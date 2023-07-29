@@ -43,7 +43,7 @@ public enum ZigAttributes {
     Operator(OPERATION_SIGN),
     Builtin(STATIC_METHOD),
     Label(LABEL),
-    KeywordLiteral(KEYWORD),
+    KeywordLiteral(Keyword.KEY),
     Namespace(CLASS_NAME),
     Struct(CLASS_NAME);
     public final TextAttributesKey KEY;
