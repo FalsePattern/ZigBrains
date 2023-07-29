@@ -30,23 +30,22 @@ import java.util.Map;
 
 public class ZigColorSettingsPage implements ColorSettingsPage {
 
-    private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
-            new AttributesDescriptor("Type", ZigAttributes.Type.KEY),
-            new AttributesDescriptor("Parameter", ZigAttributes.Parameter.KEY),
-            new AttributesDescriptor("Variable", ZigAttributes.Variable.KEY),
-            new AttributesDescriptor("Enum member", ZigAttributes.EnumMember.KEY),
-            new AttributesDescriptor("Field", ZigAttributes.Field.KEY),
-            new AttributesDescriptor("Error tag", ZigAttributes.ErrorTag.KEY),
-            new AttributesDescriptor("Function", ZigAttributes.Function.KEY),
-            new AttributesDescriptor("Keyword//Regular", ZigAttributes.Keyword.KEY),
-            new AttributesDescriptor("Keyword//Literal", ZigAttributes.KeywordLiteral.KEY),
-            new AttributesDescriptor("Comment", ZigAttributes.Comment.KEY),
-            new AttributesDescriptor("String", ZigAttributes.String.KEY),
-            new AttributesDescriptor("Number", ZigAttributes.Number.KEY),
-            new AttributesDescriptor("Operator", ZigAttributes.Operator.KEY),
-            new AttributesDescriptor("Builtin", ZigAttributes.Builtin.KEY),
-            new AttributesDescriptor("Label", ZigAttributes.Label.KEY),
-    };
+    private static final AttributesDescriptor[] DESCRIPTORS =
+            new AttributesDescriptor[]{new AttributesDescriptor("Type", ZigAttributes.Type.KEY),
+                                       new AttributesDescriptor("Parameter", ZigAttributes.Parameter.KEY),
+                                       new AttributesDescriptor("Variable", ZigAttributes.Variable.KEY),
+                                       new AttributesDescriptor("Enum member", ZigAttributes.EnumMember.KEY),
+                                       new AttributesDescriptor("Field", ZigAttributes.Field.KEY),
+                                       new AttributesDescriptor("Error tag", ZigAttributes.ErrorTag.KEY),
+                                       new AttributesDescriptor("Function", ZigAttributes.Function.KEY),
+                                       new AttributesDescriptor("Keyword//Regular", ZigAttributes.Keyword.KEY),
+                                       new AttributesDescriptor("Keyword//Literal", ZigAttributes.KeywordLiteral.KEY),
+                                       new AttributesDescriptor("Comment", ZigAttributes.Comment.KEY),
+                                       new AttributesDescriptor("String", ZigAttributes.String.KEY),
+                                       new AttributesDescriptor("Number", ZigAttributes.Number.KEY),
+                                       new AttributesDescriptor("Operator", ZigAttributes.Operator.KEY),
+                                       new AttributesDescriptor("Builtin", ZigAttributes.Builtin.KEY),
+                                       new AttributesDescriptor("Label", ZigAttributes.Label.KEY),};
 
     @Nullable
     @Override

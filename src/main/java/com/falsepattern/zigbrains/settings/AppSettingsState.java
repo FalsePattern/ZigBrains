@@ -26,10 +26,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Service(Service.Level.PROJECT)
-@State(
-        name = "com.falsepattern.zigbrains.settings.AppSettingsState",
-        storages = @Storage("ZigBrainsSettings.xml")
-)
+@State(name = "com.falsepattern.zigbrains.settings.AppSettingsState",
+       storages = @Storage("ZigBrainsSettings.xml"))
 public final class AppSettingsState implements PersistentStateComponent<AppSettingsState> {
     public String zlsPath = "";
 

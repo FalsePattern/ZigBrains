@@ -26,6 +26,7 @@ import javax.swing.Icon;
 
 public class ZigFileType extends LanguageFileType {
     public static final ZigFileType INSTANCE = new ZigFileType();
+
     private ZigFileType() {
         super(ZigLanguage.INSTANCE);
     }

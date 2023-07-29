@@ -36,17 +36,15 @@ import java.util.concurrent.CompletableFuture;
 public class ZLSRequestManager extends DefaultRequestManager {
     private static final Logger LOG = Logger.getInstance(ZLSRequestManager.class);
 
-    public ZLSRequestManager(LanguageServerWrapper wrapper,
-                             LanguageServer server,
-                             LanguageClient client,
-                             ServerCapabilities serverCapabilities) {
+    public ZLSRequestManager(LanguageServerWrapper wrapper, LanguageServer server, LanguageClient client, ServerCapabilities serverCapabilities) {
         super(wrapper, server, client, serverCapabilities);
     }
 
     public CompletableFuture<SemanticTokens> semanticTokens(SemanticTokensParams params) {
         if (checkStatus()) {
             try {
-                return (getServerCapabilities().getSemanticTokensProvider() != null) ? getTextDocumentService().semanticTokensFull(params) : null;
+                return (getServerCapabilities().getSemanticTokensProvider() != null)
+                       ? getTextDocumentService().semanticTokensFull(params) : null;
             } catch (Exception e) {
                 crashed(e);
                 return null;

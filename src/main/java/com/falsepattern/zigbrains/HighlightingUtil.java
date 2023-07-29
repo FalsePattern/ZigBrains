@@ -40,8 +40,9 @@ public class HighlightingUtil {
             SwingUtilities.invokeLater(() -> {
                 ApplicationManager.getApplication().runWriteAction(() -> {
                     markup.removeAllHighlighters();
-                    for (var range: highlightRanges) {
-                        markup.addRangeHighlighter(range.color(), range.start(), range.end(), HighlighterLayer.SYNTAX, HighlighterTargetArea.EXACT_RANGE);
+                    for (var range : highlightRanges) {
+                        markup.addRangeHighlighter(range.color(), range.start(), range.end(), HighlighterLayer.SYNTAX,
+                                                   HighlighterTargetArea.EXACT_RANGE);
                     }
                 });
             });

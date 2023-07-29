@@ -22,7 +22,7 @@
         <!-- for displaying the statusbar icon -->
         <statusBarWidgetFactory implementation="org.wso2.lsp4intellij.statusbar.LSPServerStatusWidgetFactory"
                                 id="org.wso2.lsp4intellij.statusbar.LSPServerStatusWidgetFactory"
-                                order="first" />
+                                order="first"/>
 
         <!-- needed for completion -->
         <completion.contributor implementationClass="org.wso2.lsp4intellij.contributors.LSPCompletionContributor"
@@ -40,8 +40,10 @@
                                id="LSPSymbolContributor"/>
 
         <!-- needed for renaming -->
-        <renameHandler implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameHandler" id="LSPRenameHandler" order="first"/>
-        <renamePsiElementProcessor implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameProcessor" id="LSPRenameProcessor" order="first"/>
+        <renameHandler implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameHandler" id="LSPRenameHandler"
+                       order="first"/>
+        <renamePsiElementProcessor implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameProcessor"
+                                   id="LSPRenameProcessor" order="first"/>
 
         <!-- endregion LSP4IntelliJ -->
 
@@ -53,11 +55,10 @@
 
         <colorSettingsPage implementation="com.falsepattern.zigbrains.ide.ZigColorSettingsPage"/>
 
-        <projectConfigurable
-            parentId="language"
-            instance="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
-            id="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
-            displayName="Zig"/>
+        <projectConfigurable parentId="language"
+                             instance="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
+                             id="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
+                             displayName="Zig"/>
 
         <postStartupActivity implementation="com.falsepattern.zigbrains.lsp.ZLSStartupActivity"/>
         <notificationGroup displayType="BALLOON" id="ZigBrains.Nag"/>

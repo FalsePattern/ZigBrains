@@ -41,22 +41,9 @@ import java.util.concurrent.TimeoutException;
 import static org.wso2.lsp4intellij.requests.Timeout.getTimeout;
 
 public class ZLSEditorEventManager extends EditorEventManager {
-    public ZLSEditorEventManager(Editor editor,
-                                 DocumentListener documentListener,
-                                 EditorMouseListener mouseListener,
-                                 EditorMouseMotionListener mouseMotionListener,
-                                 LSPCaretListenerImpl caretListener,
-                                 RequestManager requestmanager,
-                                 ServerOptions serverOptions,
-                                 LanguageServerWrapper wrapper) {
-        super(editor,
-              documentListener,
-              mouseListener,
-              mouseMotionListener,
-              caretListener,
-              requestmanager,
-              serverOptions,
-              wrapper);
+    public ZLSEditorEventManager(Editor editor, DocumentListener documentListener, EditorMouseListener mouseListener, EditorMouseMotionListener mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestmanager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
+        super(editor, documentListener, mouseListener, mouseMotionListener, caretListener, requestmanager,
+              serverOptions, wrapper);
     }
 
     @Override

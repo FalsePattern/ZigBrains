@@ -37,17 +37,15 @@ public class ZLSStartupActivity implements StartupActivity {
         try {
             path = Path.of(pathTxt);
         } catch (InvalidPathException e) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag",
-                                                      "No ZLS binary",
-                                                      "Invalid ZLS binary path \"" + pathTxt + "\"",
-                                                      NotificationType.ERROR));
+            Notifications.Bus.notify(
+                    new Notification("ZigBrains.Nag", "No ZLS binary", "Invalid ZLS binary path \"" + pathTxt + "\"",
+                                     NotificationType.ERROR));
             return;
         }
         if (!Files.exists(path) || Files.isDirectory(path)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag",
-                                                      "No ZLS binary",
-                                                      "The ZLS binary at \"" + pathTxt + "\" doesn't exist or is a directory!",
-                                                      NotificationType.ERROR));
+            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No ZLS binary",
+                                                      "The ZLS binary at \"" + pathTxt +
+                                                      "\" doesn't exist or is a directory!", NotificationType.ERROR));
         }
         if (IntellijLanguageClient.getExtensionManagerFor("zig") == null) {
             IntellijLanguageClient.addExtensionManager("zig", new ZLSExtensionManager());
@@ -61,8 +59,7 @@ public class ZLSStartupActivity implements StartupActivity {
     public void runActivity(@NotNull Project project) {
         var path = AppSettingsState.getInstance().zlsPath;
         if ("".equals(path)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag",
-                                                      "No ZLS binary",
+            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No ZLS binary",
                                                       "Please configure the path to the zls executable in the Zig language configuration menu!",
                                                       NotificationType.INFORMATION));
             return;

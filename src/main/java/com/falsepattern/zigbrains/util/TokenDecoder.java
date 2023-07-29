@@ -43,6 +43,7 @@ public class TokenDecoder {
             return new Token(line, start, data.get(index + 2), data.get(index + 3), data.get(index + 4));
         }
     }
+
     public static List<SemaRange> decodePayload(Editor editor, SemanticTokensLegend legend, List<Integer> responseData) {
         var result = new ArrayList<SemaRange>();
         var application = ApplicationManager.getApplication();
@@ -55,7 +56,8 @@ public class TokenDecoder {
         for (int i = 0; i < dataSize - 5; i += 5) {
             var token = Token.from(prevToken, responseData, i);
             var logiPosStart = new LogicalPosition(token.line(), token.start());
-            int tokenStartOffset = application.runReadAction((Computable<Integer>) () -> editor.logicalPositionToOffset(logiPosStart));
+            int tokenStartOffset =
+                    application.runReadAction((Computable<Integer>) () -> editor.logicalPositionToOffset(logiPosStart));
             var type = types.size() > token.type() ? types.get(token.type()) : null;
             Set<String> modifierSet = null;
             if (token.modifiers() != 0) {

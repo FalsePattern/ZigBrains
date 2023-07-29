@@ -34,23 +34,14 @@ import org.wso2.lsp4intellij.listeners.LSPCaretListenerImpl;
 
 public class ZLSExtensionManager implements LSPExtensionManager {
     @Override
-    public <T extends DefaultRequestManager> T getExtendedRequestManagerFor(LanguageServerWrapper wrapper,
-                                                                            LanguageServer server,
-                                                                            LanguageClient client,
-                                                                            ServerCapabilities serverCapabilities) {
+    public <T extends DefaultRequestManager> T getExtendedRequestManagerFor(LanguageServerWrapper wrapper, LanguageServer server, LanguageClient client, ServerCapabilities serverCapabilities) {
         return (T) new ZLSRequestManager(wrapper, server, client, serverCapabilities);
     }
 
     @Override
-    public <T extends EditorEventManager> T getExtendedEditorEventManagerFor(Editor editor,
-                                                                             DocumentListener documentListener,
-                                                                             EditorMouseListenerImpl mouseListener,
-                                                                             EditorMouseMotionListenerImpl mouseMotionListener,
-                                                                             LSPCaretListenerImpl caretListener,
-                                                                             RequestManager requestManager,
-                                                                             ServerOptions serverOptions,
-                                                                             LanguageServerWrapper wrapper) {
-        return (T) new ZLSEditorEventManager(editor, documentListener, mouseListener, mouseMotionListener, caretListener, requestManager, serverOptions, wrapper);
+    public <T extends EditorEventManager> T getExtendedEditorEventManagerFor(Editor editor, DocumentListener documentListener, EditorMouseListenerImpl mouseListener, EditorMouseMotionListenerImpl mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestManager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
+        return (T) new ZLSEditorEventManager(editor, documentListener, mouseListener, mouseMotionListener,
+                                             caretListener, requestManager, serverOptions, wrapper);
     }
 
     @Override

@@ -46,8 +46,7 @@ public enum ZigAttributes {
     Label(LABEL),
     KeywordLiteral(KEYWORD),
     Namespace(CLASS_NAME),
-    Struct(CLASS_NAME)
-    ;
+    Struct(CLASS_NAME);
     public final TextAttributesKey KEY;
     public final String type;
     public final @Unmodifiable Set<String> modifiers;
@@ -64,8 +63,9 @@ public enum ZigAttributes {
         if (type == null) {
             return Optional.empty();
         }
-        for (var known: values()) {
-            if (known.type.equals(type) && ((modifiers != null && modifiers.containsAll(known.modifiers)) || (modifiers == null && known.modifiers.size() == 0))) {
+        for (var known : values()) {
+            if (known.type.equals(type) && ((modifiers != null && modifiers.containsAll(known.modifiers)) ||
+                                            (modifiers == null && known.modifiers.size() == 0))) {
                 return Optional.of(known.KEY);
             }
         }

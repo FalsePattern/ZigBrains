@@ -28,12 +28,14 @@ import javax.swing.JPanel;
 public class AppSettingsComponent {
     private final JPanel myMainPanel;
     private final TextFieldWithBrowseButton zlsPathText = new TextFieldWithBrowseButton();
+
     public AppSettingsComponent() {
-        zlsPathText.addBrowseFolderListener(new TextBrowseFolderListener(new FileChooserDescriptor(true, false, false, false, false, false)));
+        zlsPathText.addBrowseFolderListener(
+                new TextBrowseFolderListener(new FileChooserDescriptor(true, false, false, false, false, false)));
         myMainPanel = FormBuilder.createFormBuilder()
-                .addLabeledComponent(new JBLabel("ZLS path: "), zlsPathText, 1, false)
-                .addComponentFillVertically(new JPanel(), 0)
-                .getPanel();
+                                 .addLabeledComponent(new JBLabel("ZLS path: "), zlsPathText, 1, false)
+                                 .addComponentFillVertically(new JPanel(), 0)
+                                 .getPanel();
     }
 
     public JPanel getPanel() {
