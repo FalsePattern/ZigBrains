@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.2.0]
+
+### Added
+- Code completion
+- Code folding
+- More ZLS config options
+
 ## [0.1.0]
 
 ### Added
