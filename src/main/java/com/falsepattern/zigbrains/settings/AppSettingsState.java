@@ -36,7 +36,7 @@ public final class AppSettingsState implements PersistentStateComponent<AppSetti
     }
 
     @Override
-    public @Nullable AppSettingsState getState() {
+    public AppSettingsState getState() {
         return this;
     }
 

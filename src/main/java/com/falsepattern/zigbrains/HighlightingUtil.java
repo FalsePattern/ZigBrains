@@ -37,15 +37,13 @@ public class HighlightingUtil {
         app.runReadAction(() -> {
             var highlightRanges = manager.semanticHighlighting();
             var markup = editor.getMarkupModel();
-            SwingUtilities.invokeLater(() -> {
-                ApplicationManager.getApplication().runWriteAction(() -> {
-                    markup.removeAllHighlighters();
-                    for (var range : highlightRanges) {
-                        markup.addRangeHighlighter(range.color(), range.start(), range.end(), HighlighterLayer.SYNTAX,
-                                                   HighlighterTargetArea.EXACT_RANGE);
-                    }
-                });
-            });
+            SwingUtilities.invokeLater(() -> ApplicationManager.getApplication().runWriteAction(() -> {
+                markup.removeAllHighlighters();
+                for (var range : highlightRanges) {
+                    markup.addRangeHighlighter(range.color(), range.start(), range.end(), HighlighterLayer.SYNTAX,
+                                               HighlighterTargetArea.EXACT_RANGE);
+                }
+            }));
         });
     }
 }

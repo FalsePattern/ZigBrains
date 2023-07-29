@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.ide;
 
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import org.jetbrains.annotations.Unmodifiable;
 

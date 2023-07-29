@@ -17,14 +17,13 @@
 package com.falsepattern.zigbrains.ide;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
-import com.intellij.openapi.util.NlsContexts;
-import com.intellij.openapi.util.NlsSafe;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 
 public class ZigFileType extends LanguageFileType {
+    @SuppressWarnings("unused") // Used by plugin.xml
     public static final ZigFileType INSTANCE = new ZigFileType();
 
     private ZigFileType() {

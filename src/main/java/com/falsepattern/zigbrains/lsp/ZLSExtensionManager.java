@@ -32,6 +32,9 @@ import org.wso2.lsp4intellij.listeners.EditorMouseListenerImpl;
 import org.wso2.lsp4intellij.listeners.EditorMouseMotionListenerImpl;
 import org.wso2.lsp4intellij.listeners.LSPCaretListenerImpl;
 
+// There's a couple unchecked casts here, because LSPExtensionManager has generics where it shouldn't,
+// but we have to live with it for now, I guess...
+@SuppressWarnings("unchecked")
 public class ZLSExtensionManager implements LSPExtensionManager {
     @Override
     public <T extends DefaultRequestManager> T getExtendedRequestManagerFor(LanguageServerWrapper wrapper, LanguageServer server, LanguageClient client, ServerCapabilities serverCapabilities) {
