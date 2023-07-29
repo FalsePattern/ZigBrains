@@ -13,6 +13,7 @@ That's it. (for now)
 Feature tracker:
 - Working:
   - Code completion
+  - Code folding
   - Syntax highlighting
   - Go to definition
   - Rename symbol

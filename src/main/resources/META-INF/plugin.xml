@@ -45,6 +45,10 @@
         <renamePsiElementProcessor implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameProcessor"
                                    id="LSPRenameProcessor" order="first"/>
 
+        <!-- needed for folding support -->
+        <lang.foldingBuilder language="Zig"
+                             implementationClass="org.wso2.lsp4intellij.contributors.LSPFoldingRangeProvider" id="LSPFoldingRangeProvider" order="first" />
+
         <!-- endregion LSP4IntelliJ -->
 
         <fileType name="Zig File"
