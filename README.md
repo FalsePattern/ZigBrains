@@ -11,18 +11,19 @@ QUICKSTART:
 That's it. (for now)
 
 Feature tracker:
-
-- [x] Code completion
-- [x] Syntax highlighting
-- [x] Go to definition
-- [x] Rename symbol
-- [x] Hover documentation
-- [ ] Autocomplete
-  (Worked with an older version of ZLS, probably a protocol change, will investigate)
-- [ ] Go to implementations / find usages
-  (A bit broken without a PSI tree, will need to poke my nose into LSP4IntellIJ internals for this)
-- [ ] Workspace Symbols
-  (Will add it later, personally I never used this feature yet)
+- Working:
+  - Code completion
+  - Syntax highlighting
+  - Go to definition
+  - Rename symbol
+  - Hover documentation
+- TODO:
+  - Autocomplete
+    (Worked with an older version of ZLS, probably a protocol change, will investigate)
+  - Go to implementations / find usages
+    (A bit broken without a PSI tree, will need to poke my nose into LSP4IntellIJ internals for this)
+  - Workspace Symbols
+    (Will add it later, personally I never used this feature yet)
 <!-- Plugin description end -->
 
 ## Licenses
