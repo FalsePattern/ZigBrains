@@ -4,6 +4,12 @@
 Yet another attempt at bringing zig to the intellij world, but this time without fumbling about with the
 IntellIJ parser/tokenizer.
 
+QUICKSTART:
+1. Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> select your `zls` executable
+2. If you want to change the color scheme, go to `Settings` -> `Editor` -> `Color Scheme` -> `Zig`
+
+That's it. (for now)
+
 Feature tracker:
 
 - [x] Code completion
