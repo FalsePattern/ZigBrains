@@ -26,7 +26,7 @@
 
         <!-- needed for completion -->
         <completion.contributor implementationClass="org.wso2.lsp4intellij.contributors.LSPCompletionContributor"
-                                id="org.wso2.lsp4intellij.contributors.LSPCompletionContributor" language="Zig"/>
+                                id="org.wso2.lsp4intellij.contributors.LSPCompletionContributor" language="any"/>
         <!-- needed for completion as well as signature help -->
         <typedHandler implementation="org.wso2.lsp4intellij.listeners.LSPTypedHandler"
                       id="LSPTypedHandler"/>

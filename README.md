@@ -18,8 +18,6 @@ Feature tracker:
   - Rename symbol
   - Hover documentation
 - TODO:
-  - Autocomplete
-    (Worked with an older version of ZLS, probably a protocol change, will investigate)
   - Go to implementations / find usages
     (A bit broken without a PSI tree, will need to poke my nose into LSP4IntellIJ internals for this)
   - Workspace Symbols
