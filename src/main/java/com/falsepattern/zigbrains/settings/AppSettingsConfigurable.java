@@ -39,20 +39,30 @@ public class AppSettingsConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         var settings = AppSettingsState.getInstance();
-        return !settings.zlsPath.equals(appSettingsComponent.getZlsPathText());
+        boolean modified = !settings.zlsPath.equals(appSettingsComponent.getZLSPath());
+        modified |= !settings.zlsConfigPath.equals(appSettingsComponent.getZLSConfigPath());
+        modified |= settings.debug != appSettingsComponent.getDebug();
+        modified |= settings.messageTrace != appSettingsComponent.getMessageTrace();
+        return modified;
     }
 
     @Override
     public void apply() {
         var settings = AppSettingsState.getInstance();
-        settings.zlsPath = appSettingsComponent.getZlsPathText();
+        settings.zlsPath = appSettingsComponent.getZLSPath();
+        settings.zlsConfigPath = appSettingsComponent.getZLSConfigPath();
+        settings.debug = appSettingsComponent.getDebug();
+        settings.messageTrace = appSettingsComponent.getMessageTrace();
         ZLSStartupActivity.initZLS();
     }
 
     @Override
     public void reset() {
         var settings = AppSettingsState.getInstance();
-        appSettingsComponent.setZlsPathText(settings.zlsPath);
+        appSettingsComponent.setZLSPath(settings.zlsPath);
+        appSettingsComponent.setZLSConfigPath(settings.zlsConfigPath);
+        appSettingsComponent.setDebug(settings.debug);
+        appSettingsComponent.setMessageTrace(settings.messageTrace);
     }
 
     @Override

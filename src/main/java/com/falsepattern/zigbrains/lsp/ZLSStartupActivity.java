@@ -24,35 +24,73 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import org.jetbrains.annotations.NotNull;
 import org.wso2.lsp4intellij.IntellijLanguageClient;
-import org.wso2.lsp4intellij.client.languageserver.serverdefinition.ProcessBuilderServerDefinition;
+import org.wso2.lsp4intellij.client.languageserver.serverdefinition.RawCommandServerDefinition;
 
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class ZLSStartupActivity implements StartupActivity {
     public static void initZLS() {
-        var pathTxt = AppSettingsState.getInstance().zlsPath;
+        var settings = AppSettingsState.getInstance();
+        var zlsPath = settings.zlsPath;
+        if (!validatePath("ZLS Binary", zlsPath, false)) {
+            return;
+        }
+        var configPath = settings.zlsConfigPath;
+        boolean configOK = true;
+        if (!"".equals(configPath) && !validatePath("ZLS Config", configPath, false)) {
+            configOK = false;
+            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "Using default config path.",
+                                                      NotificationType.INFORMATION));
+        }
+        if ("".equals(configPath)) {
+            configOK = false;
+        }
+
+        if (IntellijLanguageClient.getExtensionManagerFor("zig") == null) {
+            IntellijLanguageClient.addExtensionManager("zig", new ZLSExtensionManager());
+        }
+        var cmd = new ArrayList<String>();
+        cmd.add(zlsPath);
+        if (configOK) {
+            cmd.add("--config-path");
+            cmd.add(configPath);
+        }
+        if (settings.debug) {
+            cmd.add("--enable-debug-log");
+        }
+        if (settings.messageTrace) {
+            cmd.add("--enable-message-tracing");
+        }
+        IntellijLanguageClient.addServerDefinition(new RawCommandServerDefinition("zig", cmd.toArray(String[]::new)));
+    }
+
+    private static boolean validatePath(String name, String pathTxt, boolean dir) {
         Path path;
         try {
             path = Path.of(pathTxt);
         } catch (InvalidPathException e) {
             Notifications.Bus.notify(
-                    new Notification("ZigBrains.Nag", "No ZLS binary", "Invalid ZLS binary path \"" + pathTxt + "\"",
+                    new Notification("ZigBrains.Nag", "No " + name, "Invalid " + name + " path \"" + pathTxt + "\"",
                                      NotificationType.ERROR));
-            return;
+            return false;
         }
-        if (!Files.exists(path) || Files.isDirectory(path)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No ZLS binary",
-                                                      "The ZLS binary at \"" + pathTxt +
-                                                      "\" doesn't exist or is a directory!", NotificationType.ERROR));
+        if (!Files.exists(path)) {
+            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No " + name,
+                                                      "The " + name + " at \"" + pathTxt +
+                                                      "\" doesn't exist!", NotificationType.ERROR));
+            return false;
         }
-        if (IntellijLanguageClient.getExtensionManagerFor("zig") == null) {
-            IntellijLanguageClient.addExtensionManager("zig", new ZLSExtensionManager());
+        if (Files.isDirectory(path) != dir) {
+            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No " + name,
+                                                      "The " + name + " at \"" + pathTxt +
+                                                      "\" is a " + (Files.isDirectory(path) ? "directory": "file") +
+                                                      " , expected a " + (dir ? "directory" : "file"), NotificationType.ERROR));
+            return false;
         }
-        var procBuilder = new ProcessBuilder();
-        procBuilder.command(pathTxt, "--enable-message-tracing");
-        IntellijLanguageClient.addServerDefinition(new ProcessBuilderServerDefinition("zig", procBuilder));
+        return true;
     }
 
     @Override

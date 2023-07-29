@@ -23,13 +23,15 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-@Service(Service.Level.PROJECT)
+@Service(Service.Level.APP)
 @State(name = "com.falsepattern.zigbrains.settings.AppSettingsState",
        storages = @Storage("ZigBrainsSettings.xml"))
 public final class AppSettingsState implements PersistentStateComponent<AppSettingsState> {
     public String zlsPath = "";
+    public String zlsConfigPath = "";
+    public boolean debug = false;
+    public boolean messageTrace = false;
 
     public static AppSettingsState getInstance() {
         return ApplicationManager.getApplication().getService(AppSettingsState.class);

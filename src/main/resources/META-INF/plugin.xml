@@ -55,10 +55,10 @@
 
         <colorSettingsPage implementation="com.falsepattern.zigbrains.ide.ZigColorSettingsPage"/>
 
-        <projectConfigurable parentId="language"
-                             instance="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
-                             id="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
-                             displayName="Zig"/>
+        <applicationConfigurable parentId="language"
+                                 instance="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
+                                 id="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
+                                 displayName="Zig"/>
 
         <postStartupActivity implementation="com.falsepattern.zigbrains.lsp.ZLSStartupActivity"/>
         <notificationGroup displayType="BALLOON" id="ZigBrains.Nag"/>
