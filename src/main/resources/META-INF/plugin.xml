@@ -1,0 +1,95 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>com.falsepattern.zigbrains</id>
+    <name>ZigBrains</name>
+    <vendor>FalsePattern</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- region LSP4IntelliJ -->
+
+        <!-- register intellijLanguageClient as a Service OR as a plugin component (see readme)... -->
+        <applicationService serviceImplementation="org.wso2.lsp4intellij.IntellijLanguageClient"/>
+
+        <!-- register a listener on editor events, required for lsp file sync -->
+        <editorFactoryListener implementation="org.wso2.lsp4intellij.listeners.LSPEditorListener"/>
+        <fileDocumentManagerListener implementation="org.wso2.lsp4intellij.listeners.LSPFileDocumentManagerListener"/>
+
+        <!-- for displaying notifications by lsp -->
+        <notificationGroup id="lsp" displayType="STICKY_BALLOON"/>
+
+        <!-- for displaying the statusbar icon -->
+        <statusBarWidgetFactory implementation="org.wso2.lsp4intellij.statusbar.LSPServerStatusWidgetFactory"
+                                id="org.wso2.lsp4intellij.statusbar.LSPServerStatusWidgetFactory"
+                                order="first" />
+
+        <!-- needed for completion -->
+        <completion.contributor implementationClass="org.wso2.lsp4intellij.contributors.LSPCompletionContributor"
+                                id="org.wso2.lsp4intellij.contributors.LSPCompletionContributor" language="Zig"/>
+        <!-- needed for completion as well as signature help -->
+        <typedHandler implementation="org.wso2.lsp4intellij.listeners.LSPTypedHandler"
+                      id="LSPTypedHandler"/>
+
+        <!-- needed for code diagnostics -->
+        <externalAnnotator id="LSPAnnotator" language="Zig"
+                           implementationClass="org.wso2.lsp4intellij.contributors.annotator.LSPAnnotator"/>
+
+        <!-- needed for Workspace Symbols -->
+        <gotoSymbolContributor implementation="org.wso2.lsp4intellij.contributors.symbol.LSPSymbolContributor"
+                               id="LSPSymbolContributor"/>
+
+        <!-- needed for renaming -->
+        <renameHandler implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameHandler" id="LSPRenameHandler" order="first"/>
+        <renamePsiElementProcessor implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameProcessor" id="LSPRenameProcessor" order="first"/>
+
+        <!-- endregion LSP4IntelliJ -->
+
+        <fileType name="Zig File"
+                  implementationClass="com.falsepattern.zigbrains.ide.ZigFileType"
+                  fieldName="INSTANCE"
+                  language="Zig"
+                  extensions="zig"/>
+
+        <colorSettingsPage implementation="com.falsepattern.zigbrains.ide.ZigColorSettingsPage"/>
+
+        <projectConfigurable
+            parentId="language"
+            instance="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
+            id="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
+            displayName="Zig"/>
+
+        <postStartupActivity implementation="com.falsepattern.zigbrains.lsp.ZLSStartupActivity"/>
+        <notificationGroup displayType="BALLOON" id="ZigBrains.Nag"/>
+
+    </extensions>
+
+    <actions>
+        <!-- region LSP4IntelliJ -->
+
+        <!-- needed for hover -->
+        <action id="org.intellij.sdk.action.QuickDocAction" class="org.wso2.lsp4intellij.actions.LSPQuickDocAction">
+        </action>
+
+        <!-- needed for find references -->
+        <action class="org.wso2.lsp4intellij.actions.LSPReferencesAction" id="LSPFindUsages">
+            <keyboard-shortcut first-keystroke="shift alt F7" keymap="$default"/>
+        </action>
+
+        <!-- endregion LSP4IntelliJ -->
+    </actions>
+
+    <applicationListeners>
+        <!-- region LSP4IntelliJ -->
+
+        <!-- required for lsp file sync -->
+        <listener class="org.wso2.lsp4intellij.listeners.VFSListener"
+                  topic="com.intellij.openapi.vfs.VirtualFileListener"/>
+        <listener class="org.wso2.lsp4intellij.listeners.LSPProjectManagerListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+
+        <!-- endregion LSP4IntelliJ -->
+    </applicationListeners>
+
+
+</idea-plugin>
