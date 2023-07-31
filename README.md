@@ -20,10 +20,40 @@ Feature tracker:
   - Hover documentation
 - TODO:
   - Go to implementations / find usages
-    (A bit broken without a PSI tree, will need to poke my nose into LSP4IntellIJ internals for this)
   - Workspace Symbols
-    (Will add it later, personally I never used this feature yet)
+
+### Why LSP-only?
+
+ZLS is completely universal and compatible with any IDE that can communicate with language servers.
+
+This also means that ZLS has a much more active development/maintenance team than a single intellij plugin.
+Any sort of parsing issues that might arise from language changes get fixed much faster in ZLS.
+
+By *completely* relying on ZLS, hopefully this plugin will "just work" even when the language itself changes,
+as long as the ZLS binary is kept up to date.
 <!-- Plugin description end -->
+
+### Extended TODOs and notes for self (and potential contributors)
+<!-- This is here so that it doesn't bloat the plugin description--> 
+
+#### Better hints
+
+LSP4IntellIJ uses a somewhat strange popup for hover hints that cannot be clicked, need to investigate
+
+### Non-file syntax highlighting
+
+Probably the most difficult one, as we don't have a PSI tree, so there's a pretty high change that we'll need to
+reach deep into intellij internals for this one.
+This applies to things like the Find Usages, mentioned in the TODOs.
+
+An important part is that we need to avoid falling back onto a PSI tree, as that would go against one of the primary
+goals of this project, which is completely relying on ZLS to do the heavy lifting.
+
+Possible solutions:
+- Take the "file-less" editor, read the text into a temporary file, and then feed it to ZLS for syntax highlighting.
+- Study more of the LSP protocol and see if there's a builtin way to feed "virtual files" to the language server
+- Make the preview text a "sub-view" of an actual editor in intellij. This might be quite difficult if intellij has no
+builtin support for this kind of thing.
 
 ## Licenses
 ```
