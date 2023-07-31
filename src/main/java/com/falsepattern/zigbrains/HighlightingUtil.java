@@ -18,7 +18,6 @@ package com.falsepattern.zigbrains;
 
 import com.falsepattern.zigbrains.lsp.ZLSEditorEventManager;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.RangeMarker;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
@@ -26,7 +25,6 @@ import com.intellij.openapi.util.Key;
 import org.wso2.lsp4intellij.editor.EditorEventManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +33,7 @@ import java.util.stream.Stream;
 
 public class HighlightingUtil {
     private static final Key<Integer> HL_HASH = Key.create("HIGHLIGHTING_HASH");
+
     public static void refreshHighlighting(EditorEventManager eem) {
         var app = ApplicationManager.getApplication();
         if (!(eem instanceof ZLSEditorEventManager manager)) {
@@ -84,12 +83,13 @@ public class HighlightingUtil {
                             }
                         }
                     }
-                    for (var edit: range.add()) {
+                    for (var edit : range.add()) {
                         var end = edit.end();
                         if (end > documentLength - 1) {
                             end = documentLength - 1;
                         }
-                        markup.addRangeHighlighter(edit.color(), edit.start(), end, HighlighterLayer.SYNTAX, HighlighterTargetArea.EXACT_RANGE);
+                        markup.addRangeHighlighter(edit.color(), edit.start(), end, HighlighterLayer.SYNTAX,
+                                                   HighlighterTargetArea.EXACT_RANGE);
                     }
                 }
             });

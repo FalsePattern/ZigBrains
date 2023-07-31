@@ -25,7 +25,20 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.*;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.CLASS_NAME;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.CLASS_REFERENCE;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.FUNCTION_DECLARATION;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.GLOBAL_VARIABLE;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.KEYWORD;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.LABEL;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.LINE_COMMENT;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.LOCAL_VARIABLE;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.NUMBER;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.OPERATION_SIGN;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.PARAMETER;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.STATIC_FIELD;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.STATIC_METHOD;
+import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.STRING;
 
 public enum ZigAttributes {
     Type(CLASS_NAME),

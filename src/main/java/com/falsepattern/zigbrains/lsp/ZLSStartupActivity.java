@@ -35,6 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ZLSStartupActivity implements StartupActivity {
     private static final ReentrantLock lock = new ReentrantLock();
+
     public static void initZLS() {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             lock.lock();
@@ -48,8 +49,8 @@ public class ZLSStartupActivity implements StartupActivity {
                 boolean configOK = true;
                 if (!"".equals(configPath) && !validatePath("ZLS Config", configPath, false)) {
                     configOK = false;
-                    Notifications.Bus.notify(
-                            new Notification("ZigBrains.Nag", "Using default config path.", NotificationType.INFORMATION));
+                    Notifications.Bus.notify(new Notification("ZigBrains.Nag", "Using default config path.",
+                                                              NotificationType.INFORMATION));
                 }
                 if ("".equals(configPath)) {
                     configOK = false;
@@ -87,7 +88,8 @@ public class ZLSStartupActivity implements StartupActivity {
                         }
                     }
                 }
-                IntellijLanguageClient.addServerDefinition(new RawCommandServerDefinition("zig", cmd.toArray(String[]::new)));
+                IntellijLanguageClient.addServerDefinition(
+                        new RawCommandServerDefinition("zig", cmd.toArray(String[]::new)));
             } finally {
                 lock.unlock();
             }
@@ -106,15 +108,16 @@ public class ZLSStartupActivity implements StartupActivity {
         }
         if (!Files.exists(path)) {
             Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No " + name,
-                                                      "The " + name + " at \"" + pathTxt +
-                                                      "\" doesn't exist!", NotificationType.ERROR));
+                                                      "The " + name + " at \"" + pathTxt + "\" doesn't exist!",
+                                                      NotificationType.ERROR));
             return false;
         }
         if (Files.isDirectory(path) != dir) {
             Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No " + name,
-                                                      "The " + name + " at \"" + pathTxt +
-                                                      "\" is a " + (Files.isDirectory(path) ? "directory": "file") +
-                                                      " , expected a " + (dir ? "directory" : "file"), NotificationType.ERROR));
+                                                      "The " + name + " at \"" + pathTxt + "\" is a " +
+                                                      (Files.isDirectory(path) ? "directory" : "file") +
+                                                      " , expected a " + (dir ? "directory" : "file"),
+                                                      NotificationType.ERROR));
             return false;
         }
         return true;

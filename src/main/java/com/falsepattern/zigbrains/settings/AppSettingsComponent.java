@@ -41,13 +41,17 @@ public class AppSettingsComponent {
                                  .addComponent(new JBLabel("Regular settings"))
                                  .addVerticalGap(10)
                                  .addLabeledComponent(new JBLabel("ZLS path: "), zlsPathText, 1, false)
-                                 .addLabeledComponent(new JBLabel("ZLS config path (leave empty to use default): "), zlsConfigPathText, 1, false)
+                                 .addLabeledComponent(new JBLabel("ZLS config path (leave empty to use default): "),
+                                                      zlsConfigPathText, 1, false)
                                  .addLabeledComponent(new JBLabel("Increase timeouts"), increaseTimeouts, 1, false)
                                  .addSeparator()
-                                 .addComponent(new JBLabel("Developer settings (only usable when the IDE was launched with the runIDE gradle task in ZigBrains!)"))
+                                 .addComponent(new JBLabel("Developer settings" +
+                                                           " (only usable when the IDE was launched with " +
+                                                           "the runIDE gradle task in ZigBrains!)"))
                                  .addVerticalGap(10)
                                  .addLabeledComponent(new JBLabel("ZLS debug log: "), debugCheckBox, 1, false)
-                                 .addLabeledComponent(new JBLabel("ZLS message trace: "), messageTraceCheckBox, 1, false)
+                                 .addLabeledComponent(new JBLabel("ZLS message trace: "), messageTraceCheckBox, 1,
+                                                      false)
                                  .addComponentFillVertically(new JPanel(), 0)
                                  .getPanel();
     }

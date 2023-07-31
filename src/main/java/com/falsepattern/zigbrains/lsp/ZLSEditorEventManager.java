@@ -48,6 +48,7 @@ import static org.wso2.lsp4intellij.requests.Timeout.getTimeout;
 
 public class ZLSEditorEventManager extends EditorEventManager {
     private static String previousResultID = null;
+
     public ZLSEditorEventManager(Editor editor, DocumentListener documentListener, EditorMouseListener mouseListener, EditorMouseMotionListener mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestmanager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
         super(editor, documentListener, mouseListener, mouseMotionListener, caretListener, requestmanager,
               serverOptions, wrapper);

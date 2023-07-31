@@ -16,8 +16,8 @@
 
 package com.falsepattern.zigbrains.util;
 
-import com.falsepattern.zigbrains.ide.ZigAttributes;
 import com.falsepattern.zigbrains.ide.SemaRange;
+import com.falsepattern.zigbrains.ide.ZigAttributes;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
@@ -30,25 +30,12 @@ import java.util.List;
 import java.util.Set;
 
 public class TokenDecoder {
-    private record Token(int line, int start, int length, int type, int modifiers) {
-        public static Token from(Token prevToken, List<Integer> data, int index) {
-            int line = data.get(index);
-            int start = data.get(index + 1);
-            if (prevToken != null) {
-                if (line == 0) {
-                    start += prevToken.start();
-                }
-                line += prevToken.line();
-            }
-            return new Token(line, start, data.get(index + 2), data.get(index + 3), data.get(index + 4));
-        }
-    }
-
     public static List<SemaRange> decodePayload(int baseOffset, Editor editor, SemanticTokensLegend legend, List<Integer> responseData) {
         var result = new ArrayList<SemaRange>();
         var application = ApplicationManager.getApplication();
         int dataSize = responseData.size();
-        var startPos = application.runReadAction((Computable<LogicalPosition>)() -> editor.offsetToLogicalPosition(baseOffset));
+        var startPos = application.runReadAction(
+                (Computable<LogicalPosition>) () -> editor.offsetToLogicalPosition(baseOffset));
         Token prevToken = new Token(startPos.line, startPos.column, 0, 0, 0);
         var types = legend.getTokenTypes();
         var modifiers = legend.getTokenModifiers();
@@ -75,5 +62,19 @@ public class TokenDecoder {
         }
 
         return result;
+    }
+
+    private record Token(int line, int start, int length, int type, int modifiers) {
+        public static Token from(Token prevToken, List<Integer> data, int index) {
+            int line = data.get(index);
+            int start = data.get(index + 1);
+            if (prevToken != null) {
+                if (line == 0) {
+                    start += prevToken.start();
+                }
+                line += prevToken.line();
+            }
+            return new Token(line, start, data.get(index + 2), data.get(index + 3), data.get(index + 4));
+        }
     }
 }

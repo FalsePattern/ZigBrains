@@ -17,7 +17,8 @@
         <fileDocumentManagerListener implementation="org.wso2.lsp4intellij.listeners.LSPFileDocumentManagerListener"/>
 
         <!-- for displaying notifications by lsp -->
-        <notificationGroup id="lsp" displayType="STICKY_BALLOON"/>
+        <notificationGroup id="lsp"
+                           displayType="STICKY_BALLOON"/>
 
         <!-- for displaying the statusbar icon -->
         <statusBarWidgetFactory implementation="org.wso2.lsp4intellij.statusbar.LSPServerStatusWidgetFactory"
@@ -26,13 +27,15 @@
 
         <!-- needed for completion -->
         <completion.contributor implementationClass="org.wso2.lsp4intellij.contributors.LSPCompletionContributor"
-                                id="org.wso2.lsp4intellij.contributors.LSPCompletionContributor" language="any"/>
+                                id="org.wso2.lsp4intellij.contributors.LSPCompletionContributor"
+                                language="any"/>
         <!-- needed for completion as well as signature help -->
         <typedHandler implementation="org.wso2.lsp4intellij.listeners.LSPTypedHandler"
                       id="LSPTypedHandler"/>
 
         <!-- needed for code diagnostics -->
-        <externalAnnotator id="LSPAnnotator" language="Zig"
+        <externalAnnotator id="LSPAnnotator"
+                           language="Zig"
                            implementationClass="org.wso2.lsp4intellij.contributors.annotator.LSPAnnotator"/>
 
         <!-- needed for Workspace Symbols -->
@@ -40,14 +43,18 @@
                                id="LSPSymbolContributor"/>
 
         <!-- needed for renaming -->
-        <renameHandler implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameHandler" id="LSPRenameHandler"
+        <renameHandler implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameHandler"
+                       id="LSPRenameHandler"
                        order="first"/>
         <renamePsiElementProcessor implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameProcessor"
-                                   id="LSPRenameProcessor" order="first"/>
+                                   id="LSPRenameProcessor"
+                                   order="first"/>
 
         <!-- needed for folding support -->
         <lang.foldingBuilder language="Zig"
-                             implementationClass="org.wso2.lsp4intellij.contributors.LSPFoldingRangeProvider" id="LSPFoldingRangeProvider" order="first" />
+                             implementationClass="org.wso2.lsp4intellij.contributors.LSPFoldingRangeProvider"
+                             id="LSPFoldingRangeProvider"
+                             order="first"/>
 
         <!-- endregion LSP4IntelliJ -->
 
@@ -65,7 +72,8 @@
                                  displayName="Zig"/>
 
         <postStartupActivity implementation="com.falsepattern.zigbrains.lsp.ZLSStartupActivity"/>
-        <notificationGroup displayType="BALLOON" id="ZigBrains.Nag"/>
+        <notificationGroup displayType="BALLOON"
+                           id="ZigBrains.Nag"/>
 
     </extensions>
 
@@ -73,12 +81,15 @@
         <!-- region LSP4IntelliJ -->
 
         <!-- needed for hover -->
-        <action id="org.intellij.sdk.action.QuickDocAction" class="org.wso2.lsp4intellij.actions.LSPQuickDocAction">
+        <action id="org.intellij.sdk.action.QuickDocAction"
+                class="org.wso2.lsp4intellij.actions.LSPQuickDocAction">
         </action>
 
         <!-- needed for find references -->
-        <action class="org.wso2.lsp4intellij.actions.LSPReferencesAction" id="LSPFindUsages">
-            <keyboard-shortcut first-keystroke="shift alt F7" keymap="$default"/>
+        <action class="org.wso2.lsp4intellij.actions.LSPReferencesAction"
+                id="LSPFindUsages">
+            <keyboard-shortcut first-keystroke="shift alt F7"
+                               keymap="$default"/>
         </action>
 
         <!-- endregion LSP4IntelliJ -->
