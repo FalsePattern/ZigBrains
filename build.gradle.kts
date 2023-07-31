@@ -96,6 +96,18 @@ tasks {
         }
     }
 
+    task<Exec>("nixos_jbr") {
+        description = "Create a symlink to package jetbrains.jdk"
+        group = "build setup"
+        commandLine("nix-build", "<nixpkgs>", "-A", "jetbrains.jdk", "-o", "jbr")
+    }
+
+    withType<org.jetbrains.intellij.tasks.RunIdeBase> {
+        project.file("jbr/bin/java")
+            .takeIf { it.exists() }
+            ?.let { projectExecutable.set(it.toString()) }
+    }
+
 // TODO this whole thing
 //
 //    signPlugin {
