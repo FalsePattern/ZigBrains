@@ -9,6 +9,9 @@
 #### LSP
 - Temporary "increase timeout" toggle (currently, it bumps all timeouts to 15 seconds)
 
+#### Highlighting
+- Support for Semantic Token Deltas (more compact way for the LSP server to send back data when typing fast)
+
 ### Fixed
 
 #### Highlighting

@@ -20,16 +20,23 @@ import com.falsepattern.zigbrains.HighlightingUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
+import org.eclipse.lsp4j.FoldingRange;
+import org.eclipse.lsp4j.FoldingRangeRequestParams;
 import org.eclipse.lsp4j.SemanticTokens;
+import org.eclipse.lsp4j.SemanticTokensDelta;
+import org.eclipse.lsp4j.SemanticTokensDeltaParams;
 import org.eclipse.lsp4j.SemanticTokensLegend;
 import org.eclipse.lsp4j.SemanticTokensParams;
 import org.eclipse.lsp4j.SemanticTokensWithRegistrationOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.wso2.lsp4intellij.client.languageserver.requestmanager.DefaultRequestManager;
 import org.wso2.lsp4intellij.client.languageserver.wrapper.LanguageServerWrapper;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -40,11 +47,24 @@ public class ZLSRequestManager extends DefaultRequestManager {
         super(wrapper, server, client, serverCapabilities);
     }
 
-    public CompletableFuture<SemanticTokens> semanticTokens(SemanticTokensParams params) {
+    public CompletableFuture<SemanticTokens> semanticTokensFull(SemanticTokensParams params) {
         if (checkStatus()) {
             try {
                 return (getServerCapabilities().getSemanticTokensProvider() != null)
                        ? getTextDocumentService().semanticTokensFull(params) : null;
+            } catch (Exception e) {
+                crashed(e);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public CompletableFuture<Either<SemanticTokens, SemanticTokensDelta>> semanticTokensFullDelta(SemanticTokensDeltaParams params) {
+        if (checkStatus()) {
+            try {
+                return (getServerCapabilities().getSemanticTokensProvider() != null)
+                       ? getTextDocumentService().semanticTokensFullDelta(params) : null;
             } catch (Exception e) {
                 crashed(e);
                 return null;

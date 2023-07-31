@@ -16,15 +16,20 @@
 
 package com.falsepattern.zigbrains.lsp;
 
-import com.falsepattern.zigbrains.ide.SemaRange;
+import com.falsepattern.zigbrains.ide.SemaEdit;
 import com.falsepattern.zigbrains.util.TokenDecoder;
 import com.intellij.lang.annotation.Annotation;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.editor.event.EditorMouseListener;
 import com.intellij.openapi.editor.event.EditorMouseMotionListener;
+import org.eclipse.lsp4j.SemanticTokens;
+import org.eclipse.lsp4j.SemanticTokensDelta;
+import org.eclipse.lsp4j.SemanticTokensDeltaParams;
+import org.eclipse.lsp4j.SemanticTokensEdit;
 import org.eclipse.lsp4j.SemanticTokensParams;
 import org.eclipse.lsp4j.jsonrpc.JsonRpcException;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.wso2.lsp4intellij.client.languageserver.ServerOptions;
 import org.wso2.lsp4intellij.client.languageserver.requestmanager.RequestManager;
 import org.wso2.lsp4intellij.client.languageserver.wrapper.LanguageServerWrapper;
@@ -34,6 +39,7 @@ import org.wso2.lsp4intellij.requests.Timeouts;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -41,6 +47,7 @@ import java.util.concurrent.TimeoutException;
 import static org.wso2.lsp4intellij.requests.Timeout.getTimeout;
 
 public class ZLSEditorEventManager extends EditorEventManager {
+    private static String previousResultID = null;
     public ZLSEditorEventManager(Editor editor, DocumentListener documentListener, EditorMouseListener mouseListener, EditorMouseMotionListener mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestmanager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
         super(editor, documentListener, mouseListener, mouseMotionListener, caretListener, requestmanager,
               serverOptions, wrapper);
@@ -51,8 +58,8 @@ public class ZLSEditorEventManager extends EditorEventManager {
         return super.getAnnotations();
     }
 
-    public List<SemaRange> semanticHighlighting() {
-        var result = new ArrayList<SemaRange>();
+    public List<SemaEdit> semanticHighlighting() {
+        var result = new ArrayList<SemaEdit>();
         if (!(getRequestManager() instanceof ZLSRequestManager requestManager)) {
             return result;
         }
@@ -61,9 +68,14 @@ public class ZLSEditorEventManager extends EditorEventManager {
             return result;
         }
         var legend = legendOptional.get();
-        var request = requestManager.semanticTokens(new SemanticTokensParams(getIdentifier()));
-        if (request == null) {
-            return result;
+        CompletableFuture<Either<SemanticTokens, SemanticTokensDelta>> request = null;
+        if (previousResultID == null) {
+            var param = new SemanticTokensParams(getIdentifier());
+            request = requestManager.semanticTokensFull(param)
+                                    .thenApply(tokens -> tokens != null ? Either.forLeft(tokens) : null);
+        } else {
+            var param = new SemanticTokensDeltaParams(getIdentifier(), previousResultID);
+            request = requestManager.semanticTokensFullDelta(param);
         }
 
         try {
@@ -72,8 +84,20 @@ public class ZLSEditorEventManager extends EditorEventManager {
             if (res == null) {
                 return result;
             }
-            var responseData = res.getData();
-            return TokenDecoder.decodePayload(editor, legend, responseData);
+            if (res.isLeft()) {
+                var response = res.getLeft();
+                previousResultID = response.getResultId();
+                var responseData = response.getData();
+                result.add(new SemaEdit(0, -1, TokenDecoder.decodePayload(0, editor, legend, responseData)));
+            } else {
+                var response = res.getRight();
+                previousResultID = response.getResultId();
+                var edits = response.getEdits();
+                for (SemanticTokensEdit edit : edits) {
+                    var add = TokenDecoder.decodePayload(0, editor, legend, edit.getData());
+                    result.add(new SemaEdit(edit.getStart(), edit.getDeleteCount(), add));
+                }
+            }
         } catch (TimeoutException | InterruptedException e) {
             LOG.warn(e);
             wrapper.notifyFailure(Timeouts.COMPLETION);

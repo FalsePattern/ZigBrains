@@ -44,12 +44,12 @@ public class TokenDecoder {
         }
     }
 
-    public static List<SemaRange> decodePayload(Editor editor, SemanticTokensLegend legend, List<Integer> responseData) {
+    public static List<SemaRange> decodePayload(int baseOffset, Editor editor, SemanticTokensLegend legend, List<Integer> responseData) {
         var result = new ArrayList<SemaRange>();
         var application = ApplicationManager.getApplication();
         int dataSize = responseData.size();
-
-        Token prevToken = null;
+        var startPos = application.runReadAction((Computable<LogicalPosition>)() -> editor.offsetToLogicalPosition(baseOffset));
+        Token prevToken = new Token(startPos.line, startPos.column, 0, 0, 0);
         var types = legend.getTokenTypes();
         var modifiers = legend.getTokenModifiers();
         var modCount = Math.min(31, modifiers.size());
