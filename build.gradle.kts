@@ -10,6 +10,18 @@ plugins {
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
 }
 
+// Keep these in sync with whatever the oldest IDE version we're targeting in gradle.properties needs
+val javaLangVersion: JavaLanguageVersion? = JavaLanguageVersion.of(17)
+val javaVersion = JavaVersion.VERSION_17
+
+java {
+    toolchain {
+        languageVersion.set(javaLangVersion)
+    }
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+}
+
 group = properties("pluginGroup").get()
 version = properties("pluginVersion").get()
 
