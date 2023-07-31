@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Added
+
+#### LSP
+- Temporary "increase timeout" toggle (currently, it bumps all timeouts to 15 seconds)
+
 ### Fixed
 
 #### Highlighting
@@ -11,6 +16,9 @@
 
 #### Folding
 - Occasional NPE in LSP4IntellIJ
+
+#### LSP
+- (Windows) ZLS binary not executing if the file path has weird characters
 
 ## [0.2.0]
 

@@ -32,6 +32,7 @@ public class AppSettingsComponent {
     private final TextFieldWithBrowseButton zlsConfigPathText = new TextFieldWithBrowseButton();
     private final JBCheckBox debugCheckBox = new JBCheckBox();
     private final JBCheckBox messageTraceCheckBox = new JBCheckBox();
+    private final JBCheckBox increaseTimeouts = new JBCheckBox();
 
     public AppSettingsComponent() {
         zlsPathText.addBrowseFolderListener(
@@ -41,8 +42,9 @@ public class AppSettingsComponent {
                                  .addVerticalGap(10)
                                  .addLabeledComponent(new JBLabel("ZLS path: "), zlsPathText, 1, false)
                                  .addLabeledComponent(new JBLabel("ZLS config path (leave empty to use default): "), zlsConfigPathText, 1, false)
+                                 .addLabeledComponent(new JBLabel("Increase timeouts"), increaseTimeouts, 1, false)
                                  .addSeparator()
-                                 .addComponent(new JBLabel("Developer settings"))
+                                 .addComponent(new JBLabel("Developer settings (only usable when the IDE was launched with the runIDE gradle task in ZigBrains!)"))
                                  .addVerticalGap(10)
                                  .addLabeledComponent(new JBLabel("ZLS debug log: "), debugCheckBox, 1, false)
                                  .addLabeledComponent(new JBLabel("ZLS message trace: "), messageTraceCheckBox, 1, false)
@@ -70,6 +72,14 @@ public class AppSettingsComponent {
 
     public void setZLSConfigPath(@NotNull String newText) {
         zlsConfigPathText.setText(newText);
+    }
+
+    public boolean getIncreaseTimeouts() {
+        return increaseTimeouts.isSelected();
+    }
+
+    public void setIncreaseTimeouts(boolean state) {
+        increaseTimeouts.setSelected(state);
     }
 
     public boolean getDebug() {

@@ -32,6 +32,7 @@ public final class AppSettingsState implements PersistentStateComponent<AppSetti
     public String zlsConfigPath = "";
     public boolean debug = false;
     public boolean messageTrace = false;
+    public boolean increaseTimeouts = false;
 
     public static AppSettingsState getInstance() {
         return ApplicationManager.getApplication().getService(AppSettingsState.class);

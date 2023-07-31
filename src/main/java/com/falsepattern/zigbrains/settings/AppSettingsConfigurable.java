@@ -43,6 +43,7 @@ public class AppSettingsConfigurable implements Configurable {
         modified |= !settings.zlsConfigPath.equals(appSettingsComponent.getZLSConfigPath());
         modified |= settings.debug != appSettingsComponent.getDebug();
         modified |= settings.messageTrace != appSettingsComponent.getMessageTrace();
+        modified |= settings.increaseTimeouts != appSettingsComponent.getIncreaseTimeouts();
         return modified;
     }
 
@@ -53,6 +54,7 @@ public class AppSettingsConfigurable implements Configurable {
         settings.zlsConfigPath = appSettingsComponent.getZLSConfigPath();
         settings.debug = appSettingsComponent.getDebug();
         settings.messageTrace = appSettingsComponent.getMessageTrace();
+        settings.increaseTimeouts = appSettingsComponent.getIncreaseTimeouts();
         ZLSStartupActivity.initZLS();
     }
 
@@ -63,6 +65,7 @@ public class AppSettingsConfigurable implements Configurable {
         appSettingsComponent.setZLSConfigPath(settings.zlsConfigPath);
         appSettingsComponent.setDebug(settings.debug);
         appSettingsComponent.setMessageTrace(settings.messageTrace);
+        appSettingsComponent.setIncreaseTimeouts(settings.increaseTimeouts);
     }
 
     @Override

@@ -20,6 +20,7 @@ import com.falsepattern.zigbrains.settings.AppSettingsState;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import org.jetbrains.annotations.NotNull;
@@ -30,41 +31,67 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ZLSStartupActivity implements StartupActivity {
+    private static final ReentrantLock lock = new ReentrantLock();
     public static void initZLS() {
-        var settings = AppSettingsState.getInstance();
-        var zlsPath = settings.zlsPath;
-        if (!validatePath("ZLS Binary", zlsPath, false)) {
-            return;
-        }
-        var configPath = settings.zlsConfigPath;
-        boolean configOK = true;
-        if (!"".equals(configPath) && !validatePath("ZLS Config", configPath, false)) {
-            configOK = false;
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "Using default config path.",
-                                                      NotificationType.INFORMATION));
-        }
-        if ("".equals(configPath)) {
-            configOK = false;
-        }
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            lock.lock();
+            try {
+                var settings = AppSettingsState.getInstance();
+                var zlsPath = settings.zlsPath;
+                if (!validatePath("ZLS Binary", zlsPath, false)) {
+                    return;
+                }
+                var configPath = settings.zlsConfigPath;
+                boolean configOK = true;
+                if (!"".equals(configPath) && !validatePath("ZLS Config", configPath, false)) {
+                    configOK = false;
+                    Notifications.Bus.notify(
+                            new Notification("ZigBrains.Nag", "Using default config path.", NotificationType.INFORMATION));
+                }
+                if ("".equals(configPath)) {
+                    configOK = false;
+                }
 
-        if (IntellijLanguageClient.getExtensionManagerFor("zig") == null) {
-            IntellijLanguageClient.addExtensionManager("zig", new ZLSExtensionManager());
-        }
-        var cmd = new ArrayList<String>();
-        cmd.add(zlsPath);
-        if (configOK) {
-            cmd.add("--config-path");
-            cmd.add(configPath);
-        }
-        if (settings.debug) {
-            cmd.add("--enable-debug-log");
-        }
-        if (settings.messageTrace) {
-            cmd.add("--enable-message-tracing");
-        }
-        IntellijLanguageClient.addServerDefinition(new RawCommandServerDefinition("zig", cmd.toArray(String[]::new)));
+                if (IntellijLanguageClient.getExtensionManagerFor("zig") == null) {
+                    IntellijLanguageClient.addExtensionManager("zig", new ZLSExtensionManager());
+                }
+                var cmd = new ArrayList<String>();
+                cmd.add(zlsPath);
+                if (configOK) {
+                    cmd.add("--config-path");
+                    cmd.add(configPath);
+                }
+                // TODO make this properly configurable
+                if (settings.increaseTimeouts) {
+                    for (var timeout : IntellijLanguageClient.getTimeouts().keySet()) {
+                        IntellijLanguageClient.setTimeout(timeout, 15000);
+                    }
+                }
+
+                if (settings.debug) {
+                    cmd.add("--enable-debug-log");
+                }
+                if (settings.messageTrace) {
+                    cmd.add("--enable-message-tracing");
+                }
+                for (var wrapper : IntellijLanguageClient.getAllServerWrappersFor("zig")) {
+                    wrapper.removeServerWrapper();
+                }
+                if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                    for (int i = 0; i < cmd.size(); i++) {
+                        if (cmd.get(i).contains(" ")) {
+                            cmd.set(i, '"' + cmd.get(i) + '"');
+                        }
+                    }
+                }
+                IntellijLanguageClient.addServerDefinition(new RawCommandServerDefinition("zig", cmd.toArray(String[]::new)));
+            } finally {
+                lock.unlock();
+            }
+        });
     }
 
     private static boolean validatePath(String name, String pathTxt, boolean dir) {
