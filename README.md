@@ -33,10 +33,9 @@ By *completely* relying on ZLS, hopefully this plugin will "just work" even when
 as long as the ZLS binary is kept up to date.
 <!-- Plugin description end -->
 
-### Extended TODOs and notes for self (and potential contributors)
-<!-- This is here so that it doesn't bloat the plugin description--> 
+## Extended TODOs and notes for self (and potential contributors)
 
-#### Better hints
+### Better hints
 
 LSP4IntellIJ uses a somewhat strange popup for hover hints that cannot be clicked, need to investigate
 
