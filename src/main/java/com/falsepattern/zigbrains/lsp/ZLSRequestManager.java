@@ -93,4 +93,10 @@ public class ZLSRequestManager extends DefaultRequestManager {
         LOG.warn(e);
         getWrapper().crashed(e);
     }
+
+    @Override
+    public CompletableFuture<List<FoldingRange>> foldingRange(FoldingRangeRequestParams params) {
+        var future = super.foldingRange(params);
+        return future == null ? null : future.thenApply((range) -> range == null ? Collections.emptyList() : range);
+    }
 }

@@ -7,7 +7,10 @@
 ### Fixed
 
 #### Highlighting
-Last token in file not getting highlighted
+- Last token in file not getting highlighted
+
+#### Folding
+- Occasional NPE in LSP4IntellIJ
 
 ## [0.2.0]
 
