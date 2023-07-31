@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+#### Highlighting
+Last token in file not getting highlighted
+
 ## [0.2.0]
 
 ### Added

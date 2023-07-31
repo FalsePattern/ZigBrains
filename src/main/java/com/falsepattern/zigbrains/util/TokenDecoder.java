@@ -53,7 +53,7 @@ public class TokenDecoder {
         var types = legend.getTokenTypes();
         var modifiers = legend.getTokenModifiers();
         var modCount = Math.min(31, modifiers.size());
-        for (int i = 0; i < dataSize - 5; i += 5) {
+        for (int i = 0; i <= dataSize - 5; i += 5) {
             var token = Token.from(prevToken, responseData, i);
             var logiPosStart = new LogicalPosition(token.line(), token.start());
             int tokenStartOffset =
