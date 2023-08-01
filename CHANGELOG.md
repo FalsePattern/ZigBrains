@@ -18,6 +18,20 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+#### Folding
+- Better folding regions instead of just `{...}`
+  - `...` for the general case
+  - `///...` for doc comments
+
+### Fixed
+
+#### Folding
+- Race condition on IDE startup throwing exceptions
+- Folding ranges not appearing on Windows
+- Typo in the bounds checking code
+
 ## [0.3.0]
 
 ### Added

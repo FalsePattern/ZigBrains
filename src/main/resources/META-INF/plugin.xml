@@ -52,7 +52,7 @@
 
         <!-- needed for folding support -->
         <lang.foldingBuilder language="Zig"
-                             implementationClass="org.wso2.lsp4intellij.contributors.LSPFoldingRangeProvider"
+                             implementationClass="com.falsepattern.zigbrains.ide.ZigFoldingRangeProvider"
                              id="LSPFoldingRangeProvider"
                              order="first"/>
 

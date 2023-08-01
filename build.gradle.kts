@@ -42,7 +42,7 @@ dependencies {
     //  - https://github.com/ballerina-platform/lsp4intellij/pull/327 (with the extra fixes)
     //  - https://github.com/ballerina-platform/lsp4intellij/pull/331
     // Are merged.
-    implementation("com.github.FalsePattern:lsp4intellij:f385bbb726")
+    implementation("com.github.FalsePattern:lsp4intellij:783363963f")
 }
 
 intellij {
