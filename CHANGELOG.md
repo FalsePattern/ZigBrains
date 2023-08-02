@@ -23,6 +23,11 @@ Changelog structure reference:
 #### Error diagnostics (NEW)
 - Basic diagnostics info from LSP (mostly just trivial syntax errors)
 
+### Fixed
+
+#### Syntax Highlighting
+- Made the logic even more asynchronous, should lead to much less UI stuttering
+
 ## [0.3.1]
 
 ### Added

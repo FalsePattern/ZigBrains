@@ -18,6 +18,9 @@ package com.falsepattern.zigbrains;
 
 import com.falsepattern.zigbrains.lsp.ZLSEditorEventManager;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.application.WriteAction;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
@@ -25,9 +28,12 @@ import com.intellij.openapi.util.Key;
 import org.wso2.lsp4intellij.editor.EditorEventManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 
@@ -36,40 +42,41 @@ public class HighlightingUtil {
 
     public static void refreshHighlighting(EditorEventManager eem) {
         var app = ApplicationManager.getApplication();
-        if (!(eem instanceof ZLSEditorEventManager manager)) {
-            return;
-        }
-        var editor = manager.editor;
-        if (editor == null) {
-            return;
-        }
         app.executeOnPooledThread(() -> {
+            if (!(eem instanceof ZLSEditorEventManager manager)) {
+                return;
+            }
+            var editor = manager.editor;
+            if (editor == null) {
+                return;
+            }
             if (editor.isDisposed()) {
                 return;
             }
             var highlightRanges = manager.semanticHighlighting();
             var newHash = highlightRanges.hashCode();
-            app.invokeAndWait(() -> {
+            if (editor.isDisposed()) {
+                return;
+            }
+            var markup = editor.getMarkupModel();
+            var hash = markup.getUserData(HL_HASH);
+            if (hash != null && hash == newHash) {
+                return;
+            }
+            markup.putUserData(HL_HASH, newHash);
+            var highlightersSorted = new ArrayList<>(Stream.of(WriteAction.computeAndWait(markup::getAllHighlighters))
+                                                           .map(hl -> Map.entry(hl, hl.getStartOffset()))
+                                                           .sorted(Comparator.comparingInt(Map.Entry::getValue))
+                                                           .toList());
+            app.invokeLater(() -> {
                 if (editor.isDisposed()) {
                     return;
                 }
-                var markup = editor.getMarkupModel();
-                var hash = markup.getUserData(HL_HASH);
-                if (hash != null && hash == newHash) {
-                    return;
+                if (highlightRanges.size() == 1 && highlightRanges.get(0).start() == 0 && highlightRanges.get(0).remove() == -1) {
+                    markup.removeAllHighlighters();
                 }
-                markup.putUserData(HL_HASH, newHash);
-                List<Map.Entry<RangeHighlighter, Integer>> highlightersSorted = null;
                 var documentLength = editor.getDocument().getTextLength();
                 for (var range : highlightRanges) {
-                    if (range.start() == 0 && range.remove() == -1 && highlightRanges.size() == 1) {
-                        markup.removeAllHighlighters();
-                    } else if (highlightersSorted == null) {
-                        highlightersSorted = new ArrayList<>(Stream.of(markup.getAllHighlighters())
-                                                                   .map(hl -> Map.entry(hl, hl.getStartOffset()))
-                                                                   .sorted(Comparator.comparingInt(Map.Entry::getValue))
-                                                                   .toList());
-                    }
                     var start = range.start();
                     var toRemove = range.remove();
                     if (toRemove > 0) {
