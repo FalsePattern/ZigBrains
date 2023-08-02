@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [0.4.0]
+
 ### Added
 
 #### Error diagnostics (NEW)
