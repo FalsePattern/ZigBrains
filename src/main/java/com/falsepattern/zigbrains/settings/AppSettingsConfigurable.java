@@ -39,6 +39,12 @@ public class AppSettingsConfigurable implements Configurable {
     @Override
     public boolean isModified() {
         var settings = AppSettingsState.getInstance();
+        boolean modified = zlsSettingsModified(settings);
+        modified |= settings.asyncFolding != appSettingsComponent.getAsyncFolding();
+        return modified;
+    }
+
+    private boolean zlsSettingsModified(AppSettingsState settings) {
         boolean modified = !settings.zlsPath.equals(appSettingsComponent.getZLSPath());
         modified |= !settings.zlsConfigPath.equals(appSettingsComponent.getZLSConfigPath());
         modified |= settings.debug != appSettingsComponent.getDebug();
@@ -50,12 +56,16 @@ public class AppSettingsConfigurable implements Configurable {
     @Override
     public void apply() {
         var settings = AppSettingsState.getInstance();
+        boolean reloadZLS = zlsSettingsModified(settings);
         settings.zlsPath = appSettingsComponent.getZLSPath();
         settings.zlsConfigPath = appSettingsComponent.getZLSConfigPath();
+        settings.asyncFolding = appSettingsComponent.getAsyncFolding();
         settings.debug = appSettingsComponent.getDebug();
         settings.messageTrace = appSettingsComponent.getMessageTrace();
         settings.increaseTimeouts = appSettingsComponent.getIncreaseTimeouts();
-        ZLSStartupActivity.initZLS();
+        if (reloadZLS) {
+            ZLSStartupActivity.initZLS();
+        }
     }
 
     @Override
@@ -64,8 +74,10 @@ public class AppSettingsConfigurable implements Configurable {
         appSettingsComponent.setZLSPath(settings.zlsPath);
         appSettingsComponent.setZLSConfigPath(settings.zlsConfigPath);
         appSettingsComponent.setDebug(settings.debug);
+        appSettingsComponent.setAsyncFolding(settings.asyncFolding);
         appSettingsComponent.setMessageTrace(settings.messageTrace);
         appSettingsComponent.setIncreaseTimeouts(settings.increaseTimeouts);
+        appSettingsComponent.setAsyncFolding(settings.asyncFolding);
     }
 
     @Override

@@ -31,6 +31,7 @@ public final class AppSettingsState implements PersistentStateComponent<AppSetti
     public String zlsPath = "";
     public String zlsConfigPath = "";
     public boolean debug = false;
+    public boolean asyncFolding = true;
     public boolean messageTrace = false;
     public boolean increaseTimeouts = false;
 

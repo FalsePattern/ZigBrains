@@ -1,5 +1,6 @@
 package com.falsepattern.zigbrains.ide;
 
+import com.falsepattern.zigbrains.settings.AppSettingsState;
 import org.eclipse.lsp4j.FoldingRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,5 +21,10 @@ public class ZigFoldingRangeProvider extends LSPFoldingRangeProvider {
             case "comment" -> "///..."; //These are only done for doc comments. TODO figure out how to invoke the intellij doc renderer
             default -> "...";
         };
+    }
+
+    @Override
+    protected boolean async() {
+        return AppSettingsState.getInstance().asyncFolding;
     }
 }

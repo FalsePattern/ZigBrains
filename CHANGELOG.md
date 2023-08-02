@@ -23,6 +23,9 @@ Changelog structure reference:
 #### Error diagnostics (NEW)
 - Basic diagnostics info from LSP (mostly just trivial syntax errors)
 
+#### Code Folding
+- Asynchronous folding (Enable it in the settings!)
+
 ### Fixed
 
 #### Syntax Highlighting

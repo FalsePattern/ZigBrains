@@ -30,6 +30,7 @@ public class AppSettingsComponent {
     private final JPanel myMainPanel;
     private final TextFieldWithBrowseButton zlsPathText = new TextFieldWithBrowseButton();
     private final TextFieldWithBrowseButton zlsConfigPathText = new TextFieldWithBrowseButton();
+    private final JBCheckBox asyncFoldingCheckBox = new JBCheckBox();
     private final JBCheckBox debugCheckBox = new JBCheckBox();
     private final JBCheckBox messageTraceCheckBox = new JBCheckBox();
     private final JBCheckBox increaseTimeouts = new JBCheckBox();
@@ -44,6 +45,8 @@ public class AppSettingsComponent {
                                  .addLabeledComponent(new JBLabel("ZLS config path (leave empty to use default): "),
                                                       zlsConfigPathText, 1, false)
                                  .addLabeledComponent(new JBLabel("Increase timeouts"), increaseTimeouts, 1, false)
+                                 .addLabeledComponent(new JBLabel("Asynchronous code folding ranges: "),
+                                                      asyncFoldingCheckBox, 1, false)
                                  .addSeparator()
                                  .addComponent(new JBLabel("Developer settings" +
                                                            " (only usable when the IDE was launched with " +
@@ -84,6 +87,14 @@ public class AppSettingsComponent {
 
     public void setIncreaseTimeouts(boolean state) {
         increaseTimeouts.setSelected(state);
+    }
+
+    public boolean getAsyncFolding() {
+        return asyncFoldingCheckBox.isSelected();
+    }
+
+    public void setAsyncFolding(boolean state) {
+        asyncFoldingCheckBox.setSelected(state);
     }
 
     public boolean getDebug() {
