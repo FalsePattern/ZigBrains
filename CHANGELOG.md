@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+#### Error diagnostics (NEW)
+- Basic diagnostics info from LSP (mostly just trivial syntax errors)
+
 ## [0.3.1]
 
 ### Added

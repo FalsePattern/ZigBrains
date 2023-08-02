@@ -88,8 +88,7 @@ public class ZLSStartupActivity implements StartupActivity {
                         }
                     }
                 }
-                IntellijLanguageClient.addServerDefinition(
-                        new RawCommandServerDefinition("zig", cmd.toArray(String[]::new)));
+                IntellijLanguageClient.addServerDefinition(new ZLSServerDefinition(cmd.toArray(String[]::new)));
             } finally {
                 lock.unlock();
             }

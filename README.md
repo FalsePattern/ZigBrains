@@ -15,6 +15,7 @@ Feature tracker:
   - Code completion
   - Code folding
   - Syntax highlighting
+  - Basic error diagnostics
   - Go to definition
   - Rename symbol
   - Hover documentation
