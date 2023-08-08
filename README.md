@@ -1,16 +1,12 @@
 # ZigBrains
 
 <!-- Plugin description -->
-Yet another attempt at bringing zig to the intellij world, but this time without fumbling about with the
-IntellIJ parser/tokenizer.
+Yet another attempt at bringing zig to the IntelliJ world.
 
-QUICKSTART:
-1. Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> select your `zls` executable
-2. If you want to change the color scheme, go to `Settings` -> `Editor` -> `Color Scheme` -> `Zig`
+## QUICKSTART
+Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> select your `zls` executable
 
-That's it. (for now)
-
-Feature tracker:
+## Feature tracker:
 - Working:
   - Code completion
   - Code folding
@@ -23,44 +19,46 @@ Feature tracker:
   - Go to implementations / find usages
   - Workspace Symbols
 
-### Why LSP-only?
+## The motivation
+The other existing Zig language plugins for IntelliJ rely a lot on the PSI tree.
+This seems correct in theory, until
+the sheer power of Zig's comptime is taken into consideration.
 
-ZLS is completely universal and compatible with any IDE that can communicate with language servers.
+The comptime makes any sort of contextual help implemented with the PSI tree a lot more restrictive,
+and adding LSP integration at that point is an uphill battle.
 
-This also means that ZLS has a much more active development/maintenance team than a single intellij plugin.
-Any sort of parsing issues that might arise from language changes get fixed much faster in ZLS.
+## Current state of the project
+This project takes the opposite approach: The initial implementation *completely* relies on ZLS, with no lexer or parser
+in sight.
+Using a language server immediately gives us access to advanced features such as refactoring, go to definition,
+semantics-based highlighting, and so on.
 
-By *completely* relying on ZLS, hopefully this plugin will "just work" even when the language itself changes,
-as long as the ZLS binary is kept up to date.
+However, this also restricts the amount of IDE integration the language plugin can achieve,
+and things like live previews, peek definition, go to usage previews, and many other features that deeply integrate with
+the PSI system just don't work at all.
+
+## Long-term plans
+The first and foremost goal of this project is deeply integrating ZLS into the IDE,
+and LSP-provided information *always* takes the first seat.
+
+However, we must also not completely reject the PSI tree,
+as it has its own merits when used wisely, such as basic "dumb mode" syntax highlighting,
+proper caret placements with go to usages, and so on.
+
+Thus, this project will still use PSI trees and the IntelliJ lexer/parser system, but with heavy moderation, and any
+sort of "smart inspection" *shall not* be implemented in the PSI, but instead retrieved from the language server.
 <!-- Plugin description end -->
 
-## Extended TODOs and notes for self (and potential contributors)
+## Notes to self
 
-### Better hints
-
-LSP4IntellIJ uses a somewhat strange popup for hover hints that cannot be clicked, need to investigate
-
-### Non-file syntax highlighting
-
-Probably the most difficult one, as we don't have a PSI tree, so there's a pretty high change that we'll need to
-reach deep into intellij internals for this one.
-This applies to things like the Find Usages, mentioned in the TODOs.
-
-An important part is that we need to avoid falling back onto a PSI tree, as that would go against one of the primary
-goals of this project, which is completely relying on ZLS to do the heavy lifting.
-
-Possible solutions:
-- Take the "file-less" editor, read the text into a temporary file, and then feed it to ZLS for syntax highlighting.
-- Study more of the LSP protocol and see if there's a builtin way to feed "virtual files" to the language server
-- Make the preview text a "sub-view" of an actual editor in intellij. This might be quite difficult if intellij has no
-builtin support for this kind of thing.
+LSP4IntelliJ uses a somewhat strange popup for hover hints that cannot be clicked, need to investigate
 
 ## Licenses
 ```
 All code in this project, unless specified differently, is licensed under the Apache 2.0 license.
 ```
 ```
-The `zig.svg` and `zigbrains.svg` files are derived from the official Zig Programming Language logo,
+The art assets inside src/art/zig, and all copies of them, are derived from the official Zig Programming Language logo,
 which are property of the Zig Software Foundation. (https://github.com/ziglang/logo).
 These art assets are licensed under `Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).`
 ```
