@@ -1,5 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.grammarkit.tasks.GenerateLexerTask
+import org.jetbrains.grammarkit.tasks.GenerateParserTask
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -8,6 +10,7 @@ plugins {
     id("java") // Java support
     alias(libs.plugins.gradleIntelliJPlugin) // Gradle IntelliJ Plugin
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
+    alias(libs.plugins.grammarkit)
 }
 
 // Keep these in sync with whatever the oldest IDE version we're targeting in gradle.properties needs
@@ -54,6 +57,18 @@ intellij {
     plugins = properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
 }
 
+// Include the generated files in the source set
+sourceSets {
+    main {
+        java {
+            srcDirs(
+                "build/generated/sources/grammarkit/java/lexer",
+                "build/generated/sources/grammarkit/java/parser"
+            )
+        }
+    }
+}
+
 changelog {
     groups.empty()
     repositoryUrl = properties("pluginRepositoryUrl")
@@ -62,6 +77,42 @@ changelog {
 tasks {
     wrapper {
         gradleVersion = properties("gradleVersion").get()
+    }
+
+    generateLexer {
+        enabled = false
+    }
+
+    generateParser {
+        enabled = false
+    }
+
+    register<GenerateLexerTask>("generateZonLexer") {
+        group = "build setup"
+        sourceFile = file("src/main/java/com/falsepattern/zigbrains/zon/lexer/Zon.flex")
+        targetDir = "build/generated/sources/grammarkit/java/lexer/com/falsepattern/zigbrains/zon/lexer"
+        targetClass = "ZonFlexLexer"
+        purgeOldFiles = true
+    }
+
+    register<GenerateParserTask>("generateZonParser") {
+        group = "build setup"
+        sourceFile = file("src/main/java/com/falsepattern/zigbrains/zon/parser/Zon.bnf")
+        targetRoot = "build/generated/sources/grammarkit/java/parser"
+        pathToParser = "com/falsepattern/zigbrains/zon/psi/ZonParser.java"
+        pathToPsiRoot = "com/falsepattern/zigbrains/zon/psi"
+        purgeOldFiles = true
+    }
+
+    register<DefaultTask>("generateSources") {
+        description = "Generate source code from parser/lexer definitions"
+        group = "build setup"
+        dependsOn("generateZonLexer")
+        dependsOn("generateZonParser")
+    }
+
+    compileJava {
+        dependsOn("generateSources")
     }
 
     patchPluginXml {

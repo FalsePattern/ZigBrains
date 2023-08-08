@@ -22,4 +22,5 @@ import javax.swing.Icon;
 
 public class Icons {
     public static final Icon ZIG = IconLoader.getIcon("/icons/zig.svg", Icons.class);
+    public static final Icon ZON = IconLoader.getIcon("/icons/zon.svg", Icons.class);
 }

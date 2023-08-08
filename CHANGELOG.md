@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+#### Zon
+- Basic parser and PSI tree
+
 ## [0.4.0]
 
 ### Added

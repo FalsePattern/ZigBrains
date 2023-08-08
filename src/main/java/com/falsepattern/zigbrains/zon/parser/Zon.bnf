@@ -1,0 +1,35 @@
+{
+  parserClass="com.falsepattern.zigbrains.zon.parser.ZonParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Zon"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.falsepattern.zigbrains.zon.psi"
+  psiImplPackage="com.falsepattern.zigbrains.zon.psi.impl"
+
+  elementTypeHolderClass="com.falsepattern.zigbrains.zon.psi.ZonTypes"
+  elementTypeClass="com.falsepattern.zigbrains.zon.psi.ZonElementType"
+  tokenTypeClass="com.falsepattern.zigbrains.zon.psi.ZonTokenType"
+  tokens=[
+    DOT='.'
+    LBRACE='{'
+    RBRACE='}'
+    EQ='='
+    COMMA=','
+    COMMENT='comment'
+    ID='identifier'
+    STRING_LITERAL_SINGLE='string'
+    LINE_STRING='multiline string'
+  ]
+}
+
+zonFile ::= struct
+
+struct ::= DOT LBRACE (property (COMMA property)* COMMA?)? RBRACE
+
+property ::= DOT ID EQ value
+
+value ::= struct | STRING_LITERAL
+
+STRING_LITERAL ::= STRING_LITERAL_SINGLE | LINE_STRING+
