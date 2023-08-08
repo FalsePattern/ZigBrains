@@ -145,3 +145,4 @@ gradle-app.setting
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,gradle,java
 
 jbr
+secrets

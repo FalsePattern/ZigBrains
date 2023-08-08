@@ -108,14 +108,16 @@ tasks {
             ?.let { projectExecutable.set(it.toString()) }
     }
 
-// TODO this whole thing
-//
-//    signPlugin {
-//        certificateChain = environment("CERTIFICATE_CHAIN")
-//        privateKey = environment("PRIVATE_KEY")
-//        password = environment("PRIVATE_KEY_PASSWORD")
-//    }
-//
+    signPlugin {
+        certificateChainFile = file("secrets/chain.crt")
+        privateKeyFile = file("secrets/private.pem")
+        password = environment("PRIVATE_KEY_PASSWORD")
+    }
+
+    verifyPluginSignature {
+        certificateChainFile = file("secrets/chain.crt")
+    }
+
 //    publishPlugin {
 //        dependsOn("patchChangelog")
 //        token = environment("PUBLISH_TOKEN")
