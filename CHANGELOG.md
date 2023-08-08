@@ -22,6 +22,7 @@ Changelog structure reference:
 
 #### Zon
 - Basic parser and PSI tree
+- Basic syntax highlighting
 
 ## [0.4.0]
 

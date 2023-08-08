@@ -88,6 +88,9 @@
 
         <lang.parserDefinition language="Zon"
                                implementationClass="com.falsepattern.zigbrains.zon.parser.ZonParserDefinition"/>
+
+        <lang.syntaxHighlighterFactory language="Zon"
+                                       implementationClass="com.falsepattern.zigbrains.zon.highlight.ZonSyntaxHighlighterFactory"/>
         <!-- endregion Zon -->
 
     </extensions>
