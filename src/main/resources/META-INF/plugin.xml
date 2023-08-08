@@ -52,26 +52,26 @@
 
         <!-- needed for folding support -->
         <lang.foldingBuilder language="Zig"
-                             implementationClass="com.falsepattern.zigbrains.ide.ZigFoldingRangeProvider"
+                             implementationClass="com.falsepattern.zigbrains.zig.ide.ZigFoldingRangeProvider"
                              id="LSPFoldingRangeProvider"
                              order="first"/>
 
         <!-- endregion LSP4IntelliJ -->
 
         <fileType name="Zig File"
-                  implementationClass="com.falsepattern.zigbrains.ide.ZigFileType"
+                  implementationClass="com.falsepattern.zigbrains.zig.ide.ZigFileType"
                   fieldName="INSTANCE"
                   language="Zig"
                   extensions="zig"/>
 
-        <colorSettingsPage implementation="com.falsepattern.zigbrains.ide.ZigColorSettingsPage"/>
+        <colorSettingsPage implementation="com.falsepattern.zigbrains.zig.ide.ZigColorSettingsPage"/>
 
         <applicationConfigurable parentId="language"
-                                 instance="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
-                                 id="com.falsepattern.zigbrains.settings.AppSettingsConfigurable"
+                                 instance="com.falsepattern.zigbrains.zig.settings.AppSettingsConfigurable"
+                                 id="com.falsepattern.zigbrains.zig.settings.AppSettingsConfigurable"
                                  displayName="Zig"/>
 
-        <postStartupActivity implementation="com.falsepattern.zigbrains.lsp.ZLSStartupActivity"/>
+        <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
         <notificationGroup displayType="BALLOON"
                            id="ZigBrains.Nag"/>
 

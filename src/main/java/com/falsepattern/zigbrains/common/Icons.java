@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.ide;
+package com.falsepattern.zigbrains.common;
 
-import com.intellij.lang.Language;
+import com.intellij.openapi.util.IconLoader;
 
-public class ZigLanguage extends Language {
-    public static final ZigLanguage INSTANCE = new ZigLanguage();
+import javax.swing.Icon;
 
-    private ZigLanguage() {
-        super("Zig");
-    }
+public class Icons {
+    public static final Icon ZIG = IconLoader.getIcon("/icons/zig.svg", Icons.class);
 }

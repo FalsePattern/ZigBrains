@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.util;
+package com.falsepattern.zigbrains.zig.util;
 
-import com.falsepattern.zigbrains.ide.SemaRange;
-import com.falsepattern.zigbrains.ide.ZigAttributes;
+import com.falsepattern.zigbrains.zig.ide.SemaRange;
+import com.falsepattern.zigbrains.zig.ide.ZigAttributes;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;

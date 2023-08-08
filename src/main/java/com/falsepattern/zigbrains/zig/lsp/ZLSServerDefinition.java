@@ -1,4 +1,4 @@
-package com.falsepattern.zigbrains.lsp;
+package com.falsepattern.zigbrains.zig.lsp;
 
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.PublishDiagnosticsCapabilities;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.lsp;
+package com.falsepattern.zigbrains.zig.lsp;
 
-import com.falsepattern.zigbrains.ide.SemaEdit;
-import com.falsepattern.zigbrains.util.TokenDecoder;
+import com.falsepattern.zigbrains.zig.ide.SemaEdit;
+import com.falsepattern.zigbrains.zig.util.TokenDecoder;
 import com.intellij.lang.annotation.Annotation;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentListener;

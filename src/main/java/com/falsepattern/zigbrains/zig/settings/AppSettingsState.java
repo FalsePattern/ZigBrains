@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.settings;
+package com.falsepattern.zigbrains.zig.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -25,7 +25,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 
 @Service(Service.Level.APP)
-@State(name = "com.falsepattern.zigbrains.settings.AppSettingsState",
+@State(name = "com.falsepattern.zigbrains.zig.settings.AppSettingsState",
        storages = @Storage("ZigBrainsSettings.xml"))
 public final class AppSettingsState implements PersistentStateComponent<AppSettingsState> {
     public String zlsPath = "";

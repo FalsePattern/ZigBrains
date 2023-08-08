@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains;
+package com.falsepattern.zigbrains.zig;
 
-import com.falsepattern.zigbrains.lsp.ZLSEditorEventManager;
+import com.falsepattern.zigbrains.zig.lsp.ZLSEditorEventManager;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
-import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.util.Key;
 import org.wso2.lsp4intellij.editor.EditorEventManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.ide;
+package com.falsepattern.zigbrains.zig.ide;
 
+import com.falsepattern.zigbrains.common.Icons;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +48,6 @@ public class ZigFileType extends LanguageFileType {
 
     @Override
     public Icon getIcon() {
-        return ZigIcons.FILE;
+        return Icons.ZIG;
     }
 }

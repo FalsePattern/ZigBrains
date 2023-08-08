@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.settings;
+package com.falsepattern.zigbrains.zig.settings;
 
-import com.falsepattern.zigbrains.lsp.ZLSStartupActivity;
+import com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity;
 import com.intellij.openapi.options.Configurable;
 import org.jetbrains.annotations.Nullable;
 

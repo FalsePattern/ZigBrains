@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.ide;
+package com.falsepattern.zigbrains.zig.ide;
 
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import org.jetbrains.annotations.Unmodifiable;

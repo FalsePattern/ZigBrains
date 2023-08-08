@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.ide;
+package com.falsepattern.zigbrains.zig.ide;
 
-import com.intellij.openapi.util.IconLoader;
+import com.intellij.openapi.editor.colors.TextAttributesKey;
 
-import javax.swing.Icon;
-
-public class ZigIcons {
-    public static final Icon FILE = IconLoader.getIcon("/icons/zig.png", ZigIcons.class);
+public record SemaRange(int start, int end, TextAttributesKey color) {
 }

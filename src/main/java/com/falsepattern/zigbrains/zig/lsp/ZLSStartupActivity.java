@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.lsp;
+package com.falsepattern.zigbrains.zig.lsp;
 
-import com.falsepattern.zigbrains.settings.AppSettingsState;
+import com.falsepattern.zigbrains.zig.settings.AppSettingsState;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -25,7 +25,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
 import org.jetbrains.annotations.NotNull;
 import org.wso2.lsp4intellij.IntellijLanguageClient;
-import org.wso2.lsp4intellij.client.languageserver.serverdefinition.RawCommandServerDefinition;
 
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;

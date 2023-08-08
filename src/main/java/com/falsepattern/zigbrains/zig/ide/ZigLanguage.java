@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.ide;
+package com.falsepattern.zigbrains.zig.ide;
 
-import com.intellij.openapi.editor.colors.TextAttributesKey;
+import com.intellij.lang.Language;
 
-public record SemaRange(int start, int end, TextAttributesKey color) {
+public class ZigLanguage extends Language {
+    public static final ZigLanguage INSTANCE = new ZigLanguage();
+
+    private ZigLanguage() {
+        super("Zig");
+    }
 }

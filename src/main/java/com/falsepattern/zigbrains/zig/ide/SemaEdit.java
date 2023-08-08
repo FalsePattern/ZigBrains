@@ -1,4 +1,4 @@
-package com.falsepattern.zigbrains.ide;
+package com.falsepattern.zigbrains.zig.ide;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
-package com.falsepattern.zigbrains.ide;
+package com.falsepattern.zigbrains.zig.ide;
 
-import com.falsepattern.zigbrains.settings.AppSettingsState;
+import com.falsepattern.zigbrains.zig.settings.AppSettingsState;
 import org.eclipse.lsp4j.FoldingRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
