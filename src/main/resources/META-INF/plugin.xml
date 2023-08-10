@@ -92,7 +92,7 @@
         <colorSettingsPage implementation="com.falsepattern.zigbrains.zon.highlight.ZonColorSettingsPage"/>
 
         <lang.braceMatcher language="Zon"
-                           implementationClass="com.falsepattern.zigbrains.zon.braces.ZonBraceMatcher"/>
+                           implementationClass="com.falsepattern.zigbrains.zon.pairing.ZonBraceMatcher"/>
 
         <completion.contributor language="Zon"
                                 implementationClass="com.falsepattern.zigbrains.zon.completion.ZonCompletionContributor"/>
@@ -101,7 +101,7 @@
                         implementationClass="com.falsepattern.zigbrains.zon.formatter.ZonFormattingModelBuilder"/>
 
         <lang.quoteHandler language="Zon"
-                           implementationClass="com.falsepattern.zigbrains.zon.braces.ZonQuoteHandler"/>
+                           implementationClass="com.falsepattern.zigbrains.zon.pairing.ZonQuoteHandler"/>
 
         <lang.foldingBuilder language="Zon"
                              implementationClass="com.falsepattern.zigbrains.zon.folding.ZonFoldingBuilder"/>

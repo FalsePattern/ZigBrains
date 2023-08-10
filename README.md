@@ -7,6 +7,8 @@ Yet another attempt at bringing zig to the IntelliJ world.
 Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> select your `zls` executable
 
 ## Feature tracker:
+
+### .zig files:
 - Working:
   - Code completion
   - Code folding
@@ -18,6 +20,13 @@ Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> select yo
 - TODO:
   - Go to implementations / find usages
   - Workspace Symbols
+
+### .zon files:
+- Syntax highlighting
+- Formatting and indentation
+- Code completion
+- Brace folding
+- Automatic brace and quote pairing
 
 ## The motivation
 The other existing Zig language plugins for IntelliJ rely a lot on the PSI tree.

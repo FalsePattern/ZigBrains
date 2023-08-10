@@ -18,6 +18,9 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+- Updated the LSP backend, it should be more resilient now
+
 ### Added
 
 #### Zon

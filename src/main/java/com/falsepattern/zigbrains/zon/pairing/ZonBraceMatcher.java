@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zon.braces;
+package com.falsepattern.zigbrains.zon.pairing;
 
 import com.falsepattern.zigbrains.zon.psi.ZonTypes;
 import com.intellij.lang.BracePair;
