@@ -96,6 +96,9 @@
 
         <lang.braceMatcher language="Zon"
                            implementationClass="com.falsepattern.zigbrains.zon.braces.ZonBraceMatcher"/>
+
+        <completion.contributor language="Zon"
+                                implementationClass="com.falsepattern.zigbrains.zon.completion.ZonCompletionContributor"/>
         <!-- endregion Zon -->
 
     </extensions>

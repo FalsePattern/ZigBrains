@@ -34,27 +34,42 @@ WHITE_SPACE=[\s]+
 LINE_COMMENT="//" [^\n]* | "////" [^\n]*
 COMMENT="///".*
 
-ID=[A-Za-z_][A-Za-z0-9_]* | "@\"" {STRING_CHAR}* \"
+ID=[A-Za-z_][A-Za-z0-9_]*
 
-STRING_CHAR=( [^\\\"] | \\[^] )
-STRING_LITERAL_SINGLE=\"{STRING_CHAR}*\"
-LINE_STRING=(\\\\ [^\n]* [ \n]*)+
+hex=[0-9a-fA-F]
+char_escape
+    = "\\x" {hex} {hex}
+    | "\\u{" {hex}+ "}"
+    | "\\" [nr\\t'\"]
 
+string_char
+    = {char_escape}
+    | [^\\\"\n]
+
+LINE_STRING=("\\\\" [^\n]* [ \n]*)+
+
+%state STRING_LITERAL
+%state ID_STRING
 %%
 
-<YYINITIAL> {
-      {WHITE_SPACE}            { return WHITE_SPACE; }
-      "."                      { return DOT; }
-      "{"                      { return LBRACE; }
-      "}"                      { return RBRACE; }
-      "="                      { return EQ; }
-      ","                      { return COMMA; }
-      {COMMENT}                { return COMMENT; }
-      {LINE_COMMENT}           { return COMMENT; }
 
-      {ID}                     { return ID; }
-      {STRING_LITERAL_SINGLE}  { return STRING_LITERAL_SINGLE; }
-      {LINE_STRING}            { return LINE_STRING; }
-}
+<YYINITIAL>      {WHITE_SPACE}            { return WHITE_SPACE; }
+<YYINITIAL>      "."                      { return DOT; }
+<YYINITIAL>      "IntellijIdeaRulezzz"    { return INTELLIJ_COMPLETION_DUMMY; }
+<YYINITIAL>      "{"                      { return LBRACE; }
+<YYINITIAL>      "}"                      { return RBRACE; }
+<YYINITIAL>      "="                      { return EQ; }
+<YYINITIAL>      ","                      { return COMMA; }
+<YYINITIAL>      {COMMENT}                { return COMMENT; }
+<YYINITIAL>      {LINE_COMMENT}           { return COMMENT; }
 
-[^] { return BAD_CHARACTER; }
+<YYINITIAL>      {ID}                     { return ID; }
+<YYINITIAL>      "@\""                    { yybegin(ID_STRING); }
+<ID_STRING>      {string_char}*"\""       { yybegin(YYINITIAL); return ID; }
+
+<YYINITIAL>      "\""                     { yybegin(STRING_LITERAL); }
+<STRING_LITERAL> {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
+<YYINITIAL>      {LINE_STRING}            { return LINE_STRING; }
+
+
+[^] { yybegin(YYINITIAL); return BAD_CHARACTER; }

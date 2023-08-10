@@ -25,6 +25,7 @@ Changelog structure reference:
 - Basic syntax highlighting
 - Color settings page
 - Brace matching
+- Code completion
 
 ## [0.4.0]
 

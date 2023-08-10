@@ -42,9 +42,13 @@
 
 zonFile ::= struct
 
-struct ::= DOT LBRACE (property (COMMA property)* COMMA?)? RBRACE
+struct ::= DOT LBRACE (property COMMA | property_placeholder COMMA?)* property? RBRACE
 
-property ::= DOT ID EQ value
+property ::= DOT identifier EQ value
+
+identifier ::= ID
+
+property_placeholder ::= DOT? INTELLIJ_COMPLETION_DUMMY
 
 value ::= struct | STRING_LITERAL
 
