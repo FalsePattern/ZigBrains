@@ -18,12 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
-### Changed
-- Updated the LSP backend, it should be more resilient now
+## [0.5.0] "The *ZON*iverse"
 
 ### Added
 
-#### Zon
+#### .zon files
 - Basic parser and PSI tree
 - Basic syntax highlighting
 - Color settings page
@@ -31,6 +30,9 @@ Changelog structure reference:
 - Code completion
 - Code Folding
 - Indentation
+
+### Changed
+- Updated the LSP backend, it should be more resilient now
 
 ## [0.4.0]
 
