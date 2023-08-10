@@ -26,6 +26,7 @@ Changelog structure reference:
 - Color settings page
 - Brace matching
 - Code completion
+- Indentation
 
 ## [0.4.0]
 

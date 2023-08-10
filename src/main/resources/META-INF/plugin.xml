@@ -99,6 +99,9 @@
 
         <completion.contributor language="Zon"
                                 implementationClass="com.falsepattern.zigbrains.zon.completion.ZonCompletionContributor"/>
+
+        <lang.formatter language="Zon"
+                        implementationClass="com.falsepattern.zigbrains.zon.formatter.ZonFormattingModelBuilder"/>
         <!-- endregion Zon -->
 
     </extensions>
