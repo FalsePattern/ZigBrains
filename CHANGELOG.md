@@ -24,6 +24,7 @@ Changelog structure reference:
 - Basic parser and PSI tree
 - Basic syntax highlighting
 - Color settings page
+- Brace matching
 
 ## [0.4.0]
 

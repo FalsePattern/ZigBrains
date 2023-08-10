@@ -94,6 +94,8 @@
 
         <colorSettingsPage implementation="com.falsepattern.zigbrains.zon.highlight.ZonColorSettingsPage"/>
 
+        <lang.braceMatcher language="Zon"
+                           implementationClass="com.falsepattern.zigbrains.zon.braces.ZonBraceMatcher"/>
         <!-- endregion Zon -->
 
     </extensions>
