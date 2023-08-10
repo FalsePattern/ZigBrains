@@ -46,8 +46,11 @@ public class ZonCompletionContributor extends CompletionContributor {
                new CompletionProvider<>() {
                     @Override
                     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-                        var placeholder = (ZonPropertyPlaceholder) parameters.getPosition().getParent();
-                        var zonStruct = (ZonStruct) placeholder.getParent();
+                        var placeholder = ZonPsiImplUtil.parent(parameters.getPosition(), ZonPropertyPlaceholder.class);
+                        assert placeholder != null;
+
+                        var zonStruct = ZonPsiImplUtil.parent(placeholder, ZonStruct.class);
+                        assert zonStruct != null;
                         var keys = ZonPsiImplUtil.getKeys(zonStruct);
                         doAddCompletions(placeholder.getText().startsWith("."), keys, ZON_ROOT_KEYS, result);
                     }
@@ -55,19 +58,20 @@ public class ZonCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .withParent(PlatformPatterns.psiElement(ZonTypes.PROPERTY_PLACEHOLDER))
-                               .withSuperParent(3, PlatformPatterns.psiElement(ZonTypes.VALUE))
-                               .withSuperParent(6, PlatformPatterns.psiElement(ZonTypes.VALUE))
-                               .withSuperParent(9, PlatformPatterns.psiElement(ZonFile.class)),
+                               .withSuperParent(3, PlatformPatterns.psiElement(ZonTypes.PROPERTY))
+                               .withSuperParent(5, PlatformPatterns.psiElement(ZonTypes.PROPERTY))
+                               .withSuperParent(7, PlatformPatterns.psiElement(ZonFile.class)),
                new CompletionProvider<>() {
                    @Override
                    protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-                       var placeholder = (ZonPropertyPlaceholder) parameters.getPosition().getParent();
-                       var depStruct = (ZonStruct) placeholder.getParent();
-                       var parentProperty = (ZonProperty) depStruct.getParent()
-                                                                   .getParent()
-                                                                   .getParent()
-                                                                   .getParent()
-                                                                   .getParent();
+                       var placeholder = ZonPsiImplUtil.parent(parameters.getPosition(), ZonPropertyPlaceholder.class);
+                       assert placeholder != null;
+                       var depStruct = ZonPsiImplUtil.parent(placeholder, ZonStruct.class);
+                       assert depStruct != null;
+                       var parentProperty = ZonPsiImplUtil.parent(depStruct, ZonProperty.class);
+                       assert parentProperty != null;
+                       parentProperty = ZonPsiImplUtil.parent(parentProperty, ZonProperty.class);
+                       assert parentProperty != null;
                        if (!"dependencies".equals(ZonPsiImplUtil.getText(parentProperty.getIdentifier()))) {
                            return;
                        }

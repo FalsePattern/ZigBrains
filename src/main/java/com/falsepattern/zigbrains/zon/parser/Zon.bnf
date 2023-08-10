@@ -37,6 +37,7 @@
     ID='identifier'
     STRING_LITERAL_SINGLE='string'
     LINE_STRING='multiline string'
+    BAD_STRING='unterminated string'
   ]
 }
 
@@ -50,6 +51,6 @@ identifier ::= ID
 
 property_placeholder ::= DOT? INTELLIJ_COMPLETION_DUMMY
 
-value ::= struct | STRING_LITERAL
+private value ::= struct | STRING_LITERAL
 
 STRING_LITERAL ::= STRING_LITERAL_SINGLE | LINE_STRING+

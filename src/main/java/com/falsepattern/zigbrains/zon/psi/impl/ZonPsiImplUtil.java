@@ -18,6 +18,7 @@ package com.falsepattern.zigbrains.zon.psi.impl;
 
 import com.falsepattern.zigbrains.zon.psi.ZonIdentifier;
 import com.falsepattern.zigbrains.zon.psi.ZonStruct;
+import com.intellij.psi.PsiElement;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +30,17 @@ public class ZonPsiImplUtil {
             result.add(getText(property.getIdentifier()));
         }
         return result;
+    }
+
+    public static <T> T parent(PsiElement element, Class<T> parentType) {
+        var parent = element.getParent();
+        while (parent != null) {
+            if (parentType.isInstance(parent)) {
+                return parentType.cast(parent);
+            }
+            parent = parent.getParent();
+        }
+        return null;
     }
 
     public static String getText(ZonIdentifier identifier) {

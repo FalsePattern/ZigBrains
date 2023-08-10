@@ -30,6 +30,7 @@ import static com.falsepattern.zigbrains.zon.psi.ZonTypes.*;
 %type IElementType
 %unicode
 
+CRLF=\R
 WHITE_SPACE=[\s]+
 LINE_COMMENT="//" [^\n]* | "////" [^\n]*
 COMMENT="///".*
@@ -50,6 +51,7 @@ LINE_STRING=("\\\\" [^\n]* [ \n]*)+
 
 %state STRING_LITERAL
 %state ID_STRING
+%state UNCLOSED_STRING
 %%
 
 
@@ -66,10 +68,14 @@ LINE_STRING=("\\\\" [^\n]* [ \n]*)+
 <YYINITIAL>      {ID}                     { return ID; }
 <YYINITIAL>      "@\""                    { yybegin(ID_STRING); }
 <ID_STRING>      {string_char}*"\""       { yybegin(YYINITIAL); return ID; }
+<ID_STRING>      [^]                      { yypushback(1); yybegin(UNCLOSED_STRING); }
 
 <YYINITIAL>      "\""                     { yybegin(STRING_LITERAL); }
 <STRING_LITERAL> {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
+<STRING_LITERAL> [^]                      { yypushback(1); yybegin(UNCLOSED_STRING); }
+
+<UNCLOSED_STRING>[^\n]*{CRLF}             { yybegin(YYINITIAL); return BAD_STRING; }
+
 <YYINITIAL>      {LINE_STRING}            { return LINE_STRING; }
 
-
-[^] { yybegin(YYINITIAL); return BAD_CHARACTER; }
+[^] { return BAD_CHARACTER; }
