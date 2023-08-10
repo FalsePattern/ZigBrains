@@ -156,6 +156,12 @@ tasks {
             ?.let { projectExecutable.set(it.toString()) }
     }
 
+    withType<org.jetbrains.intellij.tasks.RunPluginVerifierTask> {
+        project.file("jbr")
+            .takeIf { it.exists() }
+            ?.let { runtimeDir.set(it.toString()) }
+    }
+
     signPlugin {
         certificateChainFile = file("secrets/chain.crt")
         privateKeyFile = file("secrets/private.pem")
