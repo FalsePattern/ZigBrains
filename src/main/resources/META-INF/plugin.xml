@@ -102,6 +102,9 @@
 
         <lang.formatter language="Zon"
                         implementationClass="com.falsepattern.zigbrains.zon.formatter.ZonFormattingModelBuilder"/>
+
+        <lang.quoteHandler language="Zon"
+                           implementationClass="com.falsepattern.zigbrains.zon.braces.ZonQuoteHandler"/>
         <!-- endregion Zon -->
 
     </extensions>
