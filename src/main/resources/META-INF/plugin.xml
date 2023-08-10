@@ -80,7 +80,7 @@
         <!-- endregion Zig -->
 
         <!-- region Zon -->
-        <fileType name="Zon File"
+        <fileType name="ZON File"
                   implementationClass="com.falsepattern.zigbrains.zon.ZonFileType"
                   fieldName="INSTANCE"
                   language="Zon"
@@ -91,6 +91,9 @@
 
         <lang.syntaxHighlighterFactory language="Zon"
                                        implementationClass="com.falsepattern.zigbrains.zon.highlight.ZonSyntaxHighlighterFactory"/>
+
+        <colorSettingsPage implementation="com.falsepattern.zigbrains.zon.highlight.ZonColorSettingsPage"/>
+
         <!-- endregion Zon -->
 
     </extensions>
