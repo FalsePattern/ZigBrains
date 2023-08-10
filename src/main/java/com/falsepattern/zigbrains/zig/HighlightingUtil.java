@@ -65,7 +65,9 @@ public class HighlightingUtil {
                 if (editor.isDisposed()) {
                     return;
                 }
-                if (highlightRanges.size() == 1 && highlightRanges.get(0).start() == 0 && highlightRanges.get(0).remove() == -1) {
+                if (highlightRanges.size() == 1 &&
+                    highlightRanges.get(0).start() == 0 &&
+                    highlightRanges.get(0).remove() == -1) {
                     markup.removeAllHighlighters();
                 }
                 var documentLength = editor.getDocument().getTextLength();

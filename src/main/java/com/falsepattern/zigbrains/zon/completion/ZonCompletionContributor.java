@@ -38,16 +38,17 @@ import java.util.Set;
 public class ZonCompletionContributor extends CompletionContributor {
     private static final List<String> ZON_ROOT_KEYS = List.of("name", "version", "dependencies");
     private static final List<String> ZON_DEP_KEYS = List.of("url", "hash");
+
     public ZonCompletionContributor() {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .withParent(PlatformPatterns.psiElement(ZonTypes.PROPERTY_PLACEHOLDER))
                                .withSuperParent(3, PlatformPatterns.psiElement(ZonFile.class)),
                new CompletionProvider<>() {
-                    @Override
-                    protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-                        var placeholder = ZonPsiImplUtil.parent(parameters.getPosition(), ZonPropertyPlaceholder.class);
-                        assert placeholder != null;
+                   @Override
+                   protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+                       var placeholder = ZonPsiImplUtil.parent(parameters.getPosition(), ZonPropertyPlaceholder.class);
+                       assert placeholder != null;
 
                         var zonStruct = ZonPsiImplUtil.parent(placeholder, ZonStruct.class);
                         assert zonStruct != null;
@@ -79,8 +80,9 @@ public class ZonCompletionContributor extends CompletionContributor {
                    }
                });
     }
+
     private static void doAddCompletions(boolean hasDot, Set<String> current, List<String> expected, CompletionResultSet result) {
-        for (var key: expected) {
+        for (var key : expected) {
             if (current.contains(key)) {
                 continue;
             }

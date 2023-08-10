@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 public class ZonBraceMatcher implements PairedBraceMatcher {
     public static final BracePair PAIR = new BracePair(ZonTypes.LBRACE, ZonTypes.RBRACE, true);
     private static final BracePair[] PAIRS = new BracePair[]{PAIR};
+
     @Override
     public BracePair @NotNull [] getPairs() {
         return PAIRS;

@@ -35,8 +35,7 @@ import java.util.List;
 public class ZonBlock extends AbstractBlock {
     private final SpacingBuilder spacingBuilder;
 
-    protected ZonBlock(@NotNull ASTNode node, @Nullable Wrap wrap, @Nullable Alignment alignment,
-                       SpacingBuilder spacingBuilder) {
+    protected ZonBlock(@NotNull ASTNode node, @Nullable Wrap wrap, @Nullable Alignment alignment, SpacingBuilder spacingBuilder) {
         super(node, wrap, alignment);
         this.spacingBuilder = spacingBuilder;
     }
@@ -46,9 +45,8 @@ public class ZonBlock extends AbstractBlock {
         var blocks = new ArrayList<Block>();
         var child = myNode.getFirstChildNode();
         while (child != null) {
-            if ( child.getElementType() != TokenType.WHITE_SPACE) {
-                var block = new ZonBlock(child, null, null,
-                                         spacingBuilder);
+            if (child.getElementType() != TokenType.WHITE_SPACE) {
+                var block = new ZonBlock(child, null, null, spacingBuilder);
                 blocks.add(block);
             }
             child = child.getTreeNext();
@@ -64,8 +62,6 @@ public class ZonBlock extends AbstractBlock {
             return Indent.getNoneIndent();
         }
     }
-
-
 
 
     @Override

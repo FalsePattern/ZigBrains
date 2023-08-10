@@ -26,7 +26,7 @@ import java.util.Set;
 public class ZonPsiImplUtil {
     public static Set<String> getKeys(ZonStruct struct) {
         var result = new HashSet<String>();
-        for (var property: struct.getPropertyList()) {
+        for (var property : struct.getPropertyList()) {
             result.add(getText(property.getIdentifier()));
         }
         return result;

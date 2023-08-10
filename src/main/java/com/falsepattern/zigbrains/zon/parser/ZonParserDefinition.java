@@ -33,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ZonParserDefinition implements ParserDefinition {
     public static final IFileElementType FILE = new IFileElementType(ZonLanguage.INSTANCE);
+
     @Override
     public @NotNull Lexer createLexer(Project project) {
         return new ZonLexerAdapter();

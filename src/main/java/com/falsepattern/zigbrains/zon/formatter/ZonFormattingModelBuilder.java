@@ -29,6 +29,7 @@ public class ZonFormattingModelBuilder implements FormattingModelBuilder {
     private static SpacingBuilder createSpaceBuilder(CodeStyleSettings settings) {
         return new SpacingBuilder(settings, ZonLanguage.INSTANCE);
     }
+
     @Override
     public @NotNull FormattingModel createModel(@NotNull FormattingContext formattingContext) {
         final var codeStyleSettings = formattingContext.getCodeStyleSettings();

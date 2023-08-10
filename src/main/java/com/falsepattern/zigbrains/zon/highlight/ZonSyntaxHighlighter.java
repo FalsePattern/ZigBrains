@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ZonSyntaxHighlighter extends SyntaxHighlighterBase {
-    // @formatter: off
+    // @formatter:off
     public static final TextAttributesKey
         EQ       = createKey("EQ"           , DefaultLanguageHighlighterColors.OPERATION_SIGN),
         ID       = createKey("ID"           , DefaultLanguageHighlighterColors.INSTANCE_FIELD),
@@ -41,13 +41,13 @@ public class ZonSyntaxHighlighter extends SyntaxHighlighterBase {
         COMMA    = createKey("COMMA"        , DefaultLanguageHighlighterColors.COMMA         ),
         DOT      = createKey("DOT"          , DefaultLanguageHighlighterColors.DOT           ),
         BRACE    = createKey("BRACE"        , DefaultLanguageHighlighterColors.BRACES        );
-    // @formatter: on
+    // @formatter:on
 
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
     private static final Map<IElementType, TextAttributesKey[]> KEYMAP = new HashMap<>();
 
     static {
-        // @formatter: off
+        // @formatter:off
         addMapping(DOT     , ZonTypes.DOT);
         addMapping(COMMA   , ZonTypes.COMMA);
         addMapping(BRACE   , ZonTypes.LBRACE);
@@ -57,11 +57,11 @@ public class ZonSyntaxHighlighter extends SyntaxHighlighterBase {
         addMapping(COMMENT , ZonTypes.COMMENT);
         addMapping(ID      , ZonTypes.ID);
         addMapping(EQ      , ZonTypes.EQ);
-        // @formatter: on
+        // @formatter:on
     }
 
     private static void addMapping(TextAttributesKey key, IElementType... types) {
-        for (var type: types) {
+        for (var type : types) {
             KEYMAP.put(type, new TextAttributesKey[]{key});
         }
     }
