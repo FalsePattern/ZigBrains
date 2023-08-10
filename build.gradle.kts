@@ -2,6 +2,7 @@ import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -41,11 +42,7 @@ repositories {
 
 dependencies {
     compileOnly(libs.annotations)
-    //TODO Switch back to upstream once:
-    //  - https://github.com/ballerina-platform/lsp4intellij/pull/327 (with the extra fixes)
-    //  - https://github.com/ballerina-platform/lsp4intellij/pull/331
-    // Are merged.
-    implementation("com.github.FalsePattern:lsp4intellij:db4914dd37")
+    implementation("com.github.FalsePattern:lsp4intellij:f557fc84bf")
 }
 
 intellij {
