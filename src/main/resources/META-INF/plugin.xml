@@ -105,6 +105,10 @@
 
         <lang.quoteHandler language="Zon"
                            implementationClass="com.falsepattern.zigbrains.zon.braces.ZonQuoteHandler"/>
+
+        <lang.foldingBuilder language="Zon"
+                             implementationClass="com.falsepattern.zigbrains.zon.folding.ZonFoldingBuilder"/>
+
         <!-- endregion Zon -->
 
     </extensions>
