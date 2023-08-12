@@ -55,6 +55,9 @@
                              id="LSPFoldingRangeProvider"
                              order="first"/>
 
+        <!-- needed for documentation -->
+        <platform.backend.documentation.targetProvider implementation="org.wso2.lsp4intellij.contributors.LSPDocumentationTargetProvider"/>
+
         <!-- endregion LSP4IntelliJ -->
 
         <fileType name="Zig File"
@@ -114,11 +117,6 @@
         <!-- region Zig -->
 
         <!-- region LSP4IntelliJ -->
-
-        <!-- needed for hover -->
-        <action id="org.intellij.sdk.action.QuickDocAction"
-                class="org.wso2.lsp4intellij.actions.LSPQuickDocAction">
-        </action>
 
         <!-- needed for find references -->
         <action class="org.wso2.lsp4intellij.actions.LSPReferencesAction"

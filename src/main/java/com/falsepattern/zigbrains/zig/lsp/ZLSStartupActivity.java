@@ -22,17 +22,24 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.startup.ProjectActivity;
 import com.intellij.openapi.startup.StartupActivity;
+import kotlin.Result;
+import kotlin.Unit;
+import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.wso2.lsp4intellij.IntellijLanguageClient;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ZLSStartupActivity implements StartupActivity {
+public class ZLSStartupActivity implements ProjectActivity {
     private static final ReentrantLock lock = new ReentrantLock();
 
     public static void initZLS() {
@@ -121,15 +128,17 @@ public class ZLSStartupActivity implements StartupActivity {
         return true;
     }
 
+    @Nullable
     @Override
-    public void runActivity(@NotNull Project project) {
+    public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         var path = AppSettingsState.getInstance().zlsPath;
         if ("".equals(path)) {
             Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No ZLS binary",
                                                       "Please configure the path to the zls executable in the Zig language configuration menu!",
                                                       NotificationType.INFORMATION));
-            return;
+            return null;
         }
         initZLS();
+        return null;
     }
 }

@@ -18,6 +18,12 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+- Proper documentation view (CTRL+Q) instead of the janky hover thing
+
+### Removed
+- IDEA 2022 support (Necessary change for the new documentation backend in lsp4intellij)
+
 ## [0.5.0] "The *ZON*iverse"
 
 ### Added
