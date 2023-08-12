@@ -58,10 +58,6 @@ Thus, this project will still use PSI trees and the IntelliJ lexer/parser system
 sort of "smart inspection" *shall not* be implemented in the PSI, but instead retrieved from the language server.
 <!-- Plugin description end -->
 
-## Notes to self
-
-LSP4IntelliJ uses a somewhat strange popup for hover hints that cannot be clicked, need to investigate
-
 ## Licenses
 ```
 All code in this project, unless specified differently, is licensed under the Apache 2.0 license.
