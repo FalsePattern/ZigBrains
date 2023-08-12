@@ -66,6 +66,9 @@
                   language="Zig"
                   extensions="zig"/>
 
+        <lang.parserDefinition language="Zig"
+                               implementationClass="com.falsepattern.zigbrains.zig.parser.ZigParserDefinition"/>
+
         <colorSettingsPage implementation="com.falsepattern.zigbrains.zig.ide.ZigColorSettingsPage"/>
 
         <applicationConfigurable parentId="language"

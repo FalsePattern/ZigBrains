@@ -24,6 +24,9 @@ Changelog structure reference:
 ### Removed
 - IDEA 2022 support (Necessary change for the new documentation backend in lsp4intellij)
 
+### Fixed
+- Error highlighting now works on IDEA 2023
+
 ## [0.5.0] "The *ZON*iverse"
 
 ### Added
