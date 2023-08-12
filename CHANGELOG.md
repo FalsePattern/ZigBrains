@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [0.5.1] "Modernization"
+
 ### Added
 - Proper documentation view (CTRL+Q) instead of the janky hover thing
 
