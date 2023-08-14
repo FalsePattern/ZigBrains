@@ -42,7 +42,7 @@ repositories {
 
 dependencies {
     compileOnly(libs.annotations)
-    implementation("com.github.FalsePattern:lsp4intellij:ea62500d74")
+    implementation("com.github.FalsePattern:lsp4intellij-zigbrains:c6b5059039")
 }
 
 intellij {
