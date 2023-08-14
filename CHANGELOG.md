@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [0.5.2]
+
 ### Fixed
 - NullPointerException when clicking the red circle when the LSP is not connected
 
