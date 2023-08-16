@@ -39,6 +39,13 @@
     LINE_STRING='multiline string'
     BAD_STRING='unterminated string'
   ]
+
+  //Mixins
+  mixin("struct")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonStructMixinImpl"
+  implements("struct")="com.falsepattern.zigbrains.zon.psi.mixins.ZonStructMixin"
+
+  mixin("identifier")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonIdentifierMixinImpl"
+  implements("identifier")="com.falsepattern.zigbrains.zon.psi.mixins.ZonIdentifierMixin"
 }
 
 zonFile ::= struct

@@ -21,7 +21,6 @@ import com.falsepattern.zigbrains.zon.psi.ZonProperty;
 import com.falsepattern.zigbrains.zon.psi.ZonPropertyPlaceholder;
 import com.falsepattern.zigbrains.zon.psi.ZonStruct;
 import com.falsepattern.zigbrains.zon.psi.ZonTypes;
-import com.falsepattern.zigbrains.zon.psi.impl.ZonPsiImplUtil;
 import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
@@ -35,6 +34,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Set;
 
+import static com.falsepattern.zigbrains.common.util.PsiElementUtil.parent;
+
 public class ZonCompletionContributor extends CompletionContributor {
     private static final List<String> ZON_ROOT_KEYS = List.of("name", "version", "dependencies");
     private static final List<String> ZON_DEP_KEYS = List.of("url", "hash");
@@ -47,12 +48,9 @@ public class ZonCompletionContributor extends CompletionContributor {
                new CompletionProvider<>() {
                    @Override
                    protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-                       var placeholder = ZonPsiImplUtil.parent(parameters.getPosition(), ZonPropertyPlaceholder.class);
-                       assert placeholder != null;
-
-                        var zonStruct = ZonPsiImplUtil.parent(placeholder, ZonStruct.class);
-                        assert zonStruct != null;
-                        var keys = ZonPsiImplUtil.getKeys(zonStruct);
+                        var placeholder = parent(parameters.getPosition(), ZonPropertyPlaceholder.class).orElseThrow();
+                        var zonStruct = parent(placeholder, ZonStruct.class).orElseThrow();
+                        var keys = zonStruct.getKeys();
                         doAddCompletions(placeholder.getText().startsWith("."), keys, ZON_ROOT_KEYS, result);
                     }
                 });
@@ -65,18 +63,13 @@ public class ZonCompletionContributor extends CompletionContributor {
                new CompletionProvider<>() {
                    @Override
                    protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-                       var placeholder = ZonPsiImplUtil.parent(parameters.getPosition(), ZonPropertyPlaceholder.class);
-                       assert placeholder != null;
-                       var depStruct = ZonPsiImplUtil.parent(placeholder, ZonStruct.class);
-                       assert depStruct != null;
-                       var parentProperty = ZonPsiImplUtil.parent(depStruct, ZonProperty.class);
-                       assert parentProperty != null;
-                       parentProperty = ZonPsiImplUtil.parent(parentProperty, ZonProperty.class);
-                       assert parentProperty != null;
-                       if (!"dependencies".equals(ZonPsiImplUtil.getText(parentProperty.getIdentifier()))) {
+                       var placeholder = parent(parameters.getPosition(), ZonPropertyPlaceholder.class).orElseThrow();
+                       var depStruct = parent(placeholder, ZonStruct.class).orElseThrow();
+                       var parentProperty = parent(depStruct, ZonProperty.class).flatMap(e -> parent(e, ZonProperty.class)).orElseThrow();
+                       if (!"dependencies".equals(parentProperty.getIdentifier().getName())) {
                            return;
                        }
-                       doAddCompletions(placeholder.getText().startsWith("."), ZonPsiImplUtil.getKeys(depStruct), ZON_DEP_KEYS, result);
+                       doAddCompletions(placeholder.getText().startsWith("."), depStruct.getKeys(), ZON_DEP_KEYS, result);
                    }
                });
     }
