@@ -25,7 +25,7 @@
                                 order="first"/>
 
         <!-- needed for completion -->
-        <completion.contributor implementationClass="contributors.com.falsepattern.zigbrains.lsp.LSPCompletionContributor"
+        <completion.contributor implementationClass="com.falsepattern.zigbrains.lsp.contributors.LSPCompletionContributor"
                                 id="contributors.com.falsepattern.zigbrains.lsp.LSPCompletionContributor"
                                 language="any"/>
         <!-- needed for completion as well as signature help -->

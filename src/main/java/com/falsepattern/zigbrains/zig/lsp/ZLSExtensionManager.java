@@ -32,18 +32,15 @@ import com.falsepattern.zigbrains.lsp.listeners.EditorMouseListenerImpl;
 import com.falsepattern.zigbrains.lsp.listeners.EditorMouseMotionListenerImpl;
 import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
 
-// There's a couple unchecked casts here, because LSPExtensionManager has generics where it shouldn't,
-// but we have to live with it for now, I guess...
-@SuppressWarnings("unchecked")
 public class ZLSExtensionManager implements LSPExtensionManager {
     @Override
-    public <T extends DefaultRequestManager> T getExtendedRequestManagerFor(LanguageServerWrapper wrapper, LanguageServer server, LanguageClient client, ServerCapabilities serverCapabilities) {
-        return (T) new ZLSRequestManager(wrapper, server, client, serverCapabilities);
+    public ZLSRequestManager getExtendedRequestManagerFor(LanguageServerWrapper wrapper, LanguageServer server, LanguageClient client, ServerCapabilities serverCapabilities) {
+        return new ZLSRequestManager(wrapper, server, client, serverCapabilities);
     }
 
     @Override
-    public <T extends EditorEventManager> T getExtendedEditorEventManagerFor(Editor editor, DocumentListener documentListener, EditorMouseListenerImpl mouseListener, EditorMouseMotionListenerImpl mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestManager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
-        return (T) new ZLSEditorEventManager(editor, documentListener, mouseListener, mouseMotionListener,
+    public ZLSEditorEventManager getExtendedEditorEventManagerFor(Editor editor, DocumentListener documentListener, EditorMouseListenerImpl mouseListener, EditorMouseMotionListenerImpl mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestManager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
+        return new ZLSEditorEventManager(editor, documentListener, mouseListener, mouseMotionListener,
                                              caretListener, requestManager, serverOptions, wrapper);
     }
 

@@ -51,9 +51,10 @@ public interface LSPExtensionManager {
      * As a starting point you can extend
      * {@link DefaultRequestManager}.
      */
-    <T extends DefaultRequestManager> T getExtendedRequestManagerFor(LanguageServerWrapper wrapper,
-                                                                     LanguageServer server, LanguageClient client,
-                                                                     ServerCapabilities serverCapabilities);
+   RequestManager getExtendedRequestManagerFor(LanguageServerWrapper wrapper,
+                                               LanguageServer server,
+                                               LanguageClient client,
+                                               ServerCapabilities serverCapabilities);
 
     /**
      * LSP allows you to provide custom {@link EditorEventManager} implementations.
@@ -66,13 +67,14 @@ public interface LSPExtensionManager {
      * As a starting point you can extend
      * {@link EditorEventManager}.
      */
-    <T extends EditorEventManager> T getExtendedEditorEventManagerFor(Editor editor, DocumentListener documentListener,
-                                                                      EditorMouseListenerImpl mouseListener,
-                                                                      EditorMouseMotionListenerImpl mouseMotionListener,
-                                                                      LSPCaretListenerImpl caretListener,
-                                                                      RequestManager requestManager,
-                                                                      ServerOptions serverOptions,
-                                                                      LanguageServerWrapper wrapper);
+    EditorEventManager getExtendedEditorEventManagerFor(Editor editor,
+                                                        DocumentListener documentListener,
+                                                        EditorMouseListenerImpl mouseListener,
+                                                        EditorMouseMotionListenerImpl mouseMotionListener,
+                                                        LSPCaretListenerImpl caretListener,
+                                                        RequestManager requestManager,
+                                                        ServerOptions serverOptions,
+                                                        LanguageServerWrapper wrapper);
 
     /**
      * LSP allows you to provide extended/custom {@link LanguageServer} interfaces, if required.
