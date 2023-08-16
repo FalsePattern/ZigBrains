@@ -56,14 +56,31 @@ proper caret placements with go to usages, and so on.
 
 Thus, this project will still use PSI trees and the IntelliJ lexer/parser system, but with heavy moderation, and any
 sort of "smart inspection" *shall not* be implemented in the PSI, but instead retrieved from the language server.
-<!-- Plugin description end -->
+
 
 ## Licenses
-```
-All code in this project, unless specified differently, is licensed under the Apache 2.0 license.
-```
-```
+
+<p>
+
+All code in this project, unless specified differently, is licensed under the `Apache 2.0` license.
+
+</p>
+
+<p>
+
+The code inside the `lsp` package is derived from the LSP4IntelliJ project, with various modifications, fixes, and
+additions to fix any outstanding issues i was having with the original code. (https://github.com/ballerina-platform/lsp4intellij)
+
+The original code is Copyright WSO2 Inc., licensed under the `Apache 2.0` license.
+
+</p>
+
+<p>
+
 The art assets inside src/art/zig, and all copies of them, are derived from the official Zig Programming Language logo,
 which are property of the Zig Software Foundation. (https://github.com/ziglang/logo).
 These art assets are licensed under `Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).`
-```
+
+</p>
+
+<!-- Plugin description end -->

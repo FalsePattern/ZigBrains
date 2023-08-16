@@ -12,40 +12,40 @@
         <!-- region LSP4IntelliJ -->
 
         <!-- register a listener on editor events, required for lsp file sync -->
-        <editorFactoryListener implementation="org.wso2.lsp4intellij.listeners.LSPEditorListener"/>
-        <fileDocumentManagerListener implementation="org.wso2.lsp4intellij.listeners.LSPFileDocumentManagerListener"/>
+        <editorFactoryListener implementation="com.falsepattern.zigbrains.lsp.listeners.LSPEditorListener"/>
+        <fileDocumentManagerListener implementation="com.falsepattern.zigbrains.lsp.listeners.LSPFileDocumentManagerListener"/>
 
         <!-- for displaying notifications by lsp -->
         <notificationGroup id="lsp"
                            displayType="STICKY_BALLOON"/>
 
         <!-- for displaying the statusbar icon -->
-        <statusBarWidgetFactory implementation="org.wso2.lsp4intellij.statusbar.LSPServerStatusWidgetFactory"
-                                id="org.wso2.lsp4intellij.statusbar.LSPServerStatusWidgetFactory"
+        <statusBarWidgetFactory implementation="com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidgetFactory"
+                                id="com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidgetFactory"
                                 order="first"/>
 
         <!-- needed for completion -->
-        <completion.contributor implementationClass="org.wso2.lsp4intellij.contributors.LSPCompletionContributor"
-                                id="org.wso2.lsp4intellij.contributors.LSPCompletionContributor"
+        <completion.contributor implementationClass="contributors.com.falsepattern.zigbrains.lsp.LSPCompletionContributor"
+                                id="contributors.com.falsepattern.zigbrains.lsp.LSPCompletionContributor"
                                 language="any"/>
         <!-- needed for completion as well as signature help -->
-        <typedHandler implementation="org.wso2.lsp4intellij.listeners.LSPTypedHandler"
+        <typedHandler implementation="com.falsepattern.zigbrains.lsp.listeners.LSPTypedHandler"
                       id="LSPTypedHandler"/>
 
         <!-- needed for code diagnostics -->
         <externalAnnotator id="LSPAnnotator"
                            language="Zig"
-                           implementationClass="org.wso2.lsp4intellij.contributors.annotator.LSPAnnotator"/>
+                           implementationClass="com.falsepattern.zigbrains.lsp.contributors.annotator.LSPAnnotator"/>
 
         <!-- needed for Workspace Symbols -->
-        <gotoSymbolContributor implementation="org.wso2.lsp4intellij.contributors.symbol.LSPSymbolContributor"
+        <gotoSymbolContributor implementation="com.falsepattern.zigbrains.lsp.contributors.symbol.LSPSymbolContributor"
                                id="LSPSymbolContributor"/>
 
         <!-- needed for renaming -->
-        <renameHandler implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameHandler"
+        <renameHandler implementation="com.falsepattern.zigbrains.lsp.contributors.rename.LSPRenameHandler"
                        id="LSPRenameHandler"
                        order="first"/>
-        <renamePsiElementProcessor implementation="org.wso2.lsp4intellij.contributors.rename.LSPRenameProcessor"
+        <renamePsiElementProcessor implementation="com.falsepattern.zigbrains.lsp.contributors.rename.LSPRenameProcessor"
                                    id="LSPRenameProcessor"
                                    order="first"/>
 
@@ -56,7 +56,7 @@
                              order="first"/>
 
         <!-- needed for documentation -->
-        <platform.backend.documentation.targetProvider implementation="org.wso2.lsp4intellij.contributors.LSPDocumentationTargetProvider"/>
+        <platform.backend.documentation.targetProvider implementation="com.falsepattern.zigbrains.lsp.contributors.LSPDocumentationTargetProvider"/>
 
         <!-- endregion LSP4IntelliJ -->
 
@@ -122,7 +122,7 @@
         <!-- region LSP4IntelliJ -->
 
         <!-- needed for find references -->
-        <action class="org.wso2.lsp4intellij.actions.LSPReferencesAction"
+        <action class="com.falsepattern.zigbrains.lsp.actions.LSPReferencesAction"
                 id="LSPFindUsages">
             <keyboard-shortcut first-keystroke="shift alt F7"
                                keymap="$default"/>
@@ -137,9 +137,9 @@
         <!-- region LSP4IntelliJ -->
 
         <!-- required for lsp file sync -->
-        <listener class="org.wso2.lsp4intellij.listeners.VFSListener"
+        <listener class="com.falsepattern.zigbrains.lsp.listeners.VFSListener"
                   topic="com.intellij.openapi.vfs.VirtualFileListener"/>
-        <listener class="org.wso2.lsp4intellij.listeners.LSPProjectManagerListener"
+        <listener class="com.falsepattern.zigbrains.lsp.listeners.LSPProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
 
         <!-- endregion LSP4IntelliJ -->

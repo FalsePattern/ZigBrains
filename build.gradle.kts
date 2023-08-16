@@ -42,7 +42,9 @@ repositories {
 
 dependencies {
     compileOnly(libs.annotations)
-    implementation("com.github.FalsePattern:lsp4intellij-zigbrains:c6b5059039")
+    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.0")
+    implementation("com.vladsch.flexmark:flexmark:0.34.60")
+    implementation("org.apache.commons:commons-lang3:3.12.0")
 }
 
 intellij {

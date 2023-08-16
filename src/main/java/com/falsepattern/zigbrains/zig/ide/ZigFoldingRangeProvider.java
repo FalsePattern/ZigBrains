@@ -20,7 +20,7 @@ import com.falsepattern.zigbrains.zig.settings.AppSettingsState;
 import org.eclipse.lsp4j.FoldingRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.wso2.lsp4intellij.contributors.LSPFoldingRangeProvider;
+import com.falsepattern.zigbrains.lsp.contributors.LSPFoldingRangeProvider;
 
 public class ZigFoldingRangeProvider extends LSPFoldingRangeProvider {
     @Override

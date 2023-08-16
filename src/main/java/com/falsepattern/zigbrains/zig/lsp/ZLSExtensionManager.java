@@ -21,16 +21,16 @@ import com.intellij.openapi.editor.event.DocumentListener;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
-import org.wso2.lsp4intellij.client.ClientContext;
-import org.wso2.lsp4intellij.client.languageserver.ServerOptions;
-import org.wso2.lsp4intellij.client.languageserver.requestmanager.DefaultRequestManager;
-import org.wso2.lsp4intellij.client.languageserver.requestmanager.RequestManager;
-import org.wso2.lsp4intellij.client.languageserver.wrapper.LanguageServerWrapper;
-import org.wso2.lsp4intellij.editor.EditorEventManager;
-import org.wso2.lsp4intellij.extensions.LSPExtensionManager;
-import org.wso2.lsp4intellij.listeners.EditorMouseListenerImpl;
-import org.wso2.lsp4intellij.listeners.EditorMouseMotionListenerImpl;
-import org.wso2.lsp4intellij.listeners.LSPCaretListenerImpl;
+import com.falsepattern.zigbrains.lsp.client.ClientContext;
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
+import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.DefaultRequestManager;
+import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
+import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
+import com.falsepattern.zigbrains.lsp.listeners.EditorMouseListenerImpl;
+import com.falsepattern.zigbrains.lsp.listeners.EditorMouseMotionListenerImpl;
+import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
 
 // There's a couple unchecked casts here, because LSPExtensionManager has generics where it shouldn't,
 // but we have to live with it for now, I guess...

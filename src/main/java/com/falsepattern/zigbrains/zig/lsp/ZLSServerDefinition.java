@@ -18,7 +18,7 @@ package com.falsepattern.zigbrains.zig.lsp;
 
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.PublishDiagnosticsCapabilities;
-import org.wso2.lsp4intellij.client.languageserver.serverdefinition.RawCommandServerDefinition;
+import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.RawCommandServerDefinition;
 
 public class ZLSServerDefinition extends RawCommandServerDefinition {
     public ZLSServerDefinition(String[] command) {

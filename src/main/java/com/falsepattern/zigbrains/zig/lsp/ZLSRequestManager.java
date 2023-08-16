@@ -32,8 +32,8 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
-import org.wso2.lsp4intellij.client.languageserver.requestmanager.DefaultRequestManager;
-import org.wso2.lsp4intellij.client.languageserver.wrapper.LanguageServerWrapper;
+import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.DefaultRequestManager;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 
 import java.util.Collections;
 import java.util.List;

@@ -30,12 +30,12 @@ import org.eclipse.lsp4j.SemanticTokensEdit;
 import org.eclipse.lsp4j.SemanticTokensParams;
 import org.eclipse.lsp4j.jsonrpc.JsonRpcException;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.wso2.lsp4intellij.client.languageserver.ServerOptions;
-import org.wso2.lsp4intellij.client.languageserver.requestmanager.RequestManager;
-import org.wso2.lsp4intellij.client.languageserver.wrapper.LanguageServerWrapper;
-import org.wso2.lsp4intellij.editor.EditorEventManager;
-import org.wso2.lsp4intellij.listeners.LSPCaretListenerImpl;
-import org.wso2.lsp4intellij.requests.Timeouts;
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
+import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
+import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
+import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.wso2.lsp4intellij.requests.Timeout.getTimeout;
+import static com.falsepattern.zigbrains.lsp.requests.Timeout.getTimeout;
 
 public class ZLSEditorEventManager extends EditorEventManager {
     private static String previousResultID = null;
