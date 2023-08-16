@@ -14,6 +14,11 @@ plugins {
     alias(libs.plugins.grammarkit)
 }
 
+val grammarKitGenDir = "build/generated/sources/grammarkit/java"
+val rootPackage = "com.falsepattern.zigbrains"
+
+val rootPackagePath = rootPackage.replace('.', '/')
+
 // Keep these in sync with whatever the oldest IDE version we're targeting in gradle.properties needs
 val javaLangVersion: JavaLanguageVersion? = JavaLanguageVersion.of(17)
 val javaVersion = JavaVersion.VERSION_17
@@ -61,8 +66,8 @@ sourceSets {
     main {
         java {
             srcDirs(
-                "build/generated/sources/grammarkit/java/lexer",
-                "build/generated/sources/grammarkit/java/parser"
+                "${grammarKitGenDir}/lexer",
+                "${grammarKitGenDir}/parser"
             )
         }
     }
@@ -88,18 +93,18 @@ tasks {
 
     register<GenerateLexerTask>("generateZonLexer") {
         group = "build setup"
-        sourceFile = file("src/main/java/com/falsepattern/zigbrains/zon/lexer/Zon.flex")
-        targetDir = "build/generated/sources/grammarkit/java/lexer/com/falsepattern/zigbrains/zon/lexer"
+        sourceFile = file("src/main/grammar/Zon.flex")
+        targetDir = "${grammarKitGenDir}/lexer/${rootPackagePath}/zon/lexer"
         targetClass = "ZonFlexLexer"
         purgeOldFiles = true
     }
 
     register<GenerateParserTask>("generateZonParser") {
         group = "build setup"
-        sourceFile = file("src/main/java/com/falsepattern/zigbrains/zon/parser/Zon.bnf")
-        targetRoot = "build/generated/sources/grammarkit/java/parser"
-        pathToParser = "com/falsepattern/zigbrains/zon/psi/ZonParser.java"
-        pathToPsiRoot = "com/falsepattern/zigbrains/zon/psi"
+        sourceFile = file("src/main/grammar/Zon.bnf")
+        targetRoot = "${grammarKitGenDir}/parser"
+        pathToParser = "${rootPackagePath}/zon/psi/ZonParser.java"
+        pathToPsiRoot = "${rootPackagePath}/zon/psi"
         purgeOldFiles = true
     }
 
