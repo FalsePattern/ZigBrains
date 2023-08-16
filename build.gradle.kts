@@ -47,9 +47,9 @@ repositories {
 
 dependencies {
     compileOnly(libs.annotations)
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.0")
-    implementation("com.vladsch.flexmark:flexmark:0.34.60")
-    implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation(libs.lsp4j)
+    implementation(libs.flexmark)
+    implementation(libs.commonsLang)
 }
 
 intellij {

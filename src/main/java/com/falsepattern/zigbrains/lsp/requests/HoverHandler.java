@@ -19,7 +19,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.ui.UIUtil;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.options.MutableDataSet;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.MarkupContent;
@@ -61,9 +60,8 @@ public class HoverHandler {
                                 "```" + markedString.getLanguage() + " " + markedString.getValue() + "```" :
                                 "";
                     }
-                    MutableDataSet options = new MutableDataSet();
-                    Parser parser = Parser.builder(options).build();
-                    HtmlRenderer renderer = HtmlRenderer.builder(options).build();
+                    Parser parser = Parser.builder().build();
+                    HtmlRenderer renderer = HtmlRenderer.builder().build();
                     if (!string.isEmpty()) {
                         result.add(renderer.render(parser.parse(string)));
                     }
@@ -77,9 +75,8 @@ public class HoverHandler {
             if (markedContent.isEmpty()) {
                 return "";
             }
-            MutableDataSet options = new MutableDataSet();
-            Parser parser = Parser.builder(options).build();
-            HtmlRenderer renderer = HtmlRenderer.builder(options).build();
+            Parser parser = Parser.builder().build();
+            HtmlRenderer renderer = HtmlRenderer.builder().build();
             return "<html>" + renderer.render(parser.parse(markedContent)) + "</html>";
         } else {
             return "";
