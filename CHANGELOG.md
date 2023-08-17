@@ -18,6 +18,9 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+- Separate timeout category for syntax highlighting
+
 ### Security
 - Updated dependencies
 - Integrated LSP4IntelliJ directly into ZigBrains

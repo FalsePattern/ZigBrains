@@ -80,8 +80,8 @@ public class ZLSEditorEventManager extends EditorEventManager {
         }
 
         try {
-            var res = request.get(getTimeout(Timeouts.CODEACTION), TimeUnit.MILLISECONDS);
-            wrapper.notifySuccess(Timeouts.CODEACTION);
+            var res = request.get(getTimeout(Timeouts.HIGHLIGHTING), TimeUnit.MILLISECONDS);
+            wrapper.notifySuccess(Timeouts.HIGHLIGHTING);
             if (res == null) {
                 return result;
             }
