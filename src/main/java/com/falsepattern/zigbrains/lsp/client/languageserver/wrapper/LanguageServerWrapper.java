@@ -145,7 +145,6 @@ public class LanguageServerWrapper {
     private InitializeResult initializeResult;
     private Future<?> launcherFuture;
     private CompletableFuture<InitializeResult> initializeFuture;
-    private boolean capabilitiesAlreadyRequested = false;
     private int crashCount = 0;
     private volatile boolean alreadyShownTimeout = false;
     private volatile boolean alreadyShownCrash = false;
@@ -228,7 +227,7 @@ public class LanguageServerWrapper {
             try {
                 start();
                 if (initializeFuture != null) {
-                    initializeFuture.get((capabilitiesAlreadyRequested ? 0 : Timeout.getTimeout(Timeouts.INIT)), TimeUnit.MILLISECONDS);
+                    initializeFuture.get(Timeout.getTimeout(Timeouts.INIT), TimeUnit.MILLISECONDS);
                     notifySuccess(Timeouts.INIT);
                 }
             } catch (TimeoutException e) {
@@ -248,7 +247,6 @@ public class LanguageServerWrapper {
                 stop(false);
             }
         }
-        capabilitiesAlreadyRequested = true;
         return initializeResult != null ? initializeResult.getCapabilities() : null;
     }
 
@@ -467,7 +465,6 @@ public class LanguageServerWrapper {
             uriToEditorManagers.clear();
             urisUnderLspControl.clear();
             launcherFuture = null;
-            capabilitiesAlreadyRequested = false;
             initializeResult = null;
             initializeFuture = null;
             languageServer = null;

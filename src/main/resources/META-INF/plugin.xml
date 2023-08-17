@@ -69,7 +69,10 @@
         <lang.parserDefinition language="Zig"
                                implementationClass="com.falsepattern.zigbrains.zig.parser.ZigParserDefinition"/>
 
-        <colorSettingsPage implementation="com.falsepattern.zigbrains.zig.ide.ZigColorSettingsPage"/>
+        <colorSettingsPage implementation="com.falsepattern.zigbrains.zig.highlighter.ZigColorSettingsPage"/>
+
+        <lang.syntaxHighlighterFactory language="Zig"
+                                       implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>
 
         <applicationConfigurable parentId="language"
                                  instance="com.falsepattern.zigbrains.zig.settings.AppSettingsConfigurable"

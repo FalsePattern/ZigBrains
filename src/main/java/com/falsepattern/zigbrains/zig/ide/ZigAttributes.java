@@ -21,44 +21,71 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.CLASS_NAME;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.CLASS_REFERENCE;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.FUNCTION_DECLARATION;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.GLOBAL_VARIABLE;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.KEYWORD;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.LABEL;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.LINE_COMMENT;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.LOCAL_VARIABLE;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.NUMBER;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.OPERATION_SIGN;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.PARAMETER;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.STATIC_FIELD;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.STATIC_METHOD;
-import static com.intellij.openapi.editor.DefaultLanguageHighlighterColors.STRING;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.BAD_CHAR;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.COMMENT_DOC;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.ENUM_DECL;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.LABEL_DECL;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.NAMESPACE_DECL;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.PROPERTY;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.STRUCT_DECL;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.TYPE_DECL;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.TYPE_DECL_GEN;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.TYPE_REF;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.PARAMETER;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.TYPE_REF_GEN;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.VARIABLE_DECL;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.VARIABLE_REF;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.ENUM_REF;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.ENUM_MEMBER;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.ERROR_TAG;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.FUNCTION_REF;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.KEYWORD;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.COMMENT;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.STRING;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.NUMBER;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.OPERATOR;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.BUILTIN;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.LABEL_REF;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.NAMESPACE_REF;
+import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.STRUCT_REF;
+
 
 public enum ZigAttributes {
-    Type(CLASS_NAME),
-    Parameter(PARAMETER),
-    Variable(LOCAL_VARIABLE),
-    Enum(GLOBAL_VARIABLE),
-    EnumMember(GLOBAL_VARIABLE),
-    Field(STATIC_FIELD),
-    ErrorTag(CLASS_REFERENCE),
-    Function(FUNCTION_DECLARATION),
+    Builtin(BUILTIN),
+    Comment_Doc(COMMENT_DOC, "documentation"),
+    Comment(COMMENT),
+    Enum_Decl(ENUM_DECL, "declaration"),
+    Enum(ENUM_REF),
+    EnumMember(ENUM_MEMBER),
+    ErrorTag(ERROR_TAG),
+    Property(PROPERTY),
+    Function_Decl_Gen(FUNCTION_REF, "declaration", "generic"),
+    Function_Decl(FUNCTION_REF, "declaration"),
+    Function_Gen(FUNCTION_REF, "generic"),
+    Function(FUNCTION_REF),
     Keyword(KEYWORD),
-    Comment(LINE_COMMENT),
-    String(STRING),
+    KeywordLiteral(KEYWORD),
+    Label_Decl(LABEL_DECL, "declaration"),
+    Label(LABEL_REF),
+    Namespace_Decl(NAMESPACE_DECL, "declaration"),
+    Namespace(NAMESPACE_REF),
     Number(NUMBER),
-    Operator(OPERATION_SIGN),
-    Builtin(STATIC_METHOD),
-    Label(LABEL),
-    KeywordLiteral(Keyword.KEY),
-    Namespace(CLASS_NAME),
-    Struct(CLASS_NAME);
+    Operator(OPERATOR),
+    Parameter_Decl(PARAMETER, "declaration"),
+    Parameter(PARAMETER),
+    String(STRING),
+    Struct_Decl(STRUCT_DECL, "declaration"),
+    Struct(STRUCT_REF),
+    Type_Decl_Gen(TYPE_DECL_GEN, "declaration", "generic"),
+    Type_Decl(TYPE_DECL, "declaration"),
+    Type_Gen(TYPE_REF_GEN, "generic"),
+    Type(TYPE_REF),
+    Variable_Decl(VARIABLE_DECL, "declaration"),
+    Variable(VARIABLE_REF),
+    ;
     public final TextAttributesKey KEY;
     public final String type;
     public final @Unmodifiable Set<String> modifiers;
@@ -66,8 +93,8 @@ public enum ZigAttributes {
     ZigAttributes(TextAttributesKey defaultKey, String... modifiers) {
         var name = name();
         int underscoreIndex = name.indexOf('_');
-        type = (underscoreIndex >= 0 ? name.substring(0, underscoreIndex) : name).toLowerCase(Locale.ROOT);
-        KEY = TextAttributesKey.createTextAttributesKey("ZIG_" + name.toUpperCase(Locale.ROOT), defaultKey);
+        type = Character.toLowerCase(name.charAt(0)) + (underscoreIndex > 0 ? name.substring(1, underscoreIndex) : name.substring(1));
+        KEY = defaultKey;
         this.modifiers = new HashSet<>(List.of(modifiers));
     }
 
@@ -80,9 +107,6 @@ public enum ZigAttributes {
                                             (modifiers == null && known.modifiers.size() == 0))) {
                 return Optional.of(known.KEY);
             }
-        }
-        if (modifiers != null && modifiers.size() > 0) {
-            System.out.println(type + ": " + modifiers);
         }
         return Optional.empty();
     }

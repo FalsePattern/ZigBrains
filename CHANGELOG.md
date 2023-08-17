@@ -19,9 +19,24 @@ Changelog structure reference:
 ## [Unreleased]
 
 ### Added
+
+#### LSP
 - Separate timeout category for syntax highlighting
 
+#### Zig
+- Basic "dumb" syntax highlighting when LSP is not connected
+- Go to usages now works properly
+- Color scheme preview now works properly
+- Better "smart" syntax highlighting when LSP is connected
+
+### Fixed
+
+#### Code Actions
+- IDE no longer freezes when ZLS responds slowly
+
+
 ### Security
+
 - Updated dependencies
 - Integrated LSP4IntelliJ directly into ZigBrains
 

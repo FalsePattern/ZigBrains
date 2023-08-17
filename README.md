@@ -17,8 +17,8 @@ Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> select yo
   - Go to definition
   - Rename symbol
   - Hover documentation
-- TODO:
   - Go to implementations / find usages
+- TODO:
   - Workspace Symbols
 
 ### .zon files:

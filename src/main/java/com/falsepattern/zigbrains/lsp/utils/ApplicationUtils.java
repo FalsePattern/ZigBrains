@@ -20,8 +20,10 @@ import com.intellij.openapi.project.NoAccessDuringPsiEvents;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.Condition;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class ApplicationUtils {
 
@@ -49,7 +51,15 @@ public class ApplicationUtils {
     }
 
     static public <T> T computableReadAction(Computable<T> computable) {
-        return ApplicationManager.getApplication().runReadAction(computable);
+        if (ApplicationManager.getApplication().isDispatchThread()) {
+            return ApplicationManager.getApplication().runReadAction(computable);
+        } else {
+            var result = new Object() {
+                T value = null;
+            };
+            ApplicationManager.getApplication().invokeAndWait(() -> result.value = ApplicationManager.getApplication().runReadAction(computable));
+            return result.value;
+        }
     }
 
     static public void writeAction(Runnable runnable) {

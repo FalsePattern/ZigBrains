@@ -17,48 +17,41 @@
 package com.falsepattern.zigbrains.zig.parser;
 
 import com.falsepattern.zigbrains.zig.ZigLanguage;
-import com.intellij.lang.ASTFactory;
+import com.falsepattern.zigbrains.zig.lexer.ZigLexerAdapter;
+import com.falsepattern.zigbrains.zig.psi.ZigTypes;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.PsiParser;
-import com.intellij.lexer.DummyLexer;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
-import com.intellij.psi.PlainTextTokenTypes;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
-import com.intellij.psi.util.PsiUtilCore;
 import org.jetbrains.annotations.NotNull;
 
 public class ZigParserDefinition implements ParserDefinition {
-    public static final IFileElementType FILE = new IFileElementType(ZigLanguage.INSTANCE) {
-        public ASTNode parseContents(@NotNull ASTNode chameleon) {
-            final CharSequence chars = chameleon.getChars();
-            return ASTFactory.leaf(PlainTextTokenTypes.PLAIN_TEXT, chars);
-        }
-    };
+    public static final IFileElementType FILE = new IFileElementType(ZigLanguage.INSTANCE);
 
     @Override
     public @NotNull Lexer createLexer(Project project) {
-        return new DummyLexer(FILE);
+        return new ZigLexerAdapter();
     }
 
     @Override
     public @NotNull TokenSet getCommentTokens() {
-        return TokenSet.EMPTY;
+        return ZigTokenSets.COMMENTS;
     }
 
     @Override
     public @NotNull TokenSet getStringLiteralElements() {
-        return TokenSet.EMPTY;
+        return ZigTokenSets.STRINGS;
     }
 
     @Override
     public @NotNull PsiParser createParser(Project project) {
-        throw new UnsupportedOperationException("Not Supported");
+        return new ZigParser();
     }
 
     @Override
@@ -73,6 +66,6 @@ public class ZigParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull PsiElement createElement(ASTNode node) {
-        return PsiUtilCore.NULL_PSI_ELEMENT;
+        return ZigTypes.Factory.createElement(node);
     }
 }

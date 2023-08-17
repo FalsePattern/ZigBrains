@@ -108,11 +108,30 @@ tasks {
         purgeOldFiles = true
     }
 
+    register<GenerateLexerTask>("generateZigLexer") {
+        group = "build setup"
+        sourceFile = file("src/main/grammar/Zig.flex")
+        targetDir = "${grammarKitGenDir}/lexer/${rootPackagePath}/zig/lexer"
+        targetClass = "ZigFlexLexer"
+        purgeOldFiles = true
+    }
+
+    register<GenerateParserTask>("generateZigParser") {
+        group = "build setup"
+        sourceFile = file("src/main/grammar/Zig.bnf")
+        targetRoot = "${grammarKitGenDir}/parser"
+        pathToParser = "${rootPackagePath}/zig/psi/ZigParser.java"
+        pathToPsiRoot = "${rootPackagePath}/zig/psi"
+        purgeOldFiles = true
+    }
+
     register<DefaultTask>("generateSources") {
         description = "Generate source code from parser/lexer definitions"
         group = "build setup"
         dependsOn("generateZonLexer")
         dependsOn("generateZonParser")
+        dependsOn("generateZigLexer")
+        dependsOn("generateZigParser")
     }
 
     compileJava {

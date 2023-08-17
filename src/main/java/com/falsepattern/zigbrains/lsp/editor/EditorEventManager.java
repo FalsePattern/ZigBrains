@@ -1400,11 +1400,18 @@ public class EditorEventManager {
 
             // sends code action request.
             int caretPos = editor.getCaretModel().getCurrentCaret().getOffset();
+        pool(() -> {
+            if (editor.isDisposed()) {
+                return;
+            }
             List<Either<Command, CodeAction>> codeActionResp = codeAction(caretPos);
             if (codeActionResp == null || codeActionResp.isEmpty()) {
                 return;
             }
-
+        invokeLater(() -> {
+            if (editor.isDisposed()) {
+                return;
+            }
             codeActionResp.forEach(element -> {
                 if (element == null) {
                     return;
@@ -1462,6 +1469,8 @@ public class EditorEventManager {
             if (codeActionSyncRequired) {
                 updateErrorAnnotations();
             }
+        });
+        });
         });
     }
 

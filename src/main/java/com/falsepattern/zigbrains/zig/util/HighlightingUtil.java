@@ -90,7 +90,7 @@ public class HighlightingUtil {
                         if (end > documentLength - 1) {
                             end = documentLength - 1;
                         }
-                        markup.addRangeHighlighter(edit.color(), edit.start(), end, HighlighterLayer.SYNTAX,
+                        markup.addRangeHighlighter(edit.color(), edit.start(), end, HighlighterLayer.ADDITIONAL_SYNTAX,
                                                    HighlighterTargetArea.EXACT_RANGE);
                     }
                 }
