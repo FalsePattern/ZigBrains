@@ -16,7 +16,7 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
-import com.falsepattern.zigbrains.zig.HighlightingUtil;
+import com.falsepattern.zigbrains.zig.util.HighlightingUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;

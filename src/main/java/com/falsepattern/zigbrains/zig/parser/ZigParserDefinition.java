@@ -16,31 +16,22 @@
 
 package com.falsepattern.zigbrains.zig.parser;
 
-import com.falsepattern.zigbrains.zig.ide.ZigLanguage;
-import com.falsepattern.zigbrains.zon.ZonLanguage;
-import com.falsepattern.zigbrains.zon.lexer.ZonLexerAdapter;
-import com.falsepattern.zigbrains.zon.parser.ZonParser;
-import com.falsepattern.zigbrains.zon.parser.ZonTokenSets;
-import com.falsepattern.zigbrains.zon.psi.ZonTypes;
+import com.falsepattern.zigbrains.zig.ZigLanguage;
 import com.intellij.lang.ASTFactory;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.ParserDefinition;
-import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiParser;
 import com.intellij.lexer.DummyLexer;
 import com.intellij.lexer.Lexer;
-import com.intellij.openapi.fileTypes.PlainTextParserDefinition;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PlainTextTokenTypes;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.util.PsiUtilCore;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ZigParserDefinition implements ParserDefinition {
     public static final IFileElementType FILE = new IFileElementType(ZigLanguage.INSTANCE) {

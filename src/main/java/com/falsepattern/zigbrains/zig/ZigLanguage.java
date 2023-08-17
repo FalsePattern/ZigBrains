@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zig.ide;
+package com.falsepattern.zigbrains.zig;
 
 import com.intellij.lang.Language;
 

@@ -61,7 +61,7 @@
         <!-- endregion LSP4IntelliJ -->
 
         <fileType name="Zig File"
-                  implementationClass="com.falsepattern.zigbrains.zig.ide.ZigFileType"
+                  implementationClass="com.falsepattern.zigbrains.zig.ZigFileType"
                   fieldName="INSTANCE"
                   language="Zig"
                   extensions="zig"/>

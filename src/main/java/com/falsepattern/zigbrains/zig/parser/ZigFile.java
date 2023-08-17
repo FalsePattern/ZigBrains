@@ -16,8 +16,8 @@
 
 package com.falsepattern.zigbrains.zig.parser;
 
-import com.falsepattern.zigbrains.zig.ide.ZigFileType;
-import com.falsepattern.zigbrains.zig.ide.ZigLanguage;
+import com.falsepattern.zigbrains.zig.ZigFileType;
+import com.falsepattern.zigbrains.zig.ZigLanguage;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.FileViewProvider;

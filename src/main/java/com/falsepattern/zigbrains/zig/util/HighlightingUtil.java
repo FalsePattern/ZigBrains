@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zig;
+package com.falsepattern.zigbrains.zig.util;
 
 import com.falsepattern.zigbrains.zig.lsp.ZLSEditorEventManager;
 import com.intellij.openapi.application.ApplicationManager;
