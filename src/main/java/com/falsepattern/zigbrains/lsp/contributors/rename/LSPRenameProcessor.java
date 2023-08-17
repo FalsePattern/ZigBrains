@@ -73,7 +73,7 @@ public class LSPRenameProcessor extends RenamePsiElementProcessor {
             EditorEventManager
                     manager = EditorEventManagerBase.forEditor(FileUtils.editorFromPsiFile(element.getContainingFile()));
             if (manager != null) {
-                Pair<List<PsiElement>, List<VirtualFile>> refs = manager.references(element.getTextOffset(), true, false);
+                Pair<List<PsiElement>, List<VirtualFile>> refs = manager.referencesForRename(element, true, false);
                 if (refs.getFirst() != null && refs.getSecond() != null) {
                     addEditors(refs.getSecond());
                     return refs.getFirst().stream().map(PsiElement::getReference).filter(Objects::nonNull).collect(Collectors.toList());

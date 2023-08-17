@@ -44,6 +44,7 @@ import com.intellij.refactoring.rename.inplace.MemberInplaceRenamer;
 import org.jetbrains.annotations.NotNull;
 import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import static com.intellij.openapi.command.impl.StartMarkAction.START_MARK_ACTION_KEY;
@@ -161,9 +162,11 @@ public class LSPRenameHandler implements RenameHandler {
                 .filter(e -> e.getTextRange().getStartOffset() <= offset && offset <= e.getTextRange().getEndOffset())
                 .findAny().orElse(null);
         if (curElement != null) {
-            return new LSPPsiElement(curElement.getText(), curElement.getProject(),
-                    curElement.getTextRange().getStartOffset(), curElement.getTextRange().getEndOffset(),
-                    curElement.getContainingFile());
+            var newElement = new LSPPsiElement(curElement.getText(), curElement.getProject(),
+                                               curElement.getTextRange().getStartOffset(), curElement.getTextRange().getEndOffset(),
+                                               curElement.getContainingFile());
+            eventManager.renameCache = new Pair<>(new WeakReference<>(newElement), refResponse);
+            return newElement;
         }
         return null;
     }

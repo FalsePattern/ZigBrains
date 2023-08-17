@@ -49,7 +49,7 @@ public class LSPInplaceRenamer extends MemberInplaceRenamer {
         EditorEventManager eventManager = EditorEventManagerBase.forEditor(editor);
         if (eventManager != null) {
             Pair<List<PsiElement>, List<VirtualFile>> results = eventManager
-                    .references(editor.getCaretModel().getCurrentCaret().getOffset(), true, false);
+                    .referencesForRename(editor.getCaretModel().getCurrentCaret().getOffset(), true, false);
             List<PsiElement> references = results.getFirst();
             List<VirtualFile> toClose = results.getSecond();
             LSPRenameProcessor.addEditors(toClose);

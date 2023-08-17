@@ -76,6 +76,7 @@ import com.falsepattern.zigbrains.lsp.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -364,6 +365,34 @@ public class EditorEventManager {
         return references(offset, false, false);
     }
 
+    public Pair<WeakReference<PsiElement>, Pair<List<PsiElement>, List<VirtualFile>>> renameCache = null;
+
+    public Pair<List<PsiElement>, List<VirtualFile>> referencesForRename(PsiElement originalElement, boolean getOriginalElement, boolean close) {
+        if (renameCache != null) {
+            var cached = renameCache.getFirst().get();
+            if (cached == originalElement) {
+                return renameCache.getSecond();
+            }
+        }
+        var newValue = references(originalElement.getTextOffset(), getOriginalElement, close);
+        renameCache = new Pair<>(new WeakReference<>(originalElement), newValue);
+        return newValue;
+    }
+
+    public Pair<List<PsiElement>, List<VirtualFile>> referencesForRename(int offset, boolean getOriginalElement, boolean close) {
+        if (renameCache != null) {
+            var cached = renameCache.getFirst().get();
+            if (cached != null) {
+                var textRange = cached.getTextRange();
+                if (textRange.contains(offset) || textRange.contains(offset-1)) {
+                    return renameCache.getSecond();
+                }
+            }
+        }
+        renameCache = null;
+        return references(offset, getOriginalElement, close);
+    }
+
     /**
      * Returns the references given the position of the word to search for
      * Must be called from main thread
@@ -372,6 +401,7 @@ public class EditorEventManager {
      * @return An array of PsiElement
      */
     public Pair<List<PsiElement>, List<VirtualFile>> references(int offset, boolean getOriginalElement, boolean close) {
+        renameCache = null;
         Position lspPos = DocumentUtils.offsetToLSPPos(editor, offset);
         TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(FileUtils.editorToURIString(editor));
         ReferenceParams params = new ReferenceParams(textDocumentIdentifier, lspPos, new ReferenceContext(getOriginalElement));
