@@ -339,6 +339,9 @@ public class EditorEventManager {
             Either<List<? extends Location>, List<? extends LocationLink>> definition =
                     request.get(Timeout.getTimeout(Timeouts.DEFINITION), TimeUnit.MILLISECONDS);
             wrapper.notifySuccess(Timeouts.DEFINITION);
+            if (definition == null) {
+                return null;
+            }
             if (definition.isLeft() && !definition.getLeft().isEmpty()) {
                 return definition.getLeft().get(0);
             } else if (definition.isRight() && !definition.getRight().isEmpty()) {

@@ -156,7 +156,9 @@ public class LSPFoldingRangeProvider extends CustomFoldingBuilder {
         try {
             List<FoldingRange> foldingRanges = future.get(Timeout.getTimeout(Timeouts.FOLDING), TimeUnit.MILLISECONDS);
             wrapper.notifySuccess(Timeouts.FOLDING);
-
+            if (foldingRanges == null) {
+                return;
+            }
             for (FoldingRange foldingRange : foldingRanges) {
                 int start = getStartOffset(editor, foldingRange, document);
                 int end = getEndOffset(editor, foldingRange, document);

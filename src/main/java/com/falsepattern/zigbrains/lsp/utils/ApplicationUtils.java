@@ -16,6 +16,7 @@
 package com.falsepattern.zigbrains.lsp.utils;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import com.intellij.openapi.project.NoAccessDuringPsiEvents;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.Condition;
@@ -51,7 +52,8 @@ public class ApplicationUtils {
     }
 
     static public <T> T computableReadAction(Computable<T> computable) {
-        if (ApplicationManager.getApplication().isDispatchThread()) {
+        if (ApplicationManager.getApplication().isDispatchThread() ||
+            ApplicationManagerEx.getApplicationEx().holdsReadLock()) {
             return ApplicationManager.getApplication().runReadAction(computable);
         } else {
             var result = new Object() {
