@@ -86,11 +86,12 @@ public class HighlightingUtil {
                         }
                     }
                     for (var edit : range.add()) {
+                        var editStart = edit.start();
                         var end = edit.end();
-                        if (end > documentLength - 1) {
-                            end = documentLength - 1;
+                        if (end > documentLength || editStart > documentLength) {
+                            continue;
                         }
-                        markup.addRangeHighlighter(edit.color(), edit.start(), end, HighlighterLayer.ADDITIONAL_SYNTAX,
+                        markup.addRangeHighlighter(edit.color(), editStart, end, HighlighterLayer.ADDITIONAL_SYNTAX,
                                                    HighlighterTargetArea.EXACT_RANGE);
                     }
                 }
