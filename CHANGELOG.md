@@ -28,6 +28,7 @@ Changelog structure reference:
 - Go to usages now works properly
 - Color scheme preview now works properly
 - Better "smart" syntax highlighting when LSP is connected
+- Brace/Parenthesis/Bracket matching
 
 ### Fixed
 

@@ -74,6 +74,9 @@
         <lang.syntaxHighlighterFactory language="Zig"
                                        implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>
 
+        <lang.braceMatcher language="Zig"
+                           implementationClass="com.falsepattern.zigbrains.zig.pairing.ZigBraceMatcher"/>
+
         <applicationConfigurable parentId="language"
                                  instance="com.falsepattern.zigbrains.zig.settings.AppSettingsConfigurable"
                                  id="com.falsepattern.zigbrains.zig.settings.AppSettingsConfigurable"

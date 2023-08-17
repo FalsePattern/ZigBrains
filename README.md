@@ -18,6 +18,7 @@ Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> select yo
   - Rename symbol
   - Hover documentation
   - Go to implementations / find usages
+  - Brace/Parenthesis/Bracket matching
 - TODO:
   - Workspace Symbols
 
