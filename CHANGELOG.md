@@ -18,6 +18,10 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Security
+- Updated dependencies
+- Integrated LSP4IntelliJ directly into ZigBrains
+
 ## [0.5.2]
 
 ### Fixed
