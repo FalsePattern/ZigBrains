@@ -18,6 +18,7 @@
   parserClass="com.falsepattern.zigbrains.zig.parser.ZigParser"
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+  extends(".*Expr")=Expr
 
   psiClassPrefix="Zig"
   psiImplClassSuffix="Impl"
