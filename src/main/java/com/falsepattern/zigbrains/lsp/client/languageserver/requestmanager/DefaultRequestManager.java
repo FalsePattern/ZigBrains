@@ -87,6 +87,7 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -679,9 +680,10 @@ public class DefaultRequestManager implements RequestManager {
     public CompletableFuture<List<FoldingRange>> foldingRange(FoldingRangeRequestParams params) {
         if (checkStatus()) {
             try {
-                return serverCapabilities.getFoldingRangeProvider() != null ?
+                var future = serverCapabilities.getFoldingRangeProvider() != null ?
                         textDocumentService.foldingRange(params) :
                         null;
+                return future == null ? null : future.thenApply((range) -> range == null ? Collections.emptyList() : range);
             } catch (Exception e) {
                 crashed(e);
                 return null;
