@@ -12,11 +12,26 @@ In addition to the generated sources, you also need to run the `build setup -> n
 complain about missing files
 
 # Description
+
 <!-- Plugin description -->
-Yet another attempt at bringing zig to the IntelliJ world.
+An LSP-powered language plugin for the Zig Programming Language.
+
 
 ## QUICKSTART
-Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> select your `zls` executable
+1. Download or compile the ZLS language server, available at https://github.com/zigtools/zls
+2. Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> set the path to the `zls` executable you downloaded or compiled
+3. Open a .zig file, and wait for the circle in the bottom status bar to turn Green (empty).
+See below for an explanation on what the circle means.
+
+## LSP status icon explanation
+Red (X symbol):
+LSP server is stopped. You either don't have a proper ZLS path set, or you don't have a .zig file open.
+
+Yellow ("refresh arrow" symbol):
+LSP server is starting, please be patient.
+
+Green (empty):
+LSP server is running.
 
 ## Feature tracker:
 
