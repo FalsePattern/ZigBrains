@@ -21,7 +21,17 @@ Changelog structure reference:
 ### Added
 
 #### Zig/LSP
+
 - Inlay hints
+
+### Changed
+
+#### Accessibility
+
+- The LSP status icon now has symbols in it instead of just colors:
+  - Stopped(Red): X
+  - Starting(Yellow): Refresh arrow
+  - Started(Green): Empty
 
 ## [0.6.0]
 
