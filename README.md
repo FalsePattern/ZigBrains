@@ -1,5 +1,17 @@
 # ZigBrains
 
+## Developer guide
+
+### All platforms
+
+After importing the gradle project, you need to run the `build setup -> generateSources` tasks.
+
+### NixOS
+
+In addition to the generated sources, you also need to run the `build setup -> nixos_jbr` task, otherwise java will
+complain about missing files
+
+# Description
 <!-- Plugin description -->
 Yet another attempt at bringing zig to the IntelliJ world.
 
