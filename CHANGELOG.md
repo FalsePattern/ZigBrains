@@ -33,6 +33,12 @@ Changelog structure reference:
   - Starting(Yellow): Refresh arrow
   - Started(Green): Empty
 
+### Fixed
+
+#### LSP
+
+- NullPointerException in folding range provider when closing editors quickly
+
 ## [0.6.0]
 
 ### Added

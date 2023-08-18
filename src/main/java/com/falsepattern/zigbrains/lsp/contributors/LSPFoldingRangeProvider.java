@@ -94,6 +94,9 @@ public class LSPFoldingRangeProvider extends CustomFoldingBuilder {
                                                new AFoldingRange(start, end, collapsedText == null ? "..." : collapsedText)),
                                        root, document, true);
             var editor = FileUtils.editorFromPsiFile(root.getContainingFile());
+            if (editor == null) {
+                return;
+            }
             app.invokeLater(() -> {
                 if (editor.isDisposed()) {
                     return;
@@ -102,7 +105,7 @@ public class LSPFoldingRangeProvider extends CustomFoldingBuilder {
                 var oldRegions = Arrays.stream(foldingModel.getAllFoldRegions()).filter(region -> {
                     var data = region.getUserData(ASYNC_FOLDING_KEY);
                     return data != null && data;
-                }).collect(Collectors.toList());
+                }).toList();
                 foldingModel.runBatchFoldingOperation(() -> {
                     for (var oldRegion: oldRegions) {
                         foldingModel.removeFoldRegion(oldRegion);
