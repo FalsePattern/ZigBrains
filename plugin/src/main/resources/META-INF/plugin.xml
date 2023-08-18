@@ -8,5 +8,7 @@
     <depends config-file="zigbrains-zig.xml">com.intellij.modules.platform</depends>
     <!--suppress PluginXmlValidity -->
     <depends config-file="zigbrains-zon.xml">com.intellij.modules.platform</depends>
+    <!--suppress PluginXmlValidity -->
+    <depends optional="true" config-file="zigbrains-zig-debugger.xml">com.intellij.modules.cidr.debugger</depends>
 
 </idea-plugin>

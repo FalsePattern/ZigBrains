@@ -20,9 +20,10 @@ Changelog structure reference:
 
 ### Added
 
-#### Zig/LSP
+#### Zig
 
 - Inlay hints
+- Breakpoints (CLion/IDEA Ultimate)
 
 ### Changed
 

@@ -47,6 +47,7 @@ LSP server is running.
   - Hover documentation
   - Go to implementations / find usages
   - Brace/Parenthesis/Bracket matching
+  - Breakpoints (CLion/IDEA Ultimate)
 - TODO:
   - Workspace Symbols
 

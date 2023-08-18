@@ -26,6 +26,17 @@ val rootPackagePath = rootPackage.replace('.', '/')
 val javaLangVersion: JavaLanguageVersion? = JavaLanguageVersion.of(17)
 val javaVersion = JavaVersion.VERSION_17
 
+val baseIDE: String = properties("baseIDE").get()
+val ideaVersion: String = properties("ideaVersion").get()
+val clionVersion: String = properties("clionVersion").get()
+val baseVersion = when(baseIDE) {
+    "idea" -> ideaVersion
+    "clion" -> clionVersion
+    else -> error("Unexpected IDE name: `$baseIDE")
+}
+
+val clionPlugins = listOf("com.intellij.cidr.base", "com.intellij.clion")
+
 tasks {
     wrapper {
         gradleVersion = properties("gradleVersion").get()
@@ -46,9 +57,8 @@ allprojects {
         compileOnly("org.jetbrains:annotations:24.0.1")
     }
     intellij {
-        version = properties("platformVersion")
+        version = baseVersion
         updateSinceUntilBuild = true
-        instrumentCode = false
     }
     sourceSets {
         main {
@@ -108,6 +118,10 @@ allprojects {
             dependsOn("generateLexer")
             dependsOn("generateParser")
         }
+
+        verifyPlugin {
+            enabled = false
+        }
     }
 }
 
@@ -130,6 +144,16 @@ project(":") {
     changelog {
         groups.empty()
         repositoryUrl = properties("pluginRepositoryUrl")
+    }
+}
+
+project(":debugger") {
+    dependencies {
+        implementation(project(":zig"))
+    }
+    intellij {
+        version = clionVersion
+        plugins = clionPlugins
     }
 }
 
@@ -168,6 +192,7 @@ project(":zig") {
         compileJava {
             dependsOn("generateGrammars")
         }
+
     }
 }
 
@@ -204,15 +229,12 @@ project(":plugin") {
     dependencies {
         implementation(project(":zig"))
         implementation(project(":zon"))
+        implementation(project(":debugger"))
         implementation(project(":"))
     }
 
     intellij {
         pluginName = properties("pluginName")
-        type = properties("platformType")
-
-        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
-        plugins = properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
     }
 
 // Include the generated files in the source set
@@ -306,6 +328,15 @@ project(":plugin") {
 
         verifyPluginSignature {
             certificateChainFile = file("secrets/chain.crt")
+        }
+
+        verifyPlugin {
+            dependsOn(mergePluginJarTask)
+            enabled = true
+        }
+
+        listProductsReleases {
+            types = listOf("IU", "IC", "CL")
         }
 
 //    publishPlugin {
