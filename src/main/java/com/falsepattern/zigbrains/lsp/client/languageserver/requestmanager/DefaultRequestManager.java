@@ -57,6 +57,8 @@ import org.eclipse.lsp4j.ImplementationParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
+import org.eclipse.lsp4j.InlayHint;
+import org.eclipse.lsp4j.InlayHintParams;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.MessageActionItem;
@@ -673,6 +675,20 @@ public class DefaultRequestManager implements RequestManager {
 
     @Override
     public CompletableFuture<List<ColorPresentation>> colorPresentation(ColorPresentationParams params) {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<List<InlayHint>> inlayHint(InlayHintParams params) {
+        if (checkStatus()) {
+            try {
+                return (getServerCapabilities().getInlayHintProvider() != null)
+                       ? getTextDocumentService().inlayHint(params) : null;
+            } catch (Exception e) {
+                crashed(e);
+                return null;
+            }
+        }
         return null;
     }
 

@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.editor;
 
+import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
 import com.intellij.openapi.editor.Editor;
 import org.eclipse.lsp4j.Diagnostic;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
@@ -22,11 +23,13 @@ import com.falsepattern.zigbrains.lsp.utils.OSUtils;
 
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EditorEventManagerBase {
@@ -112,6 +115,8 @@ public class EditorEventManagerBase {
         });
     }
 
+    private static final WeakHashMap<Editor, List<Runnable>> runOnRegistry = new WeakHashMap<>();
+
     public static void registerManager(EditorEventManager manager) {
         String uri = FileUtils.editorToURIString(manager.editor);
         synchronized (uriToManagers) {
@@ -124,7 +129,29 @@ public class EditorEventManagerBase {
             }
         }
 
-        editorToManager.put(manager.editor, manager);
+
+        synchronized (runOnRegistry) {
+            editorToManager.put(manager.editor, manager);
+            if (runOnRegistry.containsKey(manager.editor)) {
+                var tasks = runOnRegistry.remove(manager.editor);
+                for (var task: tasks) {
+                    ApplicationUtils.invokeLater(task);
+                }
+            }
+        }
+    }
+
+    public static void runWhenManagerGetsRegistered(Editor editor, Runnable... runnables) {
+        synchronized (runOnRegistry) {
+            var manager = forEditor(editor);
+            if (manager != null) {
+                for (var task: runnables) {
+                    ApplicationUtils.invokeLater(task);
+                }
+            } else {
+                runOnRegistry.computeIfAbsent(editor, (ignored) -> new ArrayList<>()).addAll(List.of(runnables));
+            }
+        }
     }
 
     public static void unregisterManager(EditorEventManager manager) {

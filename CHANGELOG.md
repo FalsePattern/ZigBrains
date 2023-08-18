@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+#### Zig/LSP
+- Inlay hints
+
 ## [0.6.0]
 
 ### Added

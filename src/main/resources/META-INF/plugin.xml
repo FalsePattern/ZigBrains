@@ -5,11 +5,11 @@
     <vendor>FalsePattern</vendor>
 
     <depends>com.intellij.modules.platform</depends>
-
+    <resource-bundle>zigbrains.Bundle</resource-bundle>
     <extensions defaultExtensionNs="com.intellij">
         <!-- region Zig -->
 
-        <!-- region LSP4IntelliJ -->
+        <!-- region LSP -->
 
         <!-- register a listener on editor events, required for lsp file sync -->
         <editorFactoryListener implementation="com.falsepattern.zigbrains.lsp.listeners.LSPEditorListener"/>
@@ -58,7 +58,16 @@
         <!-- needed for documentation -->
         <platform.backend.documentation.targetProvider implementation="com.falsepattern.zigbrains.lsp.contributors.LSPDocumentationTargetProvider"/>
 
-        <!-- endregion LSP4IntelliJ -->
+        <!-- needed for inlay hints -->
+        <codeInsight.declarativeInlayProvider implementationClass="com.falsepattern.zigbrains.lsp.contributors.LSPInlayHintProvider"
+                                              bundle="zigbrains.Bundle"
+                                              nameKey="inlayprovider"
+                                              providerId="ZigBrains"
+                                              isEnabledByDefault="true"
+                                              group="PARAMETERS_GROUP"
+                                              language="Zig"/>
+
+        <!-- endregion LSP -->
 
         <fileType name="Zig File"
                   implementationClass="com.falsepattern.zigbrains.zig.ZigFileType"
@@ -125,7 +134,7 @@
     <actions>
         <!-- region Zig -->
 
-        <!-- region LSP4IntelliJ -->
+        <!-- region LSP -->
 
         <!-- needed for find references -->
         <action class="com.falsepattern.zigbrains.lsp.actions.LSPReferencesAction"
@@ -134,13 +143,13 @@
                                keymap="$default"/>
         </action>
 
-        <!-- endregion LSP4IntelliJ -->
+        <!-- endregion LSP -->
 
         <!-- endregion Zig -->
     </actions>
 
     <applicationListeners>
-        <!-- region LSP4IntelliJ -->
+        <!-- region LSP -->
 
         <!-- required for lsp file sync -->
         <listener class="com.falsepattern.zigbrains.lsp.listeners.VFSListener"
@@ -148,7 +157,7 @@
         <listener class="com.falsepattern.zigbrains.lsp.listeners.LSPProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
 
-        <!-- endregion LSP4IntelliJ -->
+        <!-- endregion LSP -->
     </applicationListeners>
 
 

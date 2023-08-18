@@ -21,6 +21,7 @@ import com.falsepattern.zigbrains.lsp.requests.HoverHandler;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.requests.WorkspaceEditHandler;
+import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
 import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.codeInsight.hint.HintManager;
@@ -1305,6 +1306,32 @@ public class EditorEventManager {
                     wrapper.getRequestManager().willSave(new WillSaveTextDocumentParams(identifier, TextDocumentSaveReason.Manual));
                 }
             });
+    }
+
+    public List<InlayHint> inlayHint() {
+        var range = ApplicationUtils.computableReadAction(() -> {
+            var start = DocumentUtils.offsetToLSPPos(editor, 0);
+            var end = DocumentUtils.offsetToLSPPos(editor, editor.getDocument().getTextLength());
+            return new Range(start, end);
+        });
+        var promise = getRequestManager().inlayHint(new InlayHintParams(FileUtils.editorToLSPIdentifier(editor), range));
+        if (promise == null) {
+            return Collections.emptyList();
+        }
+        try {
+            var res = promise.get(Timeout.getTimeout(Timeouts.INLAY_HINTS), TimeUnit.MILLISECONDS);
+            wrapper.notifySuccess(Timeouts.INLAY_HINTS);
+            if (res != null) {
+                return res;
+            }
+        } catch (TimeoutException e) {
+            LOG.warn(e);
+            wrapper.notifyFailure(Timeouts.CODEACTION);
+        } catch (InterruptedException | JsonRpcException | ExecutionException e) {
+            LOG.warn(e);
+            wrapper.crashed(e);
+        }
+        return Collections.emptyList();
     }
 
     /**

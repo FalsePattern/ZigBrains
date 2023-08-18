@@ -13,6 +13,7 @@ Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> select yo
   - Code completion
   - Code folding
   - Syntax highlighting
+  - Inlay hints
   - Basic error diagnostics
   - Go to definition
   - Rename symbol
