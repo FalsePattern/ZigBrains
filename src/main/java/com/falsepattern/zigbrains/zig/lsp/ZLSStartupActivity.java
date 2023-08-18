@@ -16,7 +16,8 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
-import com.falsepattern.zigbrains.zig.settings.AppSettingsState;
+import com.falsepattern.zigbrains.lsp.utils.FileUtils;
+import com.falsepattern.zigbrains.zig.settings.ZLSSettingsState;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -38,11 +39,19 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ZLSStartupActivity implements ProjectActivity {
     private static final ReentrantLock lock = new ReentrantLock();
 
-    public static void initZLS() {
+    public static void initZLS(Project project) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             lock.lock();
             try {
-                var settings = AppSettingsState.getInstance();
+                var wrappers = IntellijLanguageClient.getAllServerWrappersFor(FileUtils.projectToUri(project));
+                for (var wrapper : wrappers) {
+                    if (wrapper.serverDefinition.ext.equals("zig")) {
+                        wrapper.stop(false);
+                        wrapper.stop(true);
+                        IntellijLanguageClient.removeWrapper(wrapper);
+                    }
+                }
+                var settings = ZLSSettingsState.getInstance(project);
                 var zlsPath = settings.zlsPath;
                 if (!validatePath("ZLS Binary", zlsPath, false)) {
                     return;
@@ -90,7 +99,7 @@ public class ZLSStartupActivity implements ProjectActivity {
                         }
                     }
                 }
-                IntellijLanguageClient.addServerDefinition(new ZLSServerDefinition(cmd.toArray(String[]::new)));
+                IntellijLanguageClient.addServerDefinition(new ZLSServerDefinition(cmd.toArray(String[]::new)), project);
             } finally {
                 lock.unlock();
             }
@@ -127,14 +136,14 @@ public class ZLSStartupActivity implements ProjectActivity {
     @Nullable
     @Override
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
-        var path = AppSettingsState.getInstance().zlsPath;
+        var path = ZLSSettingsState.getInstance(project).zlsPath;
         if ("".equals(path)) {
             Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No ZLS binary",
                                                       "Please configure the path to the zls executable in the Zig language configuration menu!",
                                                       NotificationType.INFORMATION));
             return null;
         }
-        initZLS();
+        initZLS(project);
         return null;
     }
 }

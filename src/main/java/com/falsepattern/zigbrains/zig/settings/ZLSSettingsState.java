@@ -1,0 +1,71 @@
+/*
+ * Copyright 2023 FalsePattern
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.falsepattern.zigbrains.zig.settings;
+
+import com.falsepattern.zigbrains.settings.annotations.Category;
+import com.falsepattern.zigbrains.settings.annotations.Config;
+import com.falsepattern.zigbrains.settings.annotations.FilePath;
+import com.falsepattern.zigbrains.settings.annotations.Label;
+import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.Service;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.project.Project;
+import com.intellij.util.xmlb.XmlSerializerUtil;
+import org.jetbrains.annotations.NotNull;
+
+@Service(Service.Level.PROJECT)
+@State(name = "ZLSSettings",
+       storages = @Storage("zigbrains.xml"))
+public final class ZLSSettingsState implements PersistentStateComponent<ZLSSettingsState> {
+    @Category("Regular settings")
+    @Config(0)
+    @Label("ZLS path: ")
+    @FilePath(files = true)
+    public String zlsPath = "";
+    @Config(10)
+    @Label("ZLS config path (leave empty to use default): ")
+    @FilePath(files = true)
+    public String zlsConfigPath = "";
+    @Config(20)
+    @Label("Increase timeouts")
+    public boolean increaseTimeouts = false;
+    @Config(30)
+    @Label("Asynchronous code folding ranges: ")
+    public boolean asyncFolding = true;
+    @Category("Developer settings (only usable when the IDE was launched with the runIDE gradle task in ZigBrains!)")
+    @Config(40)
+    @Label("ZLS debug log: ")
+    public boolean debug = false;
+    @Config(50)
+    @Label("ZLS message trace: ")
+    public boolean messageTrace = false;
+
+    public static ZLSSettingsState getInstance(Project project) {
+        return project.getService(ZLSSettingsState.class);
+    }
+
+    @Override
+    public ZLSSettingsState getState() {
+        return this;
+    }
+
+    @Override
+    public void loadState(@NotNull ZLSSettingsState state) {
+        XmlSerializerUtil.copyBean(state, this);
+    }
+}

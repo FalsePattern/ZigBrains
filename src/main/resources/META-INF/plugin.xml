@@ -86,10 +86,10 @@
         <lang.braceMatcher language="Zig"
                            implementationClass="com.falsepattern.zigbrains.zig.pairing.ZigBraceMatcher"/>
 
-        <applicationConfigurable parentId="language"
-                                 instance="com.falsepattern.zigbrains.zig.settings.AppSettingsConfigurable"
-                                 id="com.falsepattern.zigbrains.zig.settings.AppSettingsConfigurable"
-                                 displayName="Zig"/>
+        <projectConfigurable parentId="language"
+                             instance="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable"
+                             id="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable"
+                             displayName="Zig"/>
 
         <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
         <notificationGroup displayType="BALLOON"

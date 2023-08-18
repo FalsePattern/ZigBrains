@@ -27,6 +27,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
@@ -46,7 +47,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 public class LSPFoldingRangeProvider extends CustomFoldingBuilder {
     private static final Key<Boolean> ASYNC_FOLDING_KEY = new Key<>("ASYNC_FOLDING");
@@ -76,7 +76,7 @@ public class LSPFoldingRangeProvider extends CustomFoldingBuilder {
             return;
         }
 
-        var async = async();
+        var async = async(root.getProject());
         if (!async) {
             doBuildLanguageFoldRegions((start, end, collapsedText) -> {
                 if (collapsedText != null) {
@@ -186,7 +186,7 @@ public class LSPFoldingRangeProvider extends CustomFoldingBuilder {
         }
     }
 
-    protected boolean async() {
+    protected boolean async(Project project) {
         return true;
     }
 

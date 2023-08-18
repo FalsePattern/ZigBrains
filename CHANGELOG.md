@@ -39,6 +39,10 @@ Changelog structure reference:
 
 - NullPointerException in folding range provider when closing editors quickly
 
+#### Config
+
+- Changes to the ZLS configuration no longer require an IDE restart
+
 ## [0.6.0]
 
 ### Added
