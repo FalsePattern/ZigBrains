@@ -1,0 +1,122 @@
+<idea-plugin package="com.falsepattern.zigbrains.zig">
+    <depends>com.intellij.modules.platform</depends>
+
+    <resource-bundle>zigbrains.zig.Bundle</resource-bundle>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- region LSP -->
+
+        <!-- register a listener on editor events, required for lsp file sync -->
+        <editorFactoryListener implementation="com.falsepattern.zigbrains.lsp.listeners.LSPEditorListener"/>
+        <fileDocumentManagerListener implementation="com.falsepattern.zigbrains.lsp.listeners.LSPFileDocumentManagerListener"/>
+
+        <!-- for displaying notifications by lsp -->
+        <notificationGroup id="lsp"
+                           displayType="STICKY_BALLOON"/>
+
+        <!-- for displaying the statusbar icon -->
+        <statusBarWidgetFactory implementation="com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidgetFactory"
+                                id="com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidgetFactory"
+                                order="first"/>
+
+        <!-- needed for completion -->
+        <completion.contributor implementationClass="com.falsepattern.zigbrains.lsp.contributors.LSPCompletionContributor"
+                                id="contributors.com.falsepattern.zigbrains.lsp.LSPCompletionContributor"
+                                language="any"/>
+        <!-- needed for completion as well as signature help -->
+        <typedHandler implementation="com.falsepattern.zigbrains.lsp.listeners.LSPTypedHandler"
+                      id="LSPTypedHandler"/>
+
+        <!-- needed for code diagnostics -->
+        <externalAnnotator id="LSPAnnotator"
+                           language="Zig"
+                           implementationClass="com.falsepattern.zigbrains.lsp.contributors.annotator.LSPAnnotator"/>
+
+        <!-- needed for Workspace Symbols -->
+        <gotoSymbolContributor implementation="com.falsepattern.zigbrains.lsp.contributors.symbol.LSPSymbolContributor"
+                               id="LSPSymbolContributor"/>
+
+        <!-- needed for renaming -->
+        <renameHandler implementation="com.falsepattern.zigbrains.lsp.contributors.rename.LSPRenameHandler"
+                       id="LSPRenameHandler"
+                       order="first"/>
+        <renamePsiElementProcessor implementation="com.falsepattern.zigbrains.lsp.contributors.rename.LSPRenameProcessor"
+                                   id="LSPRenameProcessor"
+                                   order="first"/>
+
+        <!-- needed for folding support -->
+        <lang.foldingBuilder language="Zig"
+                             implementationClass="com.falsepattern.zigbrains.zig.ide.ZigFoldingRangeProvider"
+                             id="LSPFoldingRangeProvider"
+                             order="first"/>
+
+        <!-- needed for documentation -->
+        <platform.backend.documentation.targetProvider implementation="com.falsepattern.zigbrains.lsp.contributors.LSPDocumentationTargetProvider"/>
+
+        <!-- needed for inlay hints -->
+        <codeInsight.declarativeInlayProvider implementationClass="com.falsepattern.zigbrains.lsp.contributors.LSPInlayHintProvider"
+                                              bundle="zigbrains.zig.Bundle"
+                                              nameKey="inlayprovider"
+                                              providerId="ZigBrains"
+                                              isEnabledByDefault="true"
+                                              group="PARAMETERS_GROUP"
+                                              language="Zig"/>
+
+        <!-- endregion LSP -->
+
+        <fileType name="Zig File"
+                  implementationClass="com.falsepattern.zigbrains.zig.ZigFileType"
+                  fieldName="INSTANCE"
+                  language="Zig"
+                  extensions="zig"/>
+
+        <lang.parserDefinition language="Zig"
+                               implementationClass="com.falsepattern.zigbrains.zig.parser.ZigParserDefinition"/>
+
+        <colorSettingsPage implementation="com.falsepattern.zigbrains.zig.highlighter.ZigColorSettingsPage"/>
+
+        <lang.syntaxHighlighterFactory language="Zig"
+                                       implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>
+
+        <lang.braceMatcher language="Zig"
+                           implementationClass="com.falsepattern.zigbrains.zig.pairing.ZigBraceMatcher"/>
+
+        <projectConfigurable parentId="language"
+                             instance="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable"
+                             id="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable"
+                             displayName="Zig"/>
+
+        <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
+        <notificationGroup displayType="BALLOON"
+                           id="ZigBrains.Nag"/>
+
+        <!-- endregion Zig -->
+    </extensions>
+
+
+
+    <actions>
+        <!-- region LSP -->
+
+        <!-- needed for find references -->
+        <action class="com.falsepattern.zigbrains.lsp.actions.LSPReferencesAction"
+                id="LSPFindUsages">
+            <keyboard-shortcut first-keystroke="shift alt F7"
+                               keymap="$default"/>
+        </action>
+
+        <!-- endregion LSP -->
+    </actions>
+
+
+    <applicationListeners>
+        <!-- region LSP -->
+
+        <!-- required for lsp file sync -->
+        <listener class="com.falsepattern.zigbrains.lsp.listeners.VFSListener"
+                  topic="com.intellij.openapi.vfs.VirtualFileListener"/>
+        <listener class="com.falsepattern.zigbrains.lsp.listeners.LSPProjectManagerListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+
+        <!-- endregion LSP -->
+    </applicationListeners>
+</idea-plugin>
