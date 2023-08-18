@@ -22,18 +22,15 @@ import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Set;
 
 public class ZLSSettingsConfigurable extends AbstractConfigurable<ZLSSettingsState> {
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.publicLookup();
-
     private static final Set<String> RELOAD_CONFIGS = Set.of("zlsPath", "zlsConfigPath", "increaseTimeouts", "debug", "messageTrace");
 
     private final Project project;
 
     public ZLSSettingsConfigurable(@NotNull Project project) throws IllegalAccessException {
-        super(LOOKUP, "Zig", ZLSSettingsState.class);
+        super("Zig", ZLSSettingsState.class);
         this.project = project;
     }
 
@@ -48,7 +45,11 @@ public class ZLSSettingsConfigurable extends AbstractConfigurable<ZLSSettingsSta
 
     private boolean zlsSettingsModified() {
         if (configurableGui != null) {
-            return configurableGui.modified(getHolder(), false, RELOAD_CONFIGS);
+            try {
+                return configurableGui.modified(getHolder(), false, RELOAD_CONFIGS);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
         return false;
     }

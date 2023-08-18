@@ -32,8 +32,7 @@ import com.intellij.util.ui.FormBuilder;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -50,11 +49,11 @@ public class ConfigurableGui<T> {
     private final JPanel thePanel;
 
     private final Map<String, ConfigurableAccessor<?>> guiProps;
-    private final Map<String, VarHandle> configProps;
+    private final Map<String, Field> configProps;
     private final Set<String> props;
     private ConfigurableGui(JPanel thePanel,
                             Map<String, ConfigurableAccessor<?>> guiProps,
-                            Map<String, VarHandle> configProps,
+                            Map<String, Field> configProps,
                             Set<String> props) {
         this.thePanel = thePanel;
         this.guiProps = guiProps;
@@ -66,11 +65,11 @@ public class ConfigurableGui<T> {
         return thePanel;
     }
 
-    public boolean modified(T holder) {
+    public boolean modified(T holder) throws IllegalAccessException {
         return modified(holder, false, null);
     }
 
-    public boolean modified(T holder, boolean exclude, Set<String> mask) {
+    public boolean modified(T holder, boolean exclude, Set<String> mask) throws IllegalAccessException {
         for (var prop: props) {
             if (mask != null && mask.contains(prop) == exclude) {
                 continue;
@@ -82,26 +81,26 @@ public class ConfigurableGui<T> {
         return false;
     }
 
-    public void guiToConfig(T holder) {
+    public void guiToConfig(T holder) throws IllegalAccessException {
         for (var prop: props) {
             configProps.get(prop).set(holder, guiProps.get(prop).get());
         }
     }
 
-    public void configToGui(T holder) {
+    public void configToGui(T holder) throws IllegalAccessException {
         for (var prop: props) {
             guiProps.get(prop).set(configProps.get(prop).get(holder));
         }
     }
 
-    public static <T> Supplier<ConfigurableGui<T>> create(MethodHandles.Lookup lookup, Class<T> dataContainer)
+    public static <T> Supplier<ConfigurableGui<T>> create(Class<T> dataContainer)
             throws IllegalAccessException {
         var fields = Arrays.stream(dataContainer.getFields())
                 .filter(field -> field.isAnnotationPresent(Config.class))
                 .filter(field -> field.isAnnotationPresent(Label.class))
                 .sorted(Comparator.comparingInt(field -> field.getAnnotation(Config.class).value()))
                 .toList();
-        var configProps = new HashMap<String, VarHandle>();
+        var configProps = new HashMap<String, Field>();
         var props = new HashSet<String>();
         var steps = new ArrayList<BiConsumer<HashMap<String, ConfigurableAccessor<?>>, FormBuilder>>();
         for (var field: fields) {
@@ -156,7 +155,7 @@ public class ConfigurableGui<T> {
             }
             if (component != null) {
                 props.add(propName);
-                configProps.put(propName, lookup.unreflectVarHandle(field));
+                configProps.put(propName, field);
             }
             steps.add((gp, fb) -> {
                 var comp = component == null ? null : component.apply(gp);
@@ -174,9 +173,6 @@ public class ConfigurableGui<T> {
             var fb = FormBuilder.createFormBuilder();
             for (var step: steps) {
                 step.accept(gp, fb);
-            }
-            for (var prop: props) {
-
             }
             return new ConfigurableGui<>(fb.getPanel(), gp, configProps, props);
         };

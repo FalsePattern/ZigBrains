@@ -22,7 +22,6 @@ import com.intellij.openapi.util.NlsContexts;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JComponent;
-import java.lang.invoke.MethodHandles;
 import java.util.function.Supplier;
 
 public abstract class AbstractConfigurable<T> implements Configurable {
@@ -30,10 +29,10 @@ public abstract class AbstractConfigurable<T> implements Configurable {
     private final Supplier<ConfigurableGui<T>> guiSupplier;
     protected ConfigurableGui<T> configurableGui;
 
-    public AbstractConfigurable(MethodHandles.Lookup lookup, String displayName, Class<T> holderClass)
+    public AbstractConfigurable(String displayName, Class<T> holderClass)
             throws IllegalAccessException {
         this.displayName = displayName;
-        guiSupplier = ConfigurableGui.create(lookup, holderClass);
+        guiSupplier = ConfigurableGui.create(holderClass);
     }
 
     protected abstract T getHolder();
@@ -51,17 +50,29 @@ public abstract class AbstractConfigurable<T> implements Configurable {
 
     @Override
     public boolean isModified() {
-        return configurableGui.modified(getHolder());
+        try {
+            return configurableGui.modified(getHolder());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        configurableGui.guiToConfig(getHolder());
+        try {
+            configurableGui.guiToConfig(getHolder());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void reset() {
-        configurableGui.configToGui(getHolder());
+        try {
+            configurableGui.configToGui(getHolder());
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
