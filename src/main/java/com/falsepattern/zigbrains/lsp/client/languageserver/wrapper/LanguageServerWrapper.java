@@ -120,6 +120,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus.INITIALIZED;
 import static com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus.STARTED;
@@ -150,6 +151,7 @@ public class LanguageServerWrapper {
     private volatile boolean alreadyShownTimeout = false;
     private volatile boolean alreadyShownCrash = false;
     private volatile ServerStatus status = STOPPED;
+    private final AtomicReference<Thread> shutdownHook = new AtomicReference<>();
     private static final Map<Pair<String, String>, LanguageServerWrapper> uriToLanguageServerWrapper =
             new ConcurrentHashMap<>();
     private static final Map<Project, LanguageServerWrapper> projectToLanguageServerWrapper = new ConcurrentHashMap<>();
@@ -623,6 +625,20 @@ public class LanguageServerWrapper {
     private void setStatus(ServerStatus status) {
         this.status = status;
         getWidget().ifPresent(widget -> widget.setStatus(status));
+        synchronized (shutdownHook) {
+            if ((status == STARTED || status == INITIALIZED) && shutdownHook.get() == null) {
+                shutdownHook.set(new Thread(() -> {
+                    shutdownHook.set(null);
+                    stop(true);
+                }));
+                Runtime.getRuntime().addShutdownHook(shutdownHook.get());
+            } else if (status == STOPPED && shutdownHook.get() != null) {
+                try {
+                    Runtime.getRuntime().removeShutdownHook(shutdownHook.get());
+                } catch (IllegalStateException ignored) {} //Shouldn't happen
+                shutdownHook.set(null);
+            }
+        }
     }
 
     public void crashed(Exception e) {

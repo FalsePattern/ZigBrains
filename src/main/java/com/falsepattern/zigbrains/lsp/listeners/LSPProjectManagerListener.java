@@ -31,15 +31,9 @@ public class LSPProjectManagerListener implements ProjectManagerListener {
 
     @Override
     public void projectClosing(@NotNull Project project) {
-        // Removes all the attached LSP status widgets before closing a project. Otherwise the old status widget will
-        // not be removed when opening a new project in the same project window.
-            Set<LanguageServerWrapper> languageServerWrappers = IntellijLanguageClient.getProjectToLanguageWrappers().get(
-                    FileUtils.projectToUri(project));
-            if (languageServerWrappers == null) {
-                // nothing to do
-                return;
-            }
+            Set<LanguageServerWrapper> languageServerWrappers = IntellijLanguageClient.getAllServerWrappersFor(FileUtils.projectToUri(project));
             languageServerWrappers.forEach(wrapper -> {
+                wrapper.stop(false);
                 wrapper.removeWidget();
                 IntellijLanguageClient.removeWrapper(wrapper);
             });

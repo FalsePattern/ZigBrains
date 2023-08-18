@@ -47,7 +47,7 @@ public class ZLSStartupActivity implements ProjectActivity {
                 for (var wrapper : wrappers) {
                     if (wrapper.serverDefinition.ext.equals("zig")) {
                         wrapper.stop(false);
-                        wrapper.stop(true);
+                        wrapper.removeWidget();
                         IntellijLanguageClient.removeWrapper(wrapper);
                     }
                 }
