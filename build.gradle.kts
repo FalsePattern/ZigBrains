@@ -55,6 +55,9 @@ allprojects {
     }
     dependencies {
         compileOnly("org.jetbrains:annotations:24.0.1")
+
+        compileOnly("org.projectlombok:lombok:1.18.28")
+        annotationProcessor("org.projectlombok:lombok:1.18.28")
     }
     intellij {
         version = baseVersion
@@ -195,6 +198,13 @@ project(":zig") {
     }
 }
 
+project(":project") {
+    dependencies {
+        implementation(project(":common"))
+        implementation(project(":zig"))
+    }
+}
+
 project(":zon") {
     dependencies {
         implementation(project(":common"))
@@ -227,6 +237,7 @@ project(":plugin") {
 
     dependencies {
         implementation(project(":zig"))
+        implementation(project(":project"))
         implementation(project(":zon"))
         implementation(project(":debugger"))
         implementation(project(":"))

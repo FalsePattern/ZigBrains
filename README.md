@@ -11,6 +11,17 @@ After importing the gradle project, you need to run the `build setup -> generate
 In addition to the generated sources, you also need to run the `build setup -> nixos_jbr` task, otherwise java will
 complain about missing files
 
+## Special Thanks
+
+- [HTGAzureX1212](https://github.com/HTGAzureX1212) for developing [intellij-zig](https://github.com/intellij-zig/intellij-zig),
+which served as a fantastic reference for deep IDE integration features
+
+- The members of the `Zig Programming Language` discord server's `#tooling-dev` channel for providing encouragement and
+feedback
+
+- The Ballerina Platform developers for `lsp4intellij`, the language server connector between the IntelliJ platform
+and the Eclipse LSP4J project
+
 # Description
 
 <!-- Plugin description -->
@@ -22,7 +33,7 @@ An LSP-powered language plugin for the Zig Programming Language.
 If you have `zls` available on PATH, ZigBrains will automatically discover it. If not, follow this guide:
 
 1. Download or compile the ZLS language server, available at https://github.com/zigtools/zls
-2. Go to `Settings` -> `Languages & Frameworks` -> `Zig` -> `ZLS path` -> set the path to the `zls` executable you downloaded or compiled
+2. Go to `Settings` -> `Languages & Frameworks` -> `ZLS` -> `ZLS path` -> set the path to the `zls` executable you downloaded or compiled
 3. Open a .zig file, and wait for the circle in the bottom status bar to turn Green (empty).
 See below for an explanation on what the circle means.
 
@@ -38,7 +49,7 @@ LSP server is running.
 
 ## Setting Zig for debugging (CLion)
 
-ZigBrains doesn't have a custom executor for zig (yet), so you will need to manually add it as an external tool:
+ZigBrains doesn't have a custom debug executor for zig (yet), so you will need to manually add it as an external tool:
 
 1. Go to `Run` -> `Edit Configuration` -> `Add new` -> `Custom Build Application`, name it "Zig Build"
 2. Create an empty build target for the Target field
@@ -65,6 +76,7 @@ and it should stop at the breakpoints.
   - Go to implementations / find usages
   - Brace/Parenthesis/Bracket matching
   - Breakpoints (CLion/IDEA Ultimate)
+  - File creation prompt
 - TODO:
   - Workspace Symbols
 
@@ -74,6 +86,10 @@ and it should stop at the breakpoints.
 - Code completion
 - Brace folding
 - Automatic brace and quote pairing
+
+### Toolchain:
+- Basic per-project toolchain management
+- Run configurations (not debuggable, see above)
 
 ## The motivation
 The other existing Zig language plugins for IntelliJ rely a lot on the PSI tree.
@@ -125,8 +141,16 @@ The original code is Copyright WSO2 Inc., licensed under the `Apache 2.0` licens
 <p>
 
 The art assets inside src/art/zig, and all copies of them, are derived from the official Zig Programming Language logo,
-which are property of the Zig Software Foundation. (https://github.com/ziglang/logo).
+which are the property of the Zig Software Foundation.
+(https://github.com/ziglang/logo)
 These art assets are licensed under `Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).`
+
+</p>
+
+<p>
+
+Parts of this codebase are based on the `intellij-zig` plugin,
+developed by [HTGAzureX1212](https://github.com/HTGAzureX1212), licensed under the `Apache 2.0`.
 
 </p>
 

@@ -83,13 +83,11 @@
         <projectConfigurable parentId="language"
                              instance="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable"
                              id="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable"
-                             displayName="Zig"/>
+                             displayName="ZLS"/>
 
         <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
         <notificationGroup displayType="BALLOON"
                            id="ZigBrains.Nag"/>
-
-        <!-- endregion Zig -->
     </extensions>
 
 

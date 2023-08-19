@@ -20,10 +20,14 @@ Changelog structure reference:
 
 ### Added
 
+#### Toolchain
+- Zig compiler toolchain integration and run actions (no debugging support yet, see the readme)
+
 #### Zig
 
 - Inlay hints
 - Breakpoints (CLion/IDEA Ultimate)
+- File creation prompt
 
 #### LSP
 

@@ -1,0 +1,31 @@
+<idea-plugin package="com.falsepattern.zigbrains.project">
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <configurationType implementation="com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfigurationType"/>
+        <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.actions.ZigRunExecutionConfigurationProducer"/>
+
+        <directoryProjectGenerator implementation="com.falsepattern.zigbrains.project.platform.ZigDirectoryProjectGenerator"/>
+        <newProjectWizard.language implementation="com.falsepattern.zigbrains.project.ide.newproject.ZigNewProjectWizard"/>
+
+        <moduleBuilder builderClass="com.falsepattern.zigbrains.project.ide.util.projectwizard.ZigModuleBuilder"/>
+        <projectConfigurable parentId="language"
+                             instance="com.falsepattern.zigbrains.project.ide.project.ZigProjectConfigurable"
+                             id="com.falsepattern.zigbrains.project.ide.project.ZigProjectConfigurable"
+                             displayName="Zig"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <toolchainFlavour implementation="com.falsepattern.zigbrains.project.toolchain.flavours.ZigSystemPathToolchainFlavour"/>
+        <toolchainProvider implementation="com.falsepattern.zigbrains.project.toolchain.LocalZigToolchainProvider"/>
+    </extensions>
+
+    <actions>
+        <action class="com.falsepattern.zigbrains.project.ide.actions.ZigNewFileAction"
+                text="New Zig File"
+                id="NewZigFile">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+        </action>
+    </actions>
+
+</idea-plugin>
