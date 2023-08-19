@@ -331,13 +331,13 @@ project(":plugin") {
         }
 
         signPlugin {
-            certificateChainFile = file("secrets/chain.crt")
-            privateKeyFile = file("secrets/private.pem")
+            certificateChainFile = rootProject.file("secrets/chain.crt")
+            privateKeyFile = rootProject.file("secrets/private.pem")
             password = environment("PRIVATE_KEY_PASSWORD")
         }
 
         verifyPluginSignature {
-            certificateChainFile = file("secrets/chain.crt")
+            certificateChainFile = rootProject.file("secrets/chain.crt")
         }
 
         verifyPlugin {
