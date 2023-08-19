@@ -16,44 +16,53 @@
 
 package com.falsepattern.zigbrains.zig.settings;
 
-import com.falsepattern.zigbrains.settings.annotations.Category;
-import com.falsepattern.zigbrains.settings.annotations.Config;
-import com.falsepattern.zigbrains.settings.annotations.FilePath;
-import com.falsepattern.zigbrains.settings.annotations.Label;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
 
 @Service(Service.Level.PROJECT)
 @State(name = "ZLSSettings",
        storages = @Storage("zigbrains.xml"))
 public final class ZLSSettingsState implements PersistentStateComponent<ZLSSettingsState> {
-    @Category("Regular settings")
-    @Config(0)
-    @Label("ZLS path: ")
-    @FilePath(files = true)
     public String zlsPath = "";
-    @Config(10)
-    @Label("ZLS config path (leave empty to use default): ")
-    @FilePath(files = true)
     public String zlsConfigPath = "";
-    @Config(20)
-    @Label("Increase timeouts")
+    public boolean initialAutodetectHasBeenDone = false;
     public boolean increaseTimeouts = false;
-    @Config(30)
-    @Label("Asynchronous code folding ranges: ")
     public boolean asyncFolding = true;
-    @Category("Developer settings (only usable when the IDE was launched with the runIDE gradle task in ZigBrains!)")
-    @Config(40)
-    @Label("ZLS debug log: ")
     public boolean debug = false;
-    @Config(50)
-    @Label("ZLS message trace: ")
     public boolean messageTrace = false;
+
+    public static Optional<String> executablePathFinder(String exe) {
+        var exeName = SystemInfo.isWindows ? exe + ".exe" : exe;
+        var PATH = System.getenv("PATH").split(File.pathSeparator);
+        for (var dir: PATH) {
+            var path = Path.of(dir);
+            try {
+                path = path.toAbsolutePath();
+            } catch (Exception ignored) {
+                continue;
+            }
+            if (!Files.exists(path) || !Files.isDirectory(path)) {
+                continue;
+            }
+            var exePath = path.resolve(exeName).toAbsolutePath();
+            if (!Files.isRegularFile(exePath) || !Files.isExecutable(exePath)) {
+                continue;
+            }
+            return Optional.of(exePath.toString());
+        }
+        return Optional.empty();
+    }
 
     public static ZLSSettingsState getInstance(Project project) {
         return project.getService(ZLSSettingsState.class);

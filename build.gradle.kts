@@ -172,7 +172,6 @@ project(":zig") {
     dependencies {
         implementation(project(":lsp"))
         implementation(project(":common"))
-        implementation(project(":settings"))
     }
     tasks {
         generateLexer {

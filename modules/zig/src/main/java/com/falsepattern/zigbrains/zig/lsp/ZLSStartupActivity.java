@@ -136,8 +136,17 @@ public class ZLSStartupActivity implements ProjectActivity {
     @Nullable
     @Override
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
-        var path = ZLSSettingsState.getInstance(project).zlsPath;
-        if ("".equals(path)) {
+        var settings = ZLSSettingsState.getInstance(project);
+        var zlsPath = settings.zlsPath;
+
+        if (zlsPath.isEmpty() && !settings.initialAutodetectHasBeenDone) {
+            settings.initialAutodetectHasBeenDone = true;
+            var thePath = ZLSSettingsState.executablePathFinder("zls");
+            if (thePath.isPresent()) {
+                zlsPath = settings.zlsPath = thePath.get();
+            }
+        }
+        if ("".equals(zlsPath)) {
             Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No ZLS binary",
                                                       "Please configure the path to the zls executable in the Zig language configuration menu!",
                                                       NotificationType.INFORMATION));

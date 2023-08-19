@@ -16,46 +16,80 @@
 
 package com.falsepattern.zigbrains.zig.settings;
 
-import com.falsepattern.zigbrains.settings.AbstractConfigurable;
 import com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity;
-import com.intellij.openapi.options.ConfigurationException;
+import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import javax.swing.JComponent;
 
-public class ZLSSettingsConfigurable extends AbstractConfigurable<ZLSSettingsState> {
-    private static final Set<String> RELOAD_CONFIGS = Set.of("zlsPath", "zlsConfigPath", "increaseTimeouts", "debug", "messageTrace");
+public class ZLSSettingsConfigurable implements Configurable {
+    private ZLSSettingsComponent appSettingsComponent;
 
     private final Project project;
 
-    public ZLSSettingsConfigurable(@NotNull Project project) throws IllegalAccessException {
-        super("Zig", ZLSSettingsState.class);
+    public ZLSSettingsConfigurable(@NotNull Project project) {
         this.project = project;
     }
 
     @Override
-    public void apply() throws ConfigurationException {
-        boolean reloadZLS = zlsSettingsModified();
-        super.apply();
+    public String getDisplayName() {
+        return "Zig";
+    }
+
+    @Override
+    public @Nullable JComponent createComponent() {
+        appSettingsComponent = new ZLSSettingsComponent();
+        return appSettingsComponent.getPanel();
+    }
+
+    @Override
+    public boolean isModified() {
+        var settings = ZLSSettingsState.getInstance(project);
+        boolean modified = zlsSettingsModified(settings);
+        modified |= settings.asyncFolding != appSettingsComponent.getAsyncFolding();
+        return modified;
+    }
+
+    private boolean zlsSettingsModified(ZLSSettingsState settings) {
+        boolean modified = !settings.zlsPath.equals(appSettingsComponent.getZLSPath());
+        modified |= !settings.zlsConfigPath.equals(appSettingsComponent.getZLSConfigPath());
+        modified |= settings.debug != appSettingsComponent.getDebug();
+        modified |= settings.messageTrace != appSettingsComponent.getMessageTrace();
+        modified |= settings.increaseTimeouts != appSettingsComponent.getIncreaseTimeouts();
+        return modified;
+    }
+
+    @Override
+    public void apply() {
+        var settings = ZLSSettingsState.getInstance(project);
+        boolean reloadZLS = zlsSettingsModified(settings);
+        settings.zlsPath = appSettingsComponent.getZLSPath();
+        settings.zlsConfigPath = appSettingsComponent.getZLSConfigPath();
+        settings.asyncFolding = appSettingsComponent.getAsyncFolding();
+        settings.debug = appSettingsComponent.getDebug();
+        settings.messageTrace = appSettingsComponent.getMessageTrace();
+        settings.increaseTimeouts = appSettingsComponent.getIncreaseTimeouts();
         if (reloadZLS) {
             ZLSStartupActivity.initZLS(project);
         }
     }
 
-    private boolean zlsSettingsModified() {
-        if (configurableGui != null) {
-            try {
-                return configurableGui.modified(getHolder(), false, RELOAD_CONFIGS);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return false;
+    @Override
+    public void reset() {
+        var settings = ZLSSettingsState.getInstance(project);
+        appSettingsComponent.setZLSPath(settings.zlsPath);
+        appSettingsComponent.setZLSConfigPath(settings.zlsConfigPath);
+        appSettingsComponent.setDebug(settings.debug);
+        appSettingsComponent.setAsyncFolding(settings.asyncFolding);
+        appSettingsComponent.setMessageTrace(settings.messageTrace);
+        appSettingsComponent.setIncreaseTimeouts(settings.increaseTimeouts);
+        appSettingsComponent.setAsyncFolding(settings.asyncFolding);
     }
 
     @Override
-    protected ZLSSettingsState getHolder() {
-        return ZLSSettingsState.getInstance(project);
+    public void disposeUIResources() {
+        appSettingsComponent = null;
     }
 }

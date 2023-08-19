@@ -25,6 +25,11 @@ Changelog structure reference:
 - Inlay hints
 - Breakpoints (CLion/IDEA Ultimate)
 
+#### LSP
+
+- ZLS is now auto-detected on project startup from PATH
+  - (You can also manually auto-detect it in the config menu)
+
 ### Changed
 
 #### Accessibility
