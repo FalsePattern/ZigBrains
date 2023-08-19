@@ -62,6 +62,7 @@ allprojects {
     intellij {
         version = baseVersion
         updateSinceUntilBuild = true
+        instrumentCode = false
     }
     sourceSets {
         main {

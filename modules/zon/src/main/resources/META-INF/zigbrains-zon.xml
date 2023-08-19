@@ -1,6 +1,4 @@
 <idea-plugin package="com.falsepattern.zigbrains.zon">
-    <depends>com.intellij.modules.platform</depends>
-
     <extensions defaultExtensionNs="com.intellij">
         <!-- region Zon -->
         <fileType name="ZON File"

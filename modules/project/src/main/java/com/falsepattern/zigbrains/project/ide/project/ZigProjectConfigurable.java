@@ -20,6 +20,7 @@ import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsS
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.NlsContexts;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
@@ -79,5 +80,11 @@ public class ZigProjectConfigurable implements Configurable {
                 zigSettings.getExplicitPathToStd(),
                 zigSettings.getToolchain()
         ));
+    }
+
+    @Override
+    public void disposeUIResources() {
+        Disposer.dispose(settingsPanel);
+        settingsPanel = null;
     }
 }

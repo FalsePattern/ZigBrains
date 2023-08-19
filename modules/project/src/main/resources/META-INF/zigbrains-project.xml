@@ -1,6 +1,4 @@
 <idea-plugin package="com.falsepattern.zigbrains.project">
-    <depends>com.intellij.modules.platform</depends>
-
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfigurationType"/>
         <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.actions.ZigRunExecutionConfigurationProducer"/>

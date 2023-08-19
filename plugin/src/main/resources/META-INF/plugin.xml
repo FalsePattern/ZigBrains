@@ -4,6 +4,8 @@
     <name>ZigBrains</name>
     <vendor>FalsePattern</vendor>
 
+    <depends>com.intellij.modules.platform</depends>
+
     <xi:include href="/META-INF/zigbrains-zig.xml"/>
     <xi:include href="/META-INF/zigbrains-zon.xml"/>
     <xi:include href="/META-INF/zigbrains-project.xml"/>

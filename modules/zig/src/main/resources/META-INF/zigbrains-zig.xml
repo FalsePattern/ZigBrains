@@ -1,6 +1,4 @@
 <idea-plugin package="com.falsepattern.zigbrains.zig">
-    <depends>com.intellij.modules.platform</depends>
-
     <resource-bundle>zigbrains.zig.Bundle</resource-bundle>
     <extensions defaultExtensionNs="com.intellij">
         <!-- region LSP -->
