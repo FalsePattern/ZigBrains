@@ -22,38 +22,30 @@ Changelog structure reference:
 
 ### Added
 
-#### Toolchain
-- Zig compiler toolchain integration and run actions (no debugging support yet, see the readme)
-
-#### Zig
-
-- Inlay hints
-- Breakpoints (CLion/IDEA Ultimate)
-- File creation prompt
-
-#### LSP
-
-- ZLS is now auto-detected on project startup from PATH
-  - (You can also manually auto-detect it in the config menu)
+- Toolchain
+  - Zig compiler toolchain integration and run actions (no debugging support yet, see the readme)
+- Zig
+  - Inlay hints
+  - Breakpoints (CLion/IDEA Ultimate)
+  - File creation prompt
+- LSP
+  - ZLS is now auto-detected on project startup from PATH
+    - (You can also manually auto-detect it in the config menu)
 
 ### Changed
 
-#### Accessibility
-
-- The LSP status icon now has symbols in it instead of just colors:
-  - Stopped(Red): X
-  - Starting(Yellow): Refresh arrow
-  - Started(Green): Empty
+- Accessibility
+  - The LSP status icon now has symbols in it instead of just colors:
+    - Stopped(Red): X
+    - Starting(Yellow): Refresh arrow
+    - Started(Green): Empty
 
 ### Fixed
 
-#### LSP
-
-- NullPointerException in folding range provider when closing editors quickly
-
-#### Config
-
-- Changes to the ZLS configuration no longer require an IDE restart
+- LSP
+  - NullPointerException in folding range provider when closing editors quickly
+- Config
+  - Changes to the ZLS configuration no longer require an IDE restart
 
 ## [0.6.0]
 
