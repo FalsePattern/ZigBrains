@@ -18,6 +18,16 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Toolchain
+  - Debugging Support
+
+### Fixed
+
+- Toolchain
+  - Zig run configurations now save properly
+
 ## [0.7.0]
 
 ### Added

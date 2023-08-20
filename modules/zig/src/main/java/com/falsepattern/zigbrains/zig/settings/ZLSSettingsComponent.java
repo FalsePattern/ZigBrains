@@ -16,11 +16,9 @@
 
 package com.falsepattern.zigbrains.zig.settings;
 
-import G.B.B.G.P;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
-import com.intellij.openapi.util.SystemInfo;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
@@ -28,12 +26,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Optional;
 
 public class ZLSSettingsComponent {
     private final JPanel myMainPanel;

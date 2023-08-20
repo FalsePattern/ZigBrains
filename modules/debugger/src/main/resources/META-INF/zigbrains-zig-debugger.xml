@@ -1,7 +1,14 @@
 <idea-plugin package="com.falsepattern.zigbrains.zig.debugger">
     <depends>com.intellij.modules.cidr.debugger</depends>
 
+    <extensions defaultExtensionNs="com.intellij">
+        <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.ZigDebugRunner"
+                       id="ZigDebugRunner"/>
+    </extensions>
+
     <extensions defaultExtensionNs="cidr.debugger">
+        <languageSupport language="Zig" implementationClass="com.falsepattern.zigbrains.zig.debugger.ZigDebuggerLanguageSupport"/>
+        <editorsExtension language="Zig" implementationClass="com.falsepattern.zigbrains.zig.debugger.ZigDebuggerEditorsExtension"/>
         <lineBreakpointFileTypesProvider implementation="com.falsepattern.zigbrains.zig.debugger.ZigLineBreakpointFileTypesProvider"/>
     </extensions>
 </idea-plugin>

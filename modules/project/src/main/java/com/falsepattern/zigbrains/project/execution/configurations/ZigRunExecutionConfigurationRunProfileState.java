@@ -17,46 +17,61 @@
 package com.falsepattern.zigbrains.project.execution.configurations;
 
 import com.falsepattern.zigbrains.project.execution.ZigCapturingProcessHandler;
+import com.falsepattern.zigbrains.project.runconfig.ZigProcessHandler;
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.util.ProjectUtil;
+import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.ExecutionResult;
-import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.CommandLineState;
 import com.intellij.execution.configurations.GeneralCommandLine;
-import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.process.ProcessHandler;
+import com.intellij.execution.process.ProcessTerminatedListener;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.execution.runners.ProgramRunner;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
-public record ZigRunExecutionConfigurationRunProfileState(ExecutionEnvironment environment, ZigRunExecutionConfiguration configuration)
-        implements RunProfileState {
-    @Override
-    public @NotNull ExecutionResult execute(Executor executor, @NotNull ProgramRunner<?> runner)
-            throws ExecutionException {
-        val state = new CommandLineState(environment) {
+public final class ZigRunExecutionConfigurationRunProfileState extends CommandLineState {
+    private final ZigRunExecutionConfiguration configuration;
 
-            @Override
-            protected @NotNull ProcessHandler startProcess() throws ExecutionException {
-                val workingDirectory = configuration.workingDirectory;
-                val zigExecutablePath = Objects.requireNonNull(ProjectUtil.getToolchain(environment.getProject()))
-                                               .pathToExecutable("zig");
-
-                val commandLine = new GeneralCommandLine()
-                        .withExePath(zigExecutablePath.toString())
-                        .withWorkDirectory(workingDirectory.toString())
-                        .withCharset(StandardCharsets.UTF_8)
-                        .withRedirectErrorStream(true)
-                        .withParameters(configuration.command.split(" "));
-
-                return new ZigCapturingProcessHandler(commandLine);
-            }
-        };
-
-        return state.execute(executor, runner);
+    public ZigRunExecutionConfigurationRunProfileState(ExecutionEnvironment environment, ZigRunExecutionConfiguration configuration) {
+        super(environment);
+        this.configuration = configuration;
     }
+
+    @Override
+    protected @NotNull ProcessHandler startProcess() throws ExecutionException {
+        return new ZigCapturingProcessHandler(getCommandLine(ProjectUtil.getToolchain(getEnvironment().getProject())));
+    }
+
+    public GeneralCommandLine getCommandLine(AbstractZigToolchain toolchain) {
+        val workingDirectory = configuration.workingDirectory;
+        val zigExecutablePath = toolchain.pathToExecutable("zig");
+
+        return new GeneralCommandLine().withExePath(zigExecutablePath.toString())
+                                       .withWorkDirectory(workingDirectory.toString())
+                                       .withCharset(StandardCharsets.UTF_8)
+                                       .withRedirectErrorStream(true)
+                                       .withParameters(configuration.command.split(" "));
+    }
+
+    public ZigRunExecutionConfiguration configuration() {
+        return configuration;
+    }
+
+    public DefaultExecutionResult executeCommandLine(GeneralCommandLine commandLine,
+                                                     ExecutionEnvironment environment) throws ExecutionException {
+        val handler = startProcess(commandLine);
+        val console = getConsoleBuilder().getConsole();
+        console.attachToProcess(handler);
+        return new DefaultExecutionResult(console, handler);
+    }
+
+    public static ProcessHandler startProcess(GeneralCommandLine commandLine) throws ExecutionException {
+        val handler = new ZigProcessHandler(commandLine);
+        ProcessTerminatedListener.attach(handler);
+        return handler;
+    }
+
 }

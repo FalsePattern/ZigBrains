@@ -154,6 +154,7 @@ project(":") {
 project(":debugger") {
     dependencies {
         implementation(project(":zig"))
+        implementation(project(":project"))
     }
     intellij {
         version = clionVersion

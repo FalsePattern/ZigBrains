@@ -25,7 +25,13 @@ and the Eclipse LSP4J project
 # Description
 
 <!-- Plugin description -->
-An LSP-powered language plugin for the Zig Programming Language.
+A multifunctional Zig Programming Language plugin for the IDEA platform.
+
+Core features:
+- Uses ZLS (Zig Language Server) for code assistance, syntax highlighting, and anything to do with smart coding
+- Supports build.zig.zon files with autocomplete
+- Per-project Zig toolchain integration
+- Debugging support for CLion (builtin), and IDEA Ultimate [With this plugin](https://plugins.jetbrains.com/plugin/12775-native-debugging-support)
 
 
 ## Setting up the language server
@@ -47,19 +53,9 @@ LSP server is starting, please be patient.
 Green (empty):
 LSP server is running.
 
-## Setting Zig for debugging (CLion)
+## Debugging
 
-ZigBrains doesn't have a custom debug executor for zig (yet), so you will need to manually add it as an external tool:
-
-1. Go to `Run` -> `Edit Configuration` -> `Add new` -> `Custom Build Application`, name it "Zig Build"
-2. Create an empty build target for the Target field
-3. Set the Executable to your zig compiler executable
-4. Set the program arguments to `run <your main.zig file>`
-5. Set the working directory to `$ProjectFileDir$`
-6. Remove the build stage from the Before launch task list
-
-To see if this works, create a few breakpoints in your main.zig file, and then run this new run configuration as debug,
-and it should stop at the breakpoints.
+Currently, the debugger only works with the bundled LLDB debugger, so make sure you have that.
 
 ## Feature tracker:
 
@@ -89,7 +85,8 @@ and it should stop at the breakpoints.
 
 ### Toolchain:
 - Basic per-project toolchain management
-- Run configurations (not debuggable, see above)
+- Run configurations
+- Debugging (CLion/IDEA Ultimate)
 
 ## The motivation
 The other existing Zig language plugins for IntelliJ rely a lot on the PSI tree.
