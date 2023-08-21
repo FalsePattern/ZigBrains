@@ -190,7 +190,7 @@ FnProto ::= KEYWORD_FN IDENTIFIER? LPAREN ParamDeclList RPAREN ByteAlign? AddrSp
 VarDecl ::= (KEYWORD_CONST | KEYWORD_VAR) IDENTIFIER (COLON TypeExpr)? ByteAlign? AddrSpace? LinkSection? (EQUAL Expr)? SEMICOLON
 
 ContainerField
-::= DOC_COMMENT? KEYWORD_COMPTIME? IDENTIFIER (COLON TypeExpr)? ByteAlign? (EQUAL Expr)?
+::= DOC_COMMENT? KEYWORD_COMPTIME? IDENTIFIER (COLON (KEYWORD_ANYTYPE | TypeExpr) ByteAlign?)? (EQUAL Expr)?
   | DOC_COMMENT? KEYWORD_COMPTIME? (IDENTIFIER COLON)? !KEYWORD_FN TypeExpr ByteAlign? (EQUAL Expr)?
 
 // *** Block Level ***
@@ -369,14 +369,17 @@ IfPrefix ::= KEYWORD_IF LPAREN Expr RPAREN PtrPayload?
 
 WhilePrefix ::= KEYWORD_WHILE LPAREN Expr RPAREN PtrPayload? WhileContinueExpr?
 
-ForPrefix ::= KEYWORD_FOR LPAREN Expr RPAREN PtrIndexPayload
+ForRange ::= Expr DOT2 Expr?
+ForOperand ::= ForRange | Expr
+
+ForPrefix ::= KEYWORD_FOR LPAREN (ForOperand COMMA)* ForOperand RPAREN PtrIndexPayload
 
 // Payloads
 Payload ::= PIPE IDENTIFIER PIPE
 
 PtrPayload ::= PIPE ASTERISK? IDENTIFIER PIPE
 
-PtrIndexPayload ::= PIPE ASTERISK? IDENTIFIER (COMMA IDENTIFIER)? PIPE
+PtrIndexPayload ::= PIPE (ASTERISK? IDENTIFIER COMMA)* (ASTERISK? IDENTIFIER) PIPE
 
 // Switch specific
 SwitchProng ::= KEYWORD_INLINE? SwitchCase EQUALRARROW PtrIndexPayload? AssignExpr
