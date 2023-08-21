@@ -28,10 +28,11 @@ and the Eclipse LSP4J project
 A multifunctional Zig Programming Language plugin for the IDEA platform.
 
 Core features:
-- Uses ZLS (Zig Language Server) for code assistance, syntax highlighting, and anything to do with smart coding
+- Uses ZLS (Zig Language Server) for code assistance, syntax highlighting, and anything to do with coding assistance
 - Supports build.zig.zon files with autocomplete
 - Per-project Zig toolchain integration
 - Debugging support for CLion (builtin), and IDEA Ultimate [With this plugin](https://plugins.jetbrains.com/plugin/12775-native-debugging-support)
+- Gutter icon for running main(), tests, and build
 
 
 ## Setting up the language server
@@ -60,19 +61,20 @@ Currently, the debugger only works with the bundled LLDB debugger, so make sure 
 ## Feature tracker:
 
 ### .zig files:
-- Working:
-  - Code completion
-  - Code folding
-  - Syntax highlighting
-  - Inlay hints
-  - Basic error diagnostics
-  - Go to definition
-  - Rename symbol
-  - Hover documentation
-  - Go to implementations / find usages
-  - Brace/Parenthesis/Bracket matching
-  - Breakpoints (CLion/IDEA Ultimate)
-  - File creation prompt
+- Code completion
+- Code folding
+- Syntax highlighting
+- Inlay hints
+- Basic error diagnostics
+- Go to definition
+- Rename symbol
+- Hover documentation
+- Go to implementations / find usages
+- Brace/Parenthesis/Bracket matching
+- Breakpoints (CLion/IDEA Ultimate)
+- File creation prompt
+- Gutter launch buttons
+
 - TODO:
   - Workspace Symbols
 

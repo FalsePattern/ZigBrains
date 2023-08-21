@@ -23,6 +23,12 @@ Changelog structure reference:
 - Toolchain
   - Debugging Support
 
+- Editor
+  - Gutter icons for:
+    - Launching a file with a `main` top level function
+    - Launching a file with tests in it
+    - Running `zig build` from a build.zig file
+
 ### Fixed
 
 - Toolchain

@@ -11,6 +11,12 @@
                              instance="com.falsepattern.zigbrains.project.ide.project.ZigProjectConfigurable"
                              id="com.falsepattern.zigbrains.project.ide.project.ZigProjectConfigurable"
                              displayName="Zig"/>
+
+        <runLineMarkerContributor language="Zig"
+                                  implementationClass="com.falsepattern.zigbrains.project.execution.linemarker.ZigAggregateLineMarkerContributor"/>
+
+        <programRunner implementation="com.falsepattern.zigbrains.project.runconfig.ZigRegularRunner"
+                       id="ZigDebugRunner"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
