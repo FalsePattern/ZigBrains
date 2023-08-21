@@ -17,11 +17,11 @@
 package com.falsepattern.zigbrains.project.execution.configurations.ui;
 
 import com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfiguration;
+import com.falsepattern.zigbrains.project.ui.ZigCommandLinePanel;
 import com.intellij.ui.dsl.builder.AlignX;
 import com.intellij.ui.dsl.builder.AlignY;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import com.falsepattern.zigbrains.project.ui.ZigCommandLinePanel;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;

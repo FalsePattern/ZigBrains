@@ -15,13 +15,13 @@
  */
 package com.falsepattern.zigbrains.lsp.client.languageserver.wrapper;
 
+import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.ServerListener;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.jsonrpc.MessageConsumer;
 import org.eclipse.lsp4j.jsonrpc.messages.Message;
 import org.eclipse.lsp4j.jsonrpc.messages.ResponseMessage;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.jetbrains.annotations.NotNull;
-import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.ServerListener;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;

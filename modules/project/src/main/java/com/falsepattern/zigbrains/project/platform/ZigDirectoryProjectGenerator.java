@@ -16,10 +16,10 @@
 
 package com.falsepattern.zigbrains.project.platform;
 
-import com.falsepattern.zigbrains.zig.Icons;
 import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectConfigurationData;
 import com.falsepattern.zigbrains.project.ide.util.projectwizard.ZigProjectSettingsStep;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
+import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.facet.ui.ValidationResult;
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep;
 import com.intellij.ide.util.projectWizard.CustomStepProjectGenerator;

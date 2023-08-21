@@ -16,14 +16,25 @@
 package com.falsepattern.zigbrains.lsp.contributors.symbol;
 
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
 import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
+import com.falsepattern.zigbrains.lsp.contributors.icon.LSPIconProvider;
+import com.falsepattern.zigbrains.lsp.contributors.label.LSPLabelProvider;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.GUIUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.SymbolTag;
+import org.eclipse.lsp4j.WorkspaceSymbol;
+import org.eclipse.lsp4j.WorkspaceSymbolParams;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -34,13 +45,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.intellij.openapi.vfs.VirtualFile;
-import org.eclipse.lsp4j.*;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
-import com.falsepattern.zigbrains.lsp.contributors.icon.LSPIconProvider;
-import com.falsepattern.zigbrains.lsp.contributors.label.LSPLabelProvider;
 
 /**
  * The workspace symbole provider implementation based on LSP

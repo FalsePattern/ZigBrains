@@ -16,19 +16,19 @@
 package com.falsepattern.zigbrains.lsp.editor;
 
 import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
-import com.intellij.openapi.editor.Editor;
-import org.eclipse.lsp4j.Diagnostic;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.OSUtils;
+import com.intellij.openapi.editor.Editor;
+import org.eclipse.lsp4j.Diagnostic;
 
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 

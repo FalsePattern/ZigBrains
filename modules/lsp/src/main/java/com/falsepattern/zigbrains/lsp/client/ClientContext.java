@@ -15,11 +15,11 @@
  */
 package com.falsepattern.zigbrains.lsp.client;
 
+import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
 
 /**
  * The client context which is received by {@link DefaultLanguageClient}. The context contain

@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.zig.util;
 
-import com.falsepattern.zigbrains.zig.psi.ZigFnProto;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;

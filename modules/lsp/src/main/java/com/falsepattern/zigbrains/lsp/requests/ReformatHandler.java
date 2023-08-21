@@ -15,9 +15,9 @@
  */
 package com.falsepattern.zigbrains.lsp.requests;
 
-import com.intellij.openapi.editor.Editor;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
+import com.intellij.openapi.editor.Editor;
 
 public class ReformatHandler {
 

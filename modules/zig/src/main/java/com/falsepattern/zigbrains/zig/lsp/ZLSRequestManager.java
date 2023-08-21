@@ -16,12 +16,12 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
+import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.DefaultRequestManager;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 import com.falsepattern.zigbrains.zig.util.HighlightingUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
-import org.eclipse.lsp4j.FoldingRange;
-import org.eclipse.lsp4j.FoldingRangeRequestParams;
 import org.eclipse.lsp4j.SemanticTokens;
 import org.eclipse.lsp4j.SemanticTokensDelta;
 import org.eclipse.lsp4j.SemanticTokensDeltaParams;
@@ -32,8 +32,6 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
-import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.DefaultRequestManager;
-import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

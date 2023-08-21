@@ -16,11 +16,6 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.event.DocumentListener;
-import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.services.LanguageClient;
-import org.eclipse.lsp4j.services.LanguageServer;
 import com.falsepattern.zigbrains.lsp.client.ClientContext;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
@@ -29,6 +24,11 @@ import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
 import com.falsepattern.zigbrains.lsp.listeners.EditorMouseListenerImpl;
 import com.falsepattern.zigbrains.lsp.listeners.EditorMouseMotionListenerImpl;
 import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.event.DocumentListener;
+import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 public class ZLSExtensionManager implements LSPExtensionManager {
     @Override

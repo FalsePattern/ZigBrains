@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
+import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.zig.settings.ZLSSettingsState;
 import com.intellij.notification.Notification;
@@ -28,7 +29,6 @@ import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;

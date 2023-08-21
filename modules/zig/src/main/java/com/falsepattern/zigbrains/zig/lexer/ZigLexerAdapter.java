@@ -17,8 +17,6 @@
 package com.falsepattern.zigbrains.zig.lexer;
 
 import com.intellij.lexer.FlexAdapter;
-import com.intellij.lexer.FlexLexer;
-import org.jetbrains.annotations.NotNull;
 
 public class ZigLexerAdapter  extends FlexAdapter {
     public ZigLexerAdapter() {

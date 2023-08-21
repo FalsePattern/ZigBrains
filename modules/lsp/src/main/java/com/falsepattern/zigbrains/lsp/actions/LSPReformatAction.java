@@ -15,6 +15,8 @@
  */
 package com.falsepattern.zigbrains.lsp.actions;
 
+import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.falsepattern.zigbrains.lsp.requests.ReformatHandler;
 import com.intellij.codeInsight.actions.ReformatCodeAction;
 import com.intellij.lang.LanguageFormatting;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -25,8 +27,6 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
-import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
-import com.falsepattern.zigbrains.lsp.requests.ReformatHandler;
 
 /**
  * Action overriding the default reformat action

@@ -15,6 +15,8 @@
  */
 package com.falsepattern.zigbrains.lsp.actions;
 
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.hint.HintManagerImpl;
 import com.intellij.find.FindBundle;
@@ -39,13 +41,12 @@ import com.intellij.usages.UsageInfo2UsageAdapter;
 import com.intellij.usages.UsageTarget;
 import com.intellij.usages.UsageViewManager;
 import com.intellij.usages.UsageViewPresentation;
-import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
-import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 
-import java.awt.*;
+import javax.swing.JLabel;
+import java.awt.Color;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
 
 /**
  * Action for references / see usages (SHIFT+ALT+F7)

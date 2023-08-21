@@ -16,6 +16,12 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
+import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
+import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
+import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.zig.ide.SemaEdit;
 import com.falsepattern.zigbrains.zig.util.TokenDecoder;
 import com.intellij.lang.annotation.Annotation;
@@ -30,12 +36,6 @@ import org.eclipse.lsp4j.SemanticTokensEdit;
 import org.eclipse.lsp4j.SemanticTokensParams;
 import org.eclipse.lsp4j.jsonrpc.JsonRpcException;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
-import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
-import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
-import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
-import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
-import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 
 import java.util.ArrayList;
 import java.util.List;

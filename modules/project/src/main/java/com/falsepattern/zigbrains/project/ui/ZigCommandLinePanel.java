@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.project.ui;
 
-import com.intellij.openapi.util.NlsSafe;
 import com.intellij.ui.TextAccessor;
 import com.intellij.ui.components.JBTextField;
 

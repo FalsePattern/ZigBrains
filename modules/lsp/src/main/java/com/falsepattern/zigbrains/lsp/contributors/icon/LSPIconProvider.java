@@ -15,14 +15,14 @@
  */
 package com.falsepattern.zigbrains.lsp.contributors.icon;
 
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.SymbolKind;
-import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 
+import javax.swing.Icon;
 import java.util.Map;
-import javax.swing.*;
 
 public abstract class LSPIconProvider {
 

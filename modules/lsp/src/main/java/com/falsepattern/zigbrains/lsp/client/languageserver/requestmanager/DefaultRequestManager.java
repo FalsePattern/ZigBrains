@@ -15,6 +15,8 @@
  */
 package com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager;
 
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 import com.intellij.openapi.diagnostic.Logger;
 import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.ApplyWorkspaceEditResponse;
@@ -86,8 +88,6 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
-import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 
 import java.util.Collections;
 import java.util.List;

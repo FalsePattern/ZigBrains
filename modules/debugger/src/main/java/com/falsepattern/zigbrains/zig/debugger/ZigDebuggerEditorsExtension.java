@@ -16,12 +16,7 @@
 
 package com.falsepattern.zigbrains.zig.debugger;
 
-import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiElement;
-import com.intellij.xdebugger.XSourcePosition;
 import com.jetbrains.cidr.execution.debugger.CidrDebuggerEditorsExtensionBase;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class ZigDebuggerEditorsExtension extends CidrDebuggerEditorsExtensionBase {
 }

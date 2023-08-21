@@ -15,11 +15,11 @@
  */
 package com.falsepattern.zigbrains.lsp.listeners;
 
-        import com.intellij.openapi.editor.EditorKind;
-        import com.intellij.openapi.editor.event.EditorFactoryEvent;
-        import com.intellij.openapi.editor.event.EditorFactoryListener;
-        import org.jetbrains.annotations.NotNull;
-        import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.intellij.openapi.editor.EditorKind;
+import com.intellij.openapi.editor.event.EditorFactoryEvent;
+import com.intellij.openapi.editor.event.EditorFactoryListener;
+import org.jetbrains.annotations.NotNull;
 
 public class LSPEditorListener implements EditorFactoryListener {
 

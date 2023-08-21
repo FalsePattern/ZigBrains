@@ -15,6 +15,10 @@
  */
 package com.falsepattern.zigbrains.lsp;
 
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
+import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
+import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
@@ -29,13 +33,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
-import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
-import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
-import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 

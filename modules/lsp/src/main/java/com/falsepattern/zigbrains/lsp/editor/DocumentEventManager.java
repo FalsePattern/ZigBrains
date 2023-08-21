@@ -15,6 +15,10 @@
  */
 package com.falsepattern.zigbrains.lsp.editor;
 
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
+import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
+import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -33,10 +37,6 @@ import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
-import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
-import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
-import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 
 import java.util.Collections;
 import java.util.HashMap;

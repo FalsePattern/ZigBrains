@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.contributors.rename;
 
+import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.requests.WorkspaceEditHandler;
@@ -31,7 +32,6 @@ import com.intellij.refactoring.rename.RenameDialog;
 import com.intellij.refactoring.rename.RenamePsiElementProcessor;
 import com.intellij.usageView.UsageInfo;
 import org.jetbrains.annotations.NotNull;
-import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
 
 import java.util.ArrayList;
 import java.util.Collection;

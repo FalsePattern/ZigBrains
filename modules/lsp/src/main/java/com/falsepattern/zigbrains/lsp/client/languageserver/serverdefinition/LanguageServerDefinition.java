@@ -15,11 +15,11 @@
  */
 package com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition;
 
+import com.falsepattern.zigbrains.lsp.client.connection.StreamConnectionProvider;
 import com.intellij.openapi.diagnostic.Logger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.InitializeParams;
-import com.falsepattern.zigbrains.lsp.client.connection.StreamConnectionProvider;
 
 import java.io.IOException;
 import java.io.InputStream;

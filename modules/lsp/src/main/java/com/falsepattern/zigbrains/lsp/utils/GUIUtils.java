@@ -15,6 +15,13 @@
  */
 package com.falsepattern.zigbrains.lsp.utils;
 
+import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
+import com.falsepattern.zigbrains.lsp.contributors.icon.LSPDefaultIconProvider;
+import com.falsepattern.zigbrains.lsp.contributors.icon.LSPIconProvider;
+import com.falsepattern.zigbrains.lsp.contributors.label.LSPDefaultLabelProvider;
+import com.falsepattern.zigbrains.lsp.contributors.label.LSPLabelProvider;
+import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
 import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.hint.HintManagerImpl;
 import com.intellij.ide.browsers.BrowserLauncher;
@@ -30,18 +37,11 @@ import com.intellij.ui.Hint;
 import com.intellij.ui.LightweightHint;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
-import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
-import com.falsepattern.zigbrains.lsp.contributors.icon.LSPDefaultIconProvider;
-import com.falsepattern.zigbrains.lsp.contributors.icon.LSPIconProvider;
-import com.falsepattern.zigbrains.lsp.contributors.label.LSPDefaultLabelProvider;
-import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
-import com.falsepattern.zigbrains.lsp.contributors.label.LSPLabelProvider;
 
-import javax.swing.*;
+import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.html.HTMLEditorKit;
-import java.awt.*;
+import java.awt.Point;
 import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.Optional;

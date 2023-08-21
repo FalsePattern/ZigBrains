@@ -15,6 +15,12 @@
  */
 package com.falsepattern.zigbrains.lsp.listeners;
 
+import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
+import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -26,12 +32,6 @@ import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.FileEvent;
 import org.jetbrains.annotations.NotNull;
-import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
-import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
-import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
-import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
-import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

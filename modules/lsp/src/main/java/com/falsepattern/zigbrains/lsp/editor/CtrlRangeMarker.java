@@ -15,12 +15,12 @@
  */
 package com.falsepattern.zigbrains.lsp.editor;
 
+import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.markup.RangeHighlighter;
 import org.eclipse.lsp4j.Location;
-import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 
-import java.awt.*;
+import java.awt.Cursor;
 
 public class CtrlRangeMarker {
 

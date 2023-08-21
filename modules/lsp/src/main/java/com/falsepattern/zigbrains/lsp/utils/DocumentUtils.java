@@ -31,9 +31,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableReadAction;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableReadAction;
 
 /**
  * Various methods to convert offsets / logical position / server position

@@ -16,12 +16,12 @@
 
 package com.falsepattern.zigbrains.zig.ide;
 
+import com.falsepattern.zigbrains.lsp.contributors.LSPFoldingRangeProvider;
 import com.falsepattern.zigbrains.zig.settings.ZLSSettingsState;
 import com.intellij.openapi.project.Project;
 import org.eclipse.lsp4j.FoldingRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import com.falsepattern.zigbrains.lsp.contributors.LSPFoldingRangeProvider;
 
 public class ZigFoldingRangeProvider extends LSPFoldingRangeProvider {
     @Override

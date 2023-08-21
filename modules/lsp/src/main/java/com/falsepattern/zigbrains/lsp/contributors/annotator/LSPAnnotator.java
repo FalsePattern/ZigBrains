@@ -16,6 +16,8 @@
 package com.falsepattern.zigbrains.lsp.contributors.annotator;
 
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
@@ -37,8 +39,6 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DiagnosticTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
-import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;

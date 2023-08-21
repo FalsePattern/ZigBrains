@@ -16,6 +16,7 @@
 package com.falsepattern.zigbrains.lsp.contributors.rename;
 
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.intellij.codeInsight.template.impl.TemplateManagerImpl;
@@ -42,7 +43,6 @@ import com.intellij.refactoring.rename.inplace.InplaceRefactoring;
 import com.intellij.refactoring.rename.inplace.MemberInplaceRenameHandler;
 import com.intellij.refactoring.rename.inplace.MemberInplaceRenamer;
 import org.jetbrains.annotations.NotNull;
-import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
 
 import java.lang.ref.WeakReference;
 import java.util.List;

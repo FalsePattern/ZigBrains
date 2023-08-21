@@ -15,6 +15,8 @@
  */
 package com.falsepattern.zigbrains.lsp.utils;
 
+import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -36,8 +38,6 @@ import com.intellij.testFramework.LightVirtualFileBase;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
-import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
 
 import java.io.File;
 import java.net.URI;

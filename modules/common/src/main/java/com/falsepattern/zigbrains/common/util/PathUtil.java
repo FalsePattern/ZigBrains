@@ -17,14 +17,9 @@
 package com.falsepattern.zigbrains.common.util;
 
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.ui.DocumentAdapter;
-import org.jetbrains.annotations.NotNull;
 
-import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.Consumer;
 
 public class PathUtil {
     public static boolean hasExecutable(Path path, String toolName) {

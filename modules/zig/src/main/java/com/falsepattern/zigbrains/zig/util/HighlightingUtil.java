@@ -16,13 +16,13 @@
 
 package com.falsepattern.zigbrains.zig.util;
 
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.zig.lsp.ZLSEditorEventManager;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.util.Key;
-import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;

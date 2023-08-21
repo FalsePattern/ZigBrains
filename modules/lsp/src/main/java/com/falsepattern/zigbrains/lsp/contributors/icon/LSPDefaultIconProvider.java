@@ -15,18 +15,17 @@
  */
 package com.falsepattern.zigbrains.lsp.contributors.icon;
 
+import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
 import com.intellij.icons.AllIcons;
 import com.intellij.icons.AllIcons.Nodes;
 import com.intellij.openapi.util.IconLoader;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.SymbolKind;
-import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.Icon;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LSPDefaultIconProvider extends LSPIconProvider {
 

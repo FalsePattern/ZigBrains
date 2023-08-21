@@ -15,6 +15,12 @@
  */
 package com.falsepattern.zigbrains.lsp.requests;
 
+import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
+import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
+import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.command.UndoConfirmationPolicy;
 import com.intellij.openapi.diagnostic.Logger;
@@ -38,12 +44,6 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
-import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
-import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
-import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
-import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 
 import java.io.File;
 import java.net.MalformedURLException;

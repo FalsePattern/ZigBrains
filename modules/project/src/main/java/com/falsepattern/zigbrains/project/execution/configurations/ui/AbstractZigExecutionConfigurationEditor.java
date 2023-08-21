@@ -17,12 +17,12 @@
 package com.falsepattern.zigbrains.project.execution.configurations.ui;
 
 import com.falsepattern.zigbrains.project.execution.configurations.AbstractZigExecutionConfiguration;
+import com.falsepattern.zigbrains.project.ui.ZigCommandLinePanel;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.ui.LabeledComponent;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import org.jetbrains.annotations.NotNull;
-import com.falsepattern.zigbrains.project.ui.ZigCommandLinePanel;
 
 import java.nio.file.Paths;
 
