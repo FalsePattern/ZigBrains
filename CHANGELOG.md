@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [0.8.0]
+
 ### Added
 
 - Editor
