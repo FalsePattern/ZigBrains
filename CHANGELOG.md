@@ -20,14 +20,16 @@ Changelog structure reference:
 
 ### Added
 
-- Toolchain
-  - Debugging Support
-
 - Editor
+  - Compatibility with 0.11 for loop ranges
   - Gutter icons for:
     - Launching a file with a `main` top level function
     - Launching a file with tests in it
     - Running `zig build` from a build.zig file
+
+- Toolchain
+  - Debugging Support
+
 
 ### Fixed
 
