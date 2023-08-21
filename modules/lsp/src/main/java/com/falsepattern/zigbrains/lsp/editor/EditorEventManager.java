@@ -1569,17 +1569,20 @@ public class EditorEventManager {
                         int endOffset = editor.getDocument().getLineEndOffset(line);
                         TextRange range = new TextRange(startOffset, endOffset);
 
-                        this.anonHolder
-                                .newAnnotation(HighlightSeverity.INFORMATION, codeAction.getTitle())
-                                .range(range)
-                                .withFix(new LSPCodeActionFix(FileUtils.editorToURIString(editor), codeAction))
-                                .create();
+                        try {
+                            this.anonHolder.newAnnotation(HighlightSeverity.INFORMATION, codeAction.getTitle())
+                                           .range(range)
+                                           .withFix(new LSPCodeActionFix(FileUtils.editorToURIString(editor), codeAction))
+                                           .create();
 
-                        SmartList<Annotation> asList = (SmartList<Annotation>) this.anonHolder;
-                        this.annotations.add(asList.get(asList.size() - 1));
+                            SmartList<Annotation> asList = (SmartList<Annotation>) this.anonHolder;
+                            this.annotations.add(asList.get(asList.size() - 1));
 
 
-                        diagnosticSyncRequired = true;
+                            diagnosticSyncRequired = true;
+                        } catch (IllegalArgumentException ignored) {
+                            //TODO Suppressed error, fix this somehow
+                        }
                     }
                 }
             });
