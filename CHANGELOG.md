@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- LSP
+  - Dulled the colors of the status indicator, and added a gray "idle" color when ZLS is disconnected but not due to an error.
+
 ### Fixed
 
 - Documentation

@@ -725,6 +725,8 @@ public class LanguageServerWrapper {
 
         if (connectedEditors.isEmpty()) {
             stop(true);
+
+            getWidget().ifPresent(widget -> widget.setStatus(ServerStatus.NONEXISTENT));
         }
     }
 
@@ -761,6 +763,8 @@ public class LanguageServerWrapper {
         }
         if (connectedEditors.isEmpty()) {
             stop(true);
+
+            getWidget().ifPresent(widget -> widget.setStatus(ServerStatus.NONEXISTENT));
         }
     }
 

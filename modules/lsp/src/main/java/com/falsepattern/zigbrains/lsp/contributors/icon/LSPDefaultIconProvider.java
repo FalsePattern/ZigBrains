@@ -32,6 +32,7 @@ public class LSPDefaultIconProvider extends LSPIconProvider {
     private final static Icon GREEN = IconLoader.getIcon("/images/started.svg", LSPDefaultIconProvider.class);
     private final static Icon YELLOW = IconLoader.getIcon("/images/starting.svg", LSPDefaultIconProvider.class);
     private final static Icon RED = IconLoader.getIcon("/images/stopped.svg", LSPDefaultIconProvider.class);
+    private final static Icon GREY = IconLoader.getIcon("/images/idle.svg", LSPDefaultIconProvider.class);
 
     public Icon getCompletionIcon(CompletionItemKind kind) {
 
@@ -102,6 +103,7 @@ public class LSPDefaultIconProvider extends LSPIconProvider {
 
     public Map<ServerStatus, Icon> getStatusIcons() {
         Map<ServerStatus, Icon> statusIconMap = new HashMap<>();
+        statusIconMap.put(ServerStatus.NONEXISTENT, GREY);
         statusIconMap.put(ServerStatus.STOPPED, RED);
         statusIconMap.put(ServerStatus.STARTING, YELLOW);
         statusIconMap.put(ServerStatus.STARTED, YELLOW);

@@ -19,5 +19,10 @@ package com.falsepattern.zigbrains.lsp.client.languageserver;
  * An enum representing a server status
  */
 public enum ServerStatus {
-    STOPPED, STARTING, STARTED, INITIALIZED, STOPPING
+    NONEXISTENT,
+    STOPPED,
+    STARTING,
+    STARTED,
+    INITIALIZED,
+    STOPPING
 }
