@@ -49,6 +49,9 @@ import java.util.stream.Collectors;
 public class LSPDocumentationTargetProvider implements DocumentationTargetProvider {
     @Override
     public @NotNull List<? extends @NotNull DocumentationTarget> documentationTargets(@NotNull PsiFile file, int offset) {
+        if (!FileUtils.isFileSupported(file.getVirtualFile())) {
+            return Collections.emptyList();
+        }
         return Collections.singletonList(new LSPDocumentationTarget(file, offset));
     }
 

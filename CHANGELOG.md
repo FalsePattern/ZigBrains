@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Documentation
+  - No longer breaks the documentation of other languages
+
 ## [0.8.0]
 
 ### Added
