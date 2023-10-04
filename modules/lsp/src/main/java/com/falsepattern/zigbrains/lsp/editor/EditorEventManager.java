@@ -1087,10 +1087,16 @@ public class EditorEventManager {
             template.addTextSegment(splitInsertText[splitInsertText.length - 1]);
         }
         template.setInline(true);
-        if (variables.size() > 0) {
+        if (!variables.isEmpty()) {
             EditorModificationUtil.moveCaretRelatively(editor, -template.getTemplateText().length());
         }
-        TemplateManager.getInstance(getProject()).startTemplate(editor, template);
+        try {
+            TemplateManager.getInstance(getProject()).startTemplate(editor, template);
+        } catch (IllegalArgumentException e) {
+            if (!e.getMessage().contains("Invalid offsets")) { //Discard exception, data race
+                throw e;
+            }
+        }
     }
 
     private String convertPlaceHolders(String insertText) {
