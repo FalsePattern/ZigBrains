@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [0.8.1]
+
 ### Changed
 
 - LSP
@@ -25,8 +27,18 @@ Changelog structure reference:
 
 ### Fixed
 
+- Actions
+  - Blocking other languages' run tasks
+  - Files not autosaving before actions run
+
 - Documentation
   - No longer breaks the documentation of other languages
+
+- Editor
+  - Race condition causing IllegalArgumentException
+
+- LSP
+  - Occasional NullPointerException when LSP returns blank data for inlay hints
 
 ## [0.8.0]
 
