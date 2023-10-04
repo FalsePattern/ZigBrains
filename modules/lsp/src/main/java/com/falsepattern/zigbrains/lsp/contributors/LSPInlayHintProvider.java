@@ -81,6 +81,9 @@ public class LSPInlayHintProvider implements InlayHintsProvider {
                 var pos = DocumentUtils.LSPPosToOffset(editor, hint.getPosition());
                 var inlayPos = new InlineInlayPosition(pos, false, 0);
                 var tt = hint.getTooltip();
+                if (tt == null) {
+                    continue;
+                }
                 String tooltipText;
                 if (tt.isLeft()) {
                     tooltipText = tt.getLeft();
