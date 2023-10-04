@@ -19,6 +19,7 @@ package com.falsepattern.zigbrains.project.runconfig;
 import com.falsepattern.zigbrains.project.execution.configurations.AbstractZigExecutionConfiguration;
 import com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfigurationRunProfileState;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
+import com.falsepattern.zigbrains.zig.lsp.ZLSEditorEventManager;
 import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -27,6 +28,8 @@ import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.runners.DefaultProgramRunnerKt;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,6 +66,8 @@ public abstract class ZigExecutableRunner extends ZigDefaultProgramRunnerBase {
         if (toolchain == null) {
             return null;
         }
+
+        ApplicationManagerEx.getApplicationEx().saveAll();
 
         val cli = state.getCommandLine(toolchain);
 
