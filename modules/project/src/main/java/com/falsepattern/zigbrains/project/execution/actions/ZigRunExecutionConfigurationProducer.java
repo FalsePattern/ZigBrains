@@ -51,6 +51,9 @@ public class ZigRunExecutionConfigurationProducer extends AbstractZigRunExecutio
         if (psiFile == null) {
             return false;
         }
+        if (!(psiFile instanceof ZigFile)) {
+            return false;
+        }
         var theFile = psiFile.getVirtualFile();
         var filePath = theFile.getPath();
         if (PsiUtil.getElementType(element) == ZigTypes.KEYWORD_TEST) {
