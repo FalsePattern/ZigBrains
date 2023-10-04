@@ -22,6 +22,14 @@ feedback
 - The Ballerina Platform developers for `lsp4intellij`, the language server connector between the IntelliJ platform
 and the Eclipse LSP4J project
 
+- All the people who have generously funded the project
+  - gree7@ko-fi
+
+- Every contributor who helped with bugfixes and extra features
+  - gatesn@github
+
+- And everyone who actively reported issues and helped ironing out all the remaining problems
+
 # Description
 
 <!-- Plugin description -->
