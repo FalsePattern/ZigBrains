@@ -18,6 +18,29 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [0.9.0]
+
+### Added
+
+- Zig
+  - Commenter
+
+- Zon
+  - Can now parse the .paths attribute properly
+
+### Changed
+
+- Maximum compatible IDE version 232.* -> 233.*
+
+### Fixed
+
+- Dev env
+  - nix jbr points to the correct path
+
+- LSP
+  - Crash in huge projects
+
+
 ## [0.8.1]
 
 ### Changed

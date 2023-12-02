@@ -82,6 +82,7 @@ Currently, the debugger only works with the bundled LLDB debugger, so make sure 
 - Breakpoints (CLion/IDEA Ultimate)
 - File creation prompt
 - Gutter launch buttons
+- Commenter (thanks @MarioAriasC !)
 
 - TODO:
   - Workspace Symbols
