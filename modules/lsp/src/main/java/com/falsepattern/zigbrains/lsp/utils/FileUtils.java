@@ -82,12 +82,14 @@ public class FileUtils {
         });
     }
 
-    public static List<Editor> getAllOpenedEditorsForUri(Project project, String uri) {
+    public static List<Editor> getAllOpenedEditorsForUri(@NotNull Project project, String uri) {
         VirtualFile file = virtualFileFromURI(uri);
+        if (file == null)
+            return Collections.emptyList();
         return getAllOpenedEditorsForVirtualFile(project, file);
     }
 
-    public static List<Editor> getAllOpenedEditorsForVirtualFile(Project project, VirtualFile file) {
+    public static List<Editor> getAllOpenedEditorsForVirtualFile(@NotNull Project project, @NotNull VirtualFile file) {
         return computableReadAction(() -> {
             List<Editor> editors = new ArrayList<>();
             FileEditor[] allEditors = FileEditorManager.getInstance(project).getAllEditors(file);
