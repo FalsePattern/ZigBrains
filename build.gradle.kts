@@ -97,13 +97,13 @@ allprojects {
         }
 
         withType<org.jetbrains.intellij.tasks.RunIdeBase> {
-            rootProject.file("jbr/bin/java")
+            rootProject.file("jbr/lib/openjdk/bin/java")
                 .takeIf { it.exists() }
                 ?.let { projectExecutable.set(it.toString()) }
         }
 
         withType<org.jetbrains.intellij.tasks.RunPluginVerifierTask> {
-            rootProject.file("jbr")
+            rootProject.file("jbr/lib/openjdk")
                 .takeIf { it.exists() }
                 ?.let { runtimeDir.set(it.toString()) }
         }
