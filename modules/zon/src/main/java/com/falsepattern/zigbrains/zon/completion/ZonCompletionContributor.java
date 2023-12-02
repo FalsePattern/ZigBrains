@@ -37,14 +37,14 @@ import java.util.Set;
 import static com.falsepattern.zigbrains.common.util.PsiElementUtil.parent;
 
 public class ZonCompletionContributor extends CompletionContributor {
-    private static final List<String> ZON_ROOT_KEYS = List.of("name", "version", "dependencies");
+    private static final List<String> ZON_ROOT_KEYS = List.of("name", "version", "dependencies", "path");
     private static final List<String> ZON_DEP_KEYS = List.of("url", "hash");
 
     public ZonCompletionContributor() {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .withParent(PlatformPatterns.psiElement(ZonTypes.PROPERTY_PLACEHOLDER))
-                               .withSuperParent(3, PlatformPatterns.psiElement(ZonFile.class)),
+                               .withSuperParent(4, PlatformPatterns.psiElement(ZonFile.class)),
                new CompletionProvider<>() {
                    @Override
                    protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
@@ -57,9 +57,9 @@ public class ZonCompletionContributor extends CompletionContributor {
         extend(CompletionType.BASIC,
                PlatformPatterns.psiElement()
                                .withParent(PlatformPatterns.psiElement(ZonTypes.PROPERTY_PLACEHOLDER))
-                               .withSuperParent(3, PlatformPatterns.psiElement(ZonTypes.PROPERTY))
-                               .withSuperParent(5, PlatformPatterns.psiElement(ZonTypes.PROPERTY))
-                               .withSuperParent(7, PlatformPatterns.psiElement(ZonFile.class)),
+                               .withSuperParent(4, PlatformPatterns.psiElement(ZonTypes.PROPERTY))
+                               .withSuperParent(7, PlatformPatterns.psiElement(ZonTypes.PROPERTY))
+                               .withSuperParent(10, PlatformPatterns.psiElement(ZonFile.class)),
                new CompletionProvider<>() {
                    @Override
                    protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {

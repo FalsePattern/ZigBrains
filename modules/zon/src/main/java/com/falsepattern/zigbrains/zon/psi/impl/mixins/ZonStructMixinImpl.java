@@ -19,8 +19,10 @@ package com.falsepattern.zigbrains.zon.psi.impl.mixins;
 import com.falsepattern.zigbrains.zon.psi.ZonStruct;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,8 +33,11 @@ public abstract class ZonStructMixinImpl extends ASTWrapperPsiElement implements
 
     @Override
     public Set<String> getKeys() {
+        val structMap = getStructMap();
+        if (structMap == null)
+            return Collections.emptySet();
         var result = new HashSet<String>();
-        for (var property : getPropertyList()) {
+        for (var property : structMap.getPropertyList()) {
             result.add(property.getIdentifier().getName());
         }
         return result;

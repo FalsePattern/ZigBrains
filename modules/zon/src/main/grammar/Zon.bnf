@@ -50,7 +50,11 @@
 
 zonFile ::= struct
 
-struct ::= DOT LBRACE (property COMMA | property_placeholder COMMA?)* property? RBRACE
+struct ::= DOT LBRACE (struct_string_list | struct_map | ()) RBRACE
+
+struct_map ::= (property | property_placeholder) (COMMA (property | property_placeholder))* COMMA?
+
+struct_string_list ::= STRING_LITERAL (COMMA STRING_LITERAL)* COMMA?
 
 property ::= DOT identifier EQ value
 
