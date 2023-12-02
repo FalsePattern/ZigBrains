@@ -30,6 +30,7 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ex.ApplicationManagerEx;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -67,7 +68,7 @@ public abstract class ZigExecutableRunner extends ZigDefaultProgramRunnerBase {
             return null;
         }
 
-        ApplicationManagerEx.getApplicationEx().saveAll();
+        FileDocumentManager.getInstance().saveAllDocuments();
 
         val cli = state.getCommandLine(toolchain);
 

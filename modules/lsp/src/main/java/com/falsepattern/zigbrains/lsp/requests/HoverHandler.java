@@ -66,7 +66,7 @@ public class HoverHandler {
                         result.add(renderer.render(parser.parse(string)));
                     }
                 }
-                return "<html><style>p {margin: 0; color: " + (UIUtil.isUnderDarcula() ? "rgb(187,187,187)" : "black") + ";</style>" + String.join("\n\n", result) + "</html>";
+                return "<html>" + String.join("\n\n", result) + "</html>";
             } else {
                 return "";
             }
