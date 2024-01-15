@@ -43,7 +43,7 @@ public class ZigBlock extends AbstractBlock {
 
     @Override
     public @Nullable Spacing getSpacing(@Nullable Block block, @NotNull Block block1) {
-        return null;
+        return spacingBuilder.getSpacing(this, block, block1);
     }
 
     @Override
