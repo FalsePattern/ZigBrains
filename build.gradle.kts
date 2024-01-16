@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.gradleIntelliJPlugin) // Gradle IntelliJ Plugin
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.grammarkit)
+    id("org.jetbrains.kotlin.jvm") version "1.9.22"
 }
 
 val grammarKitGenDir = "build/generated/sources/grammarkit/java"
@@ -47,6 +48,7 @@ allprojects {
     apply {
         plugin("org.jetbrains.grammarkit")
         plugin("org.jetbrains.intellij")
+        plugin("org.jetbrains.kotlin.jvm")
     }
     repositories {
         mavenCentral()
