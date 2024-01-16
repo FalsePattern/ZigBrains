@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - Code formatter and code style settings
+
 ## [0.9.0]
 
 ### Added
