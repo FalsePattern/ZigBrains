@@ -17,6 +17,7 @@
 package com.falsepattern.zigbrains.project.ide.newproject;
 
 import com.falsepattern.zigbrains.project.ide.project.ZigProjectSettingsPanel;
+import com.falsepattern.zigbrains.project.ide.project.ZigProjectTemplate;
 
-public record ZigProjectConfigurationData(ZigProjectSettingsPanel.SettingsData settings) {
+public record ZigProjectConfigurationData(ZigProjectSettingsPanel.SettingsData settings, ZigProjectTemplate selectedTemplate) {
 }

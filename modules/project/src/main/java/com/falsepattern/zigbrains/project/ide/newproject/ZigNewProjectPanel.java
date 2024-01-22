@@ -43,7 +43,8 @@ public class ZigNewProjectPanel implements Disposable {
     private final ZigProjectSettingsPanel projectSettingsPanel = new ZigProjectSettingsPanel();
 
     public ZigProjectConfigurationData getData() {
-        return new ZigProjectConfigurationData(projectSettingsPanel.getData());
+        ZigProjectTemplate selectedTemplate = templateList.getSelectedValue();
+        return new ZigProjectConfigurationData(projectSettingsPanel.getData(), selectedTemplate);
     }
 
     private final List<ZigProjectTemplate> defaultTemplates = Arrays.asList(
