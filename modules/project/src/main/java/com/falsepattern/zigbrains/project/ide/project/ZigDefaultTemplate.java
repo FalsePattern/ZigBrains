@@ -19,7 +19,9 @@ package com.falsepattern.zigbrains.project.ide.project;
 import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.openapi.util.NlsContexts;
 
-public sealed class ZigDefaultTemplate extends ZigProjectTemplate {
+import java.util.Map;
+
+public sealed abstract class ZigDefaultTemplate extends ZigProjectTemplate {
     public ZigDefaultTemplate(@NlsContexts.ListItem String name, boolean isBinary) {
         super(name, isBinary, Icons.ZIG);
     }
@@ -29,12 +31,26 @@ public sealed class ZigDefaultTemplate extends ZigProjectTemplate {
         private ZigExecutableTemplate() {
             super("Executable (application)", true);
         }
+
+        @Override
+        public Map<String, String> fileTemplates() {
+            return Map.of("main.zig", "application",
+                          "build.zig", "application",
+                          "build.zig.zon", "shared");
+        }
     }
 
     public static final class ZigLibraryTemplate extends ZigDefaultTemplate {
         public static final ZigLibraryTemplate INSTANCE = new ZigLibraryTemplate();
         private ZigLibraryTemplate() {
             super("Library (static)", true);
+        }
+
+        @Override
+        public Map<String, String> fileTemplates() {
+            return Map.of("root.zig", "static",
+                          "build.zig", "static",
+                          "build.zig.zon", "shared");
         }
     }
 }
