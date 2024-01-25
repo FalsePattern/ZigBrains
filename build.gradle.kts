@@ -12,10 +12,9 @@ fun environment(key: String) = providers.environmentVariable(key)
 plugins {
     id("java") // Java support
     id("java-library")
-    alias(libs.plugins.gradleIntelliJPlugin) // Gradle IntelliJ Plugin
-    alias(libs.plugins.changelog) // Gradle Changelog Plugin
-    alias(libs.plugins.grammarkit)
-    id("org.jetbrains.kotlin.jvm") version "1.9.22"
+    id("org.jetbrains.intellij") version("1.17.0")
+    id("org.jetbrains.changelog") version("2.2.0")
+    id("org.jetbrains.grammarkit") version("2022.3.2.1")
 }
 
 val grammarKitGenDir = "build/generated/sources/grammarkit/java"
@@ -48,7 +47,6 @@ allprojects {
     apply {
         plugin("org.jetbrains.grammarkit")
         plugin("org.jetbrains.intellij")
-        plugin("org.jetbrains.kotlin.jvm")
     }
     repositories {
         mavenCentral()
@@ -56,10 +54,10 @@ allprojects {
         maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     }
     dependencies {
-        compileOnly("org.jetbrains:annotations:24.0.1")
+        compileOnly("org.jetbrains:annotations:24.1.0")
 
-        compileOnly("org.projectlombok:lombok:1.18.28")
-        annotationProcessor("org.projectlombok:lombok:1.18.28")
+        compileOnly("org.projectlombok:lombok:1.18.30")
+        annotationProcessor("org.projectlombok:lombok:1.18.30")
     }
     intellij {
         version = baseVersion
@@ -169,9 +167,9 @@ project(":lsp") {
         plugin("java-library")
     }
     dependencies {
-        api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.0")
+        api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.2")
         implementation("com.vladsch.flexmark:flexmark:0.64.8")
-        api("org.apache.commons:commons-lang3:3.13.0")
+        api("org.apache.commons:commons-lang3:3.14.0")
     }
 }
 
