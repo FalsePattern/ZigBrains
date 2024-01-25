@@ -20,10 +20,13 @@ import com.intellij.openapi.util.NlsContexts;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.Icon;
+import java.util.Map;
 
 @RequiredArgsConstructor
-public sealed class ZigProjectTemplate permits ZigDefaultTemplate {
+public sealed abstract class ZigProjectTemplate permits ZigDefaultTemplate {
     public final @NlsContexts.ListItem String name;
     public final boolean isBinary;
     public final Icon icon;
+
+    public abstract Map<String, String> fileTemplates();
 }

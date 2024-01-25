@@ -23,18 +23,23 @@ import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.facet.ui.ValidationResult;
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep;
 import com.intellij.ide.util.projectWizard.CustomStepProjectGenerator;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsContexts;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.impl.welcomeScreen.AbstractActionWithPanel;
 import com.intellij.platform.DirectoryProjectGenerator;
 import com.intellij.platform.ProjectGeneratorPeer;
+import com.intellij.util.ResourceUtil;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class ZigDirectoryProjectGenerator implements DirectoryProjectGenerator<ZigProjectConfigurationData>,
         CustomStepProjectGenerator<ZigProjectConfigurationData> {
@@ -59,12 +64,37 @@ public class ZigDirectoryProjectGenerator implements DirectoryProjectGenerator<Z
         return ValidationResult.OK;
     }
 
+    private static String getResourceString(String path) throws IOException {
+        byte[] data = ResourceUtil.getResourceAsBytes(path, ZigDirectoryProjectGenerator.class.getClassLoader());
+        if (data == null)
+            throw new IOException("Could not find resource " + path + "!");
+        return new String(data, StandardCharsets.UTF_8);
+    }
+
     @Override
     public void generateProject(@NotNull Project project, @NotNull VirtualFile baseDir, @NotNull ZigProjectConfigurationData data, @NotNull Module module) {
         val settings = data.settings();
 
         var svc = ZigProjectSettingsService.getInstance(project);
         svc.getState().setToolchain(settings.toolchain());
+
+        val template = data.selectedTemplate();
+
+        try {
+            WriteAction.run(() -> {
+                val srcDir = baseDir.createChildDirectory(this, "src");
+
+                for (val fileTemplate : template.fileTemplates().entrySet()) {
+                    val fileName = fileTemplate.getKey();
+                    val templateDir = fileTemplate.getValue();
+                    val resourceData = getResourceString("project-gen/" + templateDir + "/" + fileName + ".template");
+                    val targetFile = srcDir.createChildData(this, fileName);
+                    VfsUtil.saveText(targetFile, resourceData);
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
