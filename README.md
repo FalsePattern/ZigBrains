@@ -23,10 +23,14 @@ feedback
 and the Eclipse LSP4J project
 
 - All the people who have generously funded the project
-  - gree7@ko-fi
+  - gree7
+  - xceno
+  - AnErrupTion
 
 - Every contributor who helped with bugfixes and extra features
-  - gatesn@github
+  - [gatesn](https://github.com/gatesn)
+  - [MarioAriasC](https://github.com/MarioAriasC)
+  - [JensvandeWiel](https://github.com/JensvandeWiel)
 
 - And everyone who actively reported issues and helped ironing out all the remaining problems
 
