@@ -23,6 +23,11 @@ Changelog structure reference:
 - Zig
   - Code formatter and code style settings
 
+### Fixed
+
+- Project generation
+  - Now actually populates the project directory with example files instead of just creating an empty directory
+
 ## [0.9.0]
 
 ### Added
