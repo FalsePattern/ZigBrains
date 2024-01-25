@@ -103,6 +103,7 @@ Currently, the debugger only works with the bundled LLDB debugger, so make sure 
 - Basic per-project toolchain management
 - Run configurations
 - Debugging (CLion/IDEA Ultimate)
+- Project generation (thanks @JensvandeWiel !)
 
 ## The motivation
 The other existing Zig language plugins for IntelliJ rely a lot on the PSI tree.
