@@ -35,7 +35,7 @@ val baseVersion = when(baseIDE) {
     else -> error("Unexpected IDE name: `$baseIDE")
 }
 
-val clionPlugins = listOf("com.intellij.cidr.base", "com.intellij.clion")
+val clionPlugins = listOf("com.intellij.clion", "com.intellij.cidr.lang", "com.intellij.cidr.base", "com.intellij.nativeDebug")
 
 tasks {
     wrapper {
