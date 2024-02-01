@@ -44,6 +44,7 @@ import com.intellij.psi.PsiPolyVariantReference;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceService;
 import com.intellij.psi.ResolveState;
+import com.intellij.psi.impl.PsiElementBase;
 import com.intellij.psi.scope.PsiScopeProcessor;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.SearchScope;
@@ -58,7 +59,7 @@ import javax.swing.Icon;
 /**
  * A simple PsiElement for LSP
  */
-public class LSPPsiElement implements PsiNameIdentifierOwner, NavigatablePsiElement {
+public class LSPPsiElement extends PsiElementBase implements PsiNameIdentifierOwner, NavigatablePsiElement {
 
     private final Key<KeyFMap> COPYABLE_USER_MAP_KEY = Key.create("COPYABLE_USER_MAP_KEY");
     private final AtomicFieldUpdater<LSPPsiElement, KeyFMap> updater = AtomicFieldUpdater.forFieldOfType(LSPPsiElement.class, KeyFMap.class);
@@ -353,19 +354,6 @@ public class LSPPsiElement implements PsiNameIdentifierOwner, NavigatablePsiElem
     }
 
     /**
-     * Checks if it is possible to add the specified element as a child to this element, and throws an exception if the
-     * add is not possible. Does not actually modify anything.
-     *
-     * @param element the child element to check the add possibility.
-     * @throws IncorrectOperationException if the modification is not supported or not possible for some reason.
-     * @deprecated not all PSI implementations implement this method correctly.
-     */
-    @Deprecated
-    public void checkAdd(@NotNull PsiElement element) {
-        throw new IncorrectOperationException();
-    }
-
-    /**
      * Adds a range of elements as children to this PSI element.
      *
      * @param first the first child element to add.
@@ -410,18 +398,6 @@ public class LSPPsiElement implements PsiNameIdentifierOwner, NavigatablePsiElem
      *                                     example, the file containing the element is read-only).
      */
     public void delete() {
-        throw new IncorrectOperationException();
-    }
-
-    /**
-     * Checks if it is possible to delete the specified element from the tree, and throws an exception if the add is not
-     * possible. Does not actually modify anything.
-     *
-     * @throws IncorrectOperationException if the modification is not supported or not possible for some reason.
-     * @deprecated not all PSI implementations implement this method correctly.
-     */
-    @Deprecated
-    public void checkDelete() {
         throw new IncorrectOperationException();
     }
 
