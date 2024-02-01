@@ -34,6 +34,18 @@ and the Eclipse LSP4J project
 
 - And everyone who actively reported issues and helped ironing out all the remaining problems
 
+## Versioning scheme
+To reduce confusion and to better utilize semver, the plugin uses the following versioning scheme:
+
+X - Major version, incremented any time a relatively large features is added or removed
+Y - Minor version, incremented for smaller features or large refactors that don't change user-perceived behaviour
+Z - Patch version, incremented only when a fix is purely an internal change and doesn't exceed an arbitrary threshold
+of complexity (determined at the discretion of FalsePattern)
+
+Note: before version 11, the version scheme used was 0.X.Y, without separate patch versions.
+As this plugin will constantly be evolving together with the zig language, it makes not sense to keep the 0 prefix,
+and might as well utilize the full semver string for extra information.
+
 # Description
 
 <!-- Plugin description -->
