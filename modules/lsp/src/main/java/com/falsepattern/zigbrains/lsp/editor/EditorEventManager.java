@@ -718,11 +718,16 @@ public class EditorEventManager {
             if (request == null) {
                 return;
             }
-            request.thenAccept(formatting -> {
-                if (formatting != null) {
-                    invokeLater(() -> applyEdit(toEither((List<TextEdit>) formatting), "Reformat document", false));
-                }
-            });
+            try {
+                request.thenAccept(formatting -> {
+                    if (formatting != null) {
+                        invokeLater(() -> applyEdit(toEither((List<TextEdit>) formatting), "Reformat document", false));
+                    }
+                });
+            } catch (IndexOutOfBoundsException e) {
+                //Race condition, user will inevitably retry. Just log.
+                LOG.error("Reformatting race condition", e);
+            }
         });
     }
 

@@ -123,6 +123,10 @@
             <keyboard-shortcut first-keystroke="shift alt F7"
                                keymap="$default"/>
         </action>
+        <action class="com.falsepattern.zigbrains.lsp.actions.LSPReformatAction" id="ReformatCode" use-shortcut-of="ReformatCode"
+                overrides="true" text="Reformat Code"/>
+        <action class="com.falsepattern.zigbrains.lsp.actions.LSPShowReformatDialogAction" id="ShowReformatFileDialog"
+                use-shortcut-of="ShowReformatFileDialog" overrides="true" text="Show Reformat File Dialog"/>
 
         <!-- endregion LSP -->
     </actions>
