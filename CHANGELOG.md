@@ -18,6 +18,26 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- Zon
+  - Updated autocompletion to latest as per the zig spec
+
+### Fixed
+
+- Zig
+  - Autocomplete now uses the LSP
+  - Auto-indentation is now more accurate when creating new {...} blocks
+
+- Zon
+  - Fixed auto-indent for strings and comments
+
+### Removed
+
+- Zig
+  - Code style settings. The official zig formatter is not configurable either, and ZigBrains aims to minimize
+    divergence from any official or ZLS-supplied features where possible.
+
 ## [0.10.0]
 
 ### Added

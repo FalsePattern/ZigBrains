@@ -75,7 +75,7 @@ Currently, the debugger only works with the bundled LLDB debugger, so make sure 
 ### .zig files:
 - Code completion
 - Code folding
-- Code formatting and code style settings
+- Code formatting
 - Syntax highlighting
 - Inlay hints
 - Basic error diagnostics
