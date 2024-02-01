@@ -78,6 +78,10 @@ public class ZigBlock extends AbstractBlock {
 
     @Override
     public Indent getIndent() {
+        if (myNode.getElementType() == ZigTypes.STATEMENT) {
+            return Indent.getNormalIndent();
+        }
+
         return Indent.getNoneIndent();
     }
 }
