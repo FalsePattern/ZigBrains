@@ -18,11 +18,11 @@ package com.falsepattern.zigbrains.project.ide.newproject;
 
 import com.falsepattern.zigbrains.project.ide.util.projectwizard.ZigModuleBuilder;
 import com.falsepattern.zigbrains.project.platform.ZigProjectGeneratorPeer;
+import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep;
 import com.intellij.ide.wizard.GitNewProjectWizardData;
-import com.intellij.ide.wizard.LanguageNewProjectWizard;
-import com.intellij.ide.wizard.NewProjectWizardLanguageStep;
 import com.intellij.ide.wizard.NewProjectWizardStep;
+import com.intellij.ide.wizard.language.LanguageGeneratorNewProjectWizard;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
@@ -32,11 +32,12 @@ import com.intellij.ui.dsl.builder.Panel;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class ZigNewProjectWizard implements LanguageNewProjectWizard {
+public class ZigNewProjectWizard implements LanguageGeneratorNewProjectWizard {
     @NotNull
     @Override
     public String getName() {
@@ -50,7 +51,13 @@ public class ZigNewProjectWizard implements LanguageNewProjectWizard {
 
     @NotNull
     @Override
-    public NewProjectWizardStep createStep(@NotNull NewProjectWizardLanguageStep parent) {
+    public Icon getIcon() {
+        return Icons.ZIG;
+    }
+
+    @NotNull
+    @Override
+    public NewProjectWizardStep createStep(@NotNull NewProjectWizardStep parent) {
         return new ZigNewProjectWizardStep(parent);
     }
 
@@ -74,12 +81,11 @@ public class ZigNewProjectWizard implements LanguageNewProjectWizard {
         public void setupProject(@NotNull Project project) {
             val builder = new ZigModuleBuilder();
             val modList = builder.commit(project);
-            if (modList == null || modList.size() == 0) {
+            if (modList == null || modList.isEmpty()) {
                 return;
             }
             val module = modList.get(0);
 
-            //noinspection UsagesOfObsoleteApi
             ModuleRootModificationUtil.updateModel(module, rootModel -> {
                 builder.configurationData = peer.getSettings();
                 builder.createProject(rootModel, "none");
