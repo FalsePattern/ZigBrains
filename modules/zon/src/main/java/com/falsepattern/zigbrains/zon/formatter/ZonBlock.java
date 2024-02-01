@@ -26,6 +26,7 @@ import com.intellij.formatting.Wrap;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.formatter.common.AbstractBlock;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,7 +57,15 @@ public class ZonBlock extends AbstractBlock {
 
     @Override
     public Indent getIndent() {
-        if (myNode.getElementType() == ZonTypes.PROPERTY) {
+        val parent = myNode.getTreeParent();
+        if (parent == null)
+            return Indent.getNoneIndent();
+
+        val myElementType = myNode.getElementType();
+        if (parent.getElementType() == ZonTypes.STRUCT &&
+            !(myElementType == ZonTypes.DOT ||
+              myElementType == ZonTypes.LBRACE ||
+              myElementType == ZonTypes.RBRACE)) {
             return Indent.getNormalIndent();
         } else {
             return Indent.getNoneIndent();
