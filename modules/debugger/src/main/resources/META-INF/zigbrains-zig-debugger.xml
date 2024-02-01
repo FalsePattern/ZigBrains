@@ -15,7 +15,7 @@
   -->
 
 <idea-plugin package="com.falsepattern.zigbrains.zig.debugger">
-    <depends>com.intellij.modules.cidr.debugger</depends>
+    <depends>com.intellij.modules.clion</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.ZigDebugRunner"

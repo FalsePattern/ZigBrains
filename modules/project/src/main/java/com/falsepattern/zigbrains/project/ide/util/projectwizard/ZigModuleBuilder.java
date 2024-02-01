@@ -18,7 +18,6 @@ package com.falsepattern.zigbrains.project.ide.util.projectwizard;
 
 import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectConfigurationData;
 import com.falsepattern.zigbrains.project.openapi.module.ZigModuleType;
-import com.intellij.ide.NewProjectWizardLegacy;
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
@@ -36,11 +35,6 @@ public class ZigModuleBuilder extends ModuleBuilder {
     @Override
     public ModuleType<?> getModuleType() {
         return ZigModuleType.INSTANCE;
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return NewProjectWizardLegacy.isAvailable();
     }
 
     @Override
