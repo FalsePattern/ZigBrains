@@ -18,10 +18,14 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [11.0.0]
+
 ### Changed
 
 - Zon
   - Updated autocompletion to latest as per the zig spec
+
+- The versioning scheme used for ZigBrains has been revamped. See the plugin's GitHub repo for more information.
 
 ### Fixed
 
