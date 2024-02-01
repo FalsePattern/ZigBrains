@@ -37,8 +37,8 @@ import java.util.Set;
 import static com.falsepattern.zigbrains.common.util.PsiElementUtil.parent;
 
 public class ZonCompletionContributor extends CompletionContributor {
-    private static final List<String> ZON_ROOT_KEYS = List.of("name", "version", "dependencies", "path");
-    private static final List<String> ZON_DEP_KEYS = List.of("url", "hash");
+    private static final List<String> ZON_ROOT_KEYS = List.of("name", "version", "minimum_zig_version", "dependencies", "paths");
+    private static final List<String> ZON_DEP_KEYS = List.of("url", "hash", "path");
 
     public ZonCompletionContributor() {
         extend(CompletionType.BASIC,
