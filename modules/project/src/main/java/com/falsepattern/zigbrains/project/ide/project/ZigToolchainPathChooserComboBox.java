@@ -63,7 +63,7 @@ public class ZigToolchainPathChooserComboBox extends ComponentWithBrowseButton<C
         super(new ComboBoxWithWidePopup<>(), null);
         this.onTextChanged = onTextChanged;
 
-        new ComboboxSpeedSearch(getChildComponent());
+        ComboboxSpeedSearch.installOn(getChildComponent());
         getChildComponent().setEditor(comboBoxEditor);
         getChildComponent().setEditable(true);
 
