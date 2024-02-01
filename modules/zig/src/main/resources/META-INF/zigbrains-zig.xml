@@ -96,11 +96,7 @@
 
         <lang.commenter language="Zig" implementationClass="com.falsepattern.zigbrains.zig.comments.ZigCommenter"/>
 
-        <lang.formatter language="Zig"  implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>
-
-        <codeStyleSettingsProvider implementation="com.falsepattern.zigbrains.zig.settings.ZigCodeStyleSettingsProvider"/>
-
-        <langCodeStyleSettingsProvider implementation="com.falsepattern.zigbrains.zig.settings.ZigLanguageCodeStyleSettingsProvider"/>
+        <lang.formatter language="Zig" implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>
 
         <projectConfigurable parentId="language"
                              instance="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable"
