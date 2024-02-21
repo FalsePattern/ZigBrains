@@ -43,6 +43,10 @@ tasks {
     }
 }
 
+fun getPluginVersionFull(): Provider<String> {
+    return properties("pluginVersion").map { it + "-" + properties("pluginSinceBuild").get() }
+}
+
 allprojects {
     apply {
         plugin("org.jetbrains.grammarkit")
@@ -84,7 +88,7 @@ allprojects {
     }
 
     group = properties("pluginGroup").get()
-    version = properties("pluginVersion").get()
+    version = getPluginVersionFull().get()
 
     tasks {
         runIde { enabled = false }
@@ -303,7 +307,7 @@ project(":plugin") {
         }
 
         patchPluginXml {
-            version = properties("pluginVersion")
+            version = getPluginVersionFull()
 
             // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
             pluginDescription = providers.fileContents(rootProject.layout.projectDirectory.file("README.md")).asText.map {

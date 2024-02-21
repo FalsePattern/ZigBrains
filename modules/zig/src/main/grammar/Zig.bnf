@@ -168,12 +168,9 @@
 Root ::= CONTAINER_DOC_COMMENT? ContainerMembers?
 
 // *** Top level ***
-private ContainerMembers ::= ContainerDeclaration* (ContainerField COMMA)* (ContainerField | ContainerDeclaration*)?
+private ContainerMembers ::= ContainerDeclarations (ContainerField COMMA)* (ContainerField | ContainerDeclarations)?
 
-ContainerDeclaration
-::= TestDecl
-  | ComptimeDecl
-  | DOC_COMMENT? KEYWORD_PUB? Decl
+ContainerDeclarations ::= (TestDecl | ComptimeDecl | DOC_COMMENT? KEYWORD_PUB? Decl)*
 
 
 TestDecl ::= DOC_COMMENT? KEYWORD_TEST (STRING_LITERAL_SINGLE | IDENTIFIER)? Block
@@ -181,13 +178,15 @@ TestDecl ::= DOC_COMMENT? KEYWORD_TEST (STRING_LITERAL_SINGLE | IDENTIFIER)? Blo
 ComptimeDecl ::= KEYWORD_COMPTIME Block
 
 Decl
-::= (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE? | (KEYWORD_INLINE | KEYWORD_NOILINE))? FnProto (SEMICOLON | Block)
-  | (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE?)? KEYWORD_THREADLOCAL? VarDecl
+::= (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE? | KEYWORD_INLINE | KEYWORD_NOILINE)? FnProto (SEMICOLON | Block)
+  | (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE?)? KEYWORD_THREADLOCAL? GlobalVarDecl
   | KEYWORD_USINGNAMESPACE Expr SEMICOLON
 
 FnProto ::= KEYWORD_FN IDENTIFIER? LPAREN ParamDeclList RPAREN ByteAlign? AddrSpace? LinkSection? CallConv? EXCLAMATIONMARK? TypeExpr
 
-VarDecl ::= (KEYWORD_CONST | KEYWORD_VAR) IDENTIFIER (COLON TypeExpr)? ByteAlign? AddrSpace? LinkSection? (EQUAL Expr)? SEMICOLON
+VarDeclProto ::= (KEYWORD_CONST | KEYWORD_VAR) IDENTIFIER (COLON TypeExpr)? ByteAlign? AddrSpace? LinkSection?
+
+GlobalVarDecl ::= VarDeclProto (EQUAL Expr)? SEMICOLON
 
 ContainerField
 ::= DOC_COMMENT? KEYWORD_COMPTIME? IDENTIFIER (COLON (KEYWORD_ANYTYPE | TypeExpr) ByteAlign?)? (EQUAL Expr)?
@@ -195,15 +194,18 @@ ContainerField
 
 // *** Block Level ***
 Statement
-::= KEYWORD_COMPTIME? VarDecl
-  | KEYWORD_COMPTIME BlockExprStatement
+::= KEYWORD_COMPTIME? ComptimeStatement
   | KEYWORD_NOSUSPEND BlockExprStatement
   | KEYWORD_DEFER BlockExprStatement
   | KEYWORD_ERRDEFER Payload? BlockExprStatement
   | IfStatement
   | LabeledStatement
   | SwitchExpr
-  | AssignExpr SEMICOLON
+  | VarDeclExprStatement
+
+ComptimeStatement
+::= BlockExpr
+  | VarDeclExprStatement
 
 IfStatement
 ::= IfPrefix BlockExpr ( KEYWORD_ELSE Payload? Statement )?
@@ -227,8 +229,17 @@ BlockExprStatement
 
 BlockExpr ::= BlockLabel? Block
 
+//An expression, assignment, or any destructure, as a statement.
+VarDeclExprStatement
+::= VarDeclProto (COMMA (VarDeclProto | Expr))* EQUAL Expr SEMICOLON
+  | Expr (AssignOp Expr | (COMMA (VarDeclProto | Expr))+ EQUAL Expr)? SEMICOLON
+
 // *** Expression Level ***
-AssignExpr ::= Expr (AssignOp Expr)?
+
+// An assignment or a destructure whose LHS are all lvalue expressions.
+AssignExpr ::= Expr (AssignOp Expr | (COMMA Expr)+ EQUAL Expr)?
+
+SingleAssignExpr ::= Expr (AssignOp Expr)?
 
 Expr ::= BoolOrExpr
 
@@ -382,7 +393,7 @@ PtrPayload ::= PIPE ASTERISK? IDENTIFIER PIPE
 PtrIndexPayload ::= PIPE (ASTERISK? IDENTIFIER COMMA)* (ASTERISK? IDENTIFIER) PIPE
 
 // Switch specific
-SwitchProng ::= KEYWORD_INLINE? SwitchCase EQUALRARROW PtrIndexPayload? AssignExpr
+SwitchProng ::= KEYWORD_INLINE? SwitchCase EQUALRARROW PtrIndexPayload? SingleAssignExpr
 
 SwitchCase
 ::= SwitchItem (COMMA SwitchItem)* COMMA?
