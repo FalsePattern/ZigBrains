@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [11.1.0]
+
 ### Changed
 
 - Zig
