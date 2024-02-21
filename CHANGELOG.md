@@ -18,6 +18,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [11.1.0]
+
+### Changed
+
+- Zig
+  - Updated to latest language grammar (destructuring syntax)
+
 ## [11.0.0]
 
 ### Changed

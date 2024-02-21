@@ -35,7 +35,7 @@ public abstract class ZigTopLevelDeclarationLineMarkerContributorBase extends Ru
 
         int nestingLevel = 0;
         while (parent != null && !(parent instanceof PsiFile)) {
-            if (PsiUtil.getElementType(parent) == ZigTypes.CONTAINER_DECLARATION) {
+            if (PsiUtil.getElementType(parent) == ZigTypes.CONTAINER_DECLARATIONS) {
                 nestingLevel++;
             }
             parent = parent.getParent();
