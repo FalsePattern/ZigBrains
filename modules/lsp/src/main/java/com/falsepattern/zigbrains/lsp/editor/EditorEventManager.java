@@ -1599,7 +1599,8 @@ public class EditorEventManager {
             });
             // If code actions are updated, forcefully triggers the inspection tool.
             if (codeActionSyncRequired) {
-                updateErrorAnnotations();
+                // double-delay the update to ensure that the code analyzer finishes.
+                invokeLater(this::updateErrorAnnotations);
             }
         });
         });

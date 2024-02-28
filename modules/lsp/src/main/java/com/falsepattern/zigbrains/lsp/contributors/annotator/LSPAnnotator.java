@@ -109,16 +109,7 @@ public class LSPAnnotator extends ExternalAnnotator<Object, Object> {
             if (eventManager == null) {
                 return;
             }
-            if (eventManager.isCodeActionSyncRequired()) {
-                try {
-                    updateAnnotations(holder, eventManager);
-                } catch (ConcurrentModificationException e) {
-                    // Todo - Add proper fix to handle concurrent modifications gracefully.
-                    LOG.warn("Error occurred when updating LSP diagnostics due to concurrent modifications.", e);
-                } catch (Throwable t) {
-                    LOG.warn("Error occurred when updating LSP diagnostics.", t);
-                }
-            } else if (eventManager.isDiagnosticSyncRequired()) {
+            if (eventManager.isDiagnosticSyncRequired()) {
                 try {
                     createAnnotations(holder, eventManager);
                 } catch (ConcurrentModificationException e) {
@@ -126,6 +117,15 @@ public class LSPAnnotator extends ExternalAnnotator<Object, Object> {
                     LOG.warn("Error occurred when updating LSP code actions due to concurrent modifications.", e);
                 } catch (Throwable t) {
                     LOG.warn("Error occurred when updating LSP code actions.", t);
+                }
+            } else if (eventManager.isCodeActionSyncRequired()) {
+                try {
+                    updateAnnotations(holder, eventManager);
+                } catch (ConcurrentModificationException e) {
+                    // Todo - Add proper fix to handle concurrent modifications gracefully.
+                    LOG.warn("Error occurred when updating LSP diagnostics due to concurrent modifications.", e);
+                } catch (Throwable t) {
+                    LOG.warn("Error occurred when updating LSP diagnostics.", t);
                 }
             }
         }
