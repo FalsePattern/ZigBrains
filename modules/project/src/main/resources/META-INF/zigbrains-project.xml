@@ -20,7 +20,7 @@
         <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.actions.ZigRunExecutionConfigurationProducer"/>
 
         <directoryProjectGenerator implementation="com.falsepattern.zigbrains.project.platform.ZigDirectoryProjectGenerator"/>
-        <newProjectWizard.language implementation="com.falsepattern.zigbrains.project.ide.newproject.ZigNewProjectWizard"/>
+        <newProjectWizard.languageGenerator implementation="com.falsepattern.zigbrains.project.ide.newproject.ZigNewProjectWizard"/>
 
         <moduleBuilder builderClass="com.falsepattern.zigbrains.project.ide.util.projectwizard.ZigModuleBuilder"/>
         <projectConfigurable parentId="language"
