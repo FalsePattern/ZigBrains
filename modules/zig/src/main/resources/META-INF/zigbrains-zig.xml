@@ -105,7 +105,9 @@
 
         <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
         <notificationGroup displayType="BALLOON"
-                           id="ZigBrains.Nag"/>
+                           bundle="zigbrains.zig.Bundle"
+                           key="notif-zls"
+                           id="ZigBrains.ZLS"/>
     </extensions>
 
 

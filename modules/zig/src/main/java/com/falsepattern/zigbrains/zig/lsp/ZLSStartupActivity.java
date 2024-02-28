@@ -60,7 +60,7 @@ public class ZLSStartupActivity implements ProjectActivity {
                 boolean configOK = true;
                 if (!"".equals(configPath) && !validatePath("ZLS Config", configPath, false)) {
                     configOK = false;
-                    Notifications.Bus.notify(new Notification("ZigBrains.Nag", "Using default config path.",
+                    Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Using default config path.",
                                                               NotificationType.INFORMATION));
                 }
                 if ("".equals(configPath)) {
@@ -112,18 +112,18 @@ public class ZLSStartupActivity implements ProjectActivity {
             path = Path.of(pathTxt);
         } catch (InvalidPathException e) {
             Notifications.Bus.notify(
-                    new Notification("ZigBrains.Nag", "No " + name, "Invalid " + name + " path \"" + pathTxt + "\"",
+                    new Notification("ZigBrains.ZLS", "No " + name, "Invalid " + name + " path \"" + pathTxt + "\"",
                                      NotificationType.ERROR));
             return false;
         }
         if (!Files.exists(path)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No " + name,
+            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
                                                       "The " + name + " at \"" + pathTxt + "\" doesn't exist!",
                                                       NotificationType.ERROR));
             return false;
         }
         if (Files.isDirectory(path) != dir) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No " + name,
+            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
                                                       "The " + name + " at \"" + pathTxt + "\" is a " +
                                                       (Files.isDirectory(path) ? "directory" : "file") +
                                                       " , expected a " + (dir ? "directory" : "file"),
@@ -147,7 +147,7 @@ public class ZLSStartupActivity implements ProjectActivity {
             }
         }
         if ("".equals(zlsPath)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No ZLS binary",
+            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No ZLS binary",
                                                       "Please configure the path to the zls executable in the Zig language configuration menu!",
                                                       NotificationType.INFORMATION));
             return null;
