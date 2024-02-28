@@ -113,9 +113,7 @@ class LSPFileEventManager {
                 FileUtils.findProjectsFor(file).forEach(p -> {
                     // Detaches old file from the wrappers.
                     Set<LanguageServerWrapper> wrappers = IntellijLanguageClient.getAllServerWrappersFor(FileUtils.projectToUri(p));
-                    if (wrappers != null) {
-                        wrappers.forEach(wrapper -> wrapper.disconnect(oldFileUri, FileUtils.projectToUri(p)));
-                    }
+                    wrappers.forEach(wrapper -> wrapper.disconnect(oldFileUri, FileUtils.projectToUri(p)));
                     // Re-open file to so that the new editor will be connected to the language server.
                     FileEditorManager fileEditorManager = FileEditorManager.getInstance(p);
                     ApplicationUtils.invokeLater(() -> {
