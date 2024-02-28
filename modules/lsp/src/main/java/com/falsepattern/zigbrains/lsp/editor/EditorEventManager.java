@@ -229,7 +229,7 @@ public class EditorEventManager {
 
         this.currentHint = null;
 
-        this.documentEventManager = DocumentEventManager.getOrCreateDocumentManager(editor.getDocument(), documentListener, syncKind, wrapper);
+        this.documentEventManager = new DocumentEventManager(editor.getDocument(), documentListener, syncKind, wrapper);
     }
 
     @SuppressWarnings("unused")
