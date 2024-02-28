@@ -19,6 +19,7 @@ import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.OSUtils;
 import com.intellij.openapi.editor.Editor;
+import lombok.val;
 import org.eclipse.lsp4j.Diagnostic;
 
 import java.awt.KeyboardFocusManager;
@@ -159,9 +160,12 @@ public class EditorEventManagerBase {
 
         String uri = FileUtils.editorToURIString(manager.editor);
         synchronized (uriToManagers) {
-            Set<EditorEventManager> set = getEditorEventManagerCopy(uri);
-            if (set.isEmpty()) {
-                uriToManagers.remove(uri);
+            val managers = uriToManagers.get(uri);
+            if (managers != null) {
+                managers.remove(manager);
+                if (managers.isEmpty()) {
+                    uriToManagers.remove(uri);
+                }
             }
         }
     }
