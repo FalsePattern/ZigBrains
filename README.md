@@ -80,7 +80,17 @@ LSP server is running.
 
 ## Debugging
 
-Currently, the debugger only works with the bundled LLDB debugger, so make sure you have that.
+ZigBrains uses the CLion C++ toolchains (Settings | Build, Execution, Deployment | Toolchains) for debugging purposes,
+and it is fully compatible with both GDB and LLDB debuggers.
+
+Additionally, ZigBrains will prioritize a toolchain if it is called `Zig`, otherwise it will use the default toolchain.
+
+If no toolchain is available, ZigBrains will attempt to use the bundled LLDB debugger, and if that is not available either,
+an error popup will be shown when you try to run with debugging.
+
+Note: There is a small issue with the LLDB debugger which does not happen with GDB: The debugger will pause on the first
+instruction (usually, deep inside the zig standard library's startup code). Unfortunately, we have not found a fix for
+this yet, but fortunately it doesn't break anything, just a bit of inconvenience.
 
 ## Feature tracker:
 
@@ -96,7 +106,7 @@ Currently, the debugger only works with the bundled LLDB debugger, so make sure 
 - Hover documentation
 - Go to implementations / find usages
 - Brace/Parenthesis/Bracket matching
-- Breakpoints (CLion/IDEA Ultimate)
+- Debugging (CLion/CLion Nova)
 - File creation prompt
 - Gutter launch buttons
 - Commenter (thanks @MarioAriasC !)
