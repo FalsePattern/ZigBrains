@@ -67,6 +67,7 @@ import org.eclipse.lsp4j.DidChangeWatchedFilesCapabilities;
 import org.eclipse.lsp4j.DocumentHighlightCapabilities;
 import org.eclipse.lsp4j.ExecuteCommandCapabilities;
 import org.eclipse.lsp4j.FoldingRangeCapabilities;
+import org.eclipse.lsp4j.FoldingRangeKind;
 import org.eclipse.lsp4j.FoldingRangeKindSupportCapabilities;
 import org.eclipse.lsp4j.FoldingRangeSupportCapabilities;
 import org.eclipse.lsp4j.FormattingCapabilities;
@@ -590,7 +591,8 @@ public class LanguageServerWrapper {
         textDocumentClientCapabilities.setSynchronization(new SynchronizationCapabilities(true, true, true));
 
         FoldingRangeCapabilities foldingRangeCapabilities = new FoldingRangeCapabilities();
-        foldingRangeCapabilities.setFoldingRangeKind(new FoldingRangeKindSupportCapabilities(List.of("comment", "region", "imports")));
+        foldingRangeCapabilities.setFoldingRangeKind(new FoldingRangeKindSupportCapabilities(List.of(
+                FoldingRangeKind.Comment, FoldingRangeKind.Imports, FoldingRangeKind.Region)));
         foldingRangeCapabilities.setFoldingRange(new FoldingRangeSupportCapabilities(true));
         textDocumentClientCapabilities.setFoldingRange(foldingRangeCapabilities);
 
