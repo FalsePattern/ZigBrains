@@ -35,6 +35,9 @@ Changelog structure reference:
   - Diagnostics race condition
   - Code action annotations no longer lose range
 
+- Zig
+  - Syntax highlighting no longer breaks after refactoring or reformatting
+
 ## [11.1.0]
 
 ### Changed
