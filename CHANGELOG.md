@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [12.0.0]
+
 ### Added
 
 - Debugger
@@ -29,6 +31,7 @@ Changelog structure reference:
     implementation.
   - For the time being, the "Quick Definition" (CTRL+Shift+I) action has been repurposed as Go To Definition. This will be
     replaced with a properly integrated solution once a way to couple the PSI symbol system and the LSP has been found.
+
 ### Fixed
 
 - LSP
