@@ -12,9 +12,9 @@ fun environment(key: String) = providers.environmentVariable(key)
 plugins {
     id("java") // Java support
     id("java-library")
-    id("org.jetbrains.intellij") version("1.17.0")
+    id("org.jetbrains.intellij") version("1.17.2")
     id("org.jetbrains.changelog") version("2.2.0")
-    id("org.jetbrains.grammarkit") version("2022.3.2.1")
+    id("org.jetbrains.grammarkit") version("2022.3.2.2")
 }
 
 val grammarKitGenDir = "build/generated/sources/grammarkit/java"
@@ -58,8 +58,6 @@ allprojects {
         maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     }
     dependencies {
-        compileOnly("org.jetbrains:annotations:24.1.0")
-
         compileOnly("org.projectlombok:lombok:1.18.30")
         annotationProcessor("org.projectlombok:lombok:1.18.30")
     }
@@ -116,7 +114,7 @@ allprojects {
             purgeOldFiles = true
         }
         generateParser {
-            targetRoot = "${grammarKitGenDir}/parser"
+            targetRootOutputDir = file("${grammarKitGenDir}/parser")
             purgeOldFiles = true
         }
 
@@ -171,7 +169,7 @@ project(":lsp") {
         plugin("java-library")
     }
     dependencies {
-        api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.2")
+        api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.22.0")
         implementation("com.vladsch.flexmark:flexmark:0.64.8")
         api("org.apache.commons:commons-lang3:3.14.0")
     }
@@ -186,8 +184,7 @@ project(":zig") {
         generateLexer {
             enabled = true
             sourceFile = file("src/main/grammar/Zig.flex")
-            targetDir = "${grammarKitGenDir}/lexer/${rootPackagePath}/zig/lexer"
-            targetClass = "ZigFlexLexer"
+            targetOutputDir = file("${grammarKitGenDir}/lexer/${rootPackagePath}/zig/lexer")
         }
 
         generateParser {
@@ -219,8 +216,7 @@ project(":zon") {
         generateLexer {
             enabled = true
             sourceFile = file("src/main/grammar/Zon.flex")
-            targetDir = "${grammarKitGenDir}/lexer/${rootPackagePath}/zon/lexer"
-            targetClass = "ZonFlexLexer"
+            targetOutputDir = file("${grammarKitGenDir}/lexer/${rootPackagePath}/zon/lexer")
         }
 
         generateParser {

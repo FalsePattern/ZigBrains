@@ -18,18 +18,23 @@ package com.falsepattern.zigbrains.zig.lsp;
 
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
+import com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider;
 import com.falsepattern.zigbrains.zig.settings.ZLSSettingsState;
+import com.google.gson.Gson;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -37,6 +42,7 @@ import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ZLSStartupActivity implements ProjectActivity {
+    private static final Logger LOG = Logger.getInstance(ZLSStartupActivity.class);
     private static final ReentrantLock lock = new ReentrantLock();
 
     public static void initZLS(Project project) {
@@ -59,12 +65,31 @@ public class ZLSStartupActivity implements ProjectActivity {
                 var configPath = settings.zlsConfigPath;
                 boolean configOK = true;
                 if (!"".equals(configPath) && !validatePath("ZLS Config", configPath, false)) {
-                    configOK = false;
-                    Notifications.Bus.notify(new Notification("ZigBrains.Nag", "Using default config path.",
+                    Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Using default config path.",
                                                               NotificationType.INFORMATION));
+                    configPath = "";
                 }
                 if ("".equals(configPath)) {
-                    configOK = false;
+                    blk:
+                    try {
+                        val tmpFile = Files.createTempFile("zigbrains-zls-autoconf", ".json");
+                        val config = ZLSConfigProvider.findEnvironment(project);
+                        if (config.zigExePath().isEmpty() && config.zigLibPath().isEmpty()) {
+                            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "(ZLS) Failed to detect zig path from project toolchain", NotificationType.WARNING));
+                            configOK = false;
+                            break blk;
+                        }
+                        try (val writer = Files.newBufferedWriter(tmpFile)) {
+                            val gson = new Gson();
+                            gson.toJson(config.toJson(), writer);
+                        }
+                        configPath = tmpFile.toAbsolutePath().toString();
+                    } catch (IOException e) {
+                        Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Failed to create automatic zls config file",
+                                                                  NotificationType.WARNING));
+                        LOG.warn(e);
+                        configOK = false;
+                    }
                 }
 
                 if (IntellijLanguageClient.getExtensionManagerFor("zig") == null) {
@@ -112,18 +137,18 @@ public class ZLSStartupActivity implements ProjectActivity {
             path = Path.of(pathTxt);
         } catch (InvalidPathException e) {
             Notifications.Bus.notify(
-                    new Notification("ZigBrains.Nag", "No " + name, "Invalid " + name + " path \"" + pathTxt + "\"",
+                    new Notification("ZigBrains.ZLS", "No " + name, "Invalid " + name + " path \"" + pathTxt + "\"",
                                      NotificationType.ERROR));
             return false;
         }
         if (!Files.exists(path)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No " + name,
+            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
                                                       "The " + name + " at \"" + pathTxt + "\" doesn't exist!",
                                                       NotificationType.ERROR));
             return false;
         }
         if (Files.isDirectory(path) != dir) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No " + name,
+            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
                                                       "The " + name + " at \"" + pathTxt + "\" is a " +
                                                       (Files.isDirectory(path) ? "directory" : "file") +
                                                       " , expected a " + (dir ? "directory" : "file"),
@@ -146,8 +171,8 @@ public class ZLSStartupActivity implements ProjectActivity {
                 zlsPath = settings.zlsPath = thePath.get();
             }
         }
-        if ("".equals(zlsPath)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Nag", "No ZLS binary",
+        if (zlsPath.isEmpty()) {
+            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No ZLS binary",
                                                       "Please configure the path to the zls executable in the Zig language configuration menu!",
                                                       NotificationType.INFORMATION));
             return null;

@@ -21,14 +21,16 @@ import com.jetbrains.cidr.execution.Installer;
 import com.jetbrains.cidr.execution.RunParameters;
 import com.jetbrains.cidr.execution.TrivialInstaller;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
-import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
 @RequiredArgsConstructor
 public class ZigDebugRunParameters extends RunParameters {
     private final GeneralCommandLine cmd;
+    private final DebuggerDriverConfiguration driverConfiguration;
+
     @Override
     public @NotNull Installer getInstaller() {
         return new TrivialInstaller(cmd);
@@ -36,11 +38,7 @@ public class ZigDebugRunParameters extends RunParameters {
 
     @Override
     public @NotNull DebuggerDriverConfiguration getDebuggerDriverConfiguration() {
-        if (LLDBDriverConfiguration.hasBundledLLDB()) {
-            return new LLDBDriverConfiguration();
-        } else {
-            throw new IllegalStateException("The bundled LLDB debugger is missing from your IDE!");
-        }
+        return driverConfiguration;
     }
 
     @Override

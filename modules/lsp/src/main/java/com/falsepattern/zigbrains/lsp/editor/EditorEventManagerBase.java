@@ -19,6 +19,7 @@ import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.OSUtils;
 import com.intellij.openapi.editor.Editor;
+import lombok.val;
 import org.eclipse.lsp4j.Diagnostic;
 
 import java.awt.KeyboardFocusManager;
@@ -36,56 +37,6 @@ public class EditorEventManagerBase {
 
     private static final Map<String, Set<EditorEventManager>> uriToManagers = new ConcurrentHashMap<>();
     private static final Map<Editor, EditorEventManager> editorToManager = new ConcurrentHashMap<>();
-    private static final int CTRL_KEY_CODE = OSUtils.isMac() ? KeyEvent.VK_META : KeyEvent.VK_CONTROL;
-    private volatile static boolean isKeyPressed = false;
-    private volatile static boolean isCtrlDown = false;
-    private volatile static CtrlRangeMarker ctrlRange;
-
-    static {
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher((KeyEvent e) -> {
-            int eventId = e.getID();
-            if (eventId == KeyEvent.KEY_PRESSED) {
-                setIsKeyPressed(true);
-                if (e.getKeyCode() == CTRL_KEY_CODE) {
-                    setIsCtrlDown(true);
-                }
-            } else if (eventId == KeyEvent.KEY_RELEASED) {
-                setIsKeyPressed(false);
-                if (e.getKeyCode() == CTRL_KEY_CODE) {
-                    setIsCtrlDown(false);
-                    if (getCtrlRange() != null) {
-                        getCtrlRange().dispose();
-                        setCtrlRange(null);
-                    }
-                }
-            }
-            return false;
-        });
-    }
-
-    static synchronized CtrlRangeMarker getCtrlRange() {
-        return ctrlRange;
-    }
-
-    static synchronized void setCtrlRange(CtrlRangeMarker ctrlRange) {
-        EditorEventManagerBase.ctrlRange = ctrlRange;
-    }
-
-    static synchronized boolean getIsCtrlDown() {
-        return isCtrlDown;
-    }
-
-    static synchronized void setIsCtrlDown(boolean isCtrlDown) {
-        EditorEventManagerBase.isCtrlDown = isCtrlDown;
-    }
-
-    static synchronized boolean getIsKeyPressed() {
-        return isKeyPressed;
-    }
-
-    static synchronized void setIsKeyPressed(boolean isKeyPressed) {
-        EditorEventManagerBase.isKeyPressed = isKeyPressed;
-    }
 
     private static void prune() {
         pruneEditorManagerMap();
@@ -159,9 +110,12 @@ public class EditorEventManagerBase {
 
         String uri = FileUtils.editorToURIString(manager.editor);
         synchronized (uriToManagers) {
-            Set<EditorEventManager> set = getEditorEventManagerCopy(uri);
-            if (set.isEmpty()) {
-                uriToManagers.remove(uri);
+            val managers = uriToManagers.get(uri);
+            if (managers != null) {
+                managers.remove(manager);
+                if (managers.isEmpty()) {
+                    uriToManagers.remove(uri);
+                }
             }
         }
     }

@@ -72,11 +72,13 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.Hint;
 import com.intellij.util.SmartList;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionContext;
@@ -86,6 +88,7 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.DeclarationParams;
 import org.eclipse.lsp4j.DefinitionParams;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
@@ -119,7 +122,9 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.JsonRpcException;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
+import org.eclipse.lsp4j.services.TextDocumentService;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.awt.Point;
@@ -138,12 +143,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase.getCtrlRange;
-import static com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase.getIsCtrlDown;
-import static com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase.setCtrlRange;
 import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableReadAction;
 import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableWriteAction;
 import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.invokeLater;
@@ -173,8 +177,6 @@ public class EditorEventManager {
     public LanguageServerWrapper wrapper;
     private Project project;
     private TextDocumentIdentifier identifier;
-    private EditorMouseListener mouseListener;
-    private EditorMouseMotionListener mouseMotionListener;
     private LSPCaretListenerImpl caretListener;
 
     public List<String> completionTriggers;
@@ -200,13 +202,10 @@ public class EditorEventManager {
     public static final String SNIPPET_PLACEHOLDER_REGEX = "(\\$\\{\\d+:?([^{^}]*)}|\\$\\d+)";
 
     //Todo - Revisit arguments order and add remaining listeners
-    public EditorEventManager(Editor editor, DocumentListener documentListener, EditorMouseListener mouseListener,
-                              EditorMouseMotionListener mouseMotionListener, LSPCaretListenerImpl caretListener,
+    public EditorEventManager(Editor editor, DocumentListener documentListener, LSPCaretListenerImpl caretListener,
                               RequestManager requestmanager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
 
         this.editor = editor;
-        this.mouseListener = mouseListener;
-        this.mouseMotionListener = mouseMotionListener;
         this.wrapper = wrapper;
         this.caretListener = caretListener;
 
@@ -229,7 +228,7 @@ public class EditorEventManager {
 
         this.currentHint = null;
 
-        this.documentEventManager = DocumentEventManager.getOrCreateDocumentManager(editor.getDocument(), documentListener, syncKind, wrapper);
+        this.documentEventManager = new DocumentEventManager(editor.getDocument(), documentListener, syncKind, wrapper);
     }
 
     @SuppressWarnings("unused")
@@ -258,127 +257,9 @@ public class EditorEventManager {
         }
     }
 
-    /**
-     * Tells the manager that the mouse is in the editor
-     */
-    public void mouseEntered() {
-        mouseInEditor = true;
-    }
-
-    /**
-     * Tells the manager that the mouse is not in the editor
-     */
-    public void mouseExited() {
-        mouseInEditor = false;
-    }
-
-    /**
-     * Will show documentation if the mouse doesn't move for a given time (Hover)
-     *
-     * @param e the event
-     */
-    public void mouseMoved(EditorMouseEvent e) {
-//        if (e.getEditor() != editor) {
-//            LOG.error("Wrong editor for EditorEventManager");
-//            return;
-//        }
-//
-//        PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
-//        if (psiFile == null) {
-//            return;
-//        }
-//        Language language = psiFile.getLanguage();
-//        if ((!LanguageDocumentation.INSTANCE.allForLanguage(language).isEmpty() && !isSupportedLanguageFile(psiFile))
-//                || (!getIsCtrlDown() && !EditorSettingsExternalizable.getInstance().isShowQuickDocOnMouseOverElement())) {
-//            return;
-//        }
-//
-//        long curTime = System.nanoTime();
-//        if (predTime == (-1L) || ctrlTime == (-1L)) {
-//            predTime = curTime;
-//            ctrlTime = curTime;
-//        } else {
-//            LogicalPosition lPos = getPos(e);
-//            if (lPos == null || getIsKeyPressed() && !getIsCtrlDown()) {
-//                return;
-//            }
-//
-//            int offset = editor.logicalPositionToOffset(lPos);
-//            if ((getIsCtrlDown() || EditorSettingsExternalizable.getInstance().isShowQuickDocOnMouseOverElement())
-//                    && curTime - ctrlTime > CTRL_THRESH) {
-//                if (getCtrlRange() == null || !getCtrlRange().highlightContainsOffset(offset)) {
-//                    if (currentHint != null) {
-//                        currentHint.hide();
-//                    }
-//                    currentHint = null;
-//                    if (getCtrlRange() != null) {
-//                        getCtrlRange().dispose();
-//                    }
-//                    setCtrlRange(null);
-//                    pool(() -> requestAndShowDoc(lPos, e.getMouseEvent().getPoint()));
-//                } else if (getCtrlRange().definitionContainsOffset(offset)) {
-//                    createAndShowEditorHint(editor, "Click to show usages", editor.offsetToXY(offset));
-//                } else {
-//                    editor.getContentComponent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//                }
-//                ctrlTime = curTime;
-//            }
-//            predTime = curTime;
-//        }
-    }
-
     private boolean isSupportedLanguageFile(PsiFile file) {
         return file.getLanguage().isKindOf(PlainTextLanguage.INSTANCE)
                 || FileUtils.isFileSupported(file.getVirtualFile());
-    }
-
-    /**
-     * Called when the mouse is clicked
-     * At the moment, is used by CTRL+click to see references / goto definition
-     *
-     * @param e The mouse event
-     */
-    public void mouseClicked(EditorMouseEvent e) {
-        if (e.getEditor() != editor) {
-            LOG.error("Wrong editor for EditorEventManager");
-            return;
-        }
-
-        if (getIsCtrlDown()) {
-            // If CTRL/CMD key is pressed, triggers goto definition/references and hover.
-            try {
-                trySourceNavigationAndHover(e);
-            } catch (Exception err) {
-                LOG.warn("Error occurred when trying source navigation", err);
-            }
-        }
-    }
-
-    private void createCtrlRange(Position logicalPos, Range range) {
-        Location location = requestDefinition(logicalPos);
-        if (location == null || location.getRange() == null || editor.isDisposed()) {
-            return;
-        }
-        Range corRange;
-        if (range == null) {
-            corRange = new Range(logicalPos, logicalPos);
-        } else {
-            corRange = range;
-        }
-        int startOffset = DocumentUtils.LSPPosToOffset(editor, corRange.getStart());
-        int endOffset = DocumentUtils.LSPPosToOffset(editor, corRange.getEnd());
-        boolean isDefinition = DocumentUtils.LSPPosToOffset(editor, location.getRange().getStart()) == startOffset;
-
-        CtrlRangeMarker ctrlRange = getCtrlRange();
-        if (!editor.isDisposed()) {
-            if (ctrlRange != null) {
-                ctrlRange.dispose();
-            }
-            setCtrlRange(new CtrlRangeMarker(location, editor, !isDefinition ?
-                    (editor.getMarkupModel().addRangeHighlighter(startOffset, endOffset, HighlighterLayer.HYPERLINK,
-                            editor.getColorsScheme().getAttributes(EditorColors.REFERENCE_HYPERLINK_COLOR),
-                            HighlighterTargetArea.EXACT_RANGE)) : null));
-        }
     }
 
     /**
@@ -387,30 +268,42 @@ public class EditorEventManager {
      * @param position The position
      * @return The location of the definition
      */
+    private Location requestDeclaration(Position position) {
+        return requestDefinitionOrDeclaration(position, Timeouts.DECLARATION, DeclarationParams::new, TextDocumentService::declaration);
+    }
+
+    /**
+     * Returns the position of the declaration given a position in the editor
+     *
+     * @param position The position
+     * @return The location of the declaration
+     */
     private Location requestDefinition(Position position) {
-        DefinitionParams params = new DefinitionParams(identifier, position);
-        CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> request =
-                wrapper.getRequestManager().definition(params);
+        return requestDefinitionOrDeclaration(position, Timeouts.DEFINITION, DefinitionParams::new, TextDocumentService::definition);
+    }
+
+    private <T> Location requestDefinitionOrDeclaration(Position position, Timeouts timeout, BiFunction<TextDocumentIdentifier, Position, T> paramsConstructor, BiFunction<TextDocumentService, T, CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>>> requester) {
+        val params = paramsConstructor.apply(identifier, position);
+        val request = requester.apply(wrapper.getRequestManager(), params);
 
         if (request == null) {
             return null;
         }
         try {
-            Either<List<? extends Location>, List<? extends LocationLink>> definition =
-                    request.get(Timeout.getTimeout(Timeouts.DEFINITION), TimeUnit.MILLISECONDS);
-            wrapper.notifySuccess(Timeouts.DEFINITION);
-            if (definition == null) {
+            val result = request.get(Timeout.getTimeout(timeout), TimeUnit.MILLISECONDS);
+            wrapper.notifySuccess(timeout);
+            if (result == null) {
                 return null;
             }
-            if (definition.isLeft() && !definition.getLeft().isEmpty()) {
-                return definition.getLeft().get(0);
-            } else if (definition.isRight() && !definition.getRight().isEmpty()) {
-                var def = definition.getRight().get(0);
+            if (result.isLeft() && !result.getLeft().isEmpty()) {
+                return result.getLeft().get(0);
+            } else if (result.isRight() && !result.getRight().isEmpty()) {
+                var def = result.getRight().get(0);
                 return new Location(def.getTargetUri(), def.getTargetRange());
             }
         } catch (TimeoutException e) {
             LOG.warn(e);
-            wrapper.notifyFailure(Timeouts.DEFINITION);
+            wrapper.notifyFailure(timeout);
             return null;
         } catch (InterruptedException | JsonRpcException | ExecutionException e) {
             LOG.warn(e);
@@ -459,7 +352,7 @@ public class EditorEventManager {
      * @param offset The offset in the editor
      * @return An array of PsiElement
      */
-    public Pair<List<PsiElement>, List<VirtualFile>> references(int offset, boolean getOriginalElement, boolean close) {
+    public Pair<List<PsiElement>, List<VirtualFile>> references(int offset, boolean getOriginalElement, boolean fast) {
         renameCache = null;
         Position lspPos = DocumentUtils.offsetToLSPPos(editor, offset);
         TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(FileUtils.editorToURIString(editor));
@@ -471,36 +364,48 @@ public class EditorEventManager {
             try {
                 List<? extends Location> res = request.get(Timeout.getTimeout(Timeouts.REFERENCES), TimeUnit.MILLISECONDS);
                 wrapper.notifySuccess(Timeouts.REFERENCES);
-                if (res != null && res.size() > 0) {
-                    List<VirtualFile> openedEditors = new ArrayList<>();
+                if (res != null && !res.isEmpty()) {
+                    List<VirtualFile> openedEditors = fast ? null : new ArrayList<>();
                     List<PsiElement> elements = new ArrayList<>();
                     res.forEach(l -> {
                         Position start = l.getRange().getStart();
                         Position end = l.getRange().getEnd();
                         String uri = FileUtils.sanitizeURI(l.getUri());
                         VirtualFile file = FileUtils.virtualFileFromURI(uri);
-                        Editor curEditor = FileUtils.editorFromUri(uri, project);
-                        if (curEditor == null && file != null) {
-                            OpenFileDescriptor descriptor = new OpenFileDescriptor(project, file, start.getLine(), start.getCharacter());
-                            curEditor = computableWriteAction(
-                                    () -> FileEditorManager.getInstance(project).openTextEditor(descriptor, false));
-                            openedEditors.add(file);
+                        if (fast) {
+                            if (file == null)
+                                return;
+                            val document = FileDocumentManager.getInstance().getDocument(file);
+                            if (document == null)
+                                return;
+                            val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
+                            if (psiFile == null)
+                                return;
+                            val element = psiFile.findElementAt(DocumentUtils.LSPPosToOffset(document, start));
+                            if (element == null)
+                                return;
+                            elements.add(element);
+                        } else {
+                            Editor curEditor = FileUtils.editorFromUri(uri, project);
+                            if (curEditor == null && file != null) {
+                                OpenFileDescriptor descriptor =
+                                        new OpenFileDescriptor(project, file, start.getLine(), start.getCharacter());
+                                curEditor = computableWriteAction(
+                                        () -> FileEditorManager.getInstance(project).openTextEditor(descriptor, false));
+                                openedEditors.add(file);
+                            }
+                            if (curEditor == null) {
+                                LOG.warn("Error occurred in LSP references.");
+                                return;
+                            }
+                            int logicalStart = DocumentUtils.LSPPosToOffset(curEditor, start);
+                            int logicalEnd = DocumentUtils.LSPPosToOffset(curEditor, end);
+                            String name = curEditor.getDocument().getText(new TextRange(logicalStart, logicalEnd));
+                            elements.add(new LSPPsiElement(name, project, logicalStart, logicalEnd,
+                                                           PsiDocumentManager.getInstance(project)
+                                                                             .getPsiFile(curEditor.getDocument())));
                         }
-                        if (curEditor == null) {
-                            LOG.warn("Error occurred in LSP references.");
-                            return;
-                        }
-                        int logicalStart = DocumentUtils.LSPPosToOffset(curEditor, start);
-                        int logicalEnd = DocumentUtils.LSPPosToOffset(curEditor, end);
-                        String name = curEditor.getDocument().getText(new TextRange(logicalStart, logicalEnd));
-                        elements.add(new LSPPsiElement(name, project, logicalStart, logicalEnd,
-                                PsiDocumentManager.getInstance(project).getPsiFile(curEditor.getDocument())));
                     });
-                    if (close) {
-                        writeAction(
-                                () -> openedEditors.forEach(f -> FileEditorManager.getInstance(project).closeFile(f)));
-                        openedEditors.clear();
-                    }
                     return new Pair<>(elements, openedEditors);
                 } else {
                     return new Pair<>(null, null);
@@ -795,57 +700,6 @@ public class EditorEventManager {
                 });
             }
         });
-    }
-
-    /**
-     * Gets the hover request and shows it
-     *
-     * @param editorPos The editor position
-     * @param point     The point at which to show the hint
-     */
-    private void requestAndShowDoc(LogicalPosition editorPos, Point point) {
-        Position serverPos = computableReadAction(() -> DocumentUtils.logicalToLSPPos(editorPos, editor));
-        CompletableFuture<Hover> request = wrapper.getRequestManager().hover(new HoverParams(identifier, serverPos));
-        if (request == null) {
-            return;
-        }
-        try {
-            Hover hover = request.get(Timeout.getTimeout(Timeouts.HOVER), TimeUnit.MILLISECONDS);
-            wrapper.notifySuccess(Timeouts.HOVER);
-
-            if (hover == null) {
-                LOG.debug(String.format("Hover is null for file %s and pos (%d;%d)", identifier.getUri(),
-                        serverPos.getLine(), serverPos.getCharacter()));
-                return;
-            }
-
-            String string = HoverHandler.getHoverString(hover);
-            if (StringUtils.isEmpty(string)) {
-                LOG.warn(String.format("Hover string returned is empty for file %s and pos (%d;%d)",
-                        identifier.getUri(), serverPos.getLine(), serverPos.getCharacter()));
-                return;
-            }
-
-            if (getIsCtrlDown()) {
-                invokeLater(() -> {
-                    if (!editor.isDisposed()) {
-                        currentHint = createAndShowEditorHint(editor, string, point, HintManager.HIDE_BY_OTHER_HINT);
-                    }
-                });
-            } else {
-                invokeLater(() -> {
-                    if (!editor.isDisposed()) {
-                        currentHint = createAndShowEditorHint(editor, string, point);
-                    }
-                });
-            }
-        } catch (TimeoutException e) {
-            LOG.warn(e);
-            wrapper.notifyFailure(Timeouts.HOVER);
-        } catch (InterruptedException | JsonRpcException | ExecutionException e) {
-            LOG.warn(e);
-            wrapper.crashed(e);
-        }
     }
 
     /**
@@ -1290,8 +1144,6 @@ public class EditorEventManager {
      * Adds all the listeners
      */
     public void registerListeners() {
-        editor.addEditorMouseListener(mouseListener);
-        editor.addEditorMouseMotionListener(mouseMotionListener);
         editor.getCaretModel().addCaretListener(caretListener);
         // Todo - Implement
         // editor.getSelectionModel.addSelectionListener(selectionListener)
@@ -1301,8 +1153,6 @@ public class EditorEventManager {
      * Removes all the listeners
      */
     public void removeListeners() {
-        editor.removeEditorMouseListener(mouseListener);
-        editor.removeEditorMouseMotionListener(mouseMotionListener);
         editor.getCaretModel().removeCaretListener(caretListener);
         // Todo - Implement
         // editor.getSelectionModel.removeSelectionListener(selectionListener)
@@ -1444,50 +1294,58 @@ public class EditorEventManager {
             saveDocument();
         }
     }
-
-    // Tries to go to definition / show usages based on the element which is
-    private void trySourceNavigationAndHover(EditorMouseEvent e) {
+    // Tries to go to definition
+    public void gotoDefinition(PsiElement element) {
         if (editor.isDisposed()) {
             return;
         }
+        val sourceOffset = element.getTextOffset();
+        val loc = requestDefinition(DocumentUtils.offsetToLSPPos(editor, sourceOffset));
 
-        createCtrlRange(DocumentUtils.logicalToLSPPos(editor.xyToLogicalPosition(e.getMouseEvent().getPoint()), editor),
-                null);
-        final CtrlRangeMarker ctrlRange = getCtrlRange();
-
-        if (ctrlRange == null) {
-            int offset = editor.logicalPositionToOffset(editor.xyToLogicalPosition(e.getMouseEvent().getPoint()));
-            LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
-                                                                                      .getAction("LSPFindUsages");
-            if (referencesAction != null) {
-                referencesAction.forManagerAndOffset(this, offset);
-            }
-            return;
-        }
-
-        Location loc = ctrlRange.location;
         invokeLater(() -> {
             if (editor.isDisposed()) {
                 return;
             }
 
-            int offset = editor.logicalPositionToOffset(editor.xyToLogicalPosition(e.getMouseEvent().getPoint()));
+            gotoLocation(loc);
+        });
+    }
+
+    // Tries to go to declaration / show usages based on the element which is
+    public void gotoDeclarationOrUsages(PsiElement element) {
+        if (editor.isDisposed()) {
+            return;
+        }
+        val sourceOffset = element.getTextOffset();
+        val loc = requestDeclaration(DocumentUtils.offsetToLSPPos(editor, sourceOffset));
+
+        if (loc == null) {
+            LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
+                                                                                      .getAction("LSPFindUsages");
+            if (referencesAction != null) {
+                referencesAction.forManagerAndOffset(this, sourceOffset);
+            }
+            return;
+        }
+
+        invokeLater(() -> {
+            if (editor.isDisposed()) {
+                return;
+            }
+
             String locUri = FileUtils.sanitizeURI(loc.getUri());
 
             if (identifier.getUri().equals(locUri)
-                    && offset >= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getStart())
-                    && offset <= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getEnd())) {
+                    && sourceOffset >= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getStart())
+                    && sourceOffset <= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getEnd())) {
                 LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
                         .getAction("LSPFindUsages");
                 if (referencesAction != null) {
-                    referencesAction.forManagerAndOffset(this, offset);
+                    referencesAction.forManagerAndOffset(this, sourceOffset);
                 }
             } else {
                 gotoLocation(loc);
             }
-
-            ctrlRange.dispose();
-            setCtrlRange(null);
         });
     }
 
@@ -1599,7 +1457,8 @@ public class EditorEventManager {
             });
             // If code actions are updated, forcefully triggers the inspection tool.
             if (codeActionSyncRequired) {
-                updateErrorAnnotations();
+                // double-delay the update to ensure that the code analyzer finishes.
+                invokeLater(this::updateErrorAnnotations);
             }
         });
         });
