@@ -11,6 +11,7 @@
     <xi:include href="/META-INF/zigbrains-project.xml"/>
     <!--suppress PluginXmlValidity -->
     <depends optional="true" config-file="zigbrains-zig-debugger.xml">com.intellij.modules.cidr.debugger</depends>
+    <depends optional="true" config-file="zigbrains-zig-cpp.xml">com.intellij.modules.clion</depends>
 
     <extensionPoints>
         <!-- region zigbrains-project -->
@@ -23,6 +24,9 @@
         <extensionPoint
                 interface="com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider" dynamic="true"
                 name="zlsConfigProvider"/>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.zig.debugbridge.DebuggerDriverProvider" dynamic="true"
+                name="debuggerDriverProvider"/>
         <!-- endregion zigbrains-project -->
     </extensionPoints>
 </idea-plugin>

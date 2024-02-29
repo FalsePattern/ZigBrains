@@ -16,52 +16,34 @@
 
 package com.falsepattern.zigbrains.zig.debugger;
 
+import com.falsepattern.zigbrains.zig.debugbridge.DebuggerDriverProvider;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.jetbrains.cidr.cpp.execution.debugger.backend.CLionGDBDriverConfiguration;
-import com.jetbrains.cidr.cpp.execution.debugger.backend.CLionLLDBDriverConfiguration;
-import com.jetbrains.cidr.cpp.toolchains.CPPToolchains;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration;
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
 public class Utils {
-    private static final Logger LOG = Logger.getInstance(ZigDebugRunParameters.class);
     public static @Nullable DebuggerDriverConfiguration getDebuggerConfiguration(Project project) {
-        val cppDebugger = tryGetCPPDebugger(project);
-        if (cppDebugger != null)
-            return cppDebugger;
+        val providedDebugger = DebuggerDriverProvider.findDebuggerConfigurations(project)
+                                                     .filter(x -> x instanceof DebuggerDriverConfiguration)
+                                                     .map(x -> (DebuggerDriverConfiguration)x)
+                                                     .findFirst()
+                                                     .orElse(null);
+        if (providedDebugger != null)
+            return providedDebugger;
 
 
         if (LLDBDriverConfiguration.hasBundledLLDB()) {
             Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Warn",
-                                                      "Couldn't find a working C++ toolchain, using bundled LLDB debugger!",
+                                                      "Couldn't find a working debug toolchain, using bundled LLDB debugger!",
                                                       NotificationType.WARNING));
             return new LLDBDriverConfiguration();
         } else {
             return null;
         }
-    }
-
-    private static @Nullable DebuggerDriverConfiguration tryGetCPPDebugger(Project project) {
-        val toolchains = CPPToolchains.getInstance();
-        var toolchain = toolchains.getToolchainByNameOrDefault("Zig");
-        if (toolchain == null || !toolchain.isDebuggerSupported()) {
-            LOG.info("Couldn't find debug-compatible C++ toolchain with name \"Zig\"");
-            toolchain = toolchains.getDefaultToolchain();
-        }
-        if (toolchain == null || !toolchain.isDebuggerSupported()) {
-            LOG.info("Couldn't find debug-compatible C++ default toolchain");
-            return null;
-        }
-
-        return switch (toolchain.getDebuggerKind()) {
-            case CUSTOM_GDB, BUNDLED_GDB -> new CLionGDBDriverConfiguration(project, toolchain);
-            case BUNDLED_LLDB -> new CLionLLDBDriverConfiguration(project, toolchain);
-        };
     }
 }
