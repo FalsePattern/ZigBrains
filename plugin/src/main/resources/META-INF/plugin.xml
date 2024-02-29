@@ -20,6 +20,9 @@
         <extensionPoint
                 interface="com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider" dynamic="true"
                 name="toolchainProvider"/>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider" dynamic="true"
+                name="zlsConfigProvider"/>
         <!-- endregion zigbrains-project -->
     </extensionPoints>
 </idea-plugin>

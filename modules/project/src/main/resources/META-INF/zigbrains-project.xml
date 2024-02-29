@@ -38,6 +38,7 @@
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
         <toolchainFlavour implementation="com.falsepattern.zigbrains.project.toolchain.flavours.ZigSystemPathToolchainFlavour"/>
         <toolchainProvider implementation="com.falsepattern.zigbrains.project.toolchain.LocalZigToolchainProvider"/>
+        <zlsConfigProvider implementation="com.falsepattern.zigbrains.project.toolchain.ToolchainZLSConfigProvider"/>
     </extensions>
 
     <actions>
