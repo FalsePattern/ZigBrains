@@ -46,7 +46,7 @@ public class ZLSSettingsComponent {
                                  .addVerticalGap(10)
                                  .addLabeledComponent(new JBLabel("ZLS path: "), zlsPathText, 1, false)
                                  .addComponent(autodetectZls)
-                                 .addLabeledComponent(new JBLabel("ZLS config path (leave empty to use default): "),
+                                 .addLabeledComponent(new JBLabel("ZLS config path (leave empty to use built-in config): "),
                                                       zlsConfigPathText, 1, false)
                                  .addLabeledComponent(new JBLabel("Increase timeouts"), increaseTimeouts, 1, false)
                                  .addLabeledComponent(new JBLabel("Asynchronous code folding ranges: "),

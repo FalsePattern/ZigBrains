@@ -16,10 +16,20 @@
 
 <idea-plugin package="com.falsepattern.zigbrains.zig.debugger">
     <depends>com.intellij.modules.cidr.debugger</depends>
+    <resource-bundle>zigbrains.zig.debugger.Bundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.ZigDebugRunner"
                        id="ZigDebugRunner"/>
+
+        <notificationGroup displayType="BALLOON"
+                           bundle="zigbrains.zig.debugger.Bundle"
+                           key="notif-debug-error"
+                           id="ZigBrains.Debugger.Error"/>
+        <notificationGroup displayType="BALLOON"
+                           bundle="zigbrains.zig.debugger.Bundle"
+                           key="notif-debug-warn"
+                           id="ZigBrains.Debugger.Warn"/>
     </extensions>
 
     <extensions defaultExtensionNs="cidr.debugger">

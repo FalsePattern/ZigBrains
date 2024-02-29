@@ -80,7 +80,17 @@ LSP server is running.
 
 ## Debugging
 
-Currently, the debugger only works with the bundled LLDB debugger, so make sure you have that.
+ZigBrains uses the CLion C++ toolchains (Settings | Build, Execution, Deployment | Toolchains) for debugging purposes,
+and it is fully compatible with both GDB and LLDB debuggers.
+
+Additionally, ZigBrains will prioritize a toolchain if it is called `Zig`, otherwise it will use the default toolchain.
+
+If no toolchain is available, ZigBrains will attempt to use the bundled LLDB debugger, and if that is not available either,
+an error popup will be shown when you try to run with debugging.
+
+Note: There is a small issue with the LLDB debugger which does not happen with GDB: The debugger will pause on the first
+instruction (usually, deep inside the zig standard library's startup code). Unfortunately, we have not found a fix for
+this yet, but fortunately it doesn't break anything, just a bit of inconvenience.
 
 ## Feature tracker:
 
@@ -96,7 +106,7 @@ Currently, the debugger only works with the bundled LLDB debugger, so make sure 
 - Hover documentation
 - Go to implementations / find usages
 - Brace/Parenthesis/Bracket matching
-- Breakpoints (CLion/IDEA Ultimate)
+- Debugging (CLion/CLion Nova)
 - File creation prompt
 - Gutter launch buttons
 - Commenter (thanks @MarioAriasC !)
@@ -116,36 +126,6 @@ Currently, the debugger only works with the bundled LLDB debugger, so make sure 
 - Run configurations
 - Debugging (CLion/IDEA Ultimate)
 - Project generation (thanks @JensvandeWiel !)
-
-## The motivation
-The other existing Zig language plugins for IntelliJ rely a lot on the PSI tree.
-This seems correct in theory, until
-the sheer power of Zig's comptime is taken into consideration.
-
-The comptime makes any sort of contextual help implemented with the PSI tree a lot more restrictive,
-and adding LSP integration at that point is an uphill battle.
-
-## Current state of the project
-This project takes the opposite approach: The initial implementation *completely* relies on ZLS, with no lexer or parser
-in sight.
-Using a language server immediately gives us access to advanced features such as refactoring, go to definition,
-semantics-based highlighting, and so on.
-
-However, this also restricts the amount of IDE integration the language plugin can achieve,
-and things like live previews, peek definition, go to usage previews, and many other features that deeply integrate with
-the PSI system just don't work at all.
-
-## Long-term plans
-The first and foremost goal of this project is deeply integrating ZLS into the IDE,
-and LSP-provided information *always* takes the first seat.
-
-However, we must also not completely reject the PSI tree,
-as it has its own merits when used wisely, such as basic "dumb mode" syntax highlighting,
-proper caret placements with go to usages, and so on.
-
-Thus, this project will still use PSI trees and the IntelliJ lexer/parser system, but with heavy moderation, and any
-sort of "smart inspection" *shall not* be implemented in the PSI, but instead retrieved from the language server.
-
 
 ## Licenses
 

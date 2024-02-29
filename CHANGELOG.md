@@ -18,6 +18,30 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [12.0.0]
+
+### Added
+
+- Debugger
+  - Now uses the toolchains you set in Settings | Build, Execution, Deployment | Toolchains
+  - Standard library stack frames are now automatically filtered from the debug stack trace
+
+- Zig
+  - Go to Declaration/Usages now functions as expected, taking you to the declaration of a symbol instead of its resolved
+    implementation.
+  - For the time being, the "Quick Definition" (CTRL+Shift+I) action has been repurposed as Go To Definition. This will be
+    replaced with a properly integrated solution once a way to couple the PSI symbol system and the LSP has been found.
+
+### Fixed
+
+- LSP
+  - Diagnostics race condition
+  - Code action annotations no longer lose range
+
+- Zig
+  - Syntax highlighting no longer breaks after refactoring or reformatting
+  - Go to Usages no longer freezes the IDE
+
 ## [11.1.0]
 
 ### Changed
