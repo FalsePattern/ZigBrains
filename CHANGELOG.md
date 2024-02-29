@@ -29,7 +29,6 @@ Changelog structure reference:
     implementation.
   - For the time being, the "Quick Definition" (CTRL+Shift+I) action has been repurposed as Go To Definition. This will be
     replaced with a properly integrated solution once a way to couple the PSI symbol system and the LSP has been found.
-
 ### Fixed
 
 - LSP
@@ -38,6 +37,7 @@ Changelog structure reference:
 
 - Zig
   - Syntax highlighting no longer breaks after refactoring or reformatting
+  - Go to Usages no longer freezes the IDE
 
 ## [11.1.0]
 
