@@ -18,6 +18,22 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Debugger
+  - Now uses the toolchains you set in Settings | Build, Execution, Deployment | Toolchains
+
+### Changed
+
+- Zig
+  - Go to Declarations/Usages now works with any user-configured hotkeys, not just CTRL+Click
+
+### Fixed
+
+- LSP
+  - Diagnostics race condition
+  - Code action annotations no longer lose range
+
 ## [11.1.0]
 
 ### Changed
