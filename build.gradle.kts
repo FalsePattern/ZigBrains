@@ -58,8 +58,6 @@ allprojects {
         maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     }
     dependencies {
-        compileOnly("org.jetbrains:annotations:24.1.0")
-
         compileOnly("org.projectlombok:lombok:1.18.30")
         annotationProcessor("org.projectlombok:lombok:1.18.30")
     }
@@ -171,7 +169,7 @@ project(":lsp") {
         plugin("java-library")
     }
     dependencies {
-        api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.21.2")
+        api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.22.0")
         implementation("com.vladsch.flexmark:flexmark:0.64.8")
         api("org.apache.commons:commons-lang3:3.14.0")
     }
