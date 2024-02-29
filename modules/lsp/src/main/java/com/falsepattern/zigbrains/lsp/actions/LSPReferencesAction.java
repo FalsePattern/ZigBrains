@@ -24,6 +24,8 @@ import com.intellij.find.findUsages.FindUsagesOptions;
 import com.intellij.find.findUsages.PsiElement2UsageTargetAdapter;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.project.DumbAwareAction;
@@ -41,6 +43,8 @@ import com.intellij.usages.UsageInfo2UsageAdapter;
 import com.intellij.usages.UsageTarget;
 import com.intellij.usages.UsageViewManager;
 import com.intellij.usages.UsageViewPresentation;
+import com.intellij.util.concurrency.AppExecutorUtil;
+import lombok.val;
 
 import javax.swing.JLabel;
 import java.awt.Color;
@@ -63,8 +67,8 @@ public class LSPReferencesAction extends DumbAwareAction {
             }
             List<PsiElement2UsageTargetAdapter> targets = new ArrayList<>();
             Pair<List<PsiElement>, List<VirtualFile>> references = eventManager
-                    .references(editor.getCaretModel().getCurrentCaret().getOffset());
-            if (references.first != null && references.second != null) {
+                    .references(editor.getCaretModel().getCurrentCaret().getOffset(), true, true);
+            if (references.first != null) {
                 references.first.forEach(element -> targets.add(new PsiElement2UsageTargetAdapter(element, true)));
             }
             showReferences(editor, targets, editor.getCaretModel().getCurrentCaret().getLogicalPosition());
@@ -72,13 +76,22 @@ public class LSPReferencesAction extends DumbAwareAction {
     }
 
     public void forManagerAndOffset(EditorEventManager manager, int offset) {
-        List<PsiElement2UsageTargetAdapter> targets = new ArrayList<>();
-        Pair<List<PsiElement>, List<VirtualFile>> references = manager.references(offset);
-        if (references.first != null && references.second != null) {
-            references.first.forEach(element -> targets.add(new PsiElement2UsageTargetAdapter(element, true)));
-        }
-        Editor editor = manager.editor;
-        showReferences(editor, targets, editor.offsetToLogicalPosition(offset));
+        ReadAction.nonBlocking(() -> {
+            val references = manager.references(offset, true, true);
+            val targets = new ArrayList<PsiElement2UsageTargetAdapter>();
+            if (references.first != null) {
+                references.first.forEach(element -> targets.add(new PsiElement2UsageTargetAdapter(element, true)));
+            }
+            return targets;
+                  })
+                  .expireWhen(() -> manager.editor.isDisposed())
+                  .finishOnUiThread(ModalityState.NON_MODAL, targets -> {
+                      val editor = manager.editor;
+                      if (editor.isDisposed())
+                          return;
+                      showReferences(editor, targets, editor.offsetToLogicalPosition(offset));
+                  })
+                  .submit(AppExecutorUtil.getAppExecutorService());
     }
 
     private void showReferences(Editor editor, List<PsiElement2UsageTargetAdapter> targets, LogicalPosition position) {
@@ -108,7 +121,7 @@ public class LSPReferencesAction extends DumbAwareAction {
             UsageViewPresentation presentation = createPresentation(targets.get(0).getElement(),
                     new FindUsagesOptions(editor.getProject()), false);
             UsageViewManager.getInstance(project)
-                    .showUsages(new UsageTarget[] { targets.get(0) }, usages.toArray(new Usage[usages.size()]),
+                    .showUsages(new UsageTarget[0], usages.toArray(new Usage[0]),
                             presentation);
         }
     }

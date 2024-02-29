@@ -29,11 +29,4 @@ public class ZigLocalDebugProcess extends CidrLocalDebugProcess {
             throws ExecutionException {
         super(parameters, session, consoleBuilder, (project) -> Filter.EMPTY_ARRAY, false);
     }
-
-    @Override
-    public boolean isLibraryFrameFilterSupported() {
-        return false;
-    }
-
-
 }

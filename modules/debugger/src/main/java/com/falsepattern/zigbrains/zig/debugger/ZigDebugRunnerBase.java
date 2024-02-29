@@ -24,6 +24,9 @@ import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.process.ProcessTerminatedListener;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.xdebugger.XDebugProcess;
 import com.intellij.xdebugger.XDebugProcessStarter;
 import com.intellij.xdebugger.XDebugSession;
@@ -31,6 +34,8 @@ import com.intellij.xdebugger.XDebuggerManager;
 import lombok.val;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 
 public class ZigDebugRunnerBase extends ZigExecutableRunner {
     public ZigDebugRunnerBase() {
@@ -40,17 +45,24 @@ public class ZigDebugRunnerBase extends ZigExecutableRunner {
     @Override
     protected RunContentDescriptor showRunContent(ZigRunExecutionConfigurationRunProfileState state, ExecutionEnvironment environment, GeneralCommandLine runExecutable)
             throws ExecutionException {
-        val runParameters = new ZigDebugRunParameters(runExecutable);
-        return XDebuggerManager.getInstance(environment.getProject())
-                               .startSession(environment, new XDebugProcessStarter() {
-                                   @Override
-                                   public @NotNull XDebugProcess start(@NotNull XDebugSession session) throws ExecutionException {
-                                       val process = new ZigLocalDebugProcess(runParameters, session, state.getConsoleBuilder());
-                                       ProcessTerminatedListener.attach(process.getProcessHandler(), environment.getProject());
-                                       process.start();
-                                       return process;
-                                   }
-                               }).getRunContentDescriptor();
+        val project = environment.getProject();
+        val debuggerDriver = Utils.getDebuggerConfiguration(project);
+        if (debuggerDriver == null) {
+            Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Error", "Couldn't find a working GDB or LLDB debugger! Please check your Toolchains! (Settings | Build, Execution, Deployment | Toolchains)", NotificationType.ERROR));
+            return null;
+        }
+        val runParameters = new ZigDebugRunParameters(runExecutable, debuggerDriver);
+        val manager = XDebuggerManager.getInstance(project);
+        return manager.startSession(environment,
+                                    new XDebugProcessStarter() {
+            @Override
+            public @NotNull XDebugProcess start(@NotNull XDebugSession session) throws ExecutionException {
+                val process = new ZigLocalDebugProcess(runParameters, session, state.getConsoleBuilder());
+                ProcessTerminatedListener.attach(process.getProcessHandler(), environment.getProject());
+                process.start();
+                return process;
+            }
+        }).getRunContentDescriptor();
     }
 
     @Override

@@ -90,6 +90,10 @@ public class DocumentUtils {
         });
     }
 
+    public static int LSPPosToOffset(Document document, Position pos) {
+        return document.getLineStartOffset(pos.getLine()) + pos.getCharacter();
+    }
+
     /**
      * Transforms an LSP position to an editor offset
      *

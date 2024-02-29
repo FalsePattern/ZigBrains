@@ -39,9 +39,7 @@ import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class DocumentEventManager {
@@ -52,7 +50,6 @@ public class DocumentEventManager {
     private final TextDocumentIdentifier identifier;
     private int version = -1;
     protected Logger LOG = Logger.getInstance(EditorEventManager.class);
-    private static final Map<String, DocumentEventManager> uriToDocumentEventManager = new HashMap<>();
 
     private final Set<Document> openDocuments = new HashSet<>();
 
@@ -62,22 +59,6 @@ public class DocumentEventManager {
         this.syncKind = syncKind;
         this.wrapper = wrapper;
         this.identifier = new TextDocumentIdentifier(FileUtils.documentToUri(document));
-    }
-
-    public static void clearState() {
-        uriToDocumentEventManager.clear();
-    }
-
-    public static DocumentEventManager getOrCreateDocumentManager(Document document, DocumentListener listener, TextDocumentSyncKind syncKind, LanguageServerWrapper wrapper) {
-        DocumentEventManager manager = uriToDocumentEventManager.get(FileUtils.documentToUri(document));
-        if (manager != null) {
-            return manager;
-        }
-
-        manager = new DocumentEventManager(document, listener, syncKind, wrapper);
-
-        uriToDocumentEventManager.put(FileUtils.documentToUri(document), manager);
-        return manager;
     }
 
     public void removeListeners() {

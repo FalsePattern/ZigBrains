@@ -28,8 +28,6 @@ import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
 import com.falsepattern.zigbrains.lsp.listeners.DocumentListenerImpl;
-import com.falsepattern.zigbrains.lsp.listeners.EditorMouseListenerImpl;
-import com.falsepattern.zigbrains.lsp.listeners.EditorMouseMotionListenerImpl;
 import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
@@ -67,6 +65,7 @@ import org.eclipse.lsp4j.DidChangeWatchedFilesCapabilities;
 import org.eclipse.lsp4j.DocumentHighlightCapabilities;
 import org.eclipse.lsp4j.ExecuteCommandCapabilities;
 import org.eclipse.lsp4j.FoldingRangeCapabilities;
+import org.eclipse.lsp4j.FoldingRangeKind;
 import org.eclipse.lsp4j.FoldingRangeKindSupportCapabilities;
 import org.eclipse.lsp4j.FoldingRangeSupportCapabilities;
 import org.eclipse.lsp4j.FormattingCapabilities;
@@ -355,30 +354,24 @@ public class LanguageServerWrapper {
                         //Todo - Implement
                         //  SelectionListenerImpl selectionListener = new SelectionListenerImpl();
                         DocumentListenerImpl documentListener = new DocumentListenerImpl();
-                        EditorMouseListenerImpl mouseListener = new EditorMouseListenerImpl();
-                        EditorMouseMotionListenerImpl mouseMotionListener = new EditorMouseMotionListenerImpl();
                         LSPCaretListenerImpl caretListener = new LSPCaretListenerImpl();
 
                         ServerOptions serverOptions = new ServerOptions(capabilities);
                         EditorEventManager manager;
                         if (extManager != null) {
                             manager = extManager.getExtendedEditorEventManagerFor(editor, documentListener,
-                                    mouseListener, mouseMotionListener, caretListener, requestManager, serverOptions,
+                                    caretListener, requestManager, serverOptions,
                                     this);
                             if (manager == null) {
-                                manager = new EditorEventManager(editor, documentListener, mouseListener,
-                                        mouseMotionListener, caretListener,
+                                manager = new EditorEventManager(editor, documentListener, caretListener,
                                         requestManager, serverOptions, this);
                             }
                         } else {
-                            manager = new EditorEventManager(editor, documentListener, mouseListener,
-                                    mouseMotionListener, caretListener,
+                            manager = new EditorEventManager(editor, documentListener, caretListener,
                                     requestManager, serverOptions, this);
                         }
                         // selectionListener.setManager(manager);
                         documentListener.setManager(manager);
-                        mouseListener.setManager(manager);
-                        mouseMotionListener.setManager(manager);
                         caretListener.setManager(manager);
                         manager.registerListeners();
                         if (!urisUnderLspControl.contains(uri)) {
@@ -464,7 +457,6 @@ public class LanguageServerWrapper {
 
             // sadly this whole editor closing stuff runs asynchronously, so we cannot be sure the state is really clean here...
             // therefore clear the mapping from here as it should be empty by now.
-            DocumentEventManager.clearState();
             uriToEditorManagers.clear();
             urisUnderLspControl.clear();
             launcherFuture = null;
@@ -590,7 +582,8 @@ public class LanguageServerWrapper {
         textDocumentClientCapabilities.setSynchronization(new SynchronizationCapabilities(true, true, true));
 
         FoldingRangeCapabilities foldingRangeCapabilities = new FoldingRangeCapabilities();
-        foldingRangeCapabilities.setFoldingRangeKind(new FoldingRangeKindSupportCapabilities(List.of("comment", "region", "imports")));
+        foldingRangeCapabilities.setFoldingRangeKind(new FoldingRangeKindSupportCapabilities(List.of(
+                FoldingRangeKind.Comment, FoldingRangeKind.Imports, FoldingRangeKind.Region)));
         foldingRangeCapabilities.setFoldingRange(new FoldingRangeSupportCapabilities(true));
         textDocumentClientCapabilities.setFoldingRange(foldingRangeCapabilities);
 

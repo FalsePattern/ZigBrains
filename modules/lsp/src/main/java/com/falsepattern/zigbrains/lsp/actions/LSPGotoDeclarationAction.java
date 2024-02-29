@@ -13,33 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.falsepattern.zigbrains.lsp.actions;
 
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
+import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.requests.ReformatHandler;
 import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
-import com.intellij.codeInsight.actions.ReformatCodeAction;
-import com.intellij.lang.LanguageFormatting;
+import com.intellij.codeInsight.navigation.actions.GotoDeclarationAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import lombok.val;
+import org.jetbrains.annotations.NotNull;
 
-/**
- * Action overriding the default reformat action
- * Fallback to the default action if the language is already supported or not supported by any language server
- */
-public class LSPReformatAction extends ReformatCodeAction implements DumbAware {
-    private Logger LOG = Logger.getInstance(LSPReformatAction.class);
-
+public class LSPGotoDeclarationAction extends GotoDeclarationAction {
     @Override
-    public void actionPerformed(AnActionEvent e) {
+    public void actionPerformed(@NotNull AnActionEvent e) {
         Project project = e.getData(CommonDataKeys.PROJECT);
         Editor editor = e.getData(CommonDataKeys.EDITOR);
         if (editor == null || project == null) {
@@ -51,17 +46,17 @@ public class LSPReformatAction extends ReformatCodeAction implements DumbAware {
             super.actionPerformed(e);
             return;
         }
-        ApplicationUtils.writeAction(() -> FileDocumentManager.getInstance().saveDocument(editor.getDocument()));
-        // if editor hasSelection, only reformat selection, not reformat the whole file
-        if (editor.getSelectionModel().hasSelection()) {
-            ReformatHandler.reformatSelection(editor);
-        } else {
-            ReformatHandler.reformatFile(editor);
+        EditorEventManager manager = EditorEventManagerBase.forEditor(editor);
+        if (manager == null) {
+            super.actionPerformed(e);
+            return;
         }
-    }
-
-    @Override
-    public void update(AnActionEvent event) {
-        super.update(event);
+        val offset = editor.getCaretModel().getOffset();
+        val psiElement = file.findElementAt(offset);
+        if (psiElement == null) {
+            super.actionPerformed(e);
+            return;
+        }
+        manager.gotoDeclarationOrUsages(psiElement);
     }
 }

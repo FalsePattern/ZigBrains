@@ -17,6 +17,7 @@
 package com.falsepattern.zigbrains.project.ide.project;
 
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
+import com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
@@ -66,10 +67,14 @@ public class ZigProjectConfigurable implements Configurable {
     public void apply() throws ConfigurationException {
         val zigSettings = ZigProjectSettingsService.getInstance(project);
         val settingsData = settingsPanel.getData();
+        boolean modified = isModified();
         zigSettings.modify((settings) -> {
             settings.setToolchain(settingsData.toolchain());
             settings.setExplicitPathToStd(settingsData.explicitPathToStd());
         });
+        if (modified) {
+            ZLSStartupActivity.initZLS(project);
+        }
     }
 
     @Override
