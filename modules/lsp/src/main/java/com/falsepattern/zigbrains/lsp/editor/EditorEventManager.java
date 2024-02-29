@@ -72,11 +72,13 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.Hint;
 import com.intellij.util.SmartList;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionContext;
@@ -120,6 +122,7 @@ import org.eclipse.lsp4j.jsonrpc.JsonRpcException;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.awt.Point;
@@ -173,8 +176,6 @@ public class EditorEventManager {
     public LanguageServerWrapper wrapper;
     private Project project;
     private TextDocumentIdentifier identifier;
-    private EditorMouseListener mouseListener;
-    private EditorMouseMotionListener mouseMotionListener;
     private LSPCaretListenerImpl caretListener;
 
     public List<String> completionTriggers;
@@ -200,13 +201,10 @@ public class EditorEventManager {
     public static final String SNIPPET_PLACEHOLDER_REGEX = "(\\$\\{\\d+:?([^{^}]*)}|\\$\\d+)";
 
     //Todo - Revisit arguments order and add remaining listeners
-    public EditorEventManager(Editor editor, DocumentListener documentListener, EditorMouseListener mouseListener,
-                              EditorMouseMotionListener mouseMotionListener, LSPCaretListenerImpl caretListener,
+    public EditorEventManager(Editor editor, DocumentListener documentListener, LSPCaretListenerImpl caretListener,
                               RequestManager requestmanager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
 
         this.editor = editor;
-        this.mouseListener = mouseListener;
-        this.mouseMotionListener = mouseMotionListener;
         this.wrapper = wrapper;
         this.caretListener = caretListener;
 
@@ -258,75 +256,6 @@ public class EditorEventManager {
         }
     }
 
-    /**
-     * Tells the manager that the mouse is in the editor
-     */
-    public void mouseEntered() {
-        mouseInEditor = true;
-    }
-
-    /**
-     * Tells the manager that the mouse is not in the editor
-     */
-    public void mouseExited() {
-        mouseInEditor = false;
-    }
-
-    /**
-     * Will show documentation if the mouse doesn't move for a given time (Hover)
-     *
-     * @param e the event
-     */
-    public void mouseMoved(EditorMouseEvent e) {
-//        if (e.getEditor() != editor) {
-//            LOG.error("Wrong editor for EditorEventManager");
-//            return;
-//        }
-//
-//        PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
-//        if (psiFile == null) {
-//            return;
-//        }
-//        Language language = psiFile.getLanguage();
-//        if ((!LanguageDocumentation.INSTANCE.allForLanguage(language).isEmpty() && !isSupportedLanguageFile(psiFile))
-//                || (!getIsCtrlDown() && !EditorSettingsExternalizable.getInstance().isShowQuickDocOnMouseOverElement())) {
-//            return;
-//        }
-//
-//        long curTime = System.nanoTime();
-//        if (predTime == (-1L) || ctrlTime == (-1L)) {
-//            predTime = curTime;
-//            ctrlTime = curTime;
-//        } else {
-//            LogicalPosition lPos = getPos(e);
-//            if (lPos == null || getIsKeyPressed() && !getIsCtrlDown()) {
-//                return;
-//            }
-//
-//            int offset = editor.logicalPositionToOffset(lPos);
-//            if ((getIsCtrlDown() || EditorSettingsExternalizable.getInstance().isShowQuickDocOnMouseOverElement())
-//                    && curTime - ctrlTime > CTRL_THRESH) {
-//                if (getCtrlRange() == null || !getCtrlRange().highlightContainsOffset(offset)) {
-//                    if (currentHint != null) {
-//                        currentHint.hide();
-//                    }
-//                    currentHint = null;
-//                    if (getCtrlRange() != null) {
-//                        getCtrlRange().dispose();
-//                    }
-//                    setCtrlRange(null);
-//                    pool(() -> requestAndShowDoc(lPos, e.getMouseEvent().getPoint()));
-//                } else if (getCtrlRange().definitionContainsOffset(offset)) {
-//                    createAndShowEditorHint(editor, "Click to show usages", editor.offsetToXY(offset));
-//                } else {
-//                    editor.getContentComponent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//                }
-//                ctrlTime = curTime;
-//            }
-//            predTime = curTime;
-//        }
-    }
-
     private boolean isSupportedLanguageFile(PsiFile file) {
         return file.getLanguage().isKindOf(PlainTextLanguage.INSTANCE)
                 || FileUtils.isFileSupported(file.getVirtualFile());
@@ -344,14 +273,14 @@ public class EditorEventManager {
             return;
         }
 
-        if (getIsCtrlDown()) {
-            // If CTRL/CMD key is pressed, triggers goto definition/references and hover.
-            try {
-                trySourceNavigationAndHover(e);
-            } catch (Exception err) {
-                LOG.warn("Error occurred when trying source navigation", err);
-            }
-        }
+//        if (getIsCtrlDown()) {
+//            // If CTRL/CMD key is pressed, triggers goto definition/references and hover.
+//            try {
+//                trySourceNavigationAndHover(e);
+//            } catch (Exception err) {
+//                LOG.warn("Error occurred when trying source navigation", err);
+//            }
+//        }
     }
 
     private void createCtrlRange(Position logicalPos, Range range) {
@@ -459,7 +388,7 @@ public class EditorEventManager {
      * @param offset The offset in the editor
      * @return An array of PsiElement
      */
-    public Pair<List<PsiElement>, List<VirtualFile>> references(int offset, boolean getOriginalElement, boolean close) {
+    public Pair<List<PsiElement>, List<VirtualFile>> references(int offset, boolean getOriginalElement, boolean fast) {
         renameCache = null;
         Position lspPos = DocumentUtils.offsetToLSPPos(editor, offset);
         TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(FileUtils.editorToURIString(editor));
@@ -472,35 +401,47 @@ public class EditorEventManager {
                 List<? extends Location> res = request.get(Timeout.getTimeout(Timeouts.REFERENCES), TimeUnit.MILLISECONDS);
                 wrapper.notifySuccess(Timeouts.REFERENCES);
                 if (res != null && res.size() > 0) {
-                    List<VirtualFile> openedEditors = new ArrayList<>();
+                    List<VirtualFile> openedEditors = fast ? null : new ArrayList<>();
                     List<PsiElement> elements = new ArrayList<>();
                     res.forEach(l -> {
                         Position start = l.getRange().getStart();
                         Position end = l.getRange().getEnd();
                         String uri = FileUtils.sanitizeURI(l.getUri());
                         VirtualFile file = FileUtils.virtualFileFromURI(uri);
-                        Editor curEditor = FileUtils.editorFromUri(uri, project);
-                        if (curEditor == null && file != null) {
-                            OpenFileDescriptor descriptor = new OpenFileDescriptor(project, file, start.getLine(), start.getCharacter());
-                            curEditor = computableWriteAction(
-                                    () -> FileEditorManager.getInstance(project).openTextEditor(descriptor, false));
-                            openedEditors.add(file);
+                        if (fast) {
+                            if (file == null)
+                                return;
+                            val document = FileDocumentManager.getInstance().getDocument(file);
+                            if (document == null)
+                                return;
+                            val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
+                            if (psiFile == null)
+                                return;
+                            val element = psiFile.findElementAt(DocumentUtils.LSPPosToOffset(document, start));
+                            if (element == null)
+                                return;
+                            elements.add(element);
+                        } else {
+                            Editor curEditor = FileUtils.editorFromUri(uri, project);
+                            if (curEditor == null && file != null) {
+                                OpenFileDescriptor descriptor =
+                                        new OpenFileDescriptor(project, file, start.getLine(), start.getCharacter());
+                                curEditor = computableWriteAction(
+                                        () -> FileEditorManager.getInstance(project).openTextEditor(descriptor, false));
+                                openedEditors.add(file);
+                            }
+                            if (curEditor == null) {
+                                LOG.warn("Error occurred in LSP references.");
+                                return;
+                            }
+                            int logicalStart = DocumentUtils.LSPPosToOffset(curEditor, start);
+                            int logicalEnd = DocumentUtils.LSPPosToOffset(curEditor, end);
+                            String name = curEditor.getDocument().getText(new TextRange(logicalStart, logicalEnd));
+                            elements.add(new LSPPsiElement(name, project, logicalStart, logicalEnd,
+                                                           PsiDocumentManager.getInstance(project)
+                                                                             .getPsiFile(curEditor.getDocument())));
                         }
-                        if (curEditor == null) {
-                            LOG.warn("Error occurred in LSP references.");
-                            return;
-                        }
-                        int logicalStart = DocumentUtils.LSPPosToOffset(curEditor, start);
-                        int logicalEnd = DocumentUtils.LSPPosToOffset(curEditor, end);
-                        String name = curEditor.getDocument().getText(new TextRange(logicalStart, logicalEnd));
-                        elements.add(new LSPPsiElement(name, project, logicalStart, logicalEnd,
-                                PsiDocumentManager.getInstance(project).getPsiFile(curEditor.getDocument())));
                     });
-                    if (close) {
-                        writeAction(
-                                () -> openedEditors.forEach(f -> FileEditorManager.getInstance(project).closeFile(f)));
-                        openedEditors.clear();
-                    }
                     return new Pair<>(elements, openedEditors);
                 } else {
                     return new Pair<>(null, null);
@@ -1290,8 +1231,6 @@ public class EditorEventManager {
      * Adds all the listeners
      */
     public void registerListeners() {
-        editor.addEditorMouseListener(mouseListener);
-        editor.addEditorMouseMotionListener(mouseMotionListener);
         editor.getCaretModel().addCaretListener(caretListener);
         // Todo - Implement
         // editor.getSelectionModel.addSelectionListener(selectionListener)
@@ -1301,8 +1240,6 @@ public class EditorEventManager {
      * Removes all the listeners
      */
     public void removeListeners() {
-        editor.removeEditorMouseListener(mouseListener);
-        editor.removeEditorMouseMotionListener(mouseMotionListener);
         editor.getCaretModel().removeCaretListener(caretListener);
         // Todo - Implement
         // editor.getSelectionModel.removeSelectionListener(selectionListener)
@@ -1446,21 +1383,19 @@ public class EditorEventManager {
     }
 
     // Tries to go to definition / show usages based on the element which is
-    private void trySourceNavigationAndHover(EditorMouseEvent e) {
+    public void gotoDeclarationOrUsages(PsiElement element) {
         if (editor.isDisposed()) {
             return;
         }
-
-        createCtrlRange(DocumentUtils.logicalToLSPPos(editor.xyToLogicalPosition(e.getMouseEvent().getPoint()), editor),
-                null);
+        val sourceOffset = element.getTextOffset();
+        createCtrlRange(DocumentUtils.offsetToLSPPos(editor, sourceOffset), null);
         final CtrlRangeMarker ctrlRange = getCtrlRange();
 
         if (ctrlRange == null) {
-            int offset = editor.logicalPositionToOffset(editor.xyToLogicalPosition(e.getMouseEvent().getPoint()));
             LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
                                                                                       .getAction("LSPFindUsages");
             if (referencesAction != null) {
-                referencesAction.forManagerAndOffset(this, offset);
+                referencesAction.forManagerAndOffset(this, sourceOffset);
             }
             return;
         }
@@ -1471,16 +1406,15 @@ public class EditorEventManager {
                 return;
             }
 
-            int offset = editor.logicalPositionToOffset(editor.xyToLogicalPosition(e.getMouseEvent().getPoint()));
             String locUri = FileUtils.sanitizeURI(loc.getUri());
 
             if (identifier.getUri().equals(locUri)
-                    && offset >= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getStart())
-                    && offset <= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getEnd())) {
+                    && sourceOffset >= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getStart())
+                    && sourceOffset <= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getEnd())) {
                 LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
                         .getAction("LSPFindUsages");
                 if (referencesAction != null) {
-                    referencesAction.forManagerAndOffset(this, offset);
+                    referencesAction.forManagerAndOffset(this, sourceOffset);
                 }
             } else {
                 gotoLocation(loc);

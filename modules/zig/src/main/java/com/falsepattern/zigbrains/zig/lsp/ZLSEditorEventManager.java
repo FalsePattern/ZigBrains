@@ -27,8 +27,6 @@ import com.falsepattern.zigbrains.zig.util.TokenDecoder;
 import com.intellij.lang.annotation.Annotation;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentListener;
-import com.intellij.openapi.editor.event.EditorMouseListener;
-import com.intellij.openapi.editor.event.EditorMouseMotionListener;
 import org.eclipse.lsp4j.SemanticTokens;
 import org.eclipse.lsp4j.SemanticTokensDelta;
 import org.eclipse.lsp4j.SemanticTokensDeltaParams;
@@ -49,8 +47,8 @@ import static com.falsepattern.zigbrains.lsp.requests.Timeout.getTimeout;
 public class ZLSEditorEventManager extends EditorEventManager {
     private static String previousResultID = null;
 
-    public ZLSEditorEventManager(Editor editor, DocumentListener documentListener, EditorMouseListener mouseListener, EditorMouseMotionListener mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestmanager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
-        super(editor, documentListener, mouseListener, mouseMotionListener, caretListener, requestmanager,
+    public ZLSEditorEventManager(Editor editor, DocumentListener documentListener, LSPCaretListenerImpl caretListener, RequestManager requestmanager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
+        super(editor, documentListener, caretListener, requestmanager,
               serverOptions, wrapper);
     }
 

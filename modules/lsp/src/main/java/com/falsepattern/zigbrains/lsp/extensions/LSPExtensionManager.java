@@ -26,8 +26,6 @@ import com.falsepattern.zigbrains.lsp.contributors.icon.LSPIconProvider;
 import com.falsepattern.zigbrains.lsp.contributors.label.LSPDefaultLabelProvider;
 import com.falsepattern.zigbrains.lsp.contributors.label.LSPLabelProvider;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
-import com.falsepattern.zigbrains.lsp.listeners.EditorMouseListenerImpl;
-import com.falsepattern.zigbrains.lsp.listeners.EditorMouseMotionListenerImpl;
 import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentListener;
@@ -69,8 +67,6 @@ public interface LSPExtensionManager {
      */
     EditorEventManager getExtendedEditorEventManagerFor(Editor editor,
                                                         DocumentListener documentListener,
-                                                        EditorMouseListenerImpl mouseListener,
-                                                        EditorMouseMotionListenerImpl mouseMotionListener,
                                                         LSPCaretListenerImpl caretListener,
                                                         RequestManager requestManager,
                                                         ServerOptions serverOptions,

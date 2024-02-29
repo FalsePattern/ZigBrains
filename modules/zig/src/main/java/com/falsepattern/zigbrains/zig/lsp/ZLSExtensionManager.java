@@ -21,8 +21,6 @@ import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
-import com.falsepattern.zigbrains.lsp.listeners.EditorMouseListenerImpl;
-import com.falsepattern.zigbrains.lsp.listeners.EditorMouseMotionListenerImpl;
 import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentListener;
@@ -37,9 +35,9 @@ public class ZLSExtensionManager implements LSPExtensionManager {
     }
 
     @Override
-    public ZLSEditorEventManager getExtendedEditorEventManagerFor(Editor editor, DocumentListener documentListener, EditorMouseListenerImpl mouseListener, EditorMouseMotionListenerImpl mouseMotionListener, LSPCaretListenerImpl caretListener, RequestManager requestManager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
-        return new ZLSEditorEventManager(editor, documentListener, mouseListener, mouseMotionListener,
-                                             caretListener, requestManager, serverOptions, wrapper);
+    public ZLSEditorEventManager getExtendedEditorEventManagerFor(Editor editor, DocumentListener documentListener, LSPCaretListenerImpl caretListener, RequestManager requestManager, ServerOptions serverOptions, LanguageServerWrapper wrapper) {
+        return new ZLSEditorEventManager(editor, documentListener,
+                                         caretListener, requestManager, serverOptions, wrapper);
     }
 
     @Override

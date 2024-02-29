@@ -28,8 +28,6 @@ import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
 import com.falsepattern.zigbrains.lsp.listeners.DocumentListenerImpl;
-import com.falsepattern.zigbrains.lsp.listeners.EditorMouseListenerImpl;
-import com.falsepattern.zigbrains.lsp.listeners.EditorMouseMotionListenerImpl;
 import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
@@ -356,30 +354,24 @@ public class LanguageServerWrapper {
                         //Todo - Implement
                         //  SelectionListenerImpl selectionListener = new SelectionListenerImpl();
                         DocumentListenerImpl documentListener = new DocumentListenerImpl();
-                        EditorMouseListenerImpl mouseListener = new EditorMouseListenerImpl();
-                        EditorMouseMotionListenerImpl mouseMotionListener = new EditorMouseMotionListenerImpl();
                         LSPCaretListenerImpl caretListener = new LSPCaretListenerImpl();
 
                         ServerOptions serverOptions = new ServerOptions(capabilities);
                         EditorEventManager manager;
                         if (extManager != null) {
                             manager = extManager.getExtendedEditorEventManagerFor(editor, documentListener,
-                                    mouseListener, mouseMotionListener, caretListener, requestManager, serverOptions,
+                                    caretListener, requestManager, serverOptions,
                                     this);
                             if (manager == null) {
-                                manager = new EditorEventManager(editor, documentListener, mouseListener,
-                                        mouseMotionListener, caretListener,
+                                manager = new EditorEventManager(editor, documentListener, caretListener,
                                         requestManager, serverOptions, this);
                             }
                         } else {
-                            manager = new EditorEventManager(editor, documentListener, mouseListener,
-                                    mouseMotionListener, caretListener,
+                            manager = new EditorEventManager(editor, documentListener, caretListener,
                                     requestManager, serverOptions, this);
                         }
                         // selectionListener.setManager(manager);
                         documentListener.setManager(manager);
-                        mouseListener.setManager(manager);
-                        mouseMotionListener.setManager(manager);
                         caretListener.setManager(manager);
                         manager.registerListeners();
                         if (!urisUnderLspControl.contains(uri)) {

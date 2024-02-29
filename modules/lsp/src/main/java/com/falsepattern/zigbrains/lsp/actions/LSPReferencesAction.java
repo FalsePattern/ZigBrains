@@ -63,8 +63,8 @@ public class LSPReferencesAction extends DumbAwareAction {
             }
             List<PsiElement2UsageTargetAdapter> targets = new ArrayList<>();
             Pair<List<PsiElement>, List<VirtualFile>> references = eventManager
-                    .references(editor.getCaretModel().getCurrentCaret().getOffset());
-            if (references.first != null && references.second != null) {
+                    .references(editor.getCaretModel().getCurrentCaret().getOffset(), true, true);
+            if (references.first != null) {
                 references.first.forEach(element -> targets.add(new PsiElement2UsageTargetAdapter(element, true)));
             }
             showReferences(editor, targets, editor.getCaretModel().getCurrentCaret().getLogicalPosition());
@@ -73,8 +73,8 @@ public class LSPReferencesAction extends DumbAwareAction {
 
     public void forManagerAndOffset(EditorEventManager manager, int offset) {
         List<PsiElement2UsageTargetAdapter> targets = new ArrayList<>();
-        Pair<List<PsiElement>, List<VirtualFile>> references = manager.references(offset);
-        if (references.first != null && references.second != null) {
+        Pair<List<PsiElement>, List<VirtualFile>> references = manager.references(offset, true, true);
+        if (references.first != null) {
             references.first.forEach(element -> targets.add(new PsiElement2UsageTargetAdapter(element, true)));
         }
         Editor editor = manager.editor;
@@ -108,7 +108,7 @@ public class LSPReferencesAction extends DumbAwareAction {
             UsageViewPresentation presentation = createPresentation(targets.get(0).getElement(),
                     new FindUsagesOptions(editor.getProject()), false);
             UsageViewManager.getInstance(project)
-                    .showUsages(new UsageTarget[] { targets.get(0) }, usages.toArray(new Usage[usages.size()]),
+                    .showUsages(new UsageTarget[0], usages.toArray(new Usage[0]),
                             presentation);
         }
     }
