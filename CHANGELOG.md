@@ -22,6 +22,7 @@ Changelog structure reference:
 
 - Debugger
   - Now uses the toolchains you set in Settings | Build, Execution, Deployment | Toolchains
+  - Standard library stack frames are now automatically filtered from the debug stack trace
 
 ### Changed
 
