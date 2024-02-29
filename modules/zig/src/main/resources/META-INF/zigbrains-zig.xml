@@ -125,6 +125,8 @@
                 overrides="true" text="Reformat Code"/>
         <action class="com.falsepattern.zigbrains.lsp.actions.LSPGotoDeclarationAction" id="GotoDeclaration" use-shortcut-of="GotoDeclaration"
                 overrides="true" text="Go to Declaration or Usages"/>
+        <action class="com.falsepattern.zigbrains.lsp.actions.LSPGotoDefinitionAction" id="QuickImplementations" use-shortcut-of="QuickImplementations"
+                overrides="true" text="View Implementations"/>
         <action class="com.falsepattern.zigbrains.lsp.actions.LSPShowReformatDialogAction" id="ShowReformatFileDialog"
                 use-shortcut-of="ShowReformatFileDialog" overrides="true" text="Show Reformat File Dialog"/>
 

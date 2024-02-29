@@ -24,10 +24,11 @@ Changelog structure reference:
   - Now uses the toolchains you set in Settings | Build, Execution, Deployment | Toolchains
   - Standard library stack frames are now automatically filtered from the debug stack trace
 
-### Changed
-
 - Zig
-  - Go to Declarations/Usages now works with any user-configured hotkeys, not just CTRL+Click
+  - Go to Declaration/Usages now functions as expected, taking you to the declaration of a symbol instead of its resolved
+    implementation.
+  - For the time being, the "Quick Definition" (CTRL+Shift+I) action has been repurposed as Go To Definition. This will be
+    replaced with a properly integrated solution once a way to couple the PSI symbol system and the LSP has been found.
 
 ### Fixed
 

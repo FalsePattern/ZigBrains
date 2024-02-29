@@ -88,6 +88,7 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.DeclarationParams;
 import org.eclipse.lsp4j.DefinitionParams;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
@@ -121,6 +122,7 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.JsonRpcException;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
+import org.eclipse.lsp4j.services.TextDocumentService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -141,12 +143,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase.getCtrlRange;
-import static com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase.getIsCtrlDown;
-import static com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase.setCtrlRange;
 import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableReadAction;
 import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableWriteAction;
 import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.invokeLater;
@@ -262,84 +263,47 @@ public class EditorEventManager {
     }
 
     /**
-     * Called when the mouse is clicked
-     * At the moment, is used by CTRL+click to see references / goto definition
-     *
-     * @param e The mouse event
-     */
-    public void mouseClicked(EditorMouseEvent e) {
-        if (e.getEditor() != editor) {
-            LOG.error("Wrong editor for EditorEventManager");
-            return;
-        }
-
-//        if (getIsCtrlDown()) {
-//            // If CTRL/CMD key is pressed, triggers goto definition/references and hover.
-//            try {
-//                trySourceNavigationAndHover(e);
-//            } catch (Exception err) {
-//                LOG.warn("Error occurred when trying source navigation", err);
-//            }
-//        }
-    }
-
-    private void createCtrlRange(Position logicalPos, Range range) {
-        Location location = requestDefinition(logicalPos);
-        if (location == null || location.getRange() == null || editor.isDisposed()) {
-            return;
-        }
-        Range corRange;
-        if (range == null) {
-            corRange = new Range(logicalPos, logicalPos);
-        } else {
-            corRange = range;
-        }
-        int startOffset = DocumentUtils.LSPPosToOffset(editor, corRange.getStart());
-        int endOffset = DocumentUtils.LSPPosToOffset(editor, corRange.getEnd());
-        boolean isDefinition = DocumentUtils.LSPPosToOffset(editor, location.getRange().getStart()) == startOffset;
-
-        CtrlRangeMarker ctrlRange = getCtrlRange();
-        if (!editor.isDisposed()) {
-            if (ctrlRange != null) {
-                ctrlRange.dispose();
-            }
-            setCtrlRange(new CtrlRangeMarker(location, editor, !isDefinition ?
-                    (editor.getMarkupModel().addRangeHighlighter(startOffset, endOffset, HighlighterLayer.HYPERLINK,
-                            editor.getColorsScheme().getAttributes(EditorColors.REFERENCE_HYPERLINK_COLOR),
-                            HighlighterTargetArea.EXACT_RANGE)) : null));
-        }
-    }
-
-    /**
      * Returns the position of the definition given a position in the editor
      *
      * @param position The position
      * @return The location of the definition
      */
+    private Location requestDeclaration(Position position) {
+        return requestDefinitionOrDeclaration(position, Timeouts.DECLARATION, DeclarationParams::new, TextDocumentService::declaration);
+    }
+
+    /**
+     * Returns the position of the declaration given a position in the editor
+     *
+     * @param position The position
+     * @return The location of the declaration
+     */
     private Location requestDefinition(Position position) {
-        DefinitionParams params = new DefinitionParams(identifier, position);
-        CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> request =
-                wrapper.getRequestManager().definition(params);
+        return requestDefinitionOrDeclaration(position, Timeouts.DEFINITION, DefinitionParams::new, TextDocumentService::definition);
+    }
+
+    private <T> Location requestDefinitionOrDeclaration(Position position, Timeouts timeout, BiFunction<TextDocumentIdentifier, Position, T> paramsConstructor, BiFunction<TextDocumentService, T, CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>>> requester) {
+        val params = paramsConstructor.apply(identifier, position);
+        val request = requester.apply(wrapper.getRequestManager(), params);
 
         if (request == null) {
             return null;
         }
         try {
-            Either<List<? extends Location>, List<? extends LocationLink>> definition =
-                    request.get(Timeout.getTimeout(Timeouts.DEFINITION), TimeUnit.MILLISECONDS);
-            wrapper.notifySuccess(Timeouts.DEFINITION);
-            if (definition == null) {
+            val result = request.get(Timeout.getTimeout(timeout), TimeUnit.MILLISECONDS);
+            wrapper.notifySuccess(timeout);
+            if (result == null) {
                 return null;
             }
-            if (definition.isLeft() && !definition.getLeft().isEmpty()) {
-                return definition.getLeft().get(0);
-            } else if (definition.isRight() && !definition.getRight().isEmpty()) {
-                var def = definition.getRight().get(0);
+            if (result.isLeft() && !result.getLeft().isEmpty()) {
+                return result.getLeft().get(0);
+            } else if (result.isRight() && !result.getRight().isEmpty()) {
+                var def = result.getRight().get(0);
                 return new Location(def.getTargetUri(), def.getTargetRange());
             }
         } catch (TimeoutException e) {
             LOG.warn(e);
-            wrapper.notifyFailure(Timeouts.DEFINITION);
+            wrapper.notifyFailure(timeout);
             return null;
         } catch (InterruptedException | JsonRpcException | ExecutionException e) {
             LOG.warn(e);
@@ -400,7 +364,7 @@ public class EditorEventManager {
             try {
                 List<? extends Location> res = request.get(Timeout.getTimeout(Timeouts.REFERENCES), TimeUnit.MILLISECONDS);
                 wrapper.notifySuccess(Timeouts.REFERENCES);
-                if (res != null && res.size() > 0) {
+                if (res != null && !res.isEmpty()) {
                     List<VirtualFile> openedEditors = fast ? null : new ArrayList<>();
                     List<PsiElement> elements = new ArrayList<>();
                     res.forEach(l -> {
@@ -736,57 +700,6 @@ public class EditorEventManager {
                 });
             }
         });
-    }
-
-    /**
-     * Gets the hover request and shows it
-     *
-     * @param editorPos The editor position
-     * @param point     The point at which to show the hint
-     */
-    private void requestAndShowDoc(LogicalPosition editorPos, Point point) {
-        Position serverPos = computableReadAction(() -> DocumentUtils.logicalToLSPPos(editorPos, editor));
-        CompletableFuture<Hover> request = wrapper.getRequestManager().hover(new HoverParams(identifier, serverPos));
-        if (request == null) {
-            return;
-        }
-        try {
-            Hover hover = request.get(Timeout.getTimeout(Timeouts.HOVER), TimeUnit.MILLISECONDS);
-            wrapper.notifySuccess(Timeouts.HOVER);
-
-            if (hover == null) {
-                LOG.debug(String.format("Hover is null for file %s and pos (%d;%d)", identifier.getUri(),
-                        serverPos.getLine(), serverPos.getCharacter()));
-                return;
-            }
-
-            String string = HoverHandler.getHoverString(hover);
-            if (StringUtils.isEmpty(string)) {
-                LOG.warn(String.format("Hover string returned is empty for file %s and pos (%d;%d)",
-                        identifier.getUri(), serverPos.getLine(), serverPos.getCharacter()));
-                return;
-            }
-
-            if (getIsCtrlDown()) {
-                invokeLater(() -> {
-                    if (!editor.isDisposed()) {
-                        currentHint = createAndShowEditorHint(editor, string, point, HintManager.HIDE_BY_OTHER_HINT);
-                    }
-                });
-            } else {
-                invokeLater(() -> {
-                    if (!editor.isDisposed()) {
-                        currentHint = createAndShowEditorHint(editor, string, point);
-                    }
-                });
-            }
-        } catch (TimeoutException e) {
-            LOG.warn(e);
-            wrapper.notifyFailure(Timeouts.HOVER);
-        } catch (InterruptedException | JsonRpcException | ExecutionException e) {
-            LOG.warn(e);
-            wrapper.crashed(e);
-        }
     }
 
     /**
@@ -1381,17 +1294,32 @@ public class EditorEventManager {
             saveDocument();
         }
     }
+    // Tries to go to definition
+    public void gotoDefinition(PsiElement element) {
+        if (editor.isDisposed()) {
+            return;
+        }
+        val sourceOffset = element.getTextOffset();
+        val loc = requestDefinition(DocumentUtils.offsetToLSPPos(editor, sourceOffset));
 
-    // Tries to go to definition / show usages based on the element which is
+        invokeLater(() -> {
+            if (editor.isDisposed()) {
+                return;
+            }
+
+            gotoLocation(loc);
+        });
+    }
+
+    // Tries to go to declaration / show usages based on the element which is
     public void gotoDeclarationOrUsages(PsiElement element) {
         if (editor.isDisposed()) {
             return;
         }
         val sourceOffset = element.getTextOffset();
-        createCtrlRange(DocumentUtils.offsetToLSPPos(editor, sourceOffset), null);
-        final CtrlRangeMarker ctrlRange = getCtrlRange();
+        val loc = requestDeclaration(DocumentUtils.offsetToLSPPos(editor, sourceOffset));
 
-        if (ctrlRange == null) {
+        if (loc == null) {
             LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
                                                                                       .getAction("LSPFindUsages");
             if (referencesAction != null) {
@@ -1400,7 +1328,6 @@ public class EditorEventManager {
             return;
         }
 
-        Location loc = ctrlRange.location;
         invokeLater(() -> {
             if (editor.isDisposed()) {
                 return;
@@ -1419,9 +1346,6 @@ public class EditorEventManager {
             } else {
                 gotoLocation(loc);
             }
-
-            ctrlRange.dispose();
-            setCtrlRange(null);
         });
     }
 

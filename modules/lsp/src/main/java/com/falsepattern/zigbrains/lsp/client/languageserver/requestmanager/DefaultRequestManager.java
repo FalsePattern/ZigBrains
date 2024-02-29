@@ -33,6 +33,7 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.DeclarationParams;
 import org.eclipse.lsp4j.DefinitionParams;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -564,6 +565,21 @@ public class DefaultRequestManager implements RequestManager {
                 return Optional.ofNullable(serverCapabilities.getDefinitionProvider())
                         .map(e -> e.getLeft() || e.getRight() != null).orElse(false) ?
                         textDocumentService.definition(params) : null;
+            } catch (Exception e) {
+                crashed(e);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> declaration(DeclarationParams params) {
+        if (checkStatus()) {
+            try {
+                return Optional.ofNullable(serverCapabilities.getDefinitionProvider())
+                               .map(e -> e.getLeft() || e.getRight() != null).orElse(false) ?
+                       textDocumentService.declaration(params) : null;
             } catch (Exception e) {
                 crashed(e);
                 return null;
