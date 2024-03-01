@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - Updated semantic highlighting to latest ZLS protocol
+
 ### Fixed
 
 - Plugin
