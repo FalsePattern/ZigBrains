@@ -118,7 +118,7 @@ public class ZLSEditorEventManager extends EditorEventManager {
         return () -> {
             run.run();
             if (!editor.isDisposed()) {
-                ApplicationManager.getApplication().invokeLater(() -> HighlightingUtil.refreshHighlighting(this));
+                HighlightingUtil.refreshHighlighting(this);
             }
         };
     }

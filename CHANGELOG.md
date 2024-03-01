@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Plugin
+  - Removed a bunch of write action locking, the editor should feel more responsive now
+
 ## [12.0.0]
 
 ### Added
