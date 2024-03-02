@@ -53,4 +53,16 @@ public sealed abstract class ZigDefaultTemplate extends ZigProjectTemplate {
                           "build.zig.zon", "shared");
         }
     }
+
+    public static final class ZigInitTemplate extends ZigDefaultTemplate {
+        public static final ZigInitTemplate INSTANCE = new ZigInitTemplate();
+        private ZigInitTemplate() {
+            super("Generate using \"zig init\"", true);
+        }
+
+        @Override
+        public Map<String, String> fileTemplates() {
+            throw new UnsupportedOperationException();
+        }
+    }
 }

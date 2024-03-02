@@ -49,7 +49,8 @@ public class ZigNewProjectPanel implements Disposable {
 
     private final List<ZigProjectTemplate> defaultTemplates = Arrays.asList(
             ZigDefaultTemplate.ZigExecutableTemplate.INSTANCE,
-            ZigDefaultTemplate.ZigLibraryTemplate.INSTANCE
+            ZigDefaultTemplate.ZigLibraryTemplate.INSTANCE,
+            ZigDefaultTemplate.ZigInitTemplate.INSTANCE
                                                                            );
     private final DefaultListModel<ZigProjectTemplate> templateListModel = JBList.createDefaultListModel(defaultTemplates);
 

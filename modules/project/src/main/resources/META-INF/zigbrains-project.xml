@@ -15,6 +15,7 @@
   -->
 
 <idea-plugin package="com.falsepattern.zigbrains.project">
+    <resource-bundle>zigbrains.project.Bundle</resource-bundle>
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfigurationType"/>
         <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.actions.ZigRunExecutionConfigurationProducer"/>
@@ -33,6 +34,11 @@
 
         <programRunner implementation="com.falsepattern.zigbrains.project.runconfig.ZigRegularRunner"
                        id="ZigDebugRunner"/>
+
+        <notificationGroup displayType="BALLOON"
+                           bundle="zigbrains.project.Bundle"
+                           key="notif-zig-project"
+                           id="ZigBrains.Project"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">

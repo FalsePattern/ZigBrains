@@ -17,12 +17,17 @@
 package com.falsepattern.zigbrains.project.platform;
 
 import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectConfigurationData;
+import com.falsepattern.zigbrains.project.ide.project.ZigDefaultTemplate;
 import com.falsepattern.zigbrains.project.ide.util.projectwizard.ZigProjectSettingsStep;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.facet.ui.ValidationResult;
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep;
 import com.intellij.ide.util.projectWizard.CustomStepProjectGenerator;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
@@ -76,30 +81,55 @@ public class ZigDirectoryProjectGenerator implements DirectoryProjectGenerator<Z
         val settings = data.settings();
 
         var svc = ZigProjectSettingsService.getInstance(project);
-        svc.getState().setToolchain(settings.toolchain());
+        val toolchain = settings.toolchain();
+        svc.getState().setToolchain(toolchain);
 
         val template = data.selectedTemplate();
 
-        try {
-            WriteAction.run(() -> {
-                for (val fileTemplate : template.fileTemplates().entrySet()) {
-                    var fileName = fileTemplate.getKey();
-                    VirtualFile parentDir;
-                    if (fileName.contains("/")) {
-                        val slashIndex = fileName.indexOf('/');
-                        parentDir = baseDir.createChildDirectory(this, fileName.substring(0, slashIndex));
-                        fileName = fileName.substring(slashIndex + 1);
-                    } else {
-                        parentDir = baseDir;
+        if (template instanceof ZigDefaultTemplate.ZigInitTemplate) {
+            if (toolchain == null) {
+                Notifications.Bus.notify(new Notification("ZigBrains.Project",
+                                                          "Tried to generate project with zig init, but zig toolchain is invalid!",
+                                                          NotificationType.ERROR));
+                return;
+            }
+            val zig = toolchain.zig();
+            val resultOpt = zig.callWithArgs(baseDir.toNioPath(), 10000, "init");
+            if (resultOpt.isEmpty()) {
+                Notifications.Bus.notify(new Notification("ZigBrains.Project",
+                                                          "Failed to invoke \"zig init\"!",
+                                                          NotificationType.ERROR));
+                return;
+            }
+            val result = resultOpt.get();
+            if (result.getExitCode() != 0) {
+                Notifications.Bus.notify(new Notification("ZigBrains.Project",
+                                                          "\"zig init\" failed with exit code " + result.getExitCode() + "! Check the IDE log files!",
+                                                          NotificationType.ERROR));
+                System.err.println(result.getStderr());
+            }
+        } else {
+            try {
+                WriteAction.run(() -> {
+                    for (val fileTemplate : template.fileTemplates().entrySet()) {
+                        var fileName = fileTemplate.getKey();
+                        VirtualFile parentDir;
+                        if (fileName.contains("/")) {
+                            val slashIndex = fileName.indexOf('/');
+                            parentDir = baseDir.createChildDirectory(this, fileName.substring(0, slashIndex));
+                            fileName = fileName.substring(slashIndex + 1);
+                        } else {
+                            parentDir = baseDir;
+                        }
+                        val templateDir = fileTemplate.getValue();
+                        val resourceData = getResourceString("project-gen/" + templateDir + "/" + fileName + ".template");
+                        val targetFile = parentDir.createChildData(this, fileName);
+                        VfsUtil.saveText(targetFile, resourceData);
                     }
-                    val templateDir = fileTemplate.getValue();
-                    val resourceData = getResourceString("project-gen/" + templateDir + "/" + fileName + ".template");
-                    val targetFile = parentDir.createChildData(this, fileName);
-                    VfsUtil.saveText(targetFile, resourceData);
-                }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
