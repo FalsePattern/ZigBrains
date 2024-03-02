@@ -34,10 +34,9 @@ public class ZigCompilerTool extends AbstractZigTool{
     }
 
     public Optional<ZigToolchainEnvironmentSerializable> getEnv(@Nullable Path workingDirectory) {
-        return CLIUtil.execute(createBaseCommandLine(workingDirectory, "env"),
-                               toolchain.executionTimeoutInMilliseconds())
-                      .map(ProcessOutput::getStdoutLines)
-                      .map(lines -> new Gson().fromJson(String.join(" ", lines), ZigToolchainEnvironmentSerializable.class));
+        return callWithArgs(workingDirectory, toolchain.executionTimeoutInMilliseconds(), "env")
+                .map(ProcessOutput::getStdoutLines)
+                .map(lines -> new Gson().fromJson(String.join(" ", lines), ZigToolchainEnvironmentSerializable.class));
 
     }
 
