@@ -34,7 +34,7 @@ public sealed abstract class ZigDefaultTemplate extends ZigProjectTemplate {
 
         @Override
         public Map<String, String> fileTemplates() {
-            return Map.of("main.zig", "application",
+            return Map.of("src/main.zig", "application",
                           "build.zig", "application",
                           "build.zig.zon", "shared");
         }
@@ -48,7 +48,7 @@ public sealed abstract class ZigDefaultTemplate extends ZigProjectTemplate {
 
         @Override
         public Map<String, String> fileTemplates() {
-            return Map.of("root.zig", "static",
+            return Map.of("src/root.zig", "static",
                           "build.zig", "static",
                           "build.zig.zon", "shared");
         }

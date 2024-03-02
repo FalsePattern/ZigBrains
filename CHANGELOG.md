@@ -25,6 +25,9 @@ Changelog structure reference:
 
 ### Fixed
 
+- Project
+  - Fixed build.zig and build.zig.zon getting placed in src/ during project creation
+
 - Plugin
   - Removed a bunch of write action locking, the editor should feel more responsive now
 

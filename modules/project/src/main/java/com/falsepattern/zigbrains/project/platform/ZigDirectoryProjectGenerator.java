@@ -82,13 +82,19 @@ public class ZigDirectoryProjectGenerator implements DirectoryProjectGenerator<Z
 
         try {
             WriteAction.run(() -> {
-                val srcDir = baseDir.createChildDirectory(this, "src");
-
                 for (val fileTemplate : template.fileTemplates().entrySet()) {
-                    val fileName = fileTemplate.getKey();
+                    var fileName = fileTemplate.getKey();
+                    VirtualFile parentDir;
+                    if (fileName.contains("/")) {
+                        val slashIndex = fileName.indexOf('/');
+                        parentDir = baseDir.createChildDirectory(this, fileName.substring(0, slashIndex));
+                        fileName = fileName.substring(slashIndex + 1);
+                    } else {
+                        parentDir = baseDir;
+                    }
                     val templateDir = fileTemplate.getValue();
                     val resourceData = getResourceString("project-gen/" + templateDir + "/" + fileName + ".template");
-                    val targetFile = srcDir.createChildData(this, fileName);
+                    val targetFile = parentDir.createChildData(this, fileName);
                     VfsUtil.saveText(targetFile, resourceData);
                 }
             });
