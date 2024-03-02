@@ -1,10 +1,7 @@
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.grammarkit.tasks.GenerateLexerTask
-import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -15,7 +12,10 @@ plugins {
     id("org.jetbrains.intellij") version("1.17.2")
     id("org.jetbrains.changelog") version("2.2.0")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
+    id("com.palantir.git-version") version("3.0.0")
 }
+
+val gitVersion: groovy.lang.Closure<String> by extra
 
 val grammarKitGenDir = "build/generated/sources/grammarkit/java"
 val rootPackage = "com.falsepattern.zigbrains"
@@ -43,8 +43,20 @@ tasks {
     }
 }
 
-fun getPluginVersionFull(): Provider<String> {
-    return properties("pluginVersion").map { it + "-" + properties("pluginSinceBuild").get() }
+fun pluginVersion(): Provider<String> {
+    return provider {
+        System.getenv("RELEASE_VERSION")
+    }.orElse(provider {
+        try {
+            gitVersion()
+        } catch (_: java.lang.Exception) {
+            error("Git version not found and RELEASE_VERSION environment variable is not set!")
+        }
+    })
+}
+
+fun pluginVersionFull(): Provider<String> {
+    return pluginVersion().map { it + "-" + properties("pluginSinceBuild").get() }
 }
 
 allprojects {
@@ -86,7 +98,7 @@ allprojects {
     }
 
     group = properties("pluginGroup").get()
-    version = getPluginVersionFull().get()
+    version = pluginVersionFull().get()
 
     tasks {
         runIde { enabled = false }
@@ -303,7 +315,7 @@ project(":plugin") {
         }
 
         patchPluginXml {
-            version = getPluginVersionFull()
+            version = pluginVersionFull()
 
             // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
             pluginDescription = providers.fileContents(rootProject.layout.projectDirectory.file("README.md")).asText.map {
@@ -320,7 +332,7 @@ project(":plugin") {
 
             val changelog = rootProject.changelog // local variable for configuration cache compatibility
             // Get the latest available change notes from the changelog file
-            changeNotes = properties("pluginVersion").map { pluginVersion ->
+            changeNotes = pluginVersion().map { pluginVersion ->
                 with(changelog) {
                     renderItem(
                         (getOrNull(pluginVersion) ?: getUnreleased())
