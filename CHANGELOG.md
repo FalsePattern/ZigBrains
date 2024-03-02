@@ -21,7 +21,8 @@ Changelog structure reference:
 ### Added
 
 - Project
-  - Added `zig init` as a new project creation option 
+  - Added `zig init` as a new project creation option
+  - New projects will now have the project name in the build files instead of "untitled"
 
 - Zig
   - Updated semantic highlighting to latest ZLS protocol

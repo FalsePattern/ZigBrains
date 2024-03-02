@@ -110,6 +110,7 @@ public class ZigDirectoryProjectGenerator implements DirectoryProjectGenerator<Z
             }
         } else {
             try {
+                val projectName = project.getName();
                 WriteAction.run(() -> {
                     for (val fileTemplate : template.fileTemplates().entrySet()) {
                         var fileName = fileTemplate.getKey();
@@ -122,7 +123,7 @@ public class ZigDirectoryProjectGenerator implements DirectoryProjectGenerator<Z
                             parentDir = baseDir;
                         }
                         val templateDir = fileTemplate.getValue();
-                        val resourceData = getResourceString("project-gen/" + templateDir + "/" + fileName + ".template");
+                        val resourceData = getResourceString("project-gen/" + templateDir + "/" + fileName + ".template").replace("@@PROJECT_NAME@@", projectName);
                         val targetFile = parentDir.createChildData(this, fileName);
                         VfsUtil.saveText(targetFile, resourceData);
                     }
