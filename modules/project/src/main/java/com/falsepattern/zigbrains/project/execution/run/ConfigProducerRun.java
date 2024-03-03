@@ -26,12 +26,12 @@ import org.jetbrains.annotations.NotNull;
 public class ConfigProducerRun extends ConfigProducerBase<ZigExecConfigRun> {
     @Override
     public @NotNull ConfigurationFactory getConfigurationFactory() {
-        return ConfigTypeRun.getInstance().getFactory();
+        return ConfigTypeRun.getInstance().getConfigurationFactories()[0];
     }
 
     @Override
     protected boolean setupConfigurationFromContext(@NotNull ZigExecConfigRun configuration, PsiElement element, String filePath, VirtualFile theFile) {
-        if (ZigRunLineMarker.UTILITY_INSTANCE.elementMatches(element)) {
+        if (ZigLineMarkerRun.UTILITY_INSTANCE.elementMatches(element)) {
             configuration.filePath = filePath;
             configuration.setName(theFile.getPresentableName());
             return true;

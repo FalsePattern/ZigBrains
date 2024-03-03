@@ -34,21 +34,17 @@ public class ConfigTypeRun extends ConfigurationTypeBase {
 
     public ConfigTypeRun() {
         super(IDENTIFIER, "ZigRun", "Zig Run", Icons.ZIG);
-        addFactory(new ConfigFactoryRun(this));
+        addFactory(new ConfigFactoryRun());
     }
 
-    public ConfigurationFactory getFactory() {
-        return getConfigurationFactories()[0];
-    }
-
-    public static class ConfigFactoryRun extends ConfigurationFactory {
-        public ConfigFactoryRun(ConfigTypeRun type) {
-            super(type);
+    public class ConfigFactoryRun extends ConfigurationFactory {
+        public ConfigFactoryRun() {
+            super(ConfigTypeRun.this);
         }
 
         @Override
         public @NotNull RunConfiguration createTemplateConfiguration(@NotNull Project project) {
-            return new ZigExecConfigRun(project, this, "Zig Run");
+            return new ZigExecConfigRun(project, this);
         }
 
         @Override

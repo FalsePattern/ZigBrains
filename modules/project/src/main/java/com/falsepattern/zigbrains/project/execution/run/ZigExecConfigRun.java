@@ -36,8 +36,8 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
     public String filePath = "";
-    public ZigExecConfigRun(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
-        super(project, factory, name);
+    public ZigExecConfigRun(@NotNull Project project, @NotNull ConfigurationFactory factory) {
+        super(project, factory, "Zig Run");
     }
 
     @Override

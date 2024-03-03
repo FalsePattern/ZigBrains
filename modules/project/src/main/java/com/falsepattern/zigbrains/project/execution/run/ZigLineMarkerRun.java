@@ -26,8 +26,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 
-public class ZigRunLineMarker extends ZigTopLevelLineMarkerBase {
-    public static final ZigRunLineMarker UTILITY_INSTANCE = new ZigRunLineMarker();
+public class ZigLineMarkerRun extends ZigTopLevelLineMarkerBase {
+    public static final ZigLineMarkerRun UTILITY_INSTANCE = new ZigLineMarkerRun();
     @Override
     protected @Nullable PsiElement getDeclaration(@NotNull PsiElement element) {
         if (PsiUtil.getElementType(element) != ZigTypes.IDENTIFIER) {
