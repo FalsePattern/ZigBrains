@@ -17,28 +17,23 @@
 package com.falsepattern.zigbrains.project.execution.run;
 
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
-import com.falsepattern.zigbrains.project.ui.ZigCommandLinePanel;
+import com.falsepattern.zigbrains.project.execution.common.ZigConfigEditor;
 import com.falsepattern.zigbrains.project.util.ElementUtil;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
-import com.intellij.ui.dsl.builder.AlignX;
-import com.intellij.ui.dsl.builder.AlignY;
 import lombok.Getter;
+import lombok.Setter;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
-import java.util.Objects;
-
-import static com.intellij.ui.dsl.builder.BuilderKt.panel;
-
+@Setter
+@Getter
 public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
     public String filePath = "";
     public ZigExecConfigRun(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
@@ -56,8 +51,8 @@ public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
     }
 
     @Override
-    public @NotNull SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
-        return new EditorRun();
+    public @NotNull Editor getConfigurationEditor() {
+        return new Editor();
     }
 
     @Override
@@ -82,35 +77,16 @@ public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
         ElementUtil.writeString(element, "filePath", filePath);
     }
 
-    public static class EditorRun extends EditorBase<ZigExecConfigRun> {
-        @Getter
-        private final ZigCommandLinePanel commandLinePanel = new ZigCommandLinePanel();
+    public static class Editor extends ZigConfigEditor.WithFilePath<ZigExecConfigRun> {
 
         @Override
-        protected void applyEditorTo(@NotNull ZigExecConfigRun s) throws ConfigurationException {
-            super.applyEditorTo(s);
-            s.filePath = commandLinePanel.getText();
+        protected String getFilePath(ZigExecConfigRun config) {
+            return config.filePath;
         }
 
         @Override
-        protected void resetEditorFrom(@NotNull ZigExecConfigRun s) {
-            super.resetEditorFrom(s);
-            commandLinePanel.setText(Objects.requireNonNullElse(s.filePath, ""));
-        }
-
-        @Override
-        protected @NotNull JComponent createEditor() {
-            return panel((p) -> {
-                p.row("Target file", (r) -> {
-                    r.cell(commandLinePanel).resizableColumn().align(AlignX.FILL).align(AlignY.FILL);
-                    return null;
-                });
-                p.row(workingDirectoryComponent.getLabel(), (r) -> {
-                    r.cell(workingDirectoryComponent).resizableColumn().align(AlignX.FILL).align(AlignY.FILL);
-                    return null;
-                });
-                return null;
-            });
+        protected void setFilePath(ZigExecConfigRun config, String path) {
+            config.filePath = path;
         }
     }
 }
