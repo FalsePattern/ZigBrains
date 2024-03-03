@@ -17,13 +17,11 @@
 package com.falsepattern.zigbrains.project.execution.run;
 
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
-import com.falsepattern.zigbrains.project.execution.common.ZigConfigEditor;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
 import com.falsepattern.zigbrains.project.util.ElementUtil;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
-import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
 import lombok.Getter;

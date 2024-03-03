@@ -18,7 +18,7 @@ package com.falsepattern.zigbrains.project.execution.test;
 
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
-import com.falsepattern.zigbrains.project.execution.common.ZigConfigEditor;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.RunConfiguration;

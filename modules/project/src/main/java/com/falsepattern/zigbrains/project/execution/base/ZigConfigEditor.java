@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.common;
+package com.falsepattern.zigbrains.project.execution.base;
 
-import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.ui.WorkingDirectoryComponent;
 import com.falsepattern.zigbrains.project.ui.ZigFilePathPanel;
 import com.intellij.openapi.options.ConfigurationException;
