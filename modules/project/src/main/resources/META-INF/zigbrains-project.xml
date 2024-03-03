@@ -22,6 +22,11 @@
         <runLineMarkerContributor language="Zig"
                                   implementationClass="com.falsepattern.zigbrains.project.execution.run.ZigLineMarkerRun"/>
 
+        <configurationType implementation="com.falsepattern.zigbrains.project.execution.test.ConfigTypeTest"/>
+        <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.test.ConfigProducerTest"/>
+        <runLineMarkerContributor language="Zig"
+                                  implementationClass="com.falsepattern.zigbrains.project.execution.test.ZigLineMarkerTest"/>
+
         <directoryProjectGenerator implementation="com.falsepattern.zigbrains.project.platform.ZigDirectoryProjectGenerator"/>
         <newProjectWizard.languageGenerator implementation="com.falsepattern.zigbrains.project.ide.newproject.ZigNewProjectWizard"/>
 
