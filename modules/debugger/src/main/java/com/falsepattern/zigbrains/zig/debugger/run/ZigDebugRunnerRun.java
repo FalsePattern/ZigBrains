@@ -41,7 +41,7 @@ public class ZigDebugRunnerRun extends ZigDebugRunnerBase<ProfileStateRun> {
 
     @Override
     public @NotNull @NonNls String getRunnerId() {
-        return "ZigRunDebugger";
+        return "ZigDebugRunnerRun";
     }
 
     @Override
