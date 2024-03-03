@@ -16,17 +16,45 @@
 
 package com.falsepattern.zigbrains.project.runconfig;
 
+import com.falsepattern.zigbrains.project.execution.base.config.ProfileStateBase;
+import com.falsepattern.zigbrains.project.execution.base.config.ZigExecConfigBase;
+import com.falsepattern.zigbrains.project.execution.run.config.ProfileStateRun;
+import com.falsepattern.zigbrains.project.execution.run.config.ZigExecConfigRun;
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
+import com.intellij.execution.ExecutionException;
+import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.executors.DefaultRunExecutor;
+import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.ui.RunContentDescriptor;
+import com.intellij.execution.runners.DefaultProgramRunnerKt;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class ZigRegularRunner extends ZigExecutableRunner{
+public class ZigRegularRunner extends ZigProgramRunnerBase<ProfileStateBase<?>> {
     public ZigRegularRunner() {
-        super(DefaultRunExecutor.EXECUTOR_ID, "Unable to run zig");
+        super(DefaultRunExecutor.EXECUTOR_ID);
     }
 
     @Override
     public @NotNull @NonNls String getRunnerId() {
         return "ZigRegularRunner";
+    }
+
+    @Override
+    public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
+        return this.executorId.equals(executorId) && profile instanceof ZigExecConfigBase<?>;
+    }
+
+    @Override
+    protected @Nullable ProfileStateBase<?> castProfileState(ProfileStateBase<?> state) {
+        return state;
+    }
+
+    @Override
+    protected @Nullable RunContentDescriptor doExecute(ProfileStateBase<?> state, AbstractZigToolchain toolchain, ExecutionEnvironment environment)
+            throws ExecutionException {
+        return DefaultProgramRunnerKt.showRunContent(state.executeCommandLine(state.getCommandLine(toolchain), environment), environment);
     }
 }

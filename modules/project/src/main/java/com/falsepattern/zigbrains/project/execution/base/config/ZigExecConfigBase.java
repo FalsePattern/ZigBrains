@@ -14,44 +14,36 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.configurations;
+package com.falsepattern.zigbrains.project.execution.base.config;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.LocatableConfigurationBase;
-import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsActions;
-import com.intellij.openapi.util.text.Strings;
-import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
-public abstract class AbstractZigExecutionConfiguration extends LocatableConfigurationBase<RunProfileState> {
+public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends LocatableConfigurationBase<ProfileStateBase<T>> {
     public @Nullable Path workingDirectory;
-    public AbstractZigExecutionConfiguration(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
+    public ZigExecConfigBase(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
         super(project, factory, name);
         workingDirectory = project.isDefault() ? null : Optional.ofNullable(project.getBasePath())
                                                                 .map(Path::of)
                                                                 .orElse(null);
     }
 
-    public abstract String getCommand();
-    public abstract void setCommand(String value);
+    public abstract String[] buildCommandLineArgs();
 
     @Override
-    public @Nullable @NlsActions.ActionText String suggestedName() {
-        val cmd = getCommand();
-        var spaceIndex = cmd.indexOf(' ');
-        return Strings.capitalize(spaceIndex > 0 ? cmd.substring(0, spaceIndex) : cmd);
-    }
+    public abstract @Nullable @NlsActions.ActionText String suggestedName();
 
     @Override
-    public abstract @Nullable RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment)
+    public abstract @Nullable ProfileStateBase<T> getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment)
             throws ExecutionException;
 }

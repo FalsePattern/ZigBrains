@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zig.debugger;
+package com.falsepattern.zigbrains.zig.debugger.base;
 
-import com.intellij.execution.configurations.GeneralCommandLine;
-import com.jetbrains.cidr.execution.Installer;
+import com.falsepattern.zigbrains.project.execution.base.config.ProfileStateBase;
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.jetbrains.cidr.execution.RunParameters;
-import com.jetbrains.cidr.execution.TrivialInstaller;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -27,14 +26,10 @@ import org.jetbrains.annotations.Nullable;
 
 
 @RequiredArgsConstructor
-public class ZigDebugRunParameters extends RunParameters {
-    private final GeneralCommandLine cmd;
+public abstract class ZigDebugParametersBase<ProfileState extends ProfileStateBase<?>> extends RunParameters {
     private final DebuggerDriverConfiguration driverConfiguration;
-
-    @Override
-    public @NotNull Installer getInstaller() {
-        return new TrivialInstaller(cmd);
-    }
+    protected final AbstractZigToolchain toolchain;
+    protected final ProfileState profileState;
 
     @Override
     public @NotNull DebuggerDriverConfiguration getDebuggerDriverConfiguration() {

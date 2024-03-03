@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.configurations;
+package com.falsepattern.zigbrains.project.execution.run.config;
 
 import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationTypeBase;
 import com.intellij.execution.configurations.ConfigurationTypeUtil;
 
-public class ZigRunExecutionConfigurationType extends ConfigurationTypeBase {
-    public static final String IDENTIFIER = "ZIG_RUN_CONFIGURATION";
+public class ConfigTypeRun extends ConfigurationTypeBase {
+    public static final String IDENTIFIER = "ZIGBRAINS_RUN";
 
-    public static ZigRunExecutionConfigurationType getInstance() {
-        return ConfigurationTypeUtil.findConfigurationType(ZigRunExecutionConfigurationType.class);
+    public static ConfigTypeRun getInstance() {
+        return ConfigurationTypeUtil.findConfigurationType(ConfigTypeRun.class);
     }
 
-    public ZigRunExecutionConfigurationType() {
+    public ConfigTypeRun() {
         super(IDENTIFIER, "ZigRun", "Zig Run", Icons.ZIG);
-        addFactory(new ZigRunExecutionConfigurationFactory(this));
+        addFactory(new ConfigFactoryRun(this));
     }
 
     public ConfigurationFactory getFactory() {

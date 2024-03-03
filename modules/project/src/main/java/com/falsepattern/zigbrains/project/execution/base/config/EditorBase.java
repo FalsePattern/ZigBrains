@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.configurations.ui;
+package com.falsepattern.zigbrains.project.execution.base.config;
 
-import com.falsepattern.zigbrains.project.execution.configurations.AbstractZigExecutionConfiguration;
-import com.falsepattern.zigbrains.project.ui.ZigCommandLinePanel;
+import com.falsepattern.zigbrains.project.ui.WorkingDirectoryComponent;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.ui.LabeledComponent;
@@ -25,25 +24,21 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Paths;
+import java.util.Objects;
 
-public abstract class AbstractZigExecutionConfigurationEditor<T extends AbstractZigExecutionConfiguration> extends
-        SettingsEditor<T> {
-    public abstract ZigCommandLinePanel getCommandLinePanel();
-    protected final LabeledComponent<TextFieldWithBrowseButton> workingDirectoryComponent = new WorkingDirectoryComponent();
+public abstract class EditorBase<T extends ZigExecConfigBase<T>> extends SettingsEditor<T> {
+    protected final LabeledComponent<TextFieldWithBrowseButton> workingDirectoryComponent =
+            new WorkingDirectoryComponent();
 
     @Override
     protected void applyEditorTo(@NotNull T s) throws ConfigurationException {
-        s.setCommand(getCommandLinePanel().getText());
         s.workingDirectory = Paths.get(workingDirectoryComponent.getComponent().getText());
     }
 
     @Override
     protected void resetEditorFrom(@NotNull T s) {
-        getCommandLinePanel().setText(s.getCommand());
-        if (s.workingDirectory == null) {
-            workingDirectoryComponent.getComponent().setText("");
-        } else {
-            workingDirectoryComponent.getComponent().setText(s.workingDirectory.toString());
-        }
+        workingDirectoryComponent.getComponent()
+                                 .setText(Objects.requireNonNullElse(s.workingDirectory, "")
+                                                 .toString());
     }
 }

@@ -16,40 +16,31 @@
 
 package com.falsepattern.zigbrains.project.runconfig;
 
-import com.falsepattern.zigbrains.project.execution.configurations.AbstractZigExecutionConfiguration;
-import com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfigurationRunProfileState;
+import com.falsepattern.zigbrains.project.execution.base.config.ProfileStateBase;
+import com.falsepattern.zigbrains.project.execution.base.config.ZigExecConfigBase;
+import com.falsepattern.zigbrains.project.execution.run.config.ProfileStateRun;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
-import com.falsepattern.zigbrains.zig.lsp.ZLSEditorEventManager;
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.RunProfileState;
-import com.intellij.execution.runners.DefaultProgramRunnerKt;
+import com.intellij.execution.configurations.RunnerSettings;
 import com.intellij.execution.runners.ExecutionEnvironment;
+import com.intellij.execution.runners.GenericProgramRunner;
 import com.intellij.execution.ui.RunContentDescriptor;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class ZigExecutableRunner extends ZigDefaultProgramRunnerBase {
+public abstract class ZigProgramRunnerBase<ProfileState extends ProfileStateBase<?>> extends GenericProgramRunner<RunnerSettings> {
     protected final String executorId;
-    private final String errorMessageTitle;
 
-    public ZigExecutableRunner(String executorId, String errorMessageTitle) {
+    public ZigProgramRunnerBase(String executorId) {
         this.executorId = executorId;
-        this.errorMessageTitle = errorMessageTitle;
     }
-
-
-    @Override
-    public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
-        return executorId.equals(this.executorId) && profile instanceof AbstractZigExecutionConfiguration;
-    }
-
 
     @Override
     protected void execute(@NotNull ExecutionEnvironment environment, @NotNull RunProfileState state) {
@@ -59,9 +50,12 @@ public abstract class ZigExecutableRunner extends ZigDefaultProgramRunnerBase {
     @Override
     protected @Nullable RunContentDescriptor doExecute(@NotNull RunProfileState state$, @NotNull ExecutionEnvironment environment)
             throws ExecutionException {
-        if (!(state$ instanceof ZigRunExecutionConfigurationRunProfileState state)) {
+        if (!(state$ instanceof ProfileStateBase<?> state$$)) {
             return null;
         }
+        val state = castProfileState(state$$);
+        if (state == null)
+            return null;
 
         val toolchain = ZigProjectSettingsService.getInstance(environment.getProject()).getToolchain();
         if (toolchain == null) {
@@ -70,20 +64,12 @@ public abstract class ZigExecutableRunner extends ZigDefaultProgramRunnerBase {
 
         FileDocumentManager.getInstance().saveAllDocuments();
 
-        val cli = state.getCommandLine(toolchain);
-
-        return showRunContent(state, environment, cli);
+        return doExecute(state, toolchain, environment);
     }
 
-    protected RunContentDescriptor showRunContent(ZigRunExecutionConfigurationRunProfileState state,
-                                                  ExecutionEnvironment environment,
-                                                  GeneralCommandLine runExecutable) throws ExecutionException {
-        return DefaultProgramRunnerKt.showRunContent(executeCommandLine(state, runExecutable, environment), environment);
-    }
+    protected abstract @Nullable ProfileState castProfileState(ProfileStateBase<?> state);
 
-    private DefaultExecutionResult executeCommandLine(ZigRunExecutionConfigurationRunProfileState state,
-                                                      GeneralCommandLine commandLine,
-                                                      ExecutionEnvironment environment) throws ExecutionException {
-        return state.executeCommandLine(commandLine, environment);
-    }
+    protected abstract @Nullable RunContentDescriptor doExecute(ProfileState state,
+                                                      AbstractZigToolchain toolchain,
+                                                      ExecutionEnvironment environment) throws ExecutionException;
 }

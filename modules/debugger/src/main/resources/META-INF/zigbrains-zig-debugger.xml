@@ -19,7 +19,7 @@
     <resource-bundle>zigbrains.zig.debugger.Bundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.ZigDebugRunner"
+        <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.run.ZigDebugRunnerRun"
                        id="ZigDebugRunner"/>
 
         <notificationGroup displayType="BALLOON"

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.linemarker;
+package com.falsepattern.zigbrains.project.execution.base.linemarker;
 
 import com.falsepattern.zigbrains.zig.psi.ZigTypes;
 import com.falsepattern.zigbrains.zig.util.PsiUtil;
@@ -27,10 +27,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
+import java.util.function.Function;
 
-public abstract class ZigTopLevelDeclarationLineMarkerContributorBase extends RunLineMarkerContributor {
-    @Override
-    public @Nullable Info getInfo(@NotNull PsiElement element) {
+public abstract class ZigTopLevelRunLineMarkerBase extends RunLineMarkerContributor {
+    private @Nullable PsiElement getParentIfTopLevel(@NotNull PsiElement element) {
         PsiElement parent = getDeclaration(element);
 
         int nestingLevel = 0;
@@ -44,7 +44,18 @@ public abstract class ZigTopLevelDeclarationLineMarkerContributorBase extends Ru
         if (nestingLevel != 1) {
             return null;
         }
+        return parent;
+    }
 
+    public boolean elementMatches(@NotNull PsiElement element) {
+        return getParentIfTopLevel(element) != null;
+    }
+
+    @Override
+    public @Nullable Info getInfo(@NotNull PsiElement element) {
+        val parent = getParentIfTopLevel(element);
+        if (parent == null)
+            return null;
         val actions = ExecutorAction.getActions(0);
         return new Info(getIcon(element), actions, null);
     }

@@ -14,52 +14,57 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.configurations;
+package com.falsepattern.zigbrains.project.execution.run.config;
 
-import com.falsepattern.zigbrains.project.execution.configurations.ui.ZigRunExecutionConfigurationEditor;
+import com.falsepattern.zigbrains.project.execution.base.config.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.util.ElementUtil;
-import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.RunConfiguration;
-import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
-import lombok.Getter;
-import lombok.Setter;
+import org.apache.groovy.util.Arrays;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ZigRunExecutionConfiguration extends AbstractZigExecutionConfiguration{
-    @Getter
-    @Setter
-    public String command = "run";
+import java.nio.file.Path;
 
-    public ZigRunExecutionConfiguration(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
+public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
+    public String filePath = "";
+    public ZigExecConfigRun(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
         super(project, factory, name);
     }
 
     @Override
-    public @NotNull SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
-        return new ZigRunExecutionConfigurationEditor();
+    public String[] buildCommandLineArgs() {
+        return new String[]{"run", filePath};
     }
 
     @Override
-    public @Nullable RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment)
-            throws ExecutionException {
-        return new ZigRunExecutionConfigurationRunProfileState(environment, this);
+    public @Nullable String suggestedName() {
+        return "Run";
+    }
+
+    @Override
+    public @NotNull SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
+        return new EditorRun();
+    }
+
+    @Override
+    public @Nullable ProfileStateRun getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) {
+        return new ProfileStateRun(environment, this);
     }
 
     @Override
     public void readExternal(@NotNull Element element) throws InvalidDataException {
         super.readExternal(element);
 
-        var command = ElementUtil.readString(element, "command");
-        if (command != null) {
-            this.command = command;
+        var filePath = ElementUtil.readString(element, "filePath");
+        if (filePath != null) {
+            this.filePath = filePath;
         }
     }
 
@@ -67,8 +72,6 @@ public class ZigRunExecutionConfiguration extends AbstractZigExecutionConfigurat
     public void writeExternal(@NotNull Element element) {
         super.writeExternal(element);
 
-        ElementUtil.writeString(element, "command", command);
+        ElementUtil.writeString(element, "filePath", filePath);
     }
-
-
 }

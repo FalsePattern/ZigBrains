@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.configurations.ui;
+package com.falsepattern.zigbrains.project.execution.run.config;
 
-import com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfiguration;
+import com.falsepattern.zigbrains.project.execution.base.config.EditorBase;
 import com.falsepattern.zigbrains.project.ui.ZigCommandLinePanel;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.ui.dsl.builder.AlignX;
 import com.intellij.ui.dsl.builder.AlignY;
 import lombok.Getter;
@@ -26,28 +27,35 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import java.util.Objects;
+
 import static com.intellij.ui.dsl.builder.BuilderKt.panel;
 
-public class ZigRunExecutionConfigurationEditor extends AbstractZigExecutionConfigurationEditor<ZigRunExecutionConfiguration> {
-    private JPanel panel = null;
+public class EditorRun extends EditorBase<ZigExecConfigRun> {
     @Getter
     private final ZigCommandLinePanel commandLinePanel = new ZigCommandLinePanel();
 
     @Override
+    protected void applyEditorTo(@NotNull ZigExecConfigRun s) throws ConfigurationException {
+        super.applyEditorTo(s);
+        s.filePath = commandLinePanel.getText();
+    }
+
+    @Override
+    protected void resetEditorFrom(@NotNull ZigExecConfigRun s) {
+        super.resetEditorFrom(s);
+        commandLinePanel.setText(Objects.requireNonNullElse(s.filePath, ""));
+    }
+
+    @Override
     protected @NotNull JComponent createEditor() {
-        return panel = panel((p) -> {
-            p.row("Run Config Command", (r) -> {
-                r.cell(commandLinePanel)
-                        .resizableColumn()
-                        .align(AlignX.FILL)
-                        .align(AlignY.FILL);
+        return panel((p) -> {
+            p.row("Target file", (r) -> {
+                r.cell(commandLinePanel).resizableColumn().align(AlignX.FILL).align(AlignY.FILL);
                 return null;
             });
             p.row(workingDirectoryComponent.getLabel(), (r) -> {
-                r.cell(workingDirectoryComponent)
-                        .resizableColumn()
-                        .align(AlignX.FILL)
-                        .align(AlignY.FILL);
+                r.cell(workingDirectoryComponent).resizableColumn().align(AlignX.FILL).align(AlignY.FILL);
                 return null;
             });
             return null;
