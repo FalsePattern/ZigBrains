@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.run.config;
+package com.falsepattern.zigbrains.project.execution.run;
 
-import com.falsepattern.zigbrains.project.execution.base.config.ProfileStateBase;
+import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.intellij.execution.runners.ExecutionEnvironment;
 
 public final class ProfileStateRun extends ProfileStateBase<ZigExecConfigRun> {

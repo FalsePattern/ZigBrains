@@ -16,7 +16,7 @@
 
 package com.falsepattern.zigbrains.zig.debugger.base;
 
-import com.falsepattern.zigbrains.project.execution.base.config.ProfileStateBase;
+import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.jetbrains.cidr.execution.RunParameters;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;

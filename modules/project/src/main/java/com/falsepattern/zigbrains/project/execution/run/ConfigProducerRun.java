@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.run.actions;
+package com.falsepattern.zigbrains.project.execution.run;
 
-import com.falsepattern.zigbrains.project.execution.base.actions.ConfigProducerBase;
-import com.falsepattern.zigbrains.project.execution.run.config.ConfigTypeRun;
-import com.falsepattern.zigbrains.project.execution.run.config.ZigExecConfigRun;
-import com.falsepattern.zigbrains.project.execution.run.linemarker.ZigRunLineMarker;
-import com.falsepattern.zigbrains.zig.parser.ZigFile;
-import com.falsepattern.zigbrains.zig.psi.ZigTypes;
-import com.falsepattern.zigbrains.zig.util.PsiUtil;
-import com.intellij.execution.actions.ConfigurationContext;
+import com.falsepattern.zigbrains.project.execution.base.ConfigProducerBase;
 import com.intellij.execution.actions.ConfigurationFromContext;
 import com.intellij.execution.configurations.ConfigurationFactory;
-import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
-import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 public class ConfigProducerRun extends ConfigProducerBase<ZigExecConfigRun> {

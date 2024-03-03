@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.base.config;
+package com.falsepattern.zigbrains.project.execution.base;
 
 import com.falsepattern.zigbrains.project.execution.ZigCapturingProcessHandler;
 import com.falsepattern.zigbrains.project.runconfig.ZigProcessHandler;

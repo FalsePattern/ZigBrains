@@ -16,9 +16,9 @@
 
 package com.falsepattern.zigbrains.zig.debugger.run;
 
-import com.falsepattern.zigbrains.project.execution.base.config.ProfileStateBase;
-import com.falsepattern.zigbrains.project.execution.run.config.ProfileStateRun;
-import com.falsepattern.zigbrains.project.execution.run.config.ZigExecConfigRun;
+import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
+import com.falsepattern.zigbrains.project.execution.run.ProfileStateRun;
+import com.falsepattern.zigbrains.project.execution.run.ZigExecConfigRun;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain;
 import com.falsepattern.zigbrains.zig.debugger.base.ZigDebugRunnerBase;

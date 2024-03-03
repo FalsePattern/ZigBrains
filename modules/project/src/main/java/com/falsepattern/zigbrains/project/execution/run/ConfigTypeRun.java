@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.run.config;
+package com.falsepattern.zigbrains.project.execution.run;
 
 import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationTypeBase;
 import com.intellij.execution.configurations.ConfigurationTypeUtil;
+import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.openapi.project.Project;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
 
 public class ConfigTypeRun extends ConfigurationTypeBase {
     public static final String IDENTIFIER = "ZIGBRAINS_RUN";
@@ -37,4 +41,19 @@ public class ConfigTypeRun extends ConfigurationTypeBase {
         return getConfigurationFactories()[0];
     }
 
+    public static class ConfigFactoryRun extends ConfigurationFactory {
+        public ConfigFactoryRun(ConfigTypeRun type) {
+            super(type);
+        }
+
+        @Override
+        public @NotNull RunConfiguration createTemplateConfiguration(@NotNull Project project) {
+            return new ZigExecConfigRun(project, this, "Zig Run");
+        }
+
+        @Override
+        public @NotNull @NonNls String getId() {
+            return IDENTIFIER;
+        }
+    }
 }

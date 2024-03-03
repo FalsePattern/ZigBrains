@@ -16,7 +16,7 @@
 
 package com.falsepattern.zigbrains.zig.debugger;
 
-import com.falsepattern.zigbrains.project.execution.base.config.ZigExecConfigBase;
+import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
 import com.jetbrains.cidr.execution.debugger.CidrDebuggerLanguageSupport;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.base.linemarker;
+package com.falsepattern.zigbrains.project.execution.base;
 
 import com.falsepattern.zigbrains.zig.psi.ZigTypes;
 import com.falsepattern.zigbrains.zig.util.PsiUtil;
@@ -27,9 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
-import java.util.function.Function;
 
-public abstract class ZigTopLevelRunLineMarkerBase extends RunLineMarkerContributor {
+public abstract class ZigTopLevelLineMarkerBase extends RunLineMarkerContributor {
     private @Nullable PsiElement getParentIfTopLevel(@NotNull PsiElement element) {
         PsiElement parent = getDeclaration(element);
 

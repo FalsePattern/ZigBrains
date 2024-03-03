@@ -16,7 +16,7 @@
 
 package com.falsepattern.zigbrains.project.execution.linemarker;
 
-import com.falsepattern.zigbrains.project.execution.base.linemarker.ZigTopLevelRunLineMarkerBase;
+import com.falsepattern.zigbrains.project.execution.base.ZigTopLevelLineMarkerBase;
 import com.falsepattern.zigbrains.zig.psi.ZigTypes;
 import com.falsepattern.zigbrains.zig.util.PsiUtil;
 import com.intellij.icons.AllIcons;
@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 
-public class ZigBuildLineMarker extends ZigTopLevelRunLineMarkerBase {
+public class ZigBuildLineMarker extends ZigTopLevelLineMarkerBase {
     @Override
     protected @Nullable PsiElement getDeclaration(@NotNull PsiElement element) {
         if (PsiUtil.getElementType(element) != ZigTypes.IDENTIFIER) {

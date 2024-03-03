@@ -17,8 +17,8 @@
 <idea-plugin package="com.falsepattern.zigbrains.project">
     <resource-bundle>zigbrains.project.Bundle</resource-bundle>
     <extensions defaultExtensionNs="com.intellij">
-        <configurationType implementation="com.falsepattern.zigbrains.project.execution.run.config.ConfigTypeRun"/>
-        <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.run.actions.ConfigProducerRun"/>
+        <configurationType implementation="com.falsepattern.zigbrains.project.execution.run.ConfigTypeRun"/>
+        <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.run.ConfigProducerRun"/>
 
         <directoryProjectGenerator implementation="com.falsepattern.zigbrains.project.platform.ZigDirectoryProjectGenerator"/>
         <newProjectWizard.languageGenerator implementation="com.falsepattern.zigbrains.project.ide.newproject.ZigNewProjectWizard"/>
@@ -30,7 +30,7 @@
                              displayName="Zig"/>
 
         <runLineMarkerContributor language="Zig"
-                                  implementationClass="com.falsepattern.zigbrains.project.execution.run.linemarker.ZigRunLineMarker"/>
+                                  implementationClass="com.falsepattern.zigbrains.project.execution.run.ZigRunLineMarker"/>
 
         <programRunner implementation="com.falsepattern.zigbrains.project.runconfig.ZigRegularRunner"
                        id="ZigDebugRunner"/>

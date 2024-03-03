@@ -16,13 +16,10 @@
 
 package com.falsepattern.zigbrains.project.runconfig;
 
-import com.falsepattern.zigbrains.project.execution.base.config.ProfileStateBase;
-import com.falsepattern.zigbrains.project.execution.base.config.ZigExecConfigBase;
-import com.falsepattern.zigbrains.project.execution.run.config.ProfileStateRun;
-import com.falsepattern.zigbrains.project.execution.run.config.ZigExecConfigRun;
+import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
+import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.runners.ExecutionEnvironment;
