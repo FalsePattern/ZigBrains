@@ -17,7 +17,9 @@
 package com.falsepattern.zigbrains.project.toolchain.tools;
 
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
+import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.process.ProcessOutput;
 import kotlin.text.Charsets;
 import lombok.AllArgsConstructor;
 import lombok.val;
@@ -28,6 +30,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @AllArgsConstructor
 public abstract class AbstractZigTool {
@@ -36,6 +39,11 @@ public abstract class AbstractZigTool {
 
     public Path executable() {
         return toolchain.pathToExecutable(toolName);
+    }
+
+    public final Optional<ProcessOutput> callWithArgs(@Nullable Path workingDirectory, int timeoutMillis, String... parameters) {
+        return CLIUtil.execute(createBaseCommandLine(workingDirectory, parameters),
+                               timeoutMillis);
     }
 
     protected final GeneralCommandLine createBaseCommandLine(@Nullable Path workingDirectory,

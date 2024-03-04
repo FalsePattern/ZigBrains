@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.linemarker;
+package com.falsepattern.zigbrains.project.execution.test;
 
+import com.falsepattern.zigbrains.project.execution.base.ZigTopLevelLineMarkerBase;
 import com.falsepattern.zigbrains.zig.psi.ZigTypes;
 import com.falsepattern.zigbrains.zig.util.PsiUtil;
 import com.intellij.icons.AllIcons;
@@ -25,33 +26,22 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 
-public class ZigBuildLineMarkerContributor extends ZigTopLevelDeclarationLineMarkerContributorBase {
+public class ZigLineMarkerTest extends ZigTopLevelLineMarkerBase {
+    public static final ZigLineMarkerTest UTILITY_INSTANCE = new ZigLineMarkerTest();
     @Override
     protected @Nullable PsiElement getDeclaration(@NotNull PsiElement element) {
-        if (PsiUtil.getElementType(element) != ZigTypes.IDENTIFIER) {
-            return null;
-        }
-        if (!element.textMatches("build")) {
+        if (PsiUtil.getElementType(element) != ZigTypes.KEYWORD_TEST) {
             return null;
         }
         var parent = element.getParent();
-        if (PsiUtil.getElementType(parent) != ZigTypes.FN_PROTO) {
+        if (PsiUtil.getElementType(parent) != ZigTypes.TEST_DECL) {
             return null;
         }
-
-        var file = element.getContainingFile();
-        if (file == null) {
-            return null;
-        }
-        var fileName = file.getVirtualFile().getName();
-        if (!"build.zig".equals(fileName)) {
-            return null;
-        }
-        return parent.getParent();
+        return parent;
     }
 
     @Override
     protected @NotNull Icon getIcon(@NotNull PsiElement element) {
-        return AllIcons.RunConfigurations.TestState.Run;
+        return AllIcons.RunConfigurations.TestState.Run_run;
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.configurations.ui;
+package com.falsepattern.zigbrains.project.ui;
 
 import com.intellij.execution.ExecutionBundle;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;

@@ -18,6 +18,26 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Debugging
+  - Debugging support for tests when launched using the ZigTest task type (and with the gutter icons in the editor)
+
+- Project
+  - Added `zig init` as a new project creation option
+  - New projects will now have the project name in the build files instead of "untitled"
+
+- Zig
+  - Updated semantic highlighting to latest ZLS protocol
+
+### Fixed
+
+- Project
+  - Fixed build.zig and build.zig.zon getting placed in src/ during project creation
+
+- Plugin
+  - Removed a bunch of write action locking, the editor should feel more responsive now
+
 ## [12.0.0]
 
 ### Added

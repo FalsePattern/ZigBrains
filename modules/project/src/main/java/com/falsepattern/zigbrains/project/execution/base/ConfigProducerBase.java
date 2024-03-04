@@ -14,34 +14,26 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.actions;
+package com.falsepattern.zigbrains.project.execution.base;
 
-import com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfiguration;
-import com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfigurationType;
+import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.zig.parser.ZigFile;
-import com.falsepattern.zigbrains.zig.psi.ZigTypes;
-import com.falsepattern.zigbrains.zig.util.PsiUtil;
 import com.intellij.execution.actions.ConfigurationContext;
-import com.intellij.execution.actions.ConfigurationFromContext;
+import com.intellij.execution.actions.LazyRunConfigurationProducer;
 import com.intellij.execution.configurations.ConfigurationFactory;
-import com.intellij.execution.configurations.ConfigurationTypeUtil;
 import com.intellij.openapi.util.Ref;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
-public class ZigRunExecutionConfigurationProducer extends AbstractZigRunExecutionConfigurationProducer{
+public abstract class ConfigProducerBase<T extends ZigExecConfigBase<T>> extends LazyRunConfigurationProducer<T> {
+    @NotNull
     @Override
-    public @NotNull ConfigurationFactory getConfigurationFactory() {
-        return Objects.requireNonNull(
-                              ConfigurationTypeUtil.findConfigurationType(ZigRunExecutionConfigurationType.IDENTIFIER))
-                      .getConfigurationFactories()[0];
-    }
+    public abstract ConfigurationFactory getConfigurationFactory();
 
     @Override
-    protected boolean setupConfigurationFromContext(@NotNull ZigRunExecutionConfiguration configuration, @NotNull ConfigurationContext context, @NotNull Ref<PsiElement> sourceElement) {
+    protected final boolean setupConfigurationFromContext(@NotNull T configuration, @NotNull ConfigurationContext context, @NotNull Ref<PsiElement> sourceElement) {
         var loc = context.getLocation();
         if (loc == null) {
             return false;
@@ -56,21 +48,11 @@ public class ZigRunExecutionConfigurationProducer extends AbstractZigRunExecutio
         }
         var theFile = psiFile.getVirtualFile();
         var filePath = theFile.getPath();
-        if (PsiUtil.getElementType(element) == ZigTypes.KEYWORD_TEST) {
-            configuration.command = "test " + filePath;
-            configuration.setName("Test " + theFile.getPresentableName());
-        } else if ("build.zig".equals(theFile.getName())) {
-            configuration.command = "build";
-            configuration.setName("Build");
-        } else {
-            configuration.command = "run " + filePath;
-            configuration.setName(theFile.getPresentableName());
-        }
-        return true;
+        return setupConfigurationFromContext(configuration, element, filePath, theFile);
     }
 
     @Override
-    public boolean isConfigurationFromContext(@NotNull ZigRunExecutionConfiguration configuration, @NotNull ConfigurationContext context) {
+    public final boolean isConfigurationFromContext(@NotNull T configuration, @NotNull ConfigurationContext context) {
         if (context.getLocation() == null) {
             return false;
         }
@@ -84,14 +66,35 @@ public class ZigRunExecutionConfigurationProducer extends AbstractZigRunExecutio
         }
         val vFile = file.getVirtualFile();
         val filePath = vFile.getPath();
+        return isConfigurationFromContext(configuration, filePath, vFile, element);
+    }
+
+    /*
+    TODO implement these
+    @Override
+    protected boolean setupConfigurationFromContext(@NotNull ZigExecConfigRun configuration, PsiElement element, String filePath, VirtualFile theFile) {
+        if (PsiUtil.getElementType(element) == ZigTypes.KEYWORD_TEST) {
+            configuration.command = "test " + filePath;
+            configuration.setName("Test " + theFile.getPresentableName());
+        } else if ("build.zig".equals(theFile.getName())) {
+            configuration.command = "build";
+            configuration.setName("Build");
+        } else {
+            configuration.extraArgs = filePath;
+            configuration.setName(theFile.getPresentableName());
+        }
+        return true;
+    }
+
+    @Override
+    protected boolean isConfigurationFromContext(@NotNull ZigExecConfigRun configuration, String filePath, VirtualFile vFile, PsiElement element) {
         if (!configuration.command.contains(filePath)) {
             return configuration.command.startsWith("build") && vFile.getName().equals("build.zig");
         }
         return (PsiUtil.getElementType(element) == ZigTypes.KEYWORD_TEST) == configuration.command.startsWith("test ");
     }
+     */
 
-    @Override
-    public boolean shouldReplace(@NotNull ConfigurationFromContext self, @NotNull ConfigurationFromContext other) {
-        return self.getConfigurationType() instanceof ZigRunExecutionConfigurationType;
-    }
+    protected abstract boolean setupConfigurationFromContext(@NotNull T configuration, PsiElement element, String filePath, VirtualFile theFile);
+    protected abstract boolean isConfigurationFromContext(@NotNull T configuration, String filePath, VirtualFile vFile, PsiElement element);
 }
