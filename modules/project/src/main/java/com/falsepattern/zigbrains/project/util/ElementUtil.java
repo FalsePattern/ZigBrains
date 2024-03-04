@@ -20,8 +20,10 @@ import lombok.val;
 import org.jdom.Element;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class ElementUtil {
-    public static @Nullable String readString(Element element, String name) {
+    public static Optional<String> readString(Element element, String name) {
         return element.getChildren()
                       .stream()
                       .filter(it -> it.getName()
@@ -29,8 +31,7 @@ public class ElementUtil {
                                     it.getAttributeValue("name")
                                       .equals(name))
                       .findAny()
-                      .map(it -> it.getAttributeValue("value"))
-                      .orElse(null);
+                      .map(it -> it.getAttributeValue("value"));
     }
 
     public static void writeString(Element element, String name, String value) {
@@ -39,5 +40,13 @@ public class ElementUtil {
         option.setAttribute("value", value);
 
         element.addContent(option);
+    }
+
+    public static void writeBoolean(Element element, String name, boolean state) {
+        writeString(element, name, Boolean.toString(state));
+    }
+
+    public static Optional<Boolean> readBoolean(Element element, String name) {
+        return readString(element, name).map(Boolean::parseBoolean);
     }
 }

@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.listeners;
 
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
@@ -51,7 +52,7 @@ class LSPFileEventManager {
      * @param doc The document
      */
     static void willSave(Document doc) {
-        String uri = FileUtils.VFSToURI(FileDocumentManager.getInstance().getFile(doc));
+        String uri = FileUtil.URIFromVirtualFile(FileDocumentManager.getInstance().getFile(doc));
         EditorEventManagerBase.willSave(uri);
     }
 
@@ -72,7 +73,7 @@ class LSPFileEventManager {
         if (!FileUtils.isFileSupported(file)) {
             return;
         }
-        String uri = FileUtils.VFSToURI(file);
+        String uri = FileUtil.URIFromVirtualFile(file);
         if (uri == null) {
             return;
         }
@@ -96,8 +97,8 @@ class LSPFileEventManager {
                 return;
             }
 
-            String newFileUri = FileUtils.VFSToURI(file);
-            String oldParentUri = FileUtils.VFSToURI(event.getOldParent());
+            String newFileUri = FileUtil.URIFromVirtualFile(file);
+            String oldParentUri = FileUtil.URIFromVirtualFile(event.getOldParent());
             if (newFileUri == null || oldParentUri == null) {
                 return;
             }
@@ -117,7 +118,7 @@ class LSPFileEventManager {
         if (!FileUtils.isFileSupported(file)) {
             return;
         }
-        String uri = FileUtils.VFSToURI(file);
+        String uri = FileUtil.URIFromVirtualFile(file);
         if (uri == null) {
             return;
         }
@@ -146,7 +147,7 @@ class LSPFileEventManager {
                     if (!FileUtils.isFileSupported(file)) {
                         continue;
                     }
-                    String newFileUri = FileUtils.VFSToURI(file);
+                    String newFileUri = FileUtil.URIFromVirtualFile(file);
                     String oldFileUri = newFileUri.replace(file.getName(), oldFileName);
                     closeAndReopenAffectedFile(file, oldFileUri);
                 }
@@ -157,7 +158,7 @@ class LSPFileEventManager {
     }
 
     private static void closeAndReopenAffectedFile(VirtualFile file, String oldFileUri) {
-        String newFileUri = FileUtils.VFSToURI(file);
+        String newFileUri = FileUtil.URIFromVirtualFile(file);
 
         // Notifies the language server.
         FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(oldFileUri,
@@ -189,7 +190,7 @@ class LSPFileEventManager {
         if (!FileUtils.isFileSupported(file)) {
             return;
         }
-        String uri = FileUtils.VFSToURI(file);
+        String uri = FileUtil.URIFromVirtualFile(file);
         if (uri != null) {
             ApplicationUtils.invokeAfterPsiEvents(() -> {
                 FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,

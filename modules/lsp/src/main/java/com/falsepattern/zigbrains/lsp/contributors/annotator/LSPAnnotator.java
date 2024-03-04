@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.contributors.annotator;
 
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
@@ -103,7 +104,7 @@ public class LSPAnnotator extends ExternalAnnotator<Object, Object> {
 
         VirtualFile virtualFile = file.getVirtualFile();
         if (FileUtils.isFileSupported(virtualFile) && IntellijLanguageClient.isExtensionSupported(virtualFile)) {
-            String uri = FileUtils.VFSToURI(virtualFile);
+            String uri = FileUtil.URIFromVirtualFile(virtualFile);
             // TODO annotations are applied to a file / document not to an editor. so store them by file and not by editor..
             EditorEventManager eventManager = EditorEventManagerBase.forUri(uri);
             if (eventManager == null) {

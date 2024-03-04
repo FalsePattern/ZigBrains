@@ -29,23 +29,30 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.dsl.builder.AlignX;
 import com.intellij.ui.dsl.builder.AlignY;
 import com.intellij.ui.dsl.builder.Panel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 import org.apache.groovy.util.Arrays;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 
-public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
+@Getter
+@Setter
+public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> implements
+        ZigConfigEditor.ColoredModule.Carrier {
     public String extraArguments = "";
+    public boolean colored = true;
     public ZigExecConfigBuild(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Build");
     }
 
     @Override
     public String[] buildCommandLineArgs() {
-        val base = new String[]{"build"};
+        val base = new String[]{"build", "--color", colored ? "on" : "off"};
         if (extraArguments.isBlank()) {
             return base;
         } else {
@@ -59,8 +66,11 @@ public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
     }
 
     @Override
-    public @NotNull Editor getConfigurationEditor() {
-        return new Editor();
+    public @NotNull List<ZigConfigEditor.ZigConfigModule<ZigExecConfigBuild>> getEditorConfigModules() {
+        val arr = super.getEditorConfigModules();
+        arr.add(new ExtraArgsModule());
+        arr.add(new ZigConfigEditor.ColoredModule<>());
+        return arr;
     }
 
     @Override
@@ -72,10 +82,8 @@ public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
     public void readExternal(@NotNull Element element) throws InvalidDataException {
         super.readExternal(element);
 
-        val extraArguments = ElementUtil.readString(element, "extraArguments");
-        if (extraArguments != null) {
-            this.extraArguments = extraArguments;
-        }
+        ElementUtil.readString(element, "extraArguments").ifPresent(x -> extraArguments = x);
+        ElementUtil.readBoolean(element, "colored").ifPresent(x -> colored = x);
     }
 
     @Override
@@ -83,26 +91,24 @@ public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
         super.writeExternal(element);
 
         ElementUtil.writeString(element, "extraArguments", extraArguments);
+        ElementUtil.writeBoolean(element, "colored", colored);
     }
 
-    public static class Editor extends ZigConfigEditor<ZigExecConfigBuild> {
+    public static class ExtraArgsModule implements ZigConfigEditor.ZigConfigModule<ZigExecConfigBuild> {
         private final JBTextField extraArgs = new JBTextField();
 
         @Override
-        protected void applyEditorTo(@NotNull ZigExecConfigBuild s) throws ConfigurationException {
-            super.applyEditorTo(s);
+        public void applyTo(@NotNull ZigExecConfigBuild s) throws ConfigurationException {
             s.extraArguments = extraArgs.getText();
         }
 
         @Override
-        protected void resetEditorFrom(@NotNull ZigExecConfigBuild s) {
-            super.resetEditorFrom(s);
+        public void resetFrom(@NotNull ZigExecConfigBuild s) {
             extraArgs.setText(Objects.requireNonNullElse(s.extraArguments, ""));
         }
 
         @Override
-        protected void constructPanel(Panel p) {
-            super.constructPanel(p);
+        public void construct(Panel p) {
             p.row("Extra arguments", (r) -> {
                 r.cell(extraArgs).resizableColumn().align(AlignX.FILL).align(AlignY.FILL);
                 return null;

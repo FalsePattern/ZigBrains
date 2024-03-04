@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.client.languageserver.wrapper;
 
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.DefaultLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.ServerWrapperBaseClientContext;
@@ -23,7 +24,6 @@ import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.DefaultRequestManager;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
 import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
-import com.falsepattern.zigbrains.lsp.editor.DocumentEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
@@ -182,7 +182,7 @@ public class LanguageServerWrapper {
     }
 
     public static LanguageServerWrapper forVirtualFile(VirtualFile file, Project project) {
-        return uriToLanguageServerWrapper.get(new ImmutablePair<>(FileUtils.VFSToURI(file), FileUtils.projectToUri(project)));
+        return uriToLanguageServerWrapper.get(new ImmutablePair<>(FileUtil.URIFromVirtualFile(file), FileUtils.projectToUri(project)));
     }
 
     /**
@@ -280,7 +280,7 @@ public class LanguageServerWrapper {
             return null;
         }
         VirtualFile currentOpenFile = selectedEditor.getFile();
-        VirtualFile requestedFile = FileUtils.virtualFileFromURI(uri);
+        VirtualFile requestedFile = FileUtil.virtualFileFromURI(uri);
         if (currentOpenFile == null || requestedFile == null) {
             return null;
         }
@@ -550,7 +550,7 @@ public class LanguageServerWrapper {
 
     private InitializeParams getInitParams() throws URISyntaxException {
         InitializeParams initParams = new InitializeParams();
-        String projectRootUri = FileUtils.pathToUri(projectRootPath);
+        String projectRootUri = FileUtil.pathToUri(projectRootPath);
         WorkspaceFolder workspaceFolder = new WorkspaceFolder(projectRootUri, this.project.getName());
         initParams.setWorkspaceFolders(Collections.singletonList(workspaceFolder));
 
@@ -679,7 +679,7 @@ public class LanguageServerWrapper {
         List<String> connected = new ArrayList<>();
         urisUnderLspControl.forEach(s -> {
             try {
-                connected.add(new URI(FileUtils.sanitizeURI(s)).toString());
+                connected.add(new URI(FileUtil.sanitizeURI(s)).toString());
             } catch (URISyntaxException e) {
                 LOG.warn(e);
             }
@@ -733,7 +733,7 @@ public class LanguageServerWrapper {
      * @param projectUri The project root uri
      */
     public void disconnect(String uri, String projectUri) {
-        uriToLanguageServerWrapper.remove(new ImmutablePair<>(FileUtils.sanitizeURI(uri), FileUtils.sanitizeURI(projectUri)));
+        uriToLanguageServerWrapper.remove(new ImmutablePair<>(FileUtil.sanitizeURI(uri), FileUtil.sanitizeURI(projectUri)));
 
         Set<EditorEventManager> managers = uriToEditorManagers.get(uri);
         if (managers == null) {
@@ -752,7 +752,7 @@ public class LanguageServerWrapper {
                 }
             }
             urisUnderLspControl.remove(uri);
-            uriToLanguageServerWrapper.remove(new ImmutablePair<>(FileUtils.sanitizeURI(uri), FileUtils.sanitizeURI(projectUri)));
+            uriToLanguageServerWrapper.remove(new ImmutablePair<>(FileUtil.sanitizeURI(uri), FileUtil.sanitizeURI(projectUri)));
         }
         if (connectedEditors.isEmpty()) {
             stop(true);

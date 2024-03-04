@@ -18,13 +18,17 @@ package com.falsepattern.zigbrains.project.execution;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.process.CapturingAnsiEscapesAwareProcessHandler;
 import com.intellij.execution.process.CapturingProcessHandler;
+import com.intellij.execution.process.ColoredProcessHandler;
+import com.intellij.execution.process.KillableColoredProcessHandler;
+import com.intellij.execution.process.ProcessOutput;
 import com.intellij.util.io.BaseOutputReader;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public class ZigCapturingProcessHandler extends CapturingProcessHandler {
+public class ZigCapturingProcessHandler extends CapturingAnsiEscapesAwareProcessHandler {
     public static Optional<ZigCapturingProcessHandler> startProcess(GeneralCommandLine commandLine) {
         try {
             return Optional.of(new ZigCapturingProcessHandler(commandLine));

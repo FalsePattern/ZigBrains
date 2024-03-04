@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp;
 
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
@@ -331,7 +332,7 @@ public class IntellijLanguageClient {
         if (wrapper.getProject() != null) {
             String[] extensions = wrapper.getServerDefinition().ext.split(LanguageServerDefinition.SPLIT_CHAR);
             for (String ext : extensions) {
-                MutablePair<String, String> extProjectPair = new MutablePair<>(ext, FileUtils.pathToUri(
+                MutablePair<String, String> extProjectPair = new MutablePair<>(ext, FileUtil.pathToUri(
                         new File(wrapper.getProjectRootPath()).getAbsolutePath()));
                 extToLanguageWrapper.remove(extProjectPair);
                 extToServerDefinition.remove(extProjectPair);

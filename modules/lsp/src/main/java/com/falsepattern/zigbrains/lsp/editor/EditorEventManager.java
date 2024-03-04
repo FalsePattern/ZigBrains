@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.editor;
 
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.actions.LSPReferencesAction;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
@@ -25,7 +26,6 @@ import com.falsepattern.zigbrains.lsp.contributors.icon.LSPIconProvider;
 import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
 import com.falsepattern.zigbrains.lsp.contributors.rename.LSPRenameProcessor;
 import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
-import com.falsepattern.zigbrains.lsp.requests.HoverHandler;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.requests.WorkspaceEditHandler;
@@ -54,15 +54,10 @@ import com.intellij.openapi.editor.EditorModificationUtil;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.editor.SelectionModel;
-import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
-import com.intellij.openapi.editor.event.EditorMouseListener;
-import com.intellij.openapi.editor.event.EditorMouseMotionListener;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
-import com.intellij.openapi.editor.markup.HighlighterLayer;
-import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
@@ -72,7 +67,6 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -96,8 +90,6 @@ import org.eclipse.lsp4j.DocumentFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.FormattingOptions;
-import org.eclipse.lsp4j.Hover;
-import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.InlayHintParams;
 import org.eclipse.lsp4j.InsertReplaceEdit;
@@ -124,7 +116,6 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.awt.Point;
@@ -144,7 +135,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -370,8 +360,8 @@ public class EditorEventManager {
                     res.forEach(l -> {
                         Position start = l.getRange().getStart();
                         Position end = l.getRange().getEnd();
-                        String uri = FileUtils.sanitizeURI(l.getUri());
-                        VirtualFile file = FileUtils.virtualFileFromURI(uri);
+                        String uri = FileUtil.sanitizeURI(l.getUri());
+                        VirtualFile file = FileUtil.virtualFileFromURI(uri);
                         if (fast) {
                             if (file == null)
                                 return;
@@ -1322,7 +1312,7 @@ public class EditorEventManager {
             return;
         }
 
-        String locUri = FileUtils.sanitizeURI(loc.getUri());
+        String locUri = FileUtil.sanitizeURI(loc.getUri());
 
         if (identifier.getUri().equals(locUri)
                 && sourceOffset >= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getStart())
