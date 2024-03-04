@@ -43,14 +43,25 @@ tasks {
     }
 }
 
-fun pluginVersion(): Provider<String> {
+fun pluginVersionGit(): Provider<String> {
     return provider {
-        System.getenv("RELEASE_VERSION")
-    }.orElse(provider {
         try {
             gitVersion()
         } catch (_: java.lang.Exception) {
             error("Git version not found and RELEASE_VERSION environment variable is not set!")
+        }
+    }
+}
+
+fun pluginVersion(): Provider<String> {
+    return provider {
+        System.getenv("RELEASE_VERSION")
+    }.orElse(pluginVersionGit().map {
+        val suffix = "-" + properties("pluginSinceBuild").get()
+        if (it.endsWith(suffix)) {
+            it.substring(0, it.length - suffix.length)
+        } else {
+            it
         }
     })
 }
@@ -96,6 +107,11 @@ allprojects {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
     }
+
+    tasks.withType(JavaCompile::class) {
+        options.encoding = "UTF-8"
+    }
+
 
     group = properties("pluginGroup").get()
     version = pluginVersionFull().get()
@@ -169,10 +185,23 @@ project(":debugger") {
     dependencies {
         implementation(project(":zig"))
         implementation(project(":project"))
+        implementation(project(":common"))
+        implementation(project(":lsp-common"))
+        implementation(project(":lsp"))
+        implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.22.0")
     }
     intellij {
         version = clionVersion
         plugins = clionPlugins
+    }
+}
+
+project(":lsp-common") {
+    apply {
+        plugin("java-library")
+    }
+    dependencies {
+        api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.22.0")
     }
 }
 
@@ -181,8 +210,8 @@ project(":lsp") {
         plugin("java-library")
     }
     dependencies {
-        api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.22.0")
-        implementation("com.vladsch.flexmark:flexmark:0.64.8")
+        implementation(project(":common"))
+        api(project(":lsp-common"))
         api("org.apache.commons:commons-lang3:3.14.0")
     }
 }

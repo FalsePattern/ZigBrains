@@ -16,14 +16,42 @@
 package com.falsepattern.zigbrains.lsp.listeners;
 
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileCopyEvent;
-import com.intellij.openapi.vfs.VirtualFileEvent;
-import com.intellij.openapi.vfs.VirtualFileListener;
-import com.intellij.openapi.vfs.VirtualFileMoveEvent;
-import com.intellij.openapi.vfs.VirtualFilePropertyEvent;
+import com.intellij.openapi.vfs.newvfs.BulkFileListener;
+import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFileCopyEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFileMoveEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFilePropertyChangeEvent;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-public class VFSListener implements VirtualFileListener {
+import java.util.List;
+
+public class VFSListener implements BulkFileListener {
+
+    @Override
+    public void before(@NotNull List<? extends @NotNull VFileEvent> events) {
+    }
+
+    @Override
+    public void after(@NotNull List<? extends @NotNull VFileEvent> events) {
+        for (val event: events) {
+            if (event instanceof VFilePropertyChangeEvent propEvent)
+                propertyChanged(propEvent);
+            else if (event instanceof VFileContentChangeEvent changeEvent)
+                contentsChanged(changeEvent);
+            else if (event instanceof VFileDeleteEvent deleteEvent)
+                fileDeleted(deleteEvent);
+            else if (event instanceof VFileMoveEvent moveEvent)
+                fileMoved(moveEvent);
+            else if (event instanceof VFileCopyEvent copyEvent)
+                fileCopied(copyEvent);
+            else if (event instanceof VFileCreateEvent createEvent)
+                fileCreated(createEvent);
+        }
+    }
 
     /**
      * Fired when a virtual file is renamed from within IDEA, or its writable status is changed.
@@ -31,8 +59,7 @@ public class VFSListener implements VirtualFileListener {
      *
      * @param event the event object containing information about the change.
      */
-    @Override
-    public void propertyChanged(@NotNull VirtualFilePropertyEvent event) {
+    public void propertyChanged(@NotNull VFilePropertyChangeEvent event) {
         if (event.getPropertyName().equals(VirtualFile.PROP_NAME)) {
             LSPFileEventManager.fileRenamed((String) event.getOldValue(), (String) event.getNewValue());
         }
@@ -43,8 +70,7 @@ public class VFSListener implements VirtualFileListener {
      *
      * @param event the event object containing information about the change.
      */
-    @Override
-    public void contentsChanged(@NotNull VirtualFileEvent event) {
+    public void contentsChanged(@NotNull VFileContentChangeEvent event) {
         LSPFileEventManager.fileChanged(event.getFile());
     }
 
@@ -53,8 +79,7 @@ public class VFSListener implements VirtualFileListener {
      *
      * @param event the event object containing information about the change.
      */
-    @Override
-    public void fileDeleted(@NotNull VirtualFileEvent event) {
+    public void fileDeleted(@NotNull VFileDeleteEvent event) {
         LSPFileEventManager.fileDeleted(event.getFile());
     }
 
@@ -63,8 +88,7 @@ public class VFSListener implements VirtualFileListener {
      *
      * @param event the event object containing information about the change.
      */
-    @Override
-    public void fileMoved(@NotNull VirtualFileMoveEvent event) {
+    public void fileMoved(@NotNull VFileMoveEvent event) {
         LSPFileEventManager.fileMoved(event);
     }
 
@@ -73,9 +97,8 @@ public class VFSListener implements VirtualFileListener {
      *
      * @param event the event object containing information about the change.
      */
-    @Override
-    public void fileCopied(@NotNull VirtualFileCopyEvent event) {
-        fileCreated(event);
+    public void fileCopied(@NotNull VFileCopyEvent event) {
+        LSPFileEventManager.fileCreated(event.findCreatedFile());
     }
 
     /**
@@ -83,44 +106,7 @@ public class VFSListener implements VirtualFileListener {
      *
      * @param event the event object containing information about the change.
      */
-    @Override
-    public void fileCreated(@NotNull VirtualFileEvent event) {
+    public void fileCreated(@NotNull VFileCreateEvent event) {
         LSPFileEventManager.fileCreated(event.getFile());
-    }
-
-    /**
-     * Fired before the change of a name or writable status of a file is processed.
-     *
-     * @param event the event object containing information about the change.
-     */
-    @Override
-    public void beforePropertyChange(@NotNull VirtualFilePropertyEvent event) {
-    }
-
-    /**
-     * Fired before the change of contents of a file is processed.
-     *
-     * @param event the event object containing information about the change.
-     */
-    @Override
-    public void beforeContentsChange(@NotNull VirtualFileEvent event) {
-    }
-
-    /**
-     * Fired before the deletion of a file is processed.
-     *
-     * @param event the event object containing information about the change.
-     */
-    @Override
-    public void beforeFileDeletion(@NotNull VirtualFileEvent event) {
-    }
-
-    /**
-     * Fired before the movement of a file is processed.
-     *
-     * @param event the event object containing information about the change.
-     */
-    @Override
-    public void beforeFileMovement(@NotNull VirtualFileMoveEvent event) {
     }
 }

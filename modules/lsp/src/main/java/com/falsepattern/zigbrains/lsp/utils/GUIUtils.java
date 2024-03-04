@@ -46,7 +46,7 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.writeAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.writeAction;
 
 public final class GUIUtils {
     private static final LSPDefaultIconProvider DEFAULT_ICON_PROVIDER = new LSPDefaultIconProvider();

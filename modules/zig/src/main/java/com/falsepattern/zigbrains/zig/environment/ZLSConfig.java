@@ -16,30 +16,17 @@
 
 package com.falsepattern.zigbrains.zig.environment;
 
-import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
-import lombok.val;
-import org.jetbrains.annotations.NotNull;
+import lombok.Builder;
+import lombok.With;
 
-import java.util.Optional;
 
-public record ZLSConfig(@NotNull Optional<String> zigExePath,
-                        @NotNull Optional<String> zigLibPath) {
-    public ZLSConfig(String zigExePath, String zigLibPath) {
-        this(Optional.ofNullable(zigExePath), Optional.ofNullable(zigLibPath));
-    }
-
-    public ZLSConfig overrideWith(ZLSConfig other) {
-        return new ZLSConfig(other.zigExePath.or(() -> zigExePath),
-                             other.zigLibPath.or(() -> zigLibPath));
-    }
-
-    public static final ZLSConfig EMPTY = new ZLSConfig(Optional.empty(), Optional.empty());
-
-    public JsonObject toJson() {
-        val result = new JsonObject();
-        zigExePath.ifPresent(s -> result.addProperty("zig_exe_path", s));
-        zigLibPath.ifPresent(s -> result.addProperty("zig_lib_path", s));
-        return result;
-    }
+@With
+@Builder
+public record ZLSConfig(String zig_exe_path,
+                        String zig_lib_path,
+                        Boolean enable_build_on_save,
+                        String build_on_save_step,
+                        Boolean dangerous_comptime_experiments_do_not_enable,
+                        Boolean highlight_global_var_declarations
+                        ) {
 }

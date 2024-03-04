@@ -15,10 +15,11 @@
  */
 package com.falsepattern.zigbrains.lsp.requests;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.command.CommandProcessor;
@@ -57,8 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.invokeLater;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.writeAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.invokeLater;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.writeAction;
 import static com.falsepattern.zigbrains.lsp.utils.DocumentUtils.toEither;
 
 /**
@@ -81,9 +82,9 @@ public class WorkspaceEditHandler {
                     TextEdit edit = new TextEdit(lspRange, newName);
                     String uri = null;
                     try {
-                        uri = FileUtils.sanitizeURI(
-                                new URL(ui.getVirtualFile().getUrl().replace(" ", FileUtils.SPACE_ENCODED)).toURI()
-                                        .toString());
+                        uri = FileUtil.sanitizeURI(
+                                new URL(ui.getVirtualFile().getUrl().replace(" ", FileUtil.SPACE_ENCODED)).toURI()
+                                                                                                          .toString());
                     } catch (MalformedURLException | URISyntaxException e) {
                         LOG.warn(e);
                     }
@@ -131,7 +132,7 @@ public class WorkspaceEditHandler {
                         TextDocumentEdit textEdit = tEdit.getLeft();
                         VersionedTextDocumentIdentifier doc = textEdit.getTextDocument();
                         int version = doc.getVersion() != null ? doc.getVersion() : Integer.MAX_VALUE;
-                        String uri = FileUtils.sanitizeURI(doc.getUri());
+                        String uri = FileUtil.sanitizeURI(doc.getUri());
                         EditorEventManager manager = EditorEventManagerBase.forUri(uri);
                         if (manager != null) {
                             curProject[0] = manager.editor.getProject();
@@ -151,7 +152,7 @@ public class WorkspaceEditHandler {
 
             } else if (changes != null) {
                 changes.forEach((key, lChanges) -> {
-                    String uri = FileUtils.sanitizeURI(key);
+                    String uri = FileUtil.sanitizeURI(key);
 
                     EditorEventManager manager = EditorEventManagerBase.forUri(uri);
                     if (manager != null) {
@@ -198,18 +199,18 @@ public class WorkspaceEditHandler {
         Project[] projects = ProjectManager.getInstance().getOpenProjects();
         //Infer the project from the uri
         Project project = Stream.of(projects)
-                .map(p -> new ImmutablePair<>(FileUtils.VFSToURI(ProjectUtil.guessProjectDir(p)), p))
+                .map(p -> new ImmutablePair<>(FileUtil.URIFromVirtualFile(ProjectUtil.guessProjectDir(p)), p))
                 .filter(p -> uri.startsWith(p.getLeft())).sorted(Collections.reverseOrder())
                 .map(ImmutablePair::getRight).findFirst().orElse(projects[0]);
         VirtualFile file = null;
         try {
-            file = LocalFileSystem.getInstance().findFileByIoFile(new File(new URI(FileUtils.sanitizeURI(uri))));
+            file = LocalFileSystem.getInstance().findFileByIoFile(new File(new URI(FileUtil.sanitizeURI(uri))));
         } catch (URISyntaxException e) {
             LOG.warn(e);
         }
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
         OpenFileDescriptor descriptor = new OpenFileDescriptor(project, file);
-        Editor editor = ApplicationUtils
+        Editor editor = ApplicationUtil
                 .computableWriteAction(() -> fileEditorManager.openTextEditor(descriptor, false));
         openedEditors.add(file);
         curProject[0] = editor.getProject();

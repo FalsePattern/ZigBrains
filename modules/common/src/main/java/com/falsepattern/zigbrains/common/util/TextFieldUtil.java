@@ -40,6 +40,15 @@ public class TextFieldUtil {
                              onTextChanged);
     }
 
+    public static TextFieldWithBrowseButton pathToFileTextField(Disposable disposable,
+                                                                @NlsContexts.DialogTitle String dialogTitle,
+                                                                Runnable onTextChanged) {
+        return pathTextField(FileChooserDescriptorFactory.createSingleFileDescriptor(),
+                             disposable,
+                             dialogTitle,
+                             onTextChanged);
+    }
+
     public static TextFieldWithBrowseButton pathTextField(FileChooserDescriptor fileChooserDescriptor,
                                                           Disposable disposable,
                                                           @NlsContexts.DialogTitle String dialogTitle,

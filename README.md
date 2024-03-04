@@ -13,11 +13,12 @@ complain about missing files
 
 ## Special Thanks
 
+- The [ZigTools](https://github.com/zigtools/) team for developing the Zig Language Server.
 - [HTGAzureX1212](https://github.com/HTGAzureX1212) for developing [intellij-zig](https://github.com/intellij-zig/intellij-zig),
 which served as a fantastic reference for deep IDE integration features
 
-- The members of the `Zig Programming Language` discord server's `#tooling-dev` channel for providing encouragement and
-feedback
+- The members of the `Zig Programming Language` discord server's `#tooling-dev` channel for providing encouragement,
+feedback, and lots of bug reports. 
 
 - The Ballerina Platform developers for `lsp4intellij`, the language server connector between the IntelliJ platform
 and the Eclipse LSP4J project
@@ -80,7 +81,16 @@ LSP server is running.
 
 ## Debugging
 
-ZigBrains uses the CLion C++ toolchains (Settings | Build, Execution, Deployment | Toolchains) for debugging purposes,
+### Windows
+
+Due to technical limitations, the C++ toolchains cannot be used for debugging zig code on windows.
+
+Go to `Settings | Build, Execution, Deployment | Debugger | Zig (Windows)` and follow the steps shown there to set up a
+zig-compatible debugger.
+
+### Linux / MacOS / Unix
+
+ZigBrains uses the CLion C++ toolchains `Settings | Build, Execution, Deployment | Toolchains` for debugging purposes,
 and it is fully compatible with both GDB and LLDB debuggers.
 
 Additionally, ZigBrains will prioritize a toolchain if it is called `Zig`, otherwise it will use the default toolchain.

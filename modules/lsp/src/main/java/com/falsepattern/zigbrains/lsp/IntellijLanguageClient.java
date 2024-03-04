@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp;
 
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
@@ -27,6 +28,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import lombok.val;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -43,7 +45,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.pool;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.pool;
 
 public class IntellijLanguageClient {
 
@@ -330,9 +332,14 @@ public class IntellijLanguageClient {
     public static void removeWrapper(LanguageServerWrapper wrapper) {
         if (wrapper.getProject() != null) {
             String[] extensions = wrapper.getServerDefinition().ext.split(LanguageServerDefinition.SPLIT_CHAR);
+            val rootPath = wrapper.getProjectRootPath();
+            if (rootPath == null) {
+                LOG.error("Project root path is null");
+                return;
+            }
+            val absolutePath = FileUtil.pathToUri(rootPath);
             for (String ext : extensions) {
-                MutablePair<String, String> extProjectPair = new MutablePair<>(ext, FileUtils.pathToUri(
-                        new File(wrapper.getProjectRootPath()).getAbsolutePath()));
+                MutablePair<String, String> extProjectPair = new MutablePair<>(ext, absolutePath);
                 extToLanguageWrapper.remove(extProjectPair);
                 extToServerDefinition.remove(extProjectPair);
             }

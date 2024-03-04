@@ -16,16 +16,19 @@
 
 package com.falsepattern.zigbrains.project.runconfig;
 
+import com.falsepattern.zigbrains.common.util.StringUtil;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
-import com.intellij.execution.process.KillableProcessHandler;
+import com.intellij.execution.process.AnsiEscapeDecoder;
+import com.intellij.execution.process.KillableColoredProcessHandler;
+import com.intellij.openapi.util.Key;
 import com.pty4j.PtyProcess;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;
 
-public class ZigProcessHandler extends KillableProcessHandler {
+public class ZigProcessHandler extends KillableColoredProcessHandler implements AnsiEscapeDecoder.ColoredTextAcceptor {
     public ZigProcessHandler(@NotNull GeneralCommandLine commandLine) throws ExecutionException {
         super(commandLine);
         setHasPty(commandLine instanceof PtyCommandLine);
@@ -36,5 +39,10 @@ public class ZigProcessHandler extends KillableProcessHandler {
         super(process, commandLine, charset);
         setHasPty(process instanceof PtyProcess);
         setShouldDestroyProcessRecursively(!hasPty());
+    }
+
+    @Override
+    public void coloredTextAvailable(@NotNull String text, @NotNull Key attributes) {
+        super.coloredTextAvailable(StringUtil.translateVT100Escapes(text), attributes);
     }
 }

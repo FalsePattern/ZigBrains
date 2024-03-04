@@ -15,15 +15,12 @@
  */
 package com.falsepattern.zigbrains.lsp.editor;
 
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
-import com.falsepattern.zigbrains.lsp.utils.OSUtils;
 import com.intellij.openapi.editor.Editor;
 import lombok.val;
 import org.eclipse.lsp4j.Diagnostic;
 
-import java.awt.KeyboardFocusManager;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,7 +83,7 @@ public class EditorEventManagerBase {
             if (runOnRegistry.containsKey(manager.editor)) {
                 var tasks = runOnRegistry.remove(manager.editor);
                 for (var task: tasks) {
-                    ApplicationUtils.invokeLater(task);
+                    ApplicationUtil.invokeLater(task);
                 }
             }
         }
@@ -97,7 +94,7 @@ public class EditorEventManagerBase {
             var manager = forEditor(editor);
             if (manager != null) {
                 for (var task: runnables) {
-                    ApplicationUtils.invokeLater(task);
+                    ApplicationUtil.invokeLater(task);
                 }
             } else {
                 runOnRegistry.computeIfAbsent(editor, (ignored) -> new ArrayList<>()).addAll(List.of(runnables));
