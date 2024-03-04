@@ -23,11 +23,8 @@ import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.PlainPrefixMatcher;
-import com.intellij.openapi.application.ex.ApplicationUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.progress.ProgressIndicatorProvider;
 import com.intellij.util.ProcessingContext;
 import org.eclipse.lsp4j.Position;
 import org.jetbrains.annotations.NotNull;
@@ -40,23 +37,18 @@ class LSPCompletionContributor extends CompletionContributor {
 
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
-        CompletionProvider<CompletionParameters> provider = new CompletionProvider<CompletionParameters>() {
+        CompletionProvider<CompletionParameters> provider = new CompletionProvider<>() {
             @Override
             protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
                 try {
-                    ApplicationUtil.runWithCheckCanceled(() -> {
-                        Editor editor = parameters.getEditor();
-                        int offset = parameters.getOffset();
-                        Position serverPos = DocumentUtils.offsetToLSPPos(editor, offset);
+                    Editor editor = parameters.getEditor();
+                    int offset = parameters.getOffset();
+                    Position serverPos = DocumentUtils.offsetToLSPPos(editor, offset);
 
-                        EditorEventManager manager = EditorEventManagerBase.forEditor(editor);
-                        if (manager != null) {
-                            result.addAllElements(manager.completion(serverPos));
-                        }
-                        return null;
-                    }, ProgressIndicatorProvider.getGlobalProgressIndicator());
-                } catch (ProcessCanceledException ignored) {
-                    // ProcessCanceledException can be ignored.
+                    EditorEventManager manager = EditorEventManagerBase.forEditor(editor);
+                    if (manager != null) {
+                        result.addAllElements(manager.completion(serverPos));
+                    }
                 } catch (Exception e) {
                     LOG.warn("LSP Completions ended with an error", e);
                 }

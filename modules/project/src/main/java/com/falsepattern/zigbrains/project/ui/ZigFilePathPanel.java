@@ -16,16 +16,21 @@
 
 package com.falsepattern.zigbrains.project.ui;
 
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.ui.TextBrowseFolderListener;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.TextAccessor;
 import com.intellij.ui.components.JBTextField;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 
-public class ZigCommandLinePanel extends JPanel implements TextAccessor {
-    private final JBTextField textField = new JBTextField();
-    public ZigCommandLinePanel() {
+public class ZigFilePathPanel extends JPanel implements TextAccessor {
+    private final TextFieldWithBrowseButton textField = new TextFieldWithBrowseButton();
+    public ZigFilePathPanel() {
         super(new BorderLayout());
+        textField.addBrowseFolderListener(
+                new TextBrowseFolderListener(new FileChooserDescriptor(true, false, false, false, false, false)));
         add(textField, BorderLayout.CENTER);
     }
 
