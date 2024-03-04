@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.linemarker;
+package com.falsepattern.zigbrains.project.execution.build;
 
 import com.falsepattern.zigbrains.project.execution.base.ZigTopLevelLineMarkerBase;
 import com.falsepattern.zigbrains.zig.psi.ZigTypes;
@@ -26,7 +26,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 
-public class ZigBuildLineMarker extends ZigTopLevelLineMarkerBase {
+public class ZigLineMarkerBuild extends ZigTopLevelLineMarkerBase {
+    public static final ZigLineMarkerBuild UTILITY_INSTANCE = new ZigLineMarkerBuild();
     @Override
     protected @Nullable PsiElement getDeclaration(@NotNull PsiElement element) {
         if (PsiUtil.getElementType(element) != ZigTypes.IDENTIFIER) {
