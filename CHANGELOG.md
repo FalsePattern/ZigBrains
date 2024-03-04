@@ -20,6 +20,9 @@ Changelog structure reference:
 
 ### Added
 
+- Debugging
+  - Debugging support for tests when launched using the ZigTest task type (and with the gutter icons in the editor)
+
 - Project
   - Added `zig init` as a new project creation option
   - New projects will now have the project name in the build files instead of "untitled"
