@@ -23,6 +23,7 @@ import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.editor.markup.HighlighterLayer;
 import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.util.Key;
+import lombok.val;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -61,14 +62,15 @@ public class HighlightingUtil {
                                                            .map(hl -> Map.entry(hl, hl.getStartOffset()))
                                                            .sorted(Comparator.comparingInt(Map.Entry::getValue))
                                                            .toList());
-            app.invokeLater(() -> {
+            val writes = new ArrayList<Runnable>();
+            app.runReadAction(() -> {
                 if (editor.isDisposed()) {
                     return;
                 }
                 if (highlightRanges.size() == 1 &&
                     highlightRanges.get(0).start() == 0 &&
                     highlightRanges.get(0).remove() == -1) {
-                    markup.removeAllHighlighters();
+                    writes.add(markup::removeAllHighlighters);
                 }
                 var documentLength = editor.getDocument().getTextLength();
                 for (var range : highlightRanges) {
@@ -80,7 +82,8 @@ public class HighlightingUtil {
                             if (hl.getValue() >= start) {
                                 for (int j = 0; j < toRemove; j++) {
                                     highlightersSorted.remove(i);
-                                    markup.removeHighlighter(hl.getKey());
+                                    val key = hl.getKey();
+                                    writes.add(() -> markup.removeHighlighter(key));
                                 }
                             }
                         }
@@ -91,10 +94,14 @@ public class HighlightingUtil {
                         if (end > documentLength || editStart > documentLength) {
                             continue;
                         }
-                        markup.addRangeHighlighter(edit.color(), editStart, end, HighlighterLayer.ADDITIONAL_SYNTAX,
-                                                   HighlighterTargetArea.EXACT_RANGE);
+                        val color = edit.color();
+                        writes.add(() -> markup.addRangeHighlighter(color, editStart, end, HighlighterLayer.ADDITIONAL_SYNTAX, HighlighterTargetArea.EXACT_RANGE));
                     }
                 }
+                app.invokeLater(() -> {
+                    for (val write: writes)
+                        write.run();
+                });
             });
         });
     }

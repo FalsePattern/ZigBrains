@@ -41,9 +41,12 @@ public class ZigSyntaxHighlighter extends SyntaxHighlighterBase {
             COMMENT_DOC       = createKey("COMMENT_DOC"        , DefaultLanguageHighlighterColors.DOC_COMMENT         ),
             ENUM_DECL         = createKey("ENUM_DECL"          , DefaultLanguageHighlighterColors.CLASS_NAME          ),
             ENUM_REF          = createKey("ENUM"               , DefaultLanguageHighlighterColors.CLASS_REFERENCE     ),
-            ENUM_MEMBER       = createKey("ENUM_MEMBER"        , DefaultLanguageHighlighterColors.STATIC_FIELD        ),
-            ERROR_TAG         = createKey("ERROR_TAG"          , DefaultLanguageHighlighterColors.STATIC_FIELD        ),
-            PROPERTY          = createKey("PROPERTY"           , DefaultLanguageHighlighterColors.INSTANCE_FIELD      ),
+            ENUM_MEMBER_DECL  = createKey("ENUM_MEMBER_DECL"   , DefaultLanguageHighlighterColors.STATIC_FIELD        ),
+            ENUM_MEMBER_REF   = createKey("ENUM_MEMBER"        , ENUM_MEMBER_DECL                                     ),
+            ERROR_TAG_DECL    = createKey("ERROR_TAG_DECL"     , DefaultLanguageHighlighterColors.STATIC_FIELD        ),
+            ERROR_TAG_REF     = createKey("ERROR_TAG"          , ERROR_TAG_DECL                                       ),
+            PROPERTY_DECL     = createKey("PROPERTY_DECL"      , DefaultLanguageHighlighterColors.INSTANCE_FIELD      ),
+            PROPERTY_REF      = createKey("PROPERTY"           , PROPERTY_DECL                                        ),
             FUNCTION_DECL     = createKey("FUNCTION_DECL"      , DefaultLanguageHighlighterColors.FUNCTION_DECLARATION),
             FUNCTION_DECL_GEN = createKey("FUNCTION_DECL_GEN"  , FUNCTION_DECL                                        ),
             FUNCTION_REF      = createKey("FUNCTION"           , DefaultLanguageHighlighterColors.FUNCTION_CALL       ),
@@ -51,6 +54,10 @@ public class ZigSyntaxHighlighter extends SyntaxHighlighterBase {
             KEYWORD           = createKey("KEYWORD"            , DefaultLanguageHighlighterColors.KEYWORD             ),
             LABEL_DECL        = createKey("LABEL_DECL"         , DefaultLanguageHighlighterColors.LABEL               ),
             LABEL_REF         = createKey("LABEL"              , LABEL_DECL                                           ),
+            METHOD_DECL       = createKey("METHOD_DECL"        , FUNCTION_DECL                                        ),
+            METHOD_DECL_GEN   = createKey("METHOD_DECL_GEN"    , METHOD_DECL                                          ),
+            METHOD_REF        = createKey("METHOD"             , FUNCTION_REF                                         ),
+            METHOD_REF_GEN    = createKey("METHOD_GEN"         , METHOD_REF                                           ),
             NAMESPACE_DECL    = createKey("NAMESPACE_DECL"     , DefaultLanguageHighlighterColors.CLASS_REFERENCE     ),
             NAMESPACE_REF     = createKey("NAMESPACE"          , DefaultLanguageHighlighterColors.CLASS_NAME          ),
             NUMBER            = createKey("NUMBER"             , DefaultLanguageHighlighterColors.NUMBER              ),
@@ -63,8 +70,12 @@ public class ZigSyntaxHighlighter extends SyntaxHighlighterBase {
             TYPE_DECL_GEN     = createKey("TYPE_DECL_GEN"      , TYPE_DECL                                            ),
             TYPE_REF          = createKey("TYPE"               , DefaultLanguageHighlighterColors.CLASS_REFERENCE     ),
             TYPE_REF_GEN      = createKey("TYPE_GEN"           , TYPE_REF                                             ),
+            TYPE_PARAM        = createKey("TYPE_PARAM"         , TYPE_REF                                             ),
+            TYPE_PARAM_DECL   = createKey("TYPE_PARAM_DECL"    , TYPE_PARAM                                           ),
             VARIABLE_DECL     = createKey("VARIABLE_DECL"      , DefaultLanguageHighlighterColors.LOCAL_VARIABLE      ),
-            VARIABLE_REF      = createKey("VARIABLE"           , VARIABLE_DECL                                        );
+            VARIABLE_DECL_DEPR= createKey("VARIABLE_DECL_DEPR" , VARIABLE_DECL                                        ),
+            VARIABLE_REF      = createKey("VARIABLE"           , VARIABLE_DECL                                        ),
+            VARIABLE_REF_DEPR = createKey("VARIABLE_REF_DEPL"  , VARIABLE_REF                                         );
     // @formatter:on
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
     private static final Map<IElementType, TextAttributesKey[]> KEYMAP = new HashMap<>();

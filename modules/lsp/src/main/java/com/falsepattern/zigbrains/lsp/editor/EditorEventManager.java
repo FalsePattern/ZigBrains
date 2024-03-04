@@ -1302,13 +1302,7 @@ public class EditorEventManager {
         val sourceOffset = element.getTextOffset();
         val loc = requestDefinition(DocumentUtils.offsetToLSPPos(editor, sourceOffset));
 
-        invokeLater(() -> {
-            if (editor.isDisposed()) {
-                return;
-            }
-
-            gotoLocation(loc);
-        });
+        gotoLocation(loc);
     }
 
     // Tries to go to declaration / show usages based on the element which is
@@ -1328,25 +1322,19 @@ public class EditorEventManager {
             return;
         }
 
-        invokeLater(() -> {
-            if (editor.isDisposed()) {
-                return;
-            }
+        String locUri = FileUtils.sanitizeURI(loc.getUri());
 
-            String locUri = FileUtils.sanitizeURI(loc.getUri());
-
-            if (identifier.getUri().equals(locUri)
-                    && sourceOffset >= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getStart())
-                    && sourceOffset <= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getEnd())) {
-                LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
-                        .getAction("LSPFindUsages");
-                if (referencesAction != null) {
-                    referencesAction.forManagerAndOffset(this, sourceOffset);
-                }
-            } else {
-                gotoLocation(loc);
+        if (identifier.getUri().equals(locUri)
+                && sourceOffset >= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getStart())
+                && sourceOffset <= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getEnd())) {
+            LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
+                    .getAction("LSPFindUsages");
+            if (referencesAction != null) {
+                referencesAction.forManagerAndOffset(this, sourceOffset);
             }
-        });
+        } else {
+            gotoLocation(loc);
+        }
     }
 
     public void gotoLocation(Location loc) {
@@ -1359,7 +1347,7 @@ public class EditorEventManager {
         if (file != null) {
             OpenFileDescriptor descriptor = new OpenFileDescriptor(project, file);
             VirtualFile finalFile = file;
-            writeAction(() -> {
+            invokeLater(() -> {
                 FileEditorManager.getInstance(project).openTextEditor(descriptor, true);
                 Editor srcEditor = FileUtils.editorFromVirtualFile(finalFile, project);
                 if (srcEditor != null) {
