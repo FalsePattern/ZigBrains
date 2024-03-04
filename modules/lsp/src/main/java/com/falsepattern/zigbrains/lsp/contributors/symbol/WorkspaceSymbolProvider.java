@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.contributors.symbol;
 
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
@@ -70,7 +71,7 @@ public class WorkspaceSymbolProvider {
     final SymbolInformation information = (result.getSymbolInformation() != null) ?
             result.getSymbolInformation() : from(result.getWorkspaceSymbol());
     final Location location = information.getLocation();
-    final VirtualFile file = FileUtils.URIToVFS(location.getUri());
+    final VirtualFile file = FileUtil.virtualFileFromURI(location.getUri());
 
     if (file != null) {
       final LSPIconProvider iconProviderFor = GUIUtils.getIconProviderFor(result.getDefinition());

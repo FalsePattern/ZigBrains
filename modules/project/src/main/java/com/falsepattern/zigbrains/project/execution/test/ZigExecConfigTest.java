@@ -16,27 +16,42 @@
 
 package com.falsepattern.zigbrains.project.execution.test;
 
+import com.falsepattern.zigbrains.common.util.CollectionUtil;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
-import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
+import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
-import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
+import lombok.Getter;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
+@Getter
 public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
-    public String filePath = "";
+    private ZigConfigEditor.FilePathConfigurable filePath = new ZigConfigEditor.FilePathConfigurable("filePath", "File path");
+    private ZigConfigEditor.ColoredConfigurable colored = new ZigConfigEditor.ColoredConfigurable("colored");
+    private ZigConfigEditor.OptimizationConfigurable optimization = new ZigConfigEditor.OptimizationConfigurable("optimization");
     public ZigExecConfigTest(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Test");
     }
 
     @Override
     public String[] buildCommandLineArgs() {
-        return new String[]{"test", filePath};
+        return new String[]{"test", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name()};
+    }
+
+    @Override
+    public String[] buildDebugCommandLineArgs() {
+        if (optimization.forced) {
+            return new String[]{"test", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec", "-O", optimization.level.name()};
+        } else {
+            return new String[]{"test", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec"};
+        }
     }
 
     @Override
@@ -50,20 +65,16 @@ public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
     }
 
     @Override
-    public @NotNull SettingsEditor<? extends RunConfiguration> getConfigurationEditor() {
-        return new Editor();
+    public ZigExecConfigTest clone() {
+        val clone = super.clone();
+        clone.filePath = filePath.clone();
+        clone.colored = colored.clone();
+        clone.optimization = optimization.clone();
+        return clone;
     }
 
-    public static class Editor extends ZigConfigEditor.WithFilePath<ZigExecConfigTest> {
-
-        @Override
-        protected String getFilePath(ZigExecConfigTest config) {
-            return config.filePath;
-        }
-
-        @Override
-        protected void setFilePath(ZigExecConfigTest config, String path) {
-            config.filePath = path;
-        }
+    @Override
+    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
+        return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored);
     }
 }

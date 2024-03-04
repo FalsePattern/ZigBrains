@@ -22,23 +22,59 @@ import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.LocatableConfigurationBase;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.NlsActions;
+import com.intellij.openapi.vfs.VirtualFile;
+import lombok.Getter;
+import lombok.val;
+import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
+@Getter
 public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends LocatableConfigurationBase<ProfileStateBase<T>> {
-    public @Nullable Path workingDirectory;
+    private ZigConfigEditor.WorkDirectoryConfigurable workingDirectory = new ZigConfigEditor.WorkDirectoryConfigurable("workingDirectory");
     public ZigExecConfigBase(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
         super(project, factory, name);
-        workingDirectory = project.isDefault() ? null : Optional.ofNullable(project.getBasePath())
-                                                                .map(Path::of)
-                                                                .orElse(null);
+        workingDirectory.setPath(getProject().isDefault() ? null : Optional.ofNullable(ProjectUtil.guessProjectDir(getProject()))
+                                                                           .map(VirtualFile::toNioPath)
+                                                                           .orElse(null));
+    }
+
+    @Override
+    public @NotNull ZigConfigEditor<T> getConfigurationEditor() {
+        return new ZigConfigEditor<>(this);
+    }
+
+    @Override
+    public void readExternal(@NotNull Element element) throws InvalidDataException {
+        super.readExternal(element);
+        getConfigurables().forEach(cfg -> cfg.readExternal(element));
+    }
+
+    @Override
+    public void writeExternal(@NotNull Element element) {
+        super.writeExternal(element);
+        getConfigurables().forEach(cfg -> cfg.writeExternal(element));
     }
 
     public abstract String[] buildCommandLineArgs();
+
+    public String[] buildDebugCommandLineArgs() {
+        return buildCommandLineArgs();
+    }
+
+    @Override
+    public T clone() {
+        val myClone = (ZigExecConfigBase<?>) super.clone();
+        myClone.workingDirectory = workingDirectory.clone();
+        return (T) myClone;
+    }
 
     @Override
     public abstract @Nullable @NlsActions.ActionText String suggestedName();
@@ -47,4 +83,7 @@ public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends 
     public abstract @Nullable ProfileStateBase<T> getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment)
             throws ExecutionException;
 
+    public @NotNull List<ZigConfigEditor.@NotNull ZigConfigurable<?>> getConfigurables() {
+        return List.of(workingDirectory);
+    }
 }

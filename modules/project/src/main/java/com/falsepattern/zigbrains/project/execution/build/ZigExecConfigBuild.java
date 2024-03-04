@@ -16,41 +16,33 @@
 
 package com.falsepattern.zigbrains.project.execution.build;
 
+import com.falsepattern.zigbrains.common.util.CollectionUtil;
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
-import com.falsepattern.zigbrains.project.util.ElementUtil;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.InvalidDataException;
-import com.intellij.ui.components.JBTextField;
-import com.intellij.ui.dsl.builder.AlignX;
-import com.intellij.ui.dsl.builder.AlignY;
-import com.intellij.ui.dsl.builder.Panel;
+import lombok.Getter;
 import lombok.val;
-import org.apache.groovy.util.Arrays;
-import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.util.List;
 
+@Getter
 public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
-    public String extraArguments = "";
+    private ZigConfigEditor.ArgsConfigurable extraArgs = new ZigConfigEditor.ArgsConfigurable("extraArgs", "Extra command line arguments");
+    private ZigConfigEditor.ColoredConfigurable colored = new ZigConfigEditor.ColoredConfigurable("colored");
+    private ZigConfigEditor.FilePathConfigurable exePath = new ZigConfigEditor.FilePathConfigurable("exePath", "Output executable created by the build (for debugging)");
     public ZigExecConfigBuild(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Build");
     }
 
     @Override
     public String[] buildCommandLineArgs() {
-        val base = new String[]{"build"};
-        if (extraArguments.isBlank()) {
-            return base;
-        } else {
-            return Arrays.concat(base, extraArguments.split(" "));
-        }
+        val base = new String[]{"build", "--color", colored.colored ? "on" : "off"};
+        return CollectionUtil.concat(base, extraArgs.args);
     }
 
     @Override
@@ -59,54 +51,21 @@ public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
     }
 
     @Override
-    public @NotNull Editor getConfigurationEditor() {
-        return new Editor();
+    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
+        return CollectionUtil.concat(super.getConfigurables(), extraArgs, colored, exePath);
+    }
+
+    @Override
+    public ZigExecConfigBuild clone() {
+        val clone = super.clone();
+        clone.extraArgs = extraArgs.clone();
+        clone.colored = colored.clone();
+        clone.exePath = exePath.clone();
+        return clone;
     }
 
     @Override
     public @Nullable ProfileStateBuild getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) {
         return new ProfileStateBuild(environment, this);
-    }
-
-    @Override
-    public void readExternal(@NotNull Element element) throws InvalidDataException {
-        super.readExternal(element);
-
-        val extraArguments = ElementUtil.readString(element, "extraArguments");
-        if (extraArguments != null) {
-            this.extraArguments = extraArguments;
-        }
-    }
-
-    @Override
-    public void writeExternal(@NotNull Element element) {
-        super.writeExternal(element);
-
-        ElementUtil.writeString(element, "extraArguments", extraArguments);
-    }
-
-    public static class Editor extends ZigConfigEditor<ZigExecConfigBuild> {
-        private final JBTextField extraArgs = new JBTextField();
-
-        @Override
-        protected void applyEditorTo(@NotNull ZigExecConfigBuild s) throws ConfigurationException {
-            super.applyEditorTo(s);
-            s.extraArguments = extraArgs.getText();
-        }
-
-        @Override
-        protected void resetEditorFrom(@NotNull ZigExecConfigBuild s) {
-            super.resetEditorFrom(s);
-            extraArgs.setText(Objects.requireNonNullElse(s.extraArguments, ""));
-        }
-
-        @Override
-        protected void constructPanel(Panel p) {
-            super.constructPanel(p);
-            p.row("Extra arguments", (r) -> {
-                r.cell(extraArgs).resizableColumn().align(AlignX.FILL).align(AlignY.FILL);
-                return null;
-            });
-        }
     }
 }

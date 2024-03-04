@@ -15,6 +15,8 @@
  */
 package com.falsepattern.zigbrains.lsp.editor;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.actions.LSPReferencesAction;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
@@ -25,11 +27,9 @@ import com.falsepattern.zigbrains.lsp.contributors.icon.LSPIconProvider;
 import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
 import com.falsepattern.zigbrains.lsp.contributors.rename.LSPRenameProcessor;
 import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
-import com.falsepattern.zigbrains.lsp.requests.HoverHandler;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.requests.WorkspaceEditHandler;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.GUIUtils;
@@ -54,15 +54,10 @@ import com.intellij.openapi.editor.EditorModificationUtil;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.editor.SelectionModel;
-import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.editor.event.EditorMouseEvent;
-import com.intellij.openapi.editor.event.EditorMouseListener;
-import com.intellij.openapi.editor.event.EditorMouseMotionListener;
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable;
-import com.intellij.openapi.editor.markup.HighlighterLayer;
-import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
@@ -72,7 +67,6 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -96,8 +90,6 @@ import org.eclipse.lsp4j.DocumentFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.FormattingOptions;
-import org.eclipse.lsp4j.Hover;
-import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.InlayHintParams;
 import org.eclipse.lsp4j.InsertReplaceEdit;
@@ -124,7 +116,6 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.jsonrpc.messages.Tuple;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
 import java.awt.Point;
@@ -144,15 +135,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableReadAction;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableWriteAction;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.invokeLater;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.pool;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.writeAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.computableReadAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.computableWriteAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.invokeLater;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.pool;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.writeAction;
 import static com.falsepattern.zigbrains.lsp.utils.DocumentUtils.toEither;
 import static com.falsepattern.zigbrains.lsp.utils.GUIUtils.createAndShowEditorHint;
 
@@ -370,8 +360,8 @@ public class EditorEventManager {
                     res.forEach(l -> {
                         Position start = l.getRange().getStart();
                         Position end = l.getRange().getEnd();
-                        String uri = FileUtils.sanitizeURI(l.getUri());
-                        VirtualFile file = FileUtils.virtualFileFromURI(uri);
+                        String uri = FileUtil.sanitizeURI(l.getUri());
+                        VirtualFile file = FileUtil.virtualFileFromURI(uri);
                         if (fast) {
                             if (file == null)
                                 return;
@@ -1228,7 +1218,7 @@ public class EditorEventManager {
     }
 
     public List<InlayHint> inlayHint() {
-        var range = ApplicationUtils.computableReadAction(() -> {
+        var range = ApplicationUtil.computableReadAction(() -> {
             var start = DocumentUtils.offsetToLSPPos(editor, 0);
             var end = DocumentUtils.offsetToLSPPos(editor, editor.getDocument().getTextLength());
             return new Range(start, end);
@@ -1295,14 +1285,16 @@ public class EditorEventManager {
         }
     }
     // Tries to go to definition
-    public void gotoDefinition(PsiElement element) {
+    public boolean gotoDefinition(PsiElement element) {
         if (editor.isDisposed()) {
-            return;
+            return false;
         }
         val sourceOffset = element.getTextOffset();
         val loc = requestDefinition(DocumentUtils.offsetToLSPPos(editor, sourceOffset));
+        if (loc == null)
+            return false;
 
-        gotoLocation(loc);
+        return gotoLocation(loc);
     }
 
     // Tries to go to declaration / show usages based on the element which is
@@ -1322,7 +1314,7 @@ public class EditorEventManager {
             return;
         }
 
-        String locUri = FileUtils.sanitizeURI(loc.getUri());
+        String locUri = FileUtil.sanitizeURI(loc.getUri());
 
         if (identifier.getUri().equals(locUri)
                 && sourceOffset >= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getStart())
@@ -1337,7 +1329,7 @@ public class EditorEventManager {
         }
     }
 
-    public void gotoLocation(Location loc) {
+    public boolean gotoLocation(Location loc) {
         VirtualFile file = null;
         try {
             file = VfsUtil.findFileByURL(new URL(loc.getUri()));
@@ -1359,9 +1351,11 @@ public class EditorEventManager {
                     }
                 }
             });
+            return true;
         } else {
             LOG.warn("Empty file for " + loc.getUri());
         }
+        return false;
     }
 
     public void requestAndShowCodeActions() {

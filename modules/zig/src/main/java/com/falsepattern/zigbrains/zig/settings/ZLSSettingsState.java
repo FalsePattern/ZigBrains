@@ -42,6 +42,11 @@ public final class ZLSSettingsState implements PersistentStateComponent<ZLSSetti
     public boolean debug = false;
     public boolean messageTrace = false;
 
+    public boolean buildOnSave = false;
+    public String buildOnSaveStep = "install";
+    public boolean dangerousComptimeExperimentsDoNotEnable = false;
+    public boolean highlightGlobalVarDeclarations = false;
+
     public static Optional<String> executablePathFinder(String exe) {
         var exeName = SystemInfo.isWindows ? exe + ".exe" : exe;
         var PATH = System.getenv("PATH").split(File.pathSeparator);

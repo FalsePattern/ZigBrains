@@ -21,10 +21,13 @@ IC modules MUST NOT depend on CL modules, as this violates the restrictions set 
 
 ### Common (IC)
 
-### LSP (IC)
+### LSP-Common (IC)
 - LSP4J (EXT)
-- Flexmark (EXT)
+
+### LSP (IC)
 - Apache Commons Lang 3 (EXT)
+- Common (IC)
+- LSP-Common (IC)
 
 ### Zig (IC)
 - Grammarkit (EXT)
@@ -39,6 +42,8 @@ IC modules MUST NOT depend on CL modules, as this violates the restrictions set 
 - Grammarkit (EXT)
 - Common (IC)
 
-### Debugger (CL)
+### Debugger (IU/CL)
+- Common (IC)
+- LSP-Common (IC)
 - Zig (IC)
 - Project (IC)

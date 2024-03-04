@@ -15,10 +15,10 @@
  */
 package com.falsepattern.zigbrains.lsp.client;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.requests.WorkspaceEditHandler;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
-import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationGroup;
@@ -123,7 +123,7 @@ public class DefaultLanguageClient implements LanguageClient {
 
     @Override
     public void publishDiagnostics(PublishDiagnosticsParams publishDiagnosticsParams) {
-        String uri = FileUtils.sanitizeURI(publishDiagnosticsParams.getUri());
+        String uri = FileUtil.sanitizeURI(publishDiagnosticsParams.getUri());
         List<Diagnostic> diagnostics = publishDiagnosticsParams.getDiagnostics();
         EditorEventManagerBase.diagnostics(uri, diagnostics);
     }
@@ -134,7 +134,7 @@ public class DefaultLanguageClient implements LanguageClient {
         String message = messageParams.getMessage();
 
         if (isModal) {
-            ApplicationUtils.invokeLater(() -> {
+            ApplicationUtil.invokeLater(() -> {
                 MessageType msgType = messageParams.getType();
                 switch (msgType) {
                     case Error:

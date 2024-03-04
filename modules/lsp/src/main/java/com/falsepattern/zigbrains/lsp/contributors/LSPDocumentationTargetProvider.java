@@ -16,13 +16,14 @@
 
 package com.falsepattern.zigbrains.lsp.contributors;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.requests.HoverHandler;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
+import com.intellij.markdown.utils.doc.DocMarkdownToHtmlConverter;
 import com.intellij.model.Pointer;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.TextRange;
@@ -33,6 +34,7 @@ import com.intellij.platform.backend.presentation.TargetPresentation;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.SmartPointerManager;
 import com.intellij.psi.SmartPsiFileRange;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.jsonrpc.JsonRpcException;
@@ -44,7 +46,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 public class LSPDocumentationTargetProvider implements DocumentationTargetProvider {
     @Override
@@ -86,7 +87,7 @@ public class LSPDocumentationTargetProvider implements DocumentationTargetProvid
                 return null;
             }
             var caretPos = editor.offsetToLogicalPosition(offset);
-            var serverPos = ApplicationUtils.computableReadAction(() -> DocumentUtils.logicalToLSPPos(caretPos, editor));
+            var serverPos = ApplicationUtil.computableReadAction(() -> DocumentUtils.logicalToLSPPos(caretPos, editor));
             return DocumentationResult.asyncDocumentation(() -> {
                 var identifier = manager.getIdentifier();
                 var request = wrapper.getRequestManager().hover(new HoverParams(identifier, serverPos));
@@ -102,13 +103,15 @@ public class LSPDocumentationTargetProvider implements DocumentationTargetProvid
                         return null;
                     }
 
-                    String string = HoverHandler.getHoverString(hover);
+                    val markdown = HoverHandler.getHoverString(hover);
+                    val string = ApplicationUtil.computableReadAction(() -> DocMarkdownToHtmlConverter
+                            .convert(manager.getProject(), markdown));
                     if (StringUtils.isEmpty(string)) {
                         LOG.warn(String.format("Hover string returned is empty for file %s and pos (%d;%d)",
                                                identifier.getUri(), serverPos.getLine(), serverPos.getCharacter()));
                         return null;
                     }
-                    return DocumentationResult.documentation(string.lines().collect(Collectors.joining("<br>\n")));
+                    return DocumentationResult.documentation(string);
                 } catch (TimeoutException e) {
                     LOG.warn(e);
                     wrapper.notifyFailure(Timeouts.HOVER);

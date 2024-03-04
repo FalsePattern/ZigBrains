@@ -20,7 +20,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.TextAccessor;
-import com.intellij.ui.components.JBTextField;
 
 import javax.swing.JPanel;
 import java.awt.BorderLayout;

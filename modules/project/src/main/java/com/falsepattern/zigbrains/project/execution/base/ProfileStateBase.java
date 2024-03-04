@@ -16,10 +16,10 @@
 
 package com.falsepattern.zigbrains.project.execution.base;
 
-import com.falsepattern.zigbrains.project.execution.ZigCapturingProcessHandler;
 import com.falsepattern.zigbrains.project.runconfig.ZigProcessHandler;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.util.ProjectUtil;
+import com.intellij.build.BuildTextConsoleView;
 import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.CommandLineState;
@@ -31,6 +31,7 @@ import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 public abstract class ProfileStateBase<T extends ZigExecConfigBase<T>> extends CommandLineState {
     protected final T configuration;
@@ -42,18 +43,20 @@ public abstract class ProfileStateBase<T extends ZigExecConfigBase<T>> extends C
 
     @Override
     protected @NotNull ProcessHandler startProcess() throws ExecutionException {
-        return new ZigCapturingProcessHandler(getCommandLine(ProjectUtil.getToolchain(getEnvironment().getProject())));
+        return new ZigProcessHandler(getCommandLine(ProjectUtil.getToolchain(getEnvironment().getProject()), false));
     }
 
-    public GeneralCommandLine getCommandLine(AbstractZigToolchain toolchain) {
-        val workingDirectory = configuration.workingDirectory;
+    public GeneralCommandLine getCommandLine(AbstractZigToolchain toolchain, boolean debug) throws ExecutionException {
+        val workingDirectory = configuration.getWorkingDirectory();
         val zigExecutablePath = toolchain.pathToExecutable("zig");
 
-        return new GeneralCommandLine().withExePath(zigExecutablePath.toString())
-                                       .withWorkDirectory(workingDirectory.toString())
-                                       .withCharset(StandardCharsets.UTF_8)
-                                       .withRedirectErrorStream(true)
-                                       .withParameters(configuration.buildCommandLineArgs());
+        val cli = new GeneralCommandLine();
+        cli.setExePath(zigExecutablePath.toString());
+        workingDirectory.getPath().ifPresent(x -> cli.setWorkDirectory(x.toFile()));
+        cli.setCharset(StandardCharsets.UTF_8);
+        cli.setRedirectErrorStream(true);
+        cli.addParameters(debug ? configuration.buildDebugCommandLineArgs() : configuration.buildCommandLineArgs());
+        return cli;
     }
 
     public T configuration() {
@@ -63,7 +66,7 @@ public abstract class ProfileStateBase<T extends ZigExecConfigBase<T>> extends C
     public DefaultExecutionResult executeCommandLine(GeneralCommandLine commandLine, ExecutionEnvironment environment)
             throws ExecutionException {
         val handler = startProcess(commandLine);
-        val console = getConsoleBuilder().getConsole();
+        val console = new BuildTextConsoleView(environment.getProject(), false, Collections.emptyList());
         console.attachToProcess(handler);
         return new DefaultExecutionResult(console, handler);
     }
