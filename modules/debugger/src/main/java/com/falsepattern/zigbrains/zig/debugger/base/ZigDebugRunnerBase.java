@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zig.debugger;
+package com.falsepattern.zigbrains.zig.debugger.base;
 
-import com.falsepattern.zigbrains.project.execution.configurations.ZigRunExecutionConfigurationRunProfileState;
-import com.falsepattern.zigbrains.project.runconfig.ZigExecutableRunner;
+import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
+import com.falsepattern.zigbrains.project.runconfig.ZigProgramRunnerBase;
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
+import com.falsepattern.zigbrains.zig.debugger.Utils;
+import com.falsepattern.zigbrains.zig.debugger.ZigLocalDebugProcess;
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.process.ProcessTerminatedListener;
 import com.intellij.execution.runners.ExecutionEnvironment;
@@ -31,19 +34,18 @@ import com.intellij.xdebugger.XDebugProcess;
 import com.intellij.xdebugger.XDebugProcessStarter;
 import com.intellij.xdebugger.XDebugSession;
 import com.intellij.xdebugger.XDebuggerManager;
+import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.val;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-
-public class ZigDebugRunnerBase extends ZigExecutableRunner {
+public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?>> extends ZigProgramRunnerBase<ProfileState> {
     public ZigDebugRunnerBase() {
-        super(DefaultDebugExecutor.EXECUTOR_ID, "Unable to run Zig debugger");
+        super(DefaultDebugExecutor.EXECUTOR_ID);
     }
 
     @Override
-    protected RunContentDescriptor showRunContent(ZigRunExecutionConfigurationRunProfileState state, ExecutionEnvironment environment, GeneralCommandLine runExecutable)
+    protected RunContentDescriptor doExecute(ProfileState state, AbstractZigToolchain toolchain, ExecutionEnvironment environment)
             throws ExecutionException {
         val project = environment.getProject();
         val debuggerDriver = Utils.getDebuggerConfiguration(project);
@@ -51,7 +53,11 @@ public class ZigDebugRunnerBase extends ZigExecutableRunner {
             Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Error", "Couldn't find a working GDB or LLDB debugger! Please check your Toolchains! (Settings | Build, Execution, Deployment | Toolchains)", NotificationType.ERROR));
             return null;
         }
-        val runParameters = new ZigDebugRunParameters(runExecutable, debuggerDriver);
+        val runParameters = getDebugParameters(state, environment, debuggerDriver, toolchain);
+        if (runParameters == null) {
+            //Assume that getDebugParameters reports the bug in a notification already
+            return null;
+        }
         val manager = XDebuggerManager.getInstance(project);
         return manager.startSession(environment,
                                     new XDebugProcessStarter() {
@@ -66,7 +72,7 @@ public class ZigDebugRunnerBase extends ZigExecutableRunner {
     }
 
     @Override
-    public @NotNull @NonNls String getRunnerId() {
-        return "ZigDebugRunner";
-    }
+    public abstract boolean canRun(@NotNull String executorId, @NotNull RunProfile profile);
+
+    protected abstract @Nullable ZigDebugParametersBase<ProfileState> getDebugParameters(ProfileState state, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain);
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.configurations;
+package com.falsepattern.zigbrains.project.execution.base;
 
 import com.falsepattern.zigbrains.project.execution.ZigCapturingProcessHandler;
 import com.falsepattern.zigbrains.project.runconfig.ZigProcessHandler;
@@ -32,10 +32,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 
-public final class ZigRunExecutionConfigurationRunProfileState extends CommandLineState {
-    private final ZigRunExecutionConfiguration configuration;
+public abstract class ProfileStateBase<T extends ZigExecConfigBase<T>> extends CommandLineState {
+    protected final T configuration;
 
-    public ZigRunExecutionConfigurationRunProfileState(ExecutionEnvironment environment, ZigRunExecutionConfiguration configuration) {
+    public ProfileStateBase(ExecutionEnvironment environment, T configuration) {
         super(environment);
         this.configuration = configuration;
     }
@@ -53,15 +53,15 @@ public final class ZigRunExecutionConfigurationRunProfileState extends CommandLi
                                        .withWorkDirectory(workingDirectory.toString())
                                        .withCharset(StandardCharsets.UTF_8)
                                        .withRedirectErrorStream(true)
-                                       .withParameters(configuration.command.split(" "));
+                                       .withParameters(configuration.buildCommandLineArgs());
     }
 
-    public ZigRunExecutionConfiguration configuration() {
+    public T configuration() {
         return configuration;
     }
 
-    public DefaultExecutionResult executeCommandLine(GeneralCommandLine commandLine,
-                                                     ExecutionEnvironment environment) throws ExecutionException {
+    public DefaultExecutionResult executeCommandLine(GeneralCommandLine commandLine, ExecutionEnvironment environment)
+            throws ExecutionException {
         val handler = startProcess(commandLine);
         val console = getConsoleBuilder().getConsole();
         console.attachToProcess(handler);
@@ -73,5 +73,4 @@ public final class ZigRunExecutionConfigurationRunProfileState extends CommandLi
         ProcessTerminatedListener.attach(handler);
         return handler;
     }
-
 }
