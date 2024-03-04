@@ -15,7 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.contributors.psi;
 
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
@@ -700,7 +700,7 @@ public class LSPPsiElement extends PsiElementBase implements PsiNameIdentifierOw
         if (editor == null) {
             OpenFileDescriptor descriptor = new OpenFileDescriptor(getProject(), getContainingFile().getVirtualFile(),
                     getTextOffset());
-            ApplicationUtils.invokeLater(() -> ApplicationUtils
+            ApplicationUtil.invokeLater(() -> ApplicationUtil
                     .writeAction(() -> FileEditorManager.getInstance(getProject()).openTextEditor(descriptor, false)));
         }
     }

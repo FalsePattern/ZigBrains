@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.project.execution.base;
 
-import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.zig.parser.ZigFile;
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.LazyRunConfigurationProducer;
@@ -26,6 +25,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
+
+import java.nio.file.Path;
 
 public abstract class ConfigProducerBase<T extends ZigExecConfigBase<T>> extends LazyRunConfigurationProducer<T> {
     @NotNull
@@ -47,7 +48,7 @@ public abstract class ConfigProducerBase<T extends ZigExecConfigBase<T>> extends
             return false;
         }
         var theFile = psiFile.getVirtualFile();
-        var filePath = theFile.getPath();
+        var filePath = theFile.toNioPath();
         return setupConfigurationFromContext(configuration, element, filePath, theFile);
     }
 
@@ -65,7 +66,7 @@ public abstract class ConfigProducerBase<T extends ZigExecConfigBase<T>> extends
             return false;
         }
         val vFile = file.getVirtualFile();
-        val filePath = vFile.getPath();
+        val filePath = vFile.toNioPath();
         return isConfigurationFromContext(configuration, filePath, vFile, element);
     }
 
@@ -95,6 +96,6 @@ public abstract class ConfigProducerBase<T extends ZigExecConfigBase<T>> extends
     }
      */
 
-    protected abstract boolean setupConfigurationFromContext(@NotNull T configuration, PsiElement element, String filePath, VirtualFile theFile);
-    protected abstract boolean isConfigurationFromContext(@NotNull T configuration, String filePath, VirtualFile vFile, PsiElement element);
+    protected abstract boolean setupConfigurationFromContext(@NotNull T configuration, PsiElement element, Path filePath, VirtualFile theFile);
+    protected abstract boolean isConfigurationFromContext(@NotNull T configuration, Path filePath, VirtualFile vFile, PsiElement element);
 }

@@ -22,6 +22,7 @@ Changelog structure reference:
 
 - Debugging
   - Debugging support for tests when launched using the ZigTest task type (and with the gutter icons in the editor)
+  - Debugging support on Windows systems
 
 - Project
   - Added `zig init` as a new project creation option
@@ -30,6 +31,9 @@ Changelog structure reference:
 - Zig
   - Updated semantic highlighting to latest ZLS protocol
 
+- ZLS
+  - ZLS configuration is now partially editable through the GUI
+
 ### Fixed
 
 - Project
@@ -37,6 +41,14 @@ Changelog structure reference:
 
 - Plugin
   - Removed a bunch of write action locking, the editor should feel more responsive now
+
+- Zig
+  - Error highlighting was breaking all the time
+
+### Removed
+
+- Project
+  - !!!BREAKING CHANGE!!! There is now no arbitrary "zig execution" task, all zig tasks have been categorized into Zig run/build/test tasks respectively.
 
 ## [12.0.0]
 

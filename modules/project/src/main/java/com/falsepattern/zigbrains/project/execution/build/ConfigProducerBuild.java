@@ -20,7 +20,10 @@ import com.falsepattern.zigbrains.project.execution.base.ConfigProducerBase;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
+
+import java.nio.file.Path;
 
 public class ConfigProducerBuild extends ConfigProducerBase<ZigExecConfigBuild> {
     @Override
@@ -29,7 +32,7 @@ public class ConfigProducerBuild extends ConfigProducerBase<ZigExecConfigBuild> 
     }
 
     @Override
-    protected boolean setupConfigurationFromContext(@NotNull ZigExecConfigBuild configuration, PsiElement element, String filePath, VirtualFile theFile) {
+    protected boolean setupConfigurationFromContext(@NotNull ZigExecConfigBuild configuration, PsiElement element, Path filePath, VirtualFile theFile) {
         if (ZigLineMarkerBuild.UTILITY_INSTANCE.elementMatches(element)) {
             configuration.setName("Build");
             return true;
@@ -38,7 +41,11 @@ public class ConfigProducerBuild extends ConfigProducerBase<ZigExecConfigBuild> 
     }
 
     @Override
-    protected boolean isConfigurationFromContext(@NotNull ZigExecConfigBuild configuration, String filePath, VirtualFile vFile, PsiElement element) {
-        return true;
+    protected boolean isConfigurationFromContext(@NotNull ZigExecConfigBuild configuration, Path filePath, VirtualFile vFile, PsiElement element) {
+        val p = configuration.getWorkingDirectory().getPath();
+        if (p.isEmpty())
+            return false;
+        val path = p.get();
+        return filePath.getParent().equals(path);
     }
 }
