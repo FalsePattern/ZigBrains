@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zig.debugger.base;
+package com.falsepattern.zigbrains.zig.debugger.runner.base;
 
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
+import com.intellij.util.system.CpuArch;
+import com.jetbrains.cidr.ArchitectureType;
 import com.jetbrains.cidr.execution.RunParameters;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,6 @@ public abstract class ZigDebugParametersBase<ProfileState extends ProfileStateBa
 
     @Override
     public @Nullable String getArchitectureId() {
-        return null;
+        return ArchitectureType.forVmCpuArch(CpuArch.CURRENT).getId();
     }
 }

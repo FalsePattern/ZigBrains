@@ -19,10 +19,14 @@
     <resource-bundle>zigbrains.zig.debugger.Bundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.run.ZigDebugRunnerRun"
+        <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.runner.run.ZigDebugRunnerRun"
                        id="ZigDebugRunnerRun"/>
-        <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.test.ZigDebugRunnerTest"
+        <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.runner.test.ZigDebugRunnerTest"
                        id="ZigDebugRunnerTest"/>
+        <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.runner.build.ZigDebugRunnerBuild"
+                       id="ZigDebugRunnerBuild"/>
+        <programRunner implementation="com.falsepattern.zigbrains.zig.debugger.runner.binary.ZigDebugRunnerBinary"
+                       id="ZigDebugRunnerBinary"/>
 
         <notificationGroup displayType="BALLOON"
                            bundle="zigbrains.zig.debugger.Bundle"
@@ -32,6 +36,9 @@
                            bundle="zigbrains.zig.debugger.Bundle"
                            key="notif-debug-warn"
                            id="ZigBrains.Debugger.Warn"/>
+        <applicationConfigurable parentId="project.propDebugger"
+                                 instance="com.falsepattern.zigbrains.zig.debugger.win.config.WinDebuggerConfigurable"
+                                 displayName="Zig (Windows)"/>
     </extensions>
 
     <extensions defaultExtensionNs="cidr.debugger">

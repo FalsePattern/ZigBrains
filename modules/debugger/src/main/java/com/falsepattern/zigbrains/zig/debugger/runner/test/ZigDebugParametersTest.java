@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zig.debugger.run;
+package com.falsepattern.zigbrains.zig.debugger.runner.test;
 
-import com.falsepattern.zigbrains.project.execution.run.ProfileStateRun;
+import com.falsepattern.zigbrains.project.execution.test.ProfileStateTest;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
-import com.falsepattern.zigbrains.zig.debugger.base.ZigDebugParametersBase;
+import com.falsepattern.zigbrains.zig.debugger.runner.base.ZigDebugEmitBinaryInstaller;
+import com.falsepattern.zigbrains.zig.debugger.runner.base.ZigDebugParametersBase;
 import com.jetbrains.cidr.execution.Installer;
-import com.jetbrains.cidr.execution.TrivialInstaller;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-public class ZigDebugParametersRun extends ZigDebugParametersBase<ProfileStateRun> {
-    public ZigDebugParametersRun(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateRun profileState) {
+public class ZigDebugParametersTest extends ZigDebugParametersBase<ProfileStateTest> {
+    public ZigDebugParametersTest(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateTest profileState) {
         super(driverConfiguration, toolchain, profileState);
     }
 
     @Override
     public @NotNull Installer getInstaller() {
-        return new TrivialInstaller(profileState.getCommandLine(toolchain));
+        return new ZigDebugEmitBinaryInstaller<>("test", profileState, toolchain) {
+            @Override
+            public String[] getExeArgs() {
+                return new String[0];
+            }
+        };
     }
 }

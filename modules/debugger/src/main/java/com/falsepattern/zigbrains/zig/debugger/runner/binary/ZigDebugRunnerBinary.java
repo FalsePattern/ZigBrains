@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zig.debugger.run;
+package com.falsepattern.zigbrains.zig.debugger.runner.binary;
 
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
-import com.falsepattern.zigbrains.project.execution.run.ProfileStateRun;
-import com.falsepattern.zigbrains.project.execution.run.ZigExecConfigRun;
+import com.falsepattern.zigbrains.project.execution.binary.ProfileStateBinary;
+import com.falsepattern.zigbrains.project.execution.binary.ZigExecConfigBinary;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain;
-import com.falsepattern.zigbrains.zig.debugger.base.ZigDebugRunnerBase;
+import com.falsepattern.zigbrains.zig.debugger.runner.base.ZigDebugParametersBase;
+import com.falsepattern.zigbrains.zig.debugger.runner.base.ZigDebugRunnerBase;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.notification.Notification;
@@ -32,29 +33,29 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ZigDebugRunnerRun extends ZigDebugRunnerBase<ProfileStateRun> {
+public class ZigDebugRunnerBinary extends ZigDebugRunnerBase<ProfileStateBinary> {
+    @Override
+    public @NotNull @NonNls String getRunnerId() {
+        return "ZigDebugRunnerBinary";
+    }
+
     @Override
     public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
         return this.executorId.equals(executorId) &&
-               (profile instanceof ZigExecConfigRun);
+               (profile instanceof ZigExecConfigBinary);
     }
 
     @Override
-    public @NotNull @NonNls String getRunnerId() {
-        return "ZigDebugRunnerRun";
-    }
-
-    @Override
-    protected ZigDebugParametersRun getDebugParameters(ProfileStateRun profileStateRun, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain$) {
+    protected @Nullable ZigDebugParametersBase<ProfileStateBinary> getDebugParameters(ProfileStateBinary profileStateBinary, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain$) {
         if (!(toolchain$ instanceof LocalZigToolchain toolchain)) {
             Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Error", "The debugger only supports local zig toolchains!", NotificationType.ERROR));
             return null;
         }
-        return new ZigDebugParametersRun(debuggerDriver, toolchain, profileStateRun);
+        return new ZigDebugParametersBinary(debuggerDriver, toolchain, profileStateBinary);
     }
 
     @Override
-    protected @Nullable ProfileStateRun castProfileState(ProfileStateBase<?> state) {
-        return state instanceof ProfileStateRun state$ ? state$ : null;
+    protected @Nullable ProfileStateBinary castProfileState(ProfileStateBase<?> state) {
+        return state instanceof ProfileStateBinary state$ ? state$ : null;
     }
 }

@@ -16,36 +16,43 @@
 
 package com.falsepattern.zigbrains.project.execution.run;
 
+import com.falsepattern.zigbrains.common.util.CollectionUtil;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
-import com.falsepattern.zigbrains.project.util.ElementUtil;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.InvalidDataException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
-import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-@Setter
 @Getter
-public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> implements
-        ZigConfigEditor.FilePathModule.Carrier, ZigConfigEditor.ColoredModule.Carrier {
-    public String filePath = "";
-    public boolean colored = true;
+public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
+    private ZigConfigEditor.FilePathConfigurable filePath = new ZigConfigEditor.FilePathConfigurable("filePath", "File Path");
+    private ZigConfigEditor.ColoredConfigurable colored = new ZigConfigEditor.ColoredConfigurable("colored");
+    private ZigConfigEditor.OptimizationConfigurable optimization = new ZigConfigEditor.OptimizationConfigurable("optimization");
+    private ZigConfigEditor.ArgsConfigurable exeArgs = new ZigConfigEditor.ArgsConfigurable("exeArgs", "Arguments for the compile exe");
     public ZigExecConfigRun(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Run");
     }
 
     @Override
     public String[] buildCommandLineArgs() {
-        return new String[]{"run", "--color", colored ? "on" : "off", filePath};
+        return CollectionUtil.concat(new String[]{"run", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name(), "--"}, exeArgs.args);
+    }
+
+    @Override
+    public String[] buildDebugCommandLineArgs() {
+        if (optimization.forced) {
+            return new String[]{"build-exe", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name()};
+        } else {
+            return new String[]{"build-exe", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString()};
+        }
     }
 
     @Override
@@ -54,31 +61,22 @@ public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> implem
     }
 
     @Override
-    public @NotNull List<ZigConfigEditor.ZigConfigModule<ZigExecConfigRun>> getEditorConfigModules() {
-        val modules = super.getEditorConfigModules();
-        modules.add(new ZigConfigEditor.FilePathModule<>());
-        modules.add(new ZigConfigEditor.ColoredModule<>());
-        return modules;
+    public ZigExecConfigRun clone() {
+        val clone = super.clone();
+        clone.filePath = filePath.clone();
+        clone.colored = colored.clone();
+        clone.optimization = optimization.clone();
+        clone.exeArgs = exeArgs.clone();
+        return clone;
+    }
+
+    @Override
+    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
+        return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored);
     }
 
     @Override
     public @Nullable ProfileStateRun getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) {
         return new ProfileStateRun(environment, this);
-    }
-
-    @Override
-    public void readExternal(@NotNull Element element) throws InvalidDataException {
-        super.readExternal(element);
-
-        ElementUtil.readString(element, "filePath").ifPresent(x -> filePath = x);
-        ElementUtil.readBoolean(element, "colored").ifPresent(x -> colored = x);
-    }
-
-    @Override
-    public void writeExternal(@NotNull Element element) {
-        super.writeExternal(element);
-
-        ElementUtil.writeString(element, "filePath", filePath);
-        ElementUtil.writeBoolean(element, "colored", colored);
     }
 }

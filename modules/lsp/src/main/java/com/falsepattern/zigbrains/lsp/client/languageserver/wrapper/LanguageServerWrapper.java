@@ -131,8 +131,7 @@ import static com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus.
  * The implementation of a LanguageServerWrapper (specific to a serverDefinition and a project)
  */
 public class LanguageServerWrapper {
-
-    public LanguageServerDefinition serverDefinition;
+    public final LanguageServerDefinition serverDefinition;
     private final LSPExtensionManager extManager;
     private final Project project;
     private final HashSet<Editor> toConnect = new HashSet<>();

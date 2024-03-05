@@ -40,7 +40,7 @@ public class ProcessStreamConnectionProvider implements StreamConnectionProvider
     @Nullable
     private ProcessBuilder builder;
     @Nullable
-    private Process process = null;
+    protected Process process = null;
     private List<String> commands;
     private String workingDir;
 
@@ -55,7 +55,7 @@ public class ProcessStreamConnectionProvider implements StreamConnectionProvider
     }
 
     public void start() throws IOException {
-        if ((workingDir == null || commands == null || commands.isEmpty() || commands.contains(null)) && builder == null) {
+        if ((workingDir == null || commands == null || commands.isEmpty()) && builder == null) {
             throw new IOException("Unable to start language server: " + this.toString());
         }
         ProcessBuilder builder = createProcessBuilder();
@@ -88,6 +88,12 @@ public class ProcessStreamConnectionProvider implements StreamConnectionProvider
 
     @Nullable
     @Override
+    public InputStream getErrorStream() {
+        return process != null ? process.getErrorStream() : null;
+    }
+
+    @Nullable
+    @Override
     public OutputStream getOutputStream() {
         return process != null ? process.getOutputStream() : null;
     }
@@ -95,6 +101,12 @@ public class ProcessStreamConnectionProvider implements StreamConnectionProvider
     public void stop() {
         if (process != null) {
             process.destroy();
+        }
+    }
+
+    public void onExit(Runnable runnable) {
+        if (process != null) {
+            process.onExit().thenRun(runnable);
         }
     }
 

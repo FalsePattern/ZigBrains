@@ -13,25 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.falsepattern.zigbrains.lsp.common.connection;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+package com.falsepattern.zigbrains.project.execution.base;
 
-public interface StreamConnectionProvider {
-
-    void start() throws IOException;
-
-    InputStream getInputStream();
-
-    default @Nullable InputStream getErrorStream() {
-        return null;
-    }
-
-    OutputStream getOutputStream();
-
-    void stop();
-
+public enum OptimizationLevel {
+    Debug,
+    ReleaseFast,
+    ReleaseSafe,
+    ReleaseSmall
 }

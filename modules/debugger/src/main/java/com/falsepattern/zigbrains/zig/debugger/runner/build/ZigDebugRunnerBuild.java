@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zig.debugger.test;
+package com.falsepattern.zigbrains.zig.debugger.runner.build;
 
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
-import com.falsepattern.zigbrains.project.execution.test.ProfileStateTest;
-import com.falsepattern.zigbrains.project.execution.test.ZigExecConfigTest;
+import com.falsepattern.zigbrains.project.execution.build.ProfileStateBuild;
+import com.falsepattern.zigbrains.project.execution.build.ZigExecConfigBuild;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain;
-import com.falsepattern.zigbrains.zig.debugger.base.ZigDebugParametersBase;
-import com.falsepattern.zigbrains.zig.debugger.base.ZigDebugRunnerBase;
+import com.falsepattern.zigbrains.zig.debugger.runner.base.ZigDebugParametersBase;
+import com.falsepattern.zigbrains.zig.debugger.runner.base.ZigDebugRunnerBase;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.notification.Notification;
@@ -33,29 +33,29 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ZigDebugRunnerTest extends ZigDebugRunnerBase<ProfileStateTest> {
+public class ZigDebugRunnerBuild extends ZigDebugRunnerBase<ProfileStateBuild> {
     @Override
     public @NotNull @NonNls String getRunnerId() {
-        return "ZigDebugRunnerTest";
+        return "ZigDebugRunnerBuild";
     }
 
     @Override
     public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
         return this.executorId.equals(executorId) &&
-               (profile instanceof ZigExecConfigTest);
+               (profile instanceof ZigExecConfigBuild);
     }
 
     @Override
-    protected @Nullable ZigDebugParametersBase<ProfileStateTest> getDebugParameters(ProfileStateTest profileStateTest, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain$) {
+    protected @Nullable ZigDebugParametersBase<ProfileStateBuild> getDebugParameters(ProfileStateBuild profileStateBuild, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain$) {
         if (!(toolchain$ instanceof LocalZigToolchain toolchain)) {
             Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Error", "The debugger only supports local zig toolchains!", NotificationType.ERROR));
             return null;
         }
-        return new ZigDebugParametersTest(debuggerDriver, toolchain, profileStateTest);
+        return new ZigDebugParametersBuild(debuggerDriver, toolchain, profileStateBuild);
     }
 
     @Override
-    protected @Nullable ProfileStateTest castProfileState(ProfileStateBase<?> state) {
-        return state instanceof ProfileStateTest state$ ? state$ : null;
+    protected @Nullable ProfileStateBuild castProfileState(ProfileStateBase<?> state) {
+        return state instanceof ProfileStateBuild state$ ? state$ : null;
     }
 }

@@ -17,10 +17,12 @@
 package com.falsepattern.zigbrains.zig.debugger;
 
 import com.falsepattern.zigbrains.zig.debugbridge.DebuggerDriverProvider;
+import com.falsepattern.zigbrains.zig.debugger.win.WinDebuggerDriverConfiguration;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.system.OS;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration;
 import lombok.val;
@@ -28,6 +30,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class Utils {
     public static @Nullable DebuggerDriverConfiguration getDebuggerConfiguration(Project project) {
+        if (OS.CURRENT == OS.Windows) {
+            return new WinDebuggerDriverConfiguration();
+        }
         val providedDebugger = DebuggerDriverProvider.findDebuggerConfigurations(project)
                                                      .filter(x -> x instanceof DebuggerDriverConfiguration)
                                                      .map(x -> (DebuggerDriverConfiguration)x)

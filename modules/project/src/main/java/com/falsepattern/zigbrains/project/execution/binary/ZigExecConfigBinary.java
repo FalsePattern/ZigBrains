@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.build;
+package com.falsepattern.zigbrains.project.execution.binary;
 
 import com.falsepattern.zigbrains.common.util.CollectionUtil;
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
@@ -32,41 +32,40 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Getter
-public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
-    private ZigConfigEditor.ArgsConfigurable extraArgs = new ZigConfigEditor.ArgsConfigurable("extraArgs", "Extra command line arguments");
-    private ZigConfigEditor.ColoredConfigurable colored = new ZigConfigEditor.ColoredConfigurable("colored");
-    private ZigConfigEditor.FilePathConfigurable exePath = new ZigConfigEditor.FilePathConfigurable("exePath", "Output executable created by the build (for debugging)");
-    public ZigExecConfigBuild(@NotNull Project project, @NotNull ConfigurationFactory factory) {
-        super(project, factory, "Zig Build");
+public class ZigExecConfigBinary extends ZigExecConfigBase<ZigExecConfigBinary> {
+    private ZigConfigEditor.FilePathConfigurable exePath = new ZigConfigEditor.FilePathConfigurable("exePath", "Executable program path (not the zig compiler)");
+    private ZigConfigEditor.ArgsConfigurable args = new ZigConfigEditor.ArgsConfigurable("args", "Command line arguments");
+
+    public ZigExecConfigBinary(@NotNull Project project, @NotNull ConfigurationFactory factory) {
+        super(project, factory, "Zig-compiled native executable");
     }
 
     @Override
     public String[] buildCommandLineArgs() {
-        val base = new String[]{"build", "--color", colored.colored ? "on" : "off"};
-        return CollectionUtil.concat(base, extraArgs.args);
+        return args.args;
     }
 
     @Override
     public @Nullable String suggestedName() {
-        return "Build";
+        return "Executable";
     }
 
-    @Override
-    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
-        return CollectionUtil.concat(super.getConfigurables(), extraArgs, colored, exePath);
-    }
 
     @Override
-    public ZigExecConfigBuild clone() {
+    public ZigExecConfigBinary clone() {
         val clone = super.clone();
-        clone.extraArgs = extraArgs.clone();
-        clone.colored = colored.clone();
         clone.exePath = exePath.clone();
+        clone.args = args.clone();
         return clone;
     }
 
     @Override
-    public @Nullable ProfileStateBuild getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) {
-        return new ProfileStateBuild(environment, this);
+    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
+        return CollectionUtil.concat(super.getConfigurables(), exePath, args);
+    }
+
+    @Override
+    public @Nullable ProfileStateBinary getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) {
+        return new ProfileStateBinary(environment, this);
     }
 }

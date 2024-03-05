@@ -17,57 +17,64 @@
 package com.falsepattern.zigbrains.project.console;
 
 import com.falsepattern.zigbrains.common.util.FileUtil;
-import com.falsepattern.zigbrains.project.openapi.module.ZigModuleType;
 import com.intellij.execution.filters.Filter;
 import com.intellij.execution.filters.OpenFileHyperlinkInfo;
-import com.intellij.ide.impl.ProjectUtil;
-import com.intellij.openapi.fileEditor.OpenFileDescriptor;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
+import kotlin.Pair;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 public class ZigSourceFileFilter implements Filter {
     private final Project project;
+    private final Pattern LEN_REGEX = Pattern.compile(":(\\d+):(\\d+)");
+
+    private Pair<Path, Integer> findLongestParsablePathFromOffset(String line, int end, String projectPath) {
+        int longestStart = -1;
+        Path longest = null;
+        for (int i = end - 1; i >= 0; i--) {
+            try {
+                val pathStr = line.substring(i, end);
+                var path = Path.of(pathStr);
+                if (!Files.exists(path) || !Files.isRegularFile(path)) {
+                    path = Path.of(projectPath, pathStr);
+                    if (!Files.exists(path) || !Files.isRegularFile(path))
+                        continue;
+                }
+                longest = path;
+                longestStart = i;
+            } catch (InvalidPathException ignored){}
+        }
+        return new Pair<>(longest, longestStart);
+    }
+
     @Nullable
     @Override
     public Result applyFilter(@NotNull String line, int entireLength) {
         val lineStart = entireLength - line.length();
-        int splitA, splitB, splitC;
-        splitA = line.indexOf(':');
-        if (splitA < 0)
-            return null;
-        splitB = line.indexOf(':', splitA + 1);
-        if (splitB < 0)
-            return null;
-        splitC = line.indexOf(':', splitB + 1);
-        if (splitC < 0)
-            return null;
-        final int lineNumber, lineOffset;
-        try {
-            lineNumber = Math.max(Integer.parseInt(line, splitA + 1, splitB, 10) - 1, 0);
-            lineOffset = Math.max(Integer.parseInt(line, splitB + 1, splitC, 10) - 1, 0);
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
-        val pathStr = line.substring(0, splitA);
-        var path = Path.of(pathStr);
-        if (!Files.exists(path) || !Files.isRegularFile(path)) {
-            val projectPath = project.getBasePath();
-            if (projectPath == null)
+        val projectPath = project.getBasePath();
+        val results = new ArrayList<ResultItem>();
+        val matcher = LEN_REGEX.matcher(line);
+        while (matcher.find()) {
+            val end = matcher.start();
+            val pair = findLongestParsablePathFromOffset(line, end, projectPath);
+            val path = pair.getFirst();
+            if (path == null)
                 return null;
-            path = Path.of(projectPath, pathStr);
-            if (!Files.exists(path) || !Files.isRegularFile(path))
-                return null;
+            val lineNumber = Math.max(Integer.parseInt(matcher.group(1)) - 1, 0);
+            val lineOffset = Math.max(Integer.parseInt(matcher.group(2)) - 1, 0);
+            val file = FileUtil.virtualFileFromURI(path.toUri());
+            results.add(new ResultItem(lineStart + pair.getSecond(), lineStart + matcher.end(), new OpenFileHyperlinkInfo(project, file, lineNumber, lineOffset)));
+
         }
-        val file = FileUtil.virtualFileFromURI(path.toUri());
-        return new Result(lineStart, lineStart + splitC, new OpenFileHyperlinkInfo(project, file, lineNumber, lineOffset));
+        return new Result(results);
     }
 }

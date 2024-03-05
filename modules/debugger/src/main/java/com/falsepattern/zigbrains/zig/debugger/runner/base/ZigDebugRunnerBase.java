@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.zig.debugger.base;
+package com.falsepattern.zigbrains.zig.debugger.runner.base;
 
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.runconfig.ZigProgramRunnerBase;

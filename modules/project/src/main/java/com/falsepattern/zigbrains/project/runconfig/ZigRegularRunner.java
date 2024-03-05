@@ -52,6 +52,6 @@ public class ZigRegularRunner extends ZigProgramRunnerBase<ProfileStateBase<?>> 
     @Override
     protected @Nullable RunContentDescriptor doExecute(ProfileStateBase<?> state, AbstractZigToolchain toolchain, ExecutionEnvironment environment)
             throws ExecutionException {
-        return DefaultProgramRunnerKt.showRunContent(state.executeCommandLine(state.getCommandLine(toolchain), environment), environment);
+        return DefaultProgramRunnerKt.showRunContent(state.executeCommandLine(state.getCommandLine(toolchain, false), environment), environment);
     }
 }

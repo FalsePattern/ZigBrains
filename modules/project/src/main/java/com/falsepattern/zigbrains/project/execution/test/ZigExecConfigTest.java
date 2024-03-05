@@ -16,15 +16,15 @@
 
 package com.falsepattern.zigbrains.project.execution.test;
 
+import com.falsepattern.zigbrains.common.util.CollectionUtil;
+import com.falsepattern.zigbrains.project.execution.base.OptimizationLevel;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
 import com.falsepattern.zigbrains.project.util.ElementUtil;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
-import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.openapi.options.SettingsEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
 import lombok.Getter;
@@ -37,18 +37,26 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Getter
-@Setter
-public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> implements ZigConfigEditor.FilePathModule.Carrier,
-        ZigConfigEditor.ColoredModule.Carrier {
-    public String filePath = "";
-    public boolean colored = true;
+public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
+    private ZigConfigEditor.FilePathConfigurable filePath = new ZigConfigEditor.FilePathConfigurable("filePath", "File path");
+    private ZigConfigEditor.ColoredConfigurable colored = new ZigConfigEditor.ColoredConfigurable("colored");
+    private ZigConfigEditor.OptimizationConfigurable optimization = new ZigConfigEditor.OptimizationConfigurable("optimization");
     public ZigExecConfigTest(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Test");
     }
 
     @Override
     public String[] buildCommandLineArgs() {
-        return new String[]{"test", "--color", colored ? "on" : "off", filePath};
+        return new String[]{"test", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name()};
+    }
+
+    @Override
+    public String[] buildDebugCommandLineArgs() {
+        if (optimization.forced) {
+            return new String[]{"test", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec", "-O", optimization.level.name()};
+        } else {
+            return new String[]{"test", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec"};
+        }
     }
 
     @Override
@@ -62,26 +70,16 @@ public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> impl
     }
 
     @Override
-    public void readExternal(@NotNull Element element) throws InvalidDataException {
-        super.readExternal(element);
-
-        ElementUtil.readString(element, "filePath").ifPresent(x -> filePath = x);
-        ElementUtil.readBoolean(element, "colored").ifPresent(x -> colored = x);
+    public ZigExecConfigTest clone() {
+        val clone = super.clone();
+        clone.filePath = filePath.clone();
+        clone.colored = colored.clone();
+        clone.optimization = optimization.clone();
+        return clone;
     }
 
     @Override
-    public void writeExternal(@NotNull Element element) {
-        super.writeExternal(element);
-
-        ElementUtil.writeString(element, "filePath", filePath);
-        ElementUtil.writeBoolean(element, "colored", colored);
-    }
-
-    @Override
-    public @NotNull List<ZigConfigEditor.ZigConfigModule<ZigExecConfigTest>> getEditorConfigModules() {
-        val modules = super.getEditorConfigModules();
-        modules.add(new ZigConfigEditor.FilePathModule<>());
-        modules.add(new ZigConfigEditor.ColoredModule<>());
-        return modules;
+    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
+        return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored);
     }
 }

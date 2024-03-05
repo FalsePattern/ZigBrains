@@ -174,6 +174,9 @@ project(":debugger") {
     dependencies {
         implementation(project(":zig"))
         implementation(project(":project"))
+        implementation(project(":common"))
+        implementation(project(":lsp-common"))
+        implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.22.0")
     }
     intellij {
         version = clionVersion
