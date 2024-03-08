@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.falsepattern.zigbrains.lsp.client.connection;
+package com.falsepattern.zigbrains.lsp.common.connection;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -176,12 +176,19 @@ project(":debugger") {
     }
 }
 
+project(":lsp-common") {
+    apply {
+        plugin("java-library")
+    }
+}
+
 project(":lsp") {
     apply {
         plugin("java-library")
     }
     dependencies {
         implementation(project(":common"))
+        api(project(":lsp-common"))
         api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.22.0")
         implementation("com.vladsch.flexmark:flexmark:0.64.8")
         api("org.apache.commons:commons-lang3:3.14.0")
