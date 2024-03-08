@@ -17,12 +17,10 @@ package com.falsepattern.zigbrains.lsp.actions;
 
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.requests.ReformatHandler;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.intellij.codeInsight.actions.ReformatCodeAction;
-import com.intellij.lang.LanguageFormatting;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -51,7 +49,7 @@ public class LSPReformatAction extends ReformatCodeAction implements DumbAware {
             super.actionPerformed(e);
             return;
         }
-        ApplicationUtils.writeAction(() -> FileDocumentManager.getInstance().saveDocument(editor.getDocument()));
+        ApplicationUtil.writeAction(() -> FileDocumentManager.getInstance().saveDocument(editor.getDocument()));
         // if editor hasSelection, only reformat selection, not reformat the whole file
         if (editor.getSelectionModel().hasSelection()) {
             ReformatHandler.reformatSelection(editor);

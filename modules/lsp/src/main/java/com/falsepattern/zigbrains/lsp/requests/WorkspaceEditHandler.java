@@ -19,7 +19,7 @@ import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.contributors.psi.LSPPsiElement;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.command.CommandProcessor;
@@ -58,8 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.invokeLater;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.writeAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.invokeLater;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.writeAction;
 import static com.falsepattern.zigbrains.lsp.utils.DocumentUtils.toEither;
 
 /**
@@ -210,7 +210,7 @@ public class WorkspaceEditHandler {
         }
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
         OpenFileDescriptor descriptor = new OpenFileDescriptor(project, file);
-        Editor editor = ApplicationUtils
+        Editor editor = ApplicationUtil
                 .computableWriteAction(() -> fileEditorManager.openTextEditor(descriptor, false));
         openedEditors.add(file);
         curProject[0] = editor.getProject();

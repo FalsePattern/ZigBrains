@@ -33,7 +33,7 @@ import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidget;
 import com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidgetFactory;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.LSPException;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
@@ -237,7 +237,7 @@ public class LanguageServerWrapper {
                 String msg = String.format("%s \n is not initialized after %d seconds",
                                            serverDefinition.toString(), Timeout.getTimeout(Timeouts.INIT) / 1000);
                 LOG.warn(msg, e);
-                ApplicationUtils.invokeLater(() -> {
+                ApplicationUtil.invokeLater(() -> {
                     if (!alreadyShownTimeout) {
                         notifier.showMessage(msg, MessageType.WARNING);
                         alreadyShownTimeout = true;
@@ -396,7 +396,7 @@ public class LanguageServerWrapper {
                         }
                         // Triggers annotators since this is the first editor which starts the LS
                         // and annotators are executed before LS is bootstrap to provide diagnostics.
-                        ApplicationUtils.computableReadAction(() -> {
+                        ApplicationUtil.computableReadAction(() -> {
                             PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
                             if (psiFile != null) {
                                 DaemonCodeAnalyzer.getInstance(project).restart(psiFile);
@@ -540,7 +540,7 @@ public class LanguageServerWrapper {
                 });
             } catch (LSPException | IOException | URISyntaxException e) {
                 LOG.warn(e);
-                ApplicationUtils.invokeLater(() ->
+                ApplicationUtil.invokeLater(() ->
                         notifier.showMessage(String.format("Can't start server due to %s", e.getMessage()),
                                 MessageType.WARNING));
                 removeServerWrapper();
@@ -639,7 +639,7 @@ public class LanguageServerWrapper {
         if (crashCount <= 3) {
             reconnect();
         } else {
-            ApplicationUtils.invokeLater(() -> {
+            ApplicationUtil.invokeLater(() -> {
                 if (alreadyShownCrash) {
                     reconnect();
                 } else {
@@ -787,7 +787,7 @@ public class LanguageServerWrapper {
      * Reset language server wrapper state so it can be started again if it was failed earlier.
      */
     public void restart() {
-        ApplicationUtils.pool(() -> {
+        ApplicationUtil.pool(() -> {
             if (isRestartable()) {
                 alreadyShownCrash = false;
                 alreadyShownTimeout = false;

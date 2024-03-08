@@ -29,7 +29,7 @@ import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.requests.WorkspaceEditHandler;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.GUIUtils;
@@ -138,11 +138,11 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableReadAction;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableWriteAction;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.invokeLater;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.pool;
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.writeAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.computableReadAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.computableWriteAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.invokeLater;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.pool;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.writeAction;
 import static com.falsepattern.zigbrains.lsp.utils.DocumentUtils.toEither;
 import static com.falsepattern.zigbrains.lsp.utils.GUIUtils.createAndShowEditorHint;
 
@@ -1218,7 +1218,7 @@ public class EditorEventManager {
     }
 
     public List<InlayHint> inlayHint() {
-        var range = ApplicationUtils.computableReadAction(() -> {
+        var range = ApplicationUtil.computableReadAction(() -> {
             var start = DocumentUtils.offsetToLSPPos(editor, 0);
             var end = DocumentUtils.offsetToLSPPos(editor, editor.getDocument().getTextLength());
             return new Range(start, end);

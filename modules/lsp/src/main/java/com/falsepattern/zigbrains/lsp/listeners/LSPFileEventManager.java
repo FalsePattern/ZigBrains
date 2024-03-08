@@ -20,7 +20,7 @@ import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
@@ -78,7 +78,7 @@ class LSPFileEventManager {
             return;
         }
 
-        ApplicationUtils.invokeAfterPsiEvents(() -> {
+        ApplicationUtil.invokeAfterPsiEvents(() -> {
             EditorEventManagerBase.documentSaved(uri);
             FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,
                 FileUtils.projectToUri(p), FileChangeType.Changed));
@@ -122,7 +122,7 @@ class LSPFileEventManager {
         if (uri == null) {
             return;
         }
-        ApplicationUtils.invokeAfterPsiEvents(() -> {
+        ApplicationUtil.invokeAfterPsiEvents(() -> {
             FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,
                 FileUtils.projectToUri(p), FileChangeType.Deleted));
         });
@@ -135,7 +135,7 @@ class LSPFileEventManager {
      * @param newFileName the new file name
      */
     static void fileRenamed(String oldFileName, String newFileName) {
-        ApplicationUtils.invokeAfterPsiEvents(() -> {
+        ApplicationUtil.invokeAfterPsiEvents(() -> {
             try {
                 // Getting the right file is not trivial here since we only have the file name. Since we have to iterate over
                 // all opened projects and filter based on the file name.
@@ -173,7 +173,7 @@ class LSPFileEventManager {
             if (!newFileUri.equals(oldFileUri)) {
                 // Re-open file to so that the new editor will be connected to the language server.
                 FileEditorManager fileEditorManager = FileEditorManager.getInstance(p);
-                ApplicationUtils.invokeLater(() -> {
+                ApplicationUtil.invokeLater(() -> {
                     fileEditorManager.closeFile(file);
                     fileEditorManager.openFile(file, true);
                 });
@@ -192,7 +192,7 @@ class LSPFileEventManager {
         }
         String uri = FileUtil.URIFromVirtualFile(file);
         if (uri != null) {
-            ApplicationUtils.invokeAfterPsiEvents(() -> {
+            ApplicationUtil.invokeAfterPsiEvents(() -> {
                 FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,
                     FileUtils.projectToUri(p), FileChangeType.Created));
             });
@@ -200,7 +200,7 @@ class LSPFileEventManager {
     }
 
     private static void changedConfiguration(String uri, String projectUri, FileChangeType typ) {
-        ApplicationUtils.pool(() -> {
+        ApplicationUtil.pool(() -> {
             DidChangeWatchedFilesParams params = getDidChangeWatchedFilesParams(uri, typ);
             Set<LanguageServerWrapper> wrappers = IntellijLanguageClient.getAllServerWrappersFor(projectUri);
             if (wrappers == null) {

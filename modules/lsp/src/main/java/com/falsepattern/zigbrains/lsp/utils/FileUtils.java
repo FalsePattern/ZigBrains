@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.computableReadAction;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.computableReadAction;
 
 /**
  * Various file / uri related methods

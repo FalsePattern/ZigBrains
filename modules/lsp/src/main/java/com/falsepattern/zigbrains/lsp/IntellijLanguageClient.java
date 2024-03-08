@@ -44,7 +44,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-import static com.falsepattern.zigbrains.lsp.utils.ApplicationUtils.pool;
+import static com.falsepattern.zigbrains.common.util.ApplicationUtil.pool;
 
 public class IntellijLanguageClient {
 

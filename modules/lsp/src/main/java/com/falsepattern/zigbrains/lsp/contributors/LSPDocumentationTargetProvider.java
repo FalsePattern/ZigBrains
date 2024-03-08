@@ -20,7 +20,7 @@ import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.requests.HoverHandler;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.model.Pointer;
@@ -86,7 +86,7 @@ public class LSPDocumentationTargetProvider implements DocumentationTargetProvid
                 return null;
             }
             var caretPos = editor.offsetToLogicalPosition(offset);
-            var serverPos = ApplicationUtils.computableReadAction(() -> DocumentUtils.logicalToLSPPos(caretPos, editor));
+            var serverPos = ApplicationUtil.computableReadAction(() -> DocumentUtils.logicalToLSPPos(caretPos, editor));
             return DocumentationResult.asyncDocumentation(() -> {
                 var identifier = manager.getIdentifier();
                 var request = wrapper.getRequestManager().hover(new HoverParams(identifier, serverPos));

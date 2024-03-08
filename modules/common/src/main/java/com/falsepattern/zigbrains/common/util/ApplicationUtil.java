@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.falsepattern.zigbrains.lsp.utils;
+package com.falsepattern.zigbrains.common.util;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ex.ApplicationManagerEx;
@@ -24,7 +24,7 @@ import com.intellij.openapi.util.Condition;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ApplicationUtils {
+public class ApplicationUtil {
 
     private final static ExecutorService EXECUTOR_SERVICE;
 

@@ -16,7 +16,7 @@
 package com.falsepattern.zigbrains.lsp.editor;
 
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.diagnostic.Logger;
@@ -120,7 +120,7 @@ public class DocumentEventManager {
         } else if (syncKind == TextDocumentSyncKind.Full) {
             changesParams.getContentChanges().get(0).setText(document.getText());
         }
-        ApplicationUtils.pool(() -> wrapper.getRequestManager().didChange(changesParams));
+        ApplicationUtil.pool(() -> wrapper.getRequestManager().didChange(changesParams));
     }
 
     public void documentOpened() {
