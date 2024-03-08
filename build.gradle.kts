@@ -97,6 +97,11 @@ allprojects {
         targetCompatibility = javaVersion
     }
 
+    tasks.withType(JavaCompile::class) {
+        options.encoding = "UTF-8"
+    }
+
+
     group = properties("pluginGroup").get()
     version = pluginVersionFull().get()
 
