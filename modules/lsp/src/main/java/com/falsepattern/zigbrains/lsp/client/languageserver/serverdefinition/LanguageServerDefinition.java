@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * A trait representing a ServerDefinition
  */
-public class LanguageServerDefinition {
+public abstract class LanguageServerDefinition {
 
     private static final Logger LOG = Logger.getInstance(LanguageServerDefinition.class);
 
@@ -76,18 +76,6 @@ public class LanguageServerDefinition {
     }
 
     /**
-     * Returns the initialization options for the given uri.
-     *
-     * @param uri file URI
-     * @return initialization options
-     * @deprecated use {@link #customizeInitializeParams(InitializeParams)} instead
-     */
-    @Deprecated
-    public Object getInitializationOptions(URI uri) {
-        return null;
-    }
-
-    /**
      * Use this method to modify the {@link InitializeParams} that was initialized by this library. The values
      * assigned to the passed {@link InitializeParams} after this method ends will be the ones sent to the LSP server.
      *
@@ -107,9 +95,7 @@ public class LanguageServerDefinition {
      * @param workingDir The root directory
      * @return The stream connection provider
      */
-    public StreamConnectionProvider createConnectionProvider(String workingDir) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract StreamConnectionProvider createConnectionProvider(String workingDir);
 
     public ServerListener getServerListener() {
         return ServerListener.DEFAULT;
