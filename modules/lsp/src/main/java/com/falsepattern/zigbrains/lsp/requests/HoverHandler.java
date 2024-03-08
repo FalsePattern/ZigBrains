@@ -16,7 +16,6 @@
 package com.falsepattern.zigbrains.lsp.requests;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.util.ui.UIUtil;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import org.eclipse.lsp4j.Hover;
@@ -66,7 +65,7 @@ public class HoverHandler {
                         result.add(renderer.render(parser.parse(string)));
                     }
                 }
-                return "<html>" + String.join("\n\n", result) + "</html>";
+                return String.join("\n", result);
             } else {
                 return "";
             }
@@ -75,9 +74,7 @@ public class HoverHandler {
             if (markedContent.isEmpty()) {
                 return "";
             }
-            Parser parser = Parser.builder().build();
-            HtmlRenderer renderer = HtmlRenderer.builder().build();
-            return "<html>" + renderer.render(parser.parse(markedContent)) + "</html>";
+            return markedContent;
         } else {
             return "";
         }

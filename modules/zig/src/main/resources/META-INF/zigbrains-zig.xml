@@ -141,10 +141,10 @@
         <!-- region LSP -->
 
         <!-- required for lsp file sync -->
-        <listener class="com.falsepattern.zigbrains.lsp.listeners.VFSListener"
-                  topic="com.intellij.openapi.vfs.VirtualFileListener"/>
         <listener class="com.falsepattern.zigbrains.lsp.listeners.LSPProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
+        <listener class="com.falsepattern.zigbrains.lsp.listeners.VFSListener"
+                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
 
         <!-- endregion LSP -->
     </applicationListeners>

@@ -23,6 +23,7 @@ import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
+import com.intellij.markdown.utils.doc.DocMarkdownToHtmlConverter;
 import com.intellij.model.Pointer;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.TextRange;
@@ -33,6 +34,7 @@ import com.intellij.platform.backend.presentation.TargetPresentation;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.SmartPointerManager;
 import com.intellij.psi.SmartPsiFileRange;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.jsonrpc.JsonRpcException;
@@ -102,13 +104,15 @@ public class LSPDocumentationTargetProvider implements DocumentationTargetProvid
                         return null;
                     }
 
-                    String string = HoverHandler.getHoverString(hover);
+                    val markdown = HoverHandler.getHoverString(hover);
+                    val string = ApplicationUtil.computableReadAction(() -> DocMarkdownToHtmlConverter
+                            .convert(manager.getProject(), markdown));
                     if (StringUtils.isEmpty(string)) {
                         LOG.warn(String.format("Hover string returned is empty for file %s and pos (%d;%d)",
                                                identifier.getUri(), serverPos.getLine(), serverPos.getCharacter()));
                         return null;
                     }
-                    return DocumentationResult.documentation(string.lines().collect(Collectors.joining("<br>\n")));
+                    return DocumentationResult.documentation(string);
                 } catch (TimeoutException e) {
                     LOG.warn(e);
                     wrapper.notifyFailure(Timeouts.HOVER);

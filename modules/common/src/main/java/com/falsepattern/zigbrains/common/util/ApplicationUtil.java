@@ -16,10 +16,9 @@
 package com.falsepattern.zigbrains.common.util;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import com.intellij.openapi.project.NoAccessDuringPsiEvents;
 import com.intellij.openapi.util.Computable;
-import com.intellij.openapi.util.Condition;
+import lombok.val;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,16 +49,7 @@ public class ApplicationUtil {
     }
 
     static public <T> T computableReadAction(Computable<T> computable) {
-        if (ApplicationManager.getApplication().isDispatchThread() ||
-            ApplicationManagerEx.getApplicationEx().holdsReadLock()) {
-            return ApplicationManager.getApplication().runReadAction(computable);
-        } else {
-            var result = new Object() {
-                T value = null;
-            };
-            ApplicationManager.getApplication().invokeAndWait(() -> result.value = ApplicationManager.getApplication().runReadAction(computable));
-            return result.value;
-        }
+        return ApplicationManager.getApplication().runReadAction(computable);
     }
 
     static public void writeAction(Runnable runnable) {
@@ -70,15 +60,15 @@ public class ApplicationUtil {
         return ApplicationManager.getApplication().runWriteAction(computable);
     }
 
-    static public void invokeAfterPsiEvents(Runnable runnable) {
+    static public void invokeAfterPsiEvents(Runnable runnable, boolean readLock, boolean writeLock) {
         Runnable wrapper = () -> {
             if (NoAccessDuringPsiEvents.isInsideEventProcessing()) {
-                invokeAfterPsiEvents(runnable);
+                invokeAfterPsiEvents(runnable, readLock, writeLock);
             } else {
                 runnable.run();
             }
         };
-
-        ApplicationManager.getApplication().invokeLater(wrapper, (Condition<Void>) value -> false);
+        val app = ApplicationManager.getApplication();
+        app.invokeLater(writeLock ? wrapper : () -> app.executeOnPooledThread(readLock ? () -> app.runReadAction(wrapper) : wrapper));
     }
 }

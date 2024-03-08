@@ -78,48 +78,49 @@ public class DocumentEventManager {
         DidChangeTextDocumentParams changesParams = new DidChangeTextDocumentParams(new VersionedTextDocumentIdentifier(),
                 Collections.singletonList(new TextDocumentContentChangeEvent()));
         changesParams.getTextDocument().setUri(identifier.getUri());
-
-
         changesParams.getTextDocument().setVersion(++version);
 
-        if (syncKind == TextDocumentSyncKind.Incremental) {
-            TextDocumentContentChangeEvent changeEvent = changesParams.getContentChanges().get(0);
-            CharSequence newText = event.getNewFragment();
-            int offset = event.getOffset();
-            int newTextLength = event.getNewLength();
-
-            EditorEventManager editorEventManager = EditorEventManagerBase.forUri(FileUtils.documentToUri(document));
-            if (editorEventManager == null) {
-                LOG.warn("no editor associated with document");
-                return;
-            }
-            Editor editor = editorEventManager.editor;
-            Position lspPosition = DocumentUtils.offsetToLSPPos(editor, offset);
-            if (lspPosition == null) {
-                return;
-            }
-            int startLine = lspPosition.getLine();
-            int startColumn = lspPosition.getCharacter();
-            CharSequence oldText = event.getOldFragment();
-
-            //if text was deleted/replaced, calculate the end position of inserted/deleted text
-            int endLine, endColumn;
-            if (oldText.length() > 0) {
-                endLine = startLine + StringUtil.countNewLines(oldText);
-                String content = oldText.toString();
-                String[] oldLines = content.split("\n");
-                int oldTextLength = oldLines.length == 0 ? 0 : oldLines[oldLines.length - 1].length();
-                endColumn = content.endsWith("\n") ? 0 : oldLines.length == 1 ? startColumn + oldTextLength : oldTextLength;
-            } else { //if insert or no text change, the end position is the same
-                endLine = startLine;
-                endColumn = startColumn;
-            }
-            Range range = new Range(new Position(startLine, startColumn), new Position(endLine, endColumn));
-            changeEvent.setRange(range);
-            changeEvent.setText(newText.toString());
-        } else if (syncKind == TextDocumentSyncKind.Full) {
+        // TODO this incremental update logic is kinda broken, investigate later...
+//        if (syncKind == TextDocumentSyncKind.Incremental) {
+//            TextDocumentContentChangeEvent changeEvent = changesParams.getContentChanges().get(0);
+//            CharSequence newText = event.getNewFragment();
+//            int offset = event.getOffset();
+//            int newTextLength = event.getNewLength();
+//
+//            EditorEventManager editorEventManager = EditorEventManagerBase.forUri(FileUtils.documentToUri(document));
+//            if (editorEventManager == null) {
+//                LOG.warn("no editor associated with document");
+//                return;
+//            }
+//            Editor editor = editorEventManager.editor;
+//            Position lspPosition = DocumentUtils.offsetToLSPPos(editor, offset);
+//            if (lspPosition == null) {
+//                return;
+//            }
+//            int startLine = lspPosition.getLine();
+//            int startColumn = lspPosition.getCharacter();
+//            CharSequence oldText = event.getOldFragment();
+//
+//            //if text was deleted/replaced, calculate the end position of inserted/deleted text
+//            int endLine, endColumn;
+//            if (oldText.length() > 0) {
+//                endLine = startLine + StringUtil.countNewLines(oldText);
+//                String content = oldText.toString();
+//                String[] oldLines = content.split("\n");
+//                int oldTextLength = oldLines.length == 0 ? 0 : oldLines[oldLines.length - 1].length();
+//                endColumn = content.endsWith("\n") ? 0 : oldLines.length == 1 ? startColumn + oldTextLength : oldTextLength;
+//            } else { //if insert or no text change, the end position is the same
+//                endLine = startLine;
+//                endColumn = startColumn;
+//            }
+//            Range range = new Range(new Position(startLine, startColumn), new Position(endLine, endColumn));
+//            changeEvent.setRange(range);
+//            changeEvent.setText(newText.toString());
+//        } else if (syncKind == TextDocumentSyncKind.Full) {
+        if (syncKind != TextDocumentSyncKind.None) {
             changesParams.getContentChanges().get(0).setText(document.getText());
         }
+//        }
         ApplicationUtil.pool(() -> wrapper.getRequestManager().didChange(changesParams));
     }
 

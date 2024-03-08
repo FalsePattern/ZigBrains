@@ -28,7 +28,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileMoveEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFileMoveEvent;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.FileEvent;
@@ -80,9 +80,9 @@ class LSPFileEventManager {
 
         ApplicationUtil.invokeAfterPsiEvents(() -> {
             EditorEventManagerBase.documentSaved(uri);
-            FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,
-                FileUtils.projectToUri(p), FileChangeType.Changed));
-        });
+            FileUtils.findProjectsFor(file)
+                     .forEach(p -> changedConfiguration(uri, FileUtils.projectToUri(p), FileChangeType.Changed));
+        }, false, false);
     }
 
     /**
@@ -90,7 +90,7 @@ class LSPFileEventManager {
      *
      * @param event The file move event
      */
-    static void fileMoved(VirtualFileMoveEvent event) {
+    static void fileMoved(VFileMoveEvent event) {
         try {
             VirtualFile file = event.getFile();
             if (!FileUtils.isFileSupported(file)) {
@@ -102,7 +102,7 @@ class LSPFileEventManager {
             if (newFileUri == null || oldParentUri == null) {
                 return;
             }
-            String oldFileUri = String.format("%s/%s", oldParentUri, event.getFileName());
+            String oldFileUri = String.format("%s/%s", oldParentUri, event.getFile().getName());
             closeAndReopenAffectedFile(file, oldFileUri);
         } catch (Exception e) {
             LOG.warn("LSP file move event failed due to :", e);
@@ -125,7 +125,7 @@ class LSPFileEventManager {
         ApplicationUtil.invokeAfterPsiEvents(() -> {
             FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,
                 FileUtils.projectToUri(p), FileChangeType.Deleted));
-        });
+        }, true, true);
     }
 
     /**
@@ -143,18 +143,20 @@ class LSPFileEventManager {
                     .flatMap(p -> searchFiles(newFileName, p).stream())
                     .collect(Collectors.toSet());
 
-                for (VirtualFile file : files) {
-                    if (!FileUtils.isFileSupported(file)) {
-                        continue;
+                ApplicationUtil.invokeLater(() -> {
+                    for (VirtualFile file : files) {
+                        if (!FileUtils.isFileSupported(file)) {
+                            continue;
+                        }
+                        String newFileUri = FileUtil.URIFromVirtualFile(file);
+                        String oldFileUri = newFileUri.replace(file.getName(), oldFileName);
+                        closeAndReopenAffectedFile(file, oldFileUri);
                     }
-                    String newFileUri = FileUtil.URIFromVirtualFile(file);
-                    String oldFileUri = newFileUri.replace(file.getName(), oldFileName);
-                    closeAndReopenAffectedFile(file, oldFileUri);
-                }
+                });
             } catch (Exception e) {
                 LOG.warn("LSP file rename event failed due to : ", e);
             }
-        });
+        }, true, false);
     }
 
     private static void closeAndReopenAffectedFile(VirtualFile file, String oldFileUri) {
@@ -195,7 +197,7 @@ class LSPFileEventManager {
             ApplicationUtil.invokeAfterPsiEvents(() -> {
                 FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,
                     FileUtils.projectToUri(p), FileChangeType.Created));
-            });
+            }, true, true);
         }
     }
 
