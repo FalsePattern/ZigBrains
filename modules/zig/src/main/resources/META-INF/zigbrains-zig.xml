@@ -110,6 +110,10 @@
                            id="ZigBrains.ZLS"/>
     </extensions>
 
+    <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <zlsConfigProvider implementation="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigProvider"/>
+    </extensions>
+
 
 
     <actions>

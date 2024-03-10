@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.toolchain;
+package com.falsepattern.zigbrains.zig.settings;
 
-import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.zig.environment.ZLSConfig;
 import com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import lombok.val;
-import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Path;
-
-public class ToolchainZLSConfigProvider implements ZLSConfigProvider {
+public class ZLSSettingsConfigProvider implements ZLSConfigProvider {
     @Override
     public void getEnvironment(Project project, ZLSConfig.ZLSConfigBuilder builder) {
-        val projectSettings = ZigProjectSettingsService.getInstance(project);
-        val toolchain = projectSettings.getToolchain();
-        if (toolchain == null)
-            return;
-        val projectDir = ProjectUtil.guessProjectDir(project);
-        val env = toolchain.zig().getEnv(projectDir == null ? Path.of(".") : projectDir.toNioPath());
-        env.ifPresent(e -> builder.zig_exe_path(e.zigExecutable()).zig_lib_path(e.libDirectory()));
+        val state = ZLSSettingsState.getInstance(project);
+        builder.enable_build_on_save(state.buildOnSave);
+        builder.build_on_save_step(state.buildOnSaveStep);
+        builder.highlight_global_var_declarations(state.highlightGlobalVarDeclarations);
+        builder.dangerous_comptime_experiments_do_not_enable(state.dangerousComptimeExperimentsDoNotEnable);
     }
 }

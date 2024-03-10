@@ -21,6 +21,7 @@ import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBTextField;
 import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,17 +33,29 @@ public class ZLSSettingsComponent {
     private final TextFieldWithBrowseButton zlsPathText = new TextFieldWithBrowseButton();
     private final TextFieldWithBrowseButton zlsConfigPathText = new TextFieldWithBrowseButton();
     private final JBCheckBox asyncFoldingCheckBox = new JBCheckBox();
-    private final JBCheckBox debugCheckBox = new JBCheckBox();
-    private final JBCheckBox messageTraceCheckBox = new JBCheckBox();
     private final JBCheckBox increaseTimeouts = new JBCheckBox();
+
+    private final JBCheckBox buildOnSave = new JBCheckBox();
+    private final JBTextField buildOnSaveStep = new JBTextField();
+    private final JBCheckBox highlightGlobalVarDeclarations = new JBCheckBox();
+    private final JBCheckBox dangerousComptimeExperimentsDoNotEnable = new JBCheckBox();
+
+    private final JBCheckBox messageTraceCheckBox = new JBCheckBox();
+    private final JBCheckBox debugCheckBox = new JBCheckBox();
 
     private final JButton autodetectZls = new JButton("Autodetect");
 
+    {
+        buildOnSave.setToolTipText("Whether to enable build-on-save diagnostics");
+        buildOnSaveStep.setToolTipText("Select which step should be executed on build-on-save");
+        highlightGlobalVarDeclarations.setToolTipText("Whether to highlight global var declarations");
+        dangerousComptimeExperimentsDoNotEnable.setToolTipText("Whether to use the comptime interpreter");
+    }
     public ZLSSettingsComponent() {
         zlsPathText.addBrowseFolderListener(
                 new TextBrowseFolderListener(new FileChooserDescriptor(true, false, false, false, false, false)));
         myMainPanel = FormBuilder.createFormBuilder()
-                                 .addComponent(new JBLabel("ZLS settings"))
+                                 .addComponent(new JBLabel("ZLS launch settings"))
                                  .addVerticalGap(10)
                                  .addLabeledComponent(new JBLabel("ZLS path: "), zlsPathText, 1, false)
                                  .addComponent(autodetectZls)
@@ -51,6 +64,13 @@ public class ZLSSettingsComponent {
                                  .addLabeledComponent(new JBLabel("Increase timeouts"), increaseTimeouts, 1, false)
                                  .addLabeledComponent(new JBLabel("Asynchronous code folding ranges: "),
                                                       asyncFoldingCheckBox, 1, false)
+                                 .addSeparator()
+                                 .addComponent(new JBLabel("ZLS configuration"))
+                                 .addVerticalGap(10)
+                                 .addLabeledComponent("Build on save", buildOnSave)
+                                 .addLabeledComponent("Build on save step", buildOnSaveStep)
+                                 .addLabeledComponent("Highlight global variable declarations", highlightGlobalVarDeclarations)
+                                 .addLabeledComponent("Dangerous comptime experiments (do not enable)", dangerousComptimeExperimentsDoNotEnable)
                                  .addSeparator()
                                  .addComponent(new JBLabel(
                                          "Developer settings (only usable when the IDE was launched with " +
@@ -118,5 +138,37 @@ public class ZLSSettingsComponent {
 
     public void setMessageTrace(boolean state) {
         messageTraceCheckBox.setSelected(state);
+    }
+
+    public boolean getBuildOnSave() {
+        return buildOnSave.isSelected();
+    }
+
+    public void setBuildOnSave(boolean state) {
+        buildOnSave.setSelected(state);
+    }
+
+    public String getBuildOnSaveStep() {
+        return buildOnSaveStep.getText();
+    }
+
+    public void setBuildOnSaveStep(String value) {
+        buildOnSaveStep.setText(value);
+    }
+
+    public boolean getHighlightGlobalVarDeclarations() {
+        return highlightGlobalVarDeclarations.isSelected();
+    }
+
+    public void setHighlightGlobalVarDeclarations(boolean state) {
+        highlightGlobalVarDeclarations.setSelected(state);
+    }
+
+    public boolean getDangerousComptimeExperimentsDoNotEnable() {
+        return dangerousComptimeExperimentsDoNotEnable.isSelected();
+    }
+
+    public void setDangerousComptimeExperimentsDoNotEnable(boolean state) {
+        dangerousComptimeExperimentsDoNotEnable.setSelected(state);
     }
 }
