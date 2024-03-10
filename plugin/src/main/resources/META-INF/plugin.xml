@@ -1,5 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude" require-restart="true">
     <id>com.falsepattern.zigbrains</id>
     <name>ZigBrains</name>
     <vendor>FalsePattern</vendor>
