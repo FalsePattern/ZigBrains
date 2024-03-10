@@ -108,9 +108,6 @@
                            bundle="zigbrains.zig.Bundle"
                            key="notif-zls"
                            id="ZigBrains.ZLS"/>
-
-        <consoleFilterProvider implementation="com.falsepattern.zigbrains.project.console.ZigConsoleFilterProvider"/>
-        <analyzeStacktraceFilter implementation="com.falsepattern.zigbrains.project.console.ZigSourceFileFilter"/>
     </extensions>
 
 

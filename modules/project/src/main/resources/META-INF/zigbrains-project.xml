@@ -51,6 +51,9 @@
                            bundle="zigbrains.project.Bundle"
                            key="notif-zig-project"
                            id="ZigBrains.Project"/>
+
+        <consoleFilterProvider implementation="com.falsepattern.zigbrains.project.console.ZigConsoleFilterProvider"/>
+        <analyzeStacktraceFilter implementation="com.falsepattern.zigbrains.project.console.ZigSourceFileFilter"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
