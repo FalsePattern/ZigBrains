@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.editor;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.actions.LSPReferencesAction;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
@@ -29,7 +30,6 @@ import com.falsepattern.zigbrains.lsp.listeners.LSPCaretListenerImpl;
 import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.requests.WorkspaceEditHandler;
-import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.GUIUtils;

@@ -22,7 +22,6 @@ import com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import lombok.val;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 

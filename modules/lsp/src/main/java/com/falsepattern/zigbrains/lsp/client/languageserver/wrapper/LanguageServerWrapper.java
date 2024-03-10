@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.client.languageserver.wrapper;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.DefaultLanguageClient;
@@ -33,7 +34,6 @@ import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidget;
 import com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidgetFactory;
-import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.LSPException;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;

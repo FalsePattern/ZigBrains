@@ -22,14 +22,11 @@ import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.execution.process.AnsiEscapeDecoder;
 import com.intellij.execution.process.KillableColoredProcessHandler;
-import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.openapi.util.Key;
 import com.pty4j.PtyProcess;
-import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 public class ZigProcessHandler extends KillableColoredProcessHandler implements AnsiEscapeDecoder.ColoredTextAcceptor {
     public ZigProcessHandler(@NotNull GeneralCommandLine commandLine) throws ExecutionException {

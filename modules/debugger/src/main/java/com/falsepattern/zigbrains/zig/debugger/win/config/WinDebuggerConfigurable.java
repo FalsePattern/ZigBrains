@@ -26,7 +26,6 @@ import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JComponent;
-
 import java.util.Objects;
 
 import static com.intellij.ui.dsl.builder.BuilderKt.panel;

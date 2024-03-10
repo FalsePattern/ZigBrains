@@ -15,12 +15,12 @@
  */
 package com.falsepattern.zigbrains.lsp.listeners;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
-import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;

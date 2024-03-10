@@ -15,9 +15,9 @@
  */
 package com.falsepattern.zigbrains.lsp.actions;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.requests.ReformatHandler;
-import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.intellij.codeInsight.actions.ReformatCodeAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;

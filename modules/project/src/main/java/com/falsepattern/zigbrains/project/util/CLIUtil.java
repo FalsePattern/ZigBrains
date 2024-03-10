@@ -24,7 +24,6 @@ import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import lombok.val;
-import org.apache.tools.ant.BuildException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

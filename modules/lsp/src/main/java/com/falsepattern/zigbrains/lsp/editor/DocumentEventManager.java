@@ -15,23 +15,18 @@
  */
 package com.falsepattern.zigbrains.lsp.editor;
 
-import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 import com.falsepattern.zigbrains.common.util.ApplicationUtil;
-import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
+import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.util.io.FileUtilRt;
-import com.intellij.openapi.util.text.StringUtil;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;

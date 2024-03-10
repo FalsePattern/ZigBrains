@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.project.execution.base;
 
-import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.zig.parser.ZigFile;
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.actions.LazyRunConfigurationProducer;

@@ -18,7 +18,6 @@ package com.falsepattern.zigbrains.project.toolchain.tools;
 
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainEnvironmentSerializable;
-import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.google.gson.Gson;
 import com.intellij.execution.process.ProcessOutput;
 import org.jetbrains.annotations.Nullable;

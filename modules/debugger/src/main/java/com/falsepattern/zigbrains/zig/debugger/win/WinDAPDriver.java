@@ -16,13 +16,11 @@
 
 package com.falsepattern.zigbrains.zig.debugger.win;
 
-import com.falsepattern.zigbrains.zig.debugger.dap.DAPDebuggerDriverConfiguration;
 import com.falsepattern.zigbrains.zig.debugger.dap.DAPDriver;
 import com.falsepattern.zigbrains.zig.debugger.dap.WrappedDebugServer;
 import com.intellij.execution.ExecutionException;
 import com.intellij.util.system.CpuArch;
 import com.jetbrains.cidr.ArchitectureType;
-import com.jetbrains.cidr.execution.debugger.backend.DebuggerCommandException;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;

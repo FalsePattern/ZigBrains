@@ -15,10 +15,10 @@
  */
 package com.falsepattern.zigbrains.lsp.client;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.requests.WorkspaceEditHandler;
-import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationGroup;

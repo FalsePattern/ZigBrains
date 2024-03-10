@@ -17,14 +17,13 @@
 package com.falsepattern.zigbrains.project.execution.run;
 
 import com.falsepattern.zigbrains.common.util.CollectionUtil;
-import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
+import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

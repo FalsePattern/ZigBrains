@@ -17,20 +17,15 @@
 package com.falsepattern.zigbrains.project.execution.test;
 
 import com.falsepattern.zigbrains.common.util.CollectionUtil;
-import com.falsepattern.zigbrains.project.execution.base.OptimizationLevel;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
-import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
-import com.falsepattern.zigbrains.project.util.ElementUtil;
+import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.InvalidDataException;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.val;
-import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

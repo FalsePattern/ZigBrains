@@ -24,7 +24,6 @@ import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

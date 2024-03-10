@@ -22,7 +22,6 @@ import com.falsepattern.zigbrains.zig.debugger.runner.base.ZigDebugParametersBas
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.jetbrains.cidr.execution.Installer;
-import com.jetbrains.cidr.execution.TrivialInstaller;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;

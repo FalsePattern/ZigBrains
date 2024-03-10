@@ -22,7 +22,6 @@ import com.intellij.codeInsight.actions.LayoutCodeDialog;
 import com.intellij.codeInsight.actions.LayoutCodeOptions;
 import com.intellij.codeInsight.actions.ShowReformatFileDialog;
 import com.intellij.codeInsight.actions.TextRangeType;
-import com.intellij.lang.LanguageFormatting;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.diagnostic.Logger;

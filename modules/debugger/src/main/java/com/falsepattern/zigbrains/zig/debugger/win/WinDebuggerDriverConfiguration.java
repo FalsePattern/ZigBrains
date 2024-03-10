@@ -16,8 +16,8 @@
 
 package com.falsepattern.zigbrains.zig.debugger.win;
 
-import com.falsepattern.zigbrains.zig.debugger.win.config.WinDebuggerConfigService;
 import com.falsepattern.zigbrains.zig.debugger.dap.DAPDebuggerDriverConfiguration;
+import com.falsepattern.zigbrains.zig.debugger.win.config.WinDebuggerConfigService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.jetbrains.cidr.ArchitectureType;
