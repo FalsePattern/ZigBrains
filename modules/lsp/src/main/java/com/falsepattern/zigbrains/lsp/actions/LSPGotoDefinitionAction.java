@@ -58,6 +58,8 @@ public class LSPGotoDefinitionAction extends ShowImplementationsAction {
             super.actionPerformed(e);
             return;
         }
-        manager.gotoDefinition(psiElement);
+        if (!manager.gotoDefinition(psiElement)) {
+            super.actionPerformed(e);
+        }
     }
 }

@@ -1285,14 +1285,16 @@ public class EditorEventManager {
         }
     }
     // Tries to go to definition
-    public void gotoDefinition(PsiElement element) {
+    public boolean gotoDefinition(PsiElement element) {
         if (editor.isDisposed()) {
-            return;
+            return false;
         }
         val sourceOffset = element.getTextOffset();
         val loc = requestDefinition(DocumentUtils.offsetToLSPPos(editor, sourceOffset));
+        if (loc == null)
+            return false;
 
-        gotoLocation(loc);
+        return gotoLocation(loc);
     }
 
     // Tries to go to declaration / show usages based on the element which is
@@ -1327,7 +1329,7 @@ public class EditorEventManager {
         }
     }
 
-    public void gotoLocation(Location loc) {
+    public boolean gotoLocation(Location loc) {
         VirtualFile file = null;
         try {
             file = VfsUtil.findFileByURL(new URL(loc.getUri()));
@@ -1349,9 +1351,11 @@ public class EditorEventManager {
                     }
                 }
             });
+            return true;
         } else {
             LOG.warn("Empty file for " + loc.getUri());
         }
+        return false;
     }
 
     public void requestAndShowCodeActions() {
