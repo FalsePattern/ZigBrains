@@ -43,14 +43,25 @@ tasks {
     }
 }
 
-fun pluginVersion(): Provider<String> {
+fun pluginVersionGit(): Provider<String> {
     return provider {
-        System.getenv("RELEASE_VERSION")
-    }.orElse(provider {
         try {
             gitVersion()
         } catch (_: java.lang.Exception) {
             error("Git version not found and RELEASE_VERSION environment variable is not set!")
+        }
+    }
+}
+
+fun pluginVersion(): Provider<String> {
+    return provider {
+        System.getenv("RELEASE_VERSION")
+    }.orElse(pluginVersionGit().map {
+        val suffix = "-" + properties("pluginSinceBuild").get()
+        if (it.endsWith(suffix)) {
+            it.substring(0, it.length - suffix.length)
+        } else {
+            it
         }
     })
 }
