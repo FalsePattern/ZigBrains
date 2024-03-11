@@ -20,6 +20,8 @@ import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.intellij.execution.filters.Filter;
 import com.intellij.execution.filters.OpenFileHyperlinkInfo;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import kotlin.Pair;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -30,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
@@ -37,15 +40,15 @@ public class ZigSourceFileFilter implements Filter {
     private final Project project;
     private final Pattern LEN_REGEX = Pattern.compile(":(\\d+):(\\d+)");
 
-    private Pair<Path, Integer> findLongestParsablePathFromOffset(String line, int end, String projectPath) {
+    private Pair<Path, Integer> findLongestParsablePathFromOffset(String line, int end, Path projectPath) {
         int longestStart = -1;
         Path longest = null;
         for (int i = end - 1; i >= 0; i--) {
             try {
                 val pathStr = line.substring(i, end);
                 var path = Path.of(pathStr);
-                if (!Files.exists(path) || !Files.isRegularFile(path)) {
-                    path = Path.of(projectPath, pathStr);
+                if (!(Files.exists(path) && Files.isRegularFile(path)) && projectPath != null) {
+                    path = projectPath.resolve(pathStr);
                     if (!Files.exists(path) || !Files.isRegularFile(path))
                         continue;
                 }
@@ -60,7 +63,7 @@ public class ZigSourceFileFilter implements Filter {
     @Override
     public Result applyFilter(@NotNull String line, int entireLength) {
         val lineStart = entireLength - line.length();
-        val projectPath = project.getBasePath();
+        val projectPath = Optional.ofNullable(ProjectUtil.guessProjectDir(project)).map(VirtualFile::toNioPath).orElse(null);
         val results = new ArrayList<ResultItem>();
         val matcher = LEN_REGEX.matcher(line);
         while (matcher.find()) {

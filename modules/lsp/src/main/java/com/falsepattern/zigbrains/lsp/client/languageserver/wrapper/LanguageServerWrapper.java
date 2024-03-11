@@ -43,6 +43,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -51,6 +52,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.remoteServer.util.CloudNotifier;
 import com.intellij.util.PlatformIcons;
+import lombok.val;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.ClientCapabilities;
@@ -104,6 +106,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -135,7 +138,8 @@ public class LanguageServerWrapper {
     private final LSPExtensionManager extManager;
     private final Project project;
     private final HashSet<Editor> toConnect = new HashSet<>();
-    private final String projectRootPath;
+    @Nullable
+    private final Path projectRootPath;
     private final HashSet<String> urisUnderLspControl = new HashSet<>();
     private final HashSet<Editor> connectedEditors = new HashSet<>();
     private final Map<String, Set<EditorEventManager>> uriToEditorManagers = new HashMap<>();
@@ -166,7 +170,12 @@ public class LanguageServerWrapper {
         this.project = project;
         // We need to keep the project rootPath in addition to the project instance, since we cannot get the project
         // base path if the project is disposed.
-        this.projectRootPath = project.getBasePath();
+        val projectDir = ProjectUtil.guessProjectDir(project);
+        if (projectDir != null) {
+            this.projectRootPath = projectDir.toNioPath();
+        } else {
+            this.projectRootPath = null;
+        }
         this.extManager = extManager;
         projectToLanguageServerWrapper.put(project, this);
     }
@@ -200,7 +209,7 @@ public class LanguageServerWrapper {
         return serverDefinition;
     }
 
-    public String getProjectRootPath() {
+    public Path getProjectRootPath() {
         return projectRootPath;
     }
 
@@ -448,7 +457,7 @@ public class LanguageServerWrapper {
                 launcherFuture.cancel(true);
             }
             if (serverDefinition != null) {
-                serverDefinition.stop(projectRootPath);
+                serverDefinition.stop(projectRootPath != null ? projectRootPath.toString() : null);
             }
             for (Editor ed : new HashSet<>(connectedEditors)) {
                 disconnect(ed);
@@ -495,7 +504,7 @@ public class LanguageServerWrapper {
         if (status == STOPPED && !alreadyShownCrash && !alreadyShownTimeout) {
             setStatus(STARTING);
             try {
-                Pair<InputStream, OutputStream> streams = serverDefinition.start(projectRootPath);
+                Pair<InputStream, OutputStream> streams = serverDefinition.start(projectRootPath != null ? projectRootPath.toString() : null);
                 InputStream inputStream = streams.getKey();
                 OutputStream outputStream = streams.getValue();
                 InitializeParams initParams = getInitParams();

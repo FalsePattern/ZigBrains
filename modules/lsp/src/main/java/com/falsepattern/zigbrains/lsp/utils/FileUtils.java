@@ -28,6 +28,7 @@ import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
@@ -35,11 +36,11 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.LightVirtualFileBase;
+import lombok.val;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -161,17 +162,29 @@ public class FileUtils {
     }
 
     public static String editorToProjectFolderPath(Editor editor) {
-        if (editor != null && editor.getProject() != null && editor.getProject().getBasePath() != null) {
-            return new File(editor.getProject().getBasePath()).getAbsolutePath();
-        }
-        return null;
+        if (editor == null)
+            return null;
+
+        val project = editor.getProject();
+        if (project == null)
+            return null;
+
+        val projectDir = ProjectUtil.guessProjectDir(editor.getProject());
+        if (projectDir == null)
+            return null;
+
+        return projectDir.toNioPath().toAbsolutePath().toString();
     }
 
     public static String projectToUri(Project project) {
-        if (project != null && project.getBasePath() != null) {
-            return FileUtil.pathToUri(new File(project.getBasePath()).getAbsolutePath());
-        }
-        return null;
+        if (project == null)
+            return null;
+
+        val path = ProjectUtil.guessProjectDir(project);
+        if (path == null)
+            return null;
+
+        return FileUtil.pathToUri(path.toNioPath());
     }
 
     public static String documentToUri(Document document) {

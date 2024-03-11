@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 
 public class FileUtil {
     private static final Logger LOG = Logger.getInstance(FileUtil.class);
@@ -118,6 +119,10 @@ public class FileUtil {
      */
     public static String pathToUri(@Nullable String path) {
         return path != null ? sanitizeURI(new File(path).toURI().toString()) : null;
+    }
+
+    public static String pathToUri(@Nullable Path path) {
+        return path != null ? sanitizeURI(path.toUri().toString()) : null;
     }
 
     /**
