@@ -37,6 +37,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.refactoring.listeners.RefactoringElementListener;
 import com.intellij.usageView.UsageInfo;
+import lombok.val;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ResourceOperation;
@@ -76,19 +77,27 @@ public class WorkspaceEditHandler {
             if (Stream.of(infos).allMatch(info -> info.getElement() instanceof LSPPsiElement)) {
                 Stream.of(infos).forEach(ui -> {
                     Editor editor = FileUtils.editorFromVirtualFile(ui.getVirtualFile(), ui.getProject());
-                    TextRange range = ui.getElement().getTextRange();
+                    val element = ui.getElement();
+                    if (element == null) {
+                        return;
+                    }
+                    TextRange range = element.getTextRange();
                     Range lspRange = new Range(DocumentUtils.offsetToLSPPos(editor, range.getStartOffset()),
                             DocumentUtils.offsetToLSPPos(editor, range.getEndOffset()));
                     TextEdit edit = new TextEdit(lspRange, newName);
                     String uri = null;
+                    blk:
                     try {
+                        val vfs = ui.getVirtualFile();
+                        if (vfs == null) {
+                            break blk;
+                        }
                         uri = FileUtil.sanitizeURI(
-                                new URL(ui.getVirtualFile().getUrl().replace(" ", FileUtil.SPACE_ENCODED)).toURI()
-                                                                                                          .toString());
+                                new URL(vfs.getUrl().replace(" ", FileUtil.SPACE_ENCODED)).toURI().toString());
                     } catch (MalformedURLException | URISyntaxException e) {
                         LOG.warn(e);
                     }
-                    if (edits.keySet().contains(uri)) {
+                    if (edits.containsKey(uri)) {
                         edits.get(uri).add(edit);
                     } else {
                         List<TextEdit> textEdits = new ArrayList<>();
@@ -208,6 +217,8 @@ public class WorkspaceEditHandler {
         } catch (URISyntaxException e) {
             LOG.warn(e);
         }
+        if (file == null)
+            return () -> {};
         FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
         OpenFileDescriptor descriptor = new OpenFileDescriptor(project, file);
         Editor editor = ApplicationUtil

@@ -24,6 +24,7 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.util.io.FileUtilRt;
+import lombok.val;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -124,7 +125,10 @@ public class DocumentEventManager {
             LOG.warn("trying to send open notification for document which was already opened!");
         } else {
             openDocuments.add(document);
-            final String extension = FileUtilRt.getExtension(FileDocumentManager.getInstance().getFile(document).getName());
+            val theFile = FileDocumentManager.getInstance().getFile(document);
+            if (theFile == null)
+                return;
+            final String extension = FileUtilRt.getExtension(theFile.getName());
             wrapper.getRequestManager().didOpen(new DidOpenTextDocumentParams(new TextDocumentItem(identifier.getUri(),
                     wrapper.serverDefinition.languageIdFor(extension),
                     ++version,

@@ -18,15 +18,16 @@ package com.falsepattern.zigbrains.zig.environment;
 
 import lombok.Builder;
 import lombok.With;
+import org.jetbrains.annotations.Nullable;
 
 
 @With
 @Builder
-public record ZLSConfig(String zig_exe_path,
-                        String zig_lib_path,
-                        Boolean enable_build_on_save,
-                        String build_on_save_step,
-                        Boolean dangerous_comptime_experiments_do_not_enable,
-                        Boolean highlight_global_var_declarations
+public record ZLSConfig(@Nullable String zig_exe_path,
+                        @Nullable String zig_lib_path,
+                        @Nullable Boolean enable_build_on_save,
+                        @Nullable String build_on_save_step,
+                        @Nullable Boolean dangerous_comptime_experiments_do_not_enable,
+                        @Nullable Boolean highlight_global_var_declarations
                         ) {
 }

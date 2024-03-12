@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerOptions;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
@@ -26,6 +27,7 @@ import com.falsepattern.zigbrains.zig.ide.SemaEdit;
 import com.falsepattern.zigbrains.zig.util.HighlightingUtil;
 import com.falsepattern.zigbrains.zig.util.TokenDecoder;
 import com.intellij.lang.annotation.Annotation;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentListener;
 import lombok.val;
@@ -109,6 +111,11 @@ public class ZLSEditorEventManager extends EditorEventManager {
             wrapper.crashed(e);
         }
         return result;
+    }
+
+    @Override
+    public void initComplete() {
+        ApplicationUtil.pool(() -> HighlightingUtil.refreshHighlighting(this));
     }
 
     @Override
