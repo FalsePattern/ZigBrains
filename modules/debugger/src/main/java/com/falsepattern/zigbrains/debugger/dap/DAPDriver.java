@@ -716,13 +716,6 @@ public abstract class DAPDriver<
         throw new ExecutionException("GetVariables(long, int) is deprecated!");
     }
 
-    @NotNull
-    @Override
-    public FrameVariables getFrameVariables(@NotNull LLThread thread, @NotNull LLFrame frame)
-            throws ExecutionException, DebuggerCommandException {
-        return new FrameVariables(getWrappedScopes(frame), true);
-    }
-
     // TODO registers
     @Override
     public boolean supportsRegisters() {
@@ -855,7 +848,7 @@ public abstract class DAPDriver<
     @Override
     public @NotNull List<LLValue> getVariables(@NotNull LLThread thread, @NotNull LLFrame frame)
             throws ExecutionException, DebuggerCommandException {
-        return getFrameVariables(thread, frame).getVariables();
+        return getWrappedScopes(frame);
     }
 
     /**
