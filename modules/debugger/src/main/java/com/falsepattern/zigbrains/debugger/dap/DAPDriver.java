@@ -1304,10 +1304,4 @@ public abstract class DAPDriver<
             }
         }
     }
-
-    @Nullable
-    @Override
-    public DisasmFlavor getDisasmFlavor() {
-        return DisasmFlavor.INTEL;
-    }
 }
