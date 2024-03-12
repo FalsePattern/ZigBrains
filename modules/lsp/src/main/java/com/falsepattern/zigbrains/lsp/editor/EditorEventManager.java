@@ -1463,6 +1463,9 @@ public class EditorEventManager {
         });
     }
 
+    public void initComplete() {
+    }
+
     private static class LSPTextEdit implements Comparable<LSPTextEdit> {
         private String text;
         private int startOffset;
