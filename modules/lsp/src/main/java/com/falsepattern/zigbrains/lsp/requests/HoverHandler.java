@@ -16,8 +16,6 @@
 package com.falsepattern.zigbrains.lsp.requests;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.parser.Parser;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.MarkupContent;
@@ -59,11 +57,7 @@ public class HoverHandler {
                                 "```" + markedString.getLanguage() + " " + markedString.getValue() + "```" :
                                 "";
                     }
-                    Parser parser = Parser.builder().build();
-                    HtmlRenderer renderer = HtmlRenderer.builder().build();
-                    if (!string.isEmpty()) {
-                        result.add(renderer.render(parser.parse(string)));
-                    }
+                    result.add(string);
                 }
                 return String.join("\n", result);
             } else {
