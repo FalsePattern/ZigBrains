@@ -161,7 +161,7 @@ import static com.falsepattern.zigbrains.lsp.utils.GUIUtils.createAndShowEditorH
 public class EditorEventManager {
 
     public final DocumentEventManager documentEventManager;
-    protected Logger LOG = Logger.getInstance(EditorEventManager.class);
+    protected static Logger LOG = Logger.getInstance(EditorEventManager.class);
 
     public Editor editor;
     public LanguageServerWrapper wrapper;
@@ -1294,7 +1294,7 @@ public class EditorEventManager {
         if (loc == null)
             return false;
 
-        return gotoLocation(loc);
+        return gotoLocation(project, loc);
     }
 
     // Tries to go to declaration / show usages based on the element which is
@@ -1325,11 +1325,11 @@ public class EditorEventManager {
                 referencesAction.forManagerAndOffset(this, sourceOffset);
             }
         } else {
-            gotoLocation(loc);
+            gotoLocation(project, loc);
         }
     }
 
-    public boolean gotoLocation(Location loc) {
+    public static boolean gotoLocation(Project project, Location loc) {
         VirtualFile file = null;
         try {
             file = VfsUtil.findFileByURL(new URL(loc.getUri()));

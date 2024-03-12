@@ -47,6 +47,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static com.intellij.codeInsight.documentation.DocumentationManagerProtocol.PSI_ELEMENT_PROTOCOL;
+
 public class LSPDocumentationTargetProvider implements DocumentationTargetProvider {
     @Override
     public @NotNull List<? extends @NotNull DocumentationTarget> documentationTargets(@NotNull PsiFile file, int offset) {
@@ -58,7 +60,7 @@ public class LSPDocumentationTargetProvider implements DocumentationTargetProvid
 
     public static class LSPDocumentationTarget implements DocumentationTarget {
         private final Pointer<LSPDocumentationTarget> pointer;
-        private final PsiFile file;
+        public final PsiFile file;
         private final int offset;
         public LSPDocumentationTarget(PsiFile file, int offset) {
             this.file = file;
@@ -103,7 +105,7 @@ public class LSPDocumentationTargetProvider implements DocumentationTargetProvid
                         return null;
                     }
 
-                    val markdown = HoverHandler.getHoverString(hover);
+                    val markdown = HoverHandler.getHoverString(hover).replaceAll("file://", PSI_ELEMENT_PROTOCOL + "zigbrains://");
                     val string = ApplicationUtil.computableReadAction(() -> DocMarkdownToHtmlConverter
                             .convert(manager.getProject(), markdown));
                     if (StringUtils.isEmpty(string)) {
