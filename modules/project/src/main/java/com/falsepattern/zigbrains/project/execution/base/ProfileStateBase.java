@@ -43,7 +43,11 @@ public abstract class ProfileStateBase<T extends ZigExecConfigBase<T>> extends C
 
     @Override
     protected @NotNull ProcessHandler startProcess() throws ExecutionException {
-        return new ZigProcessHandler(getCommandLine(ProjectUtil.getToolchain(getEnvironment().getProject()), false));
+        val toolchain = ProjectUtil.getToolchain(getEnvironment().getProject());
+        if (toolchain == null) {
+            throw new ExecutionException("Failed to get zig toolchain from project");
+        }
+        return new ZigProcessHandler(getCommandLine(toolchain, false));
     }
 
     public GeneralCommandLine getCommandLine(AbstractZigToolchain toolchain, boolean debug) throws ExecutionException {
