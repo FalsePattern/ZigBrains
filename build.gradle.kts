@@ -13,6 +13,7 @@ plugins {
     id("org.jetbrains.changelog") version("2.2.0")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
     id("com.palantir.git-version") version("3.0.0")
+    id("org.jetbrains.kotlin.jvm") version("1.9.22") //Only used by backport module
 }
 
 val gitVersion: groovy.lang.Closure<String> by extra
@@ -74,6 +75,7 @@ allprojects {
     apply {
         plugin("org.jetbrains.grammarkit")
         plugin("org.jetbrains.intellij")
+        plugin("org.jetbrains.kotlin.jvm")
     }
     repositories {
         mavenCentral()
@@ -156,6 +158,14 @@ allprojects {
         verifyPlugin {
             enabled = false
         }
+
+        compileKotlin {
+            enabled = false
+        }
+        compileTestKotlin {
+            enabled = false
+        }
+
     }
 }
 
@@ -178,6 +188,20 @@ project(":") {
     changelog {
         groups.empty()
         repositoryUrl = properties("pluginRepositoryUrl")
+    }
+}
+
+project(":backports") {
+    tasks {
+        compileKotlin {
+            enabled = true
+            kotlinOptions.jvmTarget = "17"
+        }
+
+        compileTestKotlin {
+            enabled = true
+            kotlinOptions.jvmTarget = "17"
+        }
     }
 }
 
@@ -211,6 +235,7 @@ project(":lsp") {
     }
     dependencies {
         implementation(project(":common"))
+        implementation(project(":backports"))
         api(project(":lsp-common"))
         api("org.apache.commons:commons-lang3:3.14.0")
     }

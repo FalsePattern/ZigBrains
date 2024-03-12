@@ -23,7 +23,7 @@ import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.utils.DocumentUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
-import com.intellij.markdown.utils.doc.DocMarkdownToHtmlConverter;
+import com.falsepattern.zigbrains.backports.com.intellij.markdown.utils.doc.DocMarkdownToHtmlConverter;
 import com.intellij.model.Pointer;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.TextRange;
