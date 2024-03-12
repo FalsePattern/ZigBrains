@@ -18,17 +18,20 @@ package com.falsepattern.zigbrains.zig.environment;
 
 import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.project.Project;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 public interface ZLSConfigProvider {
     ExtensionPointName<ZLSConfigProvider> EXTENSION_POINT_NAME = ExtensionPointName.create("com.falsepattern.zigbrains.zlsConfigProvider");
 
     static @NotNull ZLSConfig findEnvironment(Project project) {
-        return EXTENSION_POINT_NAME.getExtensionList()
-                                   .stream()
-                                   .map(it -> it.getEnvironment(project))
-                                   .reduce(ZLSConfig.EMPTY, ZLSConfig::overrideWith);
+        var config = ZLSConfig.builder();
+        val extensions = EXTENSION_POINT_NAME.getExtensionList();
+        for (val extension: extensions) {
+            extension.getEnvironment(project, config);
+        }
+        return config.build();
     }
 
-    @NotNull ZLSConfig getEnvironment(Project project);
+    void getEnvironment(Project project, ZLSConfig.ZLSConfigBuilder builder);
 }

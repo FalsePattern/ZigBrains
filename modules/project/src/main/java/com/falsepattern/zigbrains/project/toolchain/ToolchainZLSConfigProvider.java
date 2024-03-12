@@ -22,19 +22,18 @@ import com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import lombok.val;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
 public class ToolchainZLSConfigProvider implements ZLSConfigProvider {
     @Override
-    public @NotNull ZLSConfig getEnvironment(Project project) {
+    public void getEnvironment(Project project, ZLSConfig.ZLSConfigBuilder builder) {
         val projectSettings = ZigProjectSettingsService.getInstance(project);
         val toolchain = projectSettings.getToolchain();
         if (toolchain == null)
-            return ZLSConfig.EMPTY;
+            return;
         val projectDir = ProjectUtil.guessProjectDir(project);
         val env = toolchain.zig().getEnv(projectDir == null ? Path.of(".") : projectDir.toNioPath());
-        return env.map(e -> new ZLSConfig(e.zigExecutable(), e.libDirectory())).orElse(ZLSConfig.EMPTY);
+        env.ifPresent(e -> builder.zig_exe_path(e.zigExecutable()).zig_lib_path(e.libDirectory()));
     }
 }

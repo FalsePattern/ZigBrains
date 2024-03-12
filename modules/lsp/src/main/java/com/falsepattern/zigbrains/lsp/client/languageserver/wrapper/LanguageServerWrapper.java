@@ -15,6 +15,8 @@
  */
 package com.falsepattern.zigbrains.lsp.client.languageserver.wrapper;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.DefaultLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.ServerWrapperBaseClientContext;
@@ -23,7 +25,6 @@ import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.DefaultRequestManager;
 import com.falsepattern.zigbrains.lsp.client.languageserver.requestmanager.RequestManager;
 import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.LanguageServerDefinition;
-import com.falsepattern.zigbrains.lsp.editor.DocumentEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.falsepattern.zigbrains.lsp.extensions.LSPExtensionManager;
@@ -33,7 +34,6 @@ import com.falsepattern.zigbrains.lsp.requests.Timeout;
 import com.falsepattern.zigbrains.lsp.requests.Timeouts;
 import com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidget;
 import com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidgetFactory;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.LSPException;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
@@ -43,6 +43,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -51,6 +52,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.remoteServer.util.CloudNotifier;
 import com.intellij.util.PlatformIcons;
+import lombok.val;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.lsp4j.ClientCapabilities;
@@ -104,6 +106,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -131,12 +134,12 @@ import static com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus.
  * The implementation of a LanguageServerWrapper (specific to a serverDefinition and a project)
  */
 public class LanguageServerWrapper {
-
-    public LanguageServerDefinition serverDefinition;
+    public final LanguageServerDefinition serverDefinition;
     private final LSPExtensionManager extManager;
     private final Project project;
     private final HashSet<Editor> toConnect = new HashSet<>();
-    private final String projectRootPath;
+    @Nullable
+    private final Path projectRootPath;
     private final HashSet<String> urisUnderLspControl = new HashSet<>();
     private final HashSet<Editor> connectedEditors = new HashSet<>();
     private final Map<String, Set<EditorEventManager>> uriToEditorManagers = new HashMap<>();
@@ -167,7 +170,12 @@ public class LanguageServerWrapper {
         this.project = project;
         // We need to keep the project rootPath in addition to the project instance, since we cannot get the project
         // base path if the project is disposed.
-        this.projectRootPath = project.getBasePath();
+        val projectDir = ProjectUtil.guessProjectDir(project);
+        if (projectDir != null) {
+            this.projectRootPath = projectDir.toNioPath();
+        } else {
+            this.projectRootPath = null;
+        }
         this.extManager = extManager;
         projectToLanguageServerWrapper.put(project, this);
     }
@@ -182,7 +190,7 @@ public class LanguageServerWrapper {
     }
 
     public static LanguageServerWrapper forVirtualFile(VirtualFile file, Project project) {
-        return uriToLanguageServerWrapper.get(new ImmutablePair<>(FileUtils.VFSToURI(file), FileUtils.projectToUri(project)));
+        return uriToLanguageServerWrapper.get(new ImmutablePair<>(FileUtil.URIFromVirtualFile(file), FileUtils.projectToUri(project)));
     }
 
     /**
@@ -201,7 +209,7 @@ public class LanguageServerWrapper {
         return serverDefinition;
     }
 
-    public String getProjectRootPath() {
+    public Path getProjectRootPath() {
         return projectRootPath;
     }
 
@@ -237,7 +245,7 @@ public class LanguageServerWrapper {
                 String msg = String.format("%s \n is not initialized after %d seconds",
                                            serverDefinition.toString(), Timeout.getTimeout(Timeouts.INIT) / 1000);
                 LOG.warn(msg, e);
-                ApplicationUtils.invokeLater(() -> {
+                ApplicationUtil.invokeLater(() -> {
                     if (!alreadyShownTimeout) {
                         notifier.showMessage(msg, MessageType.WARNING);
                         alreadyShownTimeout = true;
@@ -280,7 +288,7 @@ public class LanguageServerWrapper {
             return null;
         }
         VirtualFile currentOpenFile = selectedEditor.getFile();
-        VirtualFile requestedFile = FileUtils.virtualFileFromURI(uri);
+        VirtualFile requestedFile = FileUtil.virtualFileFromURI(uri);
         if (currentOpenFile == null || requestedFile == null) {
             return null;
         }
@@ -396,7 +404,7 @@ public class LanguageServerWrapper {
                         }
                         // Triggers annotators since this is the first editor which starts the LS
                         // and annotators are executed before LS is bootstrap to provide diagnostics.
-                        ApplicationUtils.computableReadAction(() -> {
+                        ApplicationUtil.computableReadAction(() -> {
                             PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
                             if (psiFile != null) {
                                 DaemonCodeAnalyzer.getInstance(project).restart(psiFile);
@@ -449,7 +457,7 @@ public class LanguageServerWrapper {
                 launcherFuture.cancel(true);
             }
             if (serverDefinition != null) {
-                serverDefinition.stop(projectRootPath);
+                serverDefinition.stop(projectRootPath != null ? projectRootPath.toString() : null);
             }
             for (Editor ed : new HashSet<>(connectedEditors)) {
                 disconnect(ed);
@@ -496,7 +504,7 @@ public class LanguageServerWrapper {
         if (status == STOPPED && !alreadyShownCrash && !alreadyShownTimeout) {
             setStatus(STARTING);
             try {
-                Pair<InputStream, OutputStream> streams = serverDefinition.start(projectRootPath);
+                Pair<InputStream, OutputStream> streams = serverDefinition.start(projectRootPath != null ? projectRootPath.toString() : null);
                 InputStream inputStream = streams.getKey();
                 OutputStream outputStream = streams.getValue();
                 InitializeParams initParams = getInitParams();
@@ -540,7 +548,7 @@ public class LanguageServerWrapper {
                 });
             } catch (LSPException | IOException | URISyntaxException e) {
                 LOG.warn(e);
-                ApplicationUtils.invokeLater(() ->
+                ApplicationUtil.invokeLater(() ->
                         notifier.showMessage(String.format("Can't start server due to %s", e.getMessage()),
                                 MessageType.WARNING));
                 removeServerWrapper();
@@ -550,7 +558,7 @@ public class LanguageServerWrapper {
 
     private InitializeParams getInitParams() throws URISyntaxException {
         InitializeParams initParams = new InitializeParams();
-        String projectRootUri = FileUtils.pathToUri(projectRootPath);
+        String projectRootUri = FileUtil.pathToUri(projectRootPath);
         WorkspaceFolder workspaceFolder = new WorkspaceFolder(projectRootUri, this.project.getName());
         initParams.setWorkspaceFolders(Collections.singletonList(workspaceFolder));
 
@@ -591,8 +599,6 @@ public class LanguageServerWrapper {
                 new ClientCapabilities(workspaceClientCapabilities, textDocumentClientCapabilities, null));
         initParams.setClientInfo(new ClientInfo(ApplicationInfo.getInstance().getVersionName(), ApplicationInfo.getInstance().getFullVersion()));
 
-        // custom initialization options and initialize params provided by users
-        initParams.setInitializationOptions(serverDefinition.getInitializationOptions(URI.create(initParams.getWorkspaceFolders().get(0).getUri())));
         serverDefinition.customizeInitializeParams(initParams);
         return initParams;
     }
@@ -639,7 +645,7 @@ public class LanguageServerWrapper {
         if (crashCount <= 3) {
             reconnect();
         } else {
-            ApplicationUtils.invokeLater(() -> {
+            ApplicationUtil.invokeLater(() -> {
                 if (alreadyShownCrash) {
                     reconnect();
                 } else {
@@ -679,7 +685,7 @@ public class LanguageServerWrapper {
         List<String> connected = new ArrayList<>();
         urisUnderLspControl.forEach(s -> {
             try {
-                connected.add(new URI(FileUtils.sanitizeURI(s)).toString());
+                connected.add(new URI(FileUtil.sanitizeURI(s)).toString());
             } catch (URISyntaxException e) {
                 LOG.warn(e);
             }
@@ -733,7 +739,7 @@ public class LanguageServerWrapper {
      * @param projectUri The project root uri
      */
     public void disconnect(String uri, String projectUri) {
-        uriToLanguageServerWrapper.remove(new ImmutablePair<>(FileUtils.sanitizeURI(uri), FileUtils.sanitizeURI(projectUri)));
+        uriToLanguageServerWrapper.remove(new ImmutablePair<>(FileUtil.sanitizeURI(uri), FileUtil.sanitizeURI(projectUri)));
 
         Set<EditorEventManager> managers = uriToEditorManagers.get(uri);
         if (managers == null) {
@@ -752,7 +758,7 @@ public class LanguageServerWrapper {
                 }
             }
             urisUnderLspControl.remove(uri);
-            uriToLanguageServerWrapper.remove(new ImmutablePair<>(FileUtils.sanitizeURI(uri), FileUtils.sanitizeURI(projectUri)));
+            uriToLanguageServerWrapper.remove(new ImmutablePair<>(FileUtil.sanitizeURI(uri), FileUtil.sanitizeURI(projectUri)));
         }
         if (connectedEditors.isEmpty()) {
             stop(true);
@@ -787,7 +793,7 @@ public class LanguageServerWrapper {
      * Reset language server wrapper state so it can be started again if it was failed earlier.
      */
     public void restart() {
-        ApplicationUtils.pool(() -> {
+        ApplicationUtil.pool(() -> {
             if (isRestartable()) {
                 alreadyShownCrash = false;
                 alreadyShownTimeout = false;
