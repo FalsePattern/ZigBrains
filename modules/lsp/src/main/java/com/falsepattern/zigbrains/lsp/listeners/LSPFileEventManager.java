@@ -15,11 +15,12 @@
  */
 package com.falsepattern.zigbrains.lsp.listeners;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
-import com.falsepattern.zigbrains.lsp.utils.ApplicationUtils;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
@@ -27,7 +28,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileMoveEvent;
+import com.intellij.openapi.vfs.newvfs.events.VFileMoveEvent;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.FileEvent;
@@ -51,7 +52,7 @@ class LSPFileEventManager {
      * @param doc The document
      */
     static void willSave(Document doc) {
-        String uri = FileUtils.VFSToURI(FileDocumentManager.getInstance().getFile(doc));
+        String uri = FileUtil.URIFromVirtualFile(FileDocumentManager.getInstance().getFile(doc));
         EditorEventManagerBase.willSave(uri);
     }
 
@@ -72,16 +73,16 @@ class LSPFileEventManager {
         if (!FileUtils.isFileSupported(file)) {
             return;
         }
-        String uri = FileUtils.VFSToURI(file);
+        String uri = FileUtil.URIFromVirtualFile(file);
         if (uri == null) {
             return;
         }
 
-        ApplicationUtils.invokeAfterPsiEvents(() -> {
+        ApplicationUtil.invokeAfterPsiEvents(() -> {
             EditorEventManagerBase.documentSaved(uri);
-            FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,
-                FileUtils.projectToUri(p), FileChangeType.Changed));
-        });
+            FileUtils.findProjectsFor(file)
+                     .forEach(p -> changedConfiguration(uri, FileUtils.projectToUri(p), FileChangeType.Changed));
+        }, false, false);
     }
 
     /**
@@ -89,19 +90,19 @@ class LSPFileEventManager {
      *
      * @param event The file move event
      */
-    static void fileMoved(VirtualFileMoveEvent event) {
+    static void fileMoved(VFileMoveEvent event) {
         try {
             VirtualFile file = event.getFile();
             if (!FileUtils.isFileSupported(file)) {
                 return;
             }
 
-            String newFileUri = FileUtils.VFSToURI(file);
-            String oldParentUri = FileUtils.VFSToURI(event.getOldParent());
+            String newFileUri = FileUtil.URIFromVirtualFile(file);
+            String oldParentUri = FileUtil.URIFromVirtualFile(event.getOldParent());
             if (newFileUri == null || oldParentUri == null) {
                 return;
             }
-            String oldFileUri = String.format("%s/%s", oldParentUri, event.getFileName());
+            String oldFileUri = String.format("%s/%s", oldParentUri, event.getFile().getName());
             closeAndReopenAffectedFile(file, oldFileUri);
         } catch (Exception e) {
             LOG.warn("LSP file move event failed due to :", e);
@@ -117,14 +118,14 @@ class LSPFileEventManager {
         if (!FileUtils.isFileSupported(file)) {
             return;
         }
-        String uri = FileUtils.VFSToURI(file);
+        String uri = FileUtil.URIFromVirtualFile(file);
         if (uri == null) {
             return;
         }
-        ApplicationUtils.invokeAfterPsiEvents(() -> {
+        ApplicationUtil.invokeAfterPsiEvents(() -> {
             FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,
                 FileUtils.projectToUri(p), FileChangeType.Deleted));
-        });
+        }, true, true);
     }
 
     /**
@@ -134,7 +135,7 @@ class LSPFileEventManager {
      * @param newFileName the new file name
      */
     static void fileRenamed(String oldFileName, String newFileName) {
-        ApplicationUtils.invokeAfterPsiEvents(() -> {
+        ApplicationUtil.invokeAfterPsiEvents(() -> {
             try {
                 // Getting the right file is not trivial here since we only have the file name. Since we have to iterate over
                 // all opened projects and filter based on the file name.
@@ -142,22 +143,24 @@ class LSPFileEventManager {
                     .flatMap(p -> searchFiles(newFileName, p).stream())
                     .collect(Collectors.toSet());
 
-                for (VirtualFile file : files) {
-                    if (!FileUtils.isFileSupported(file)) {
-                        continue;
+                ApplicationUtil.invokeLater(() -> {
+                    for (VirtualFile file : files) {
+                        if (!FileUtils.isFileSupported(file)) {
+                            continue;
+                        }
+                        String newFileUri = FileUtil.URIFromVirtualFile(file);
+                        String oldFileUri = newFileUri.replace(file.getName(), oldFileName);
+                        closeAndReopenAffectedFile(file, oldFileUri);
                     }
-                    String newFileUri = FileUtils.VFSToURI(file);
-                    String oldFileUri = newFileUri.replace(file.getName(), oldFileName);
-                    closeAndReopenAffectedFile(file, oldFileUri);
-                }
+                });
             } catch (Exception e) {
                 LOG.warn("LSP file rename event failed due to : ", e);
             }
-        });
+        }, true, false);
     }
 
     private static void closeAndReopenAffectedFile(VirtualFile file, String oldFileUri) {
-        String newFileUri = FileUtils.VFSToURI(file);
+        String newFileUri = FileUtil.URIFromVirtualFile(file);
 
         // Notifies the language server.
         FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(oldFileUri,
@@ -172,7 +175,7 @@ class LSPFileEventManager {
             if (!newFileUri.equals(oldFileUri)) {
                 // Re-open file to so that the new editor will be connected to the language server.
                 FileEditorManager fileEditorManager = FileEditorManager.getInstance(p);
-                ApplicationUtils.invokeLater(() -> {
+                ApplicationUtil.invokeLater(() -> {
                     fileEditorManager.closeFile(file);
                     fileEditorManager.openFile(file, true);
                 });
@@ -189,17 +192,17 @@ class LSPFileEventManager {
         if (!FileUtils.isFileSupported(file)) {
             return;
         }
-        String uri = FileUtils.VFSToURI(file);
+        String uri = FileUtil.URIFromVirtualFile(file);
         if (uri != null) {
-            ApplicationUtils.invokeAfterPsiEvents(() -> {
+            ApplicationUtil.invokeAfterPsiEvents(() -> {
                 FileUtils.findProjectsFor(file).forEach(p -> changedConfiguration(uri,
                     FileUtils.projectToUri(p), FileChangeType.Created));
-            });
+            }, true, true);
         }
     }
 
     private static void changedConfiguration(String uri, String projectUri, FileChangeType typ) {
-        ApplicationUtils.pool(() -> {
+        ApplicationUtil.pool(() -> {
             DidChangeWatchedFilesParams params = getDidChangeWatchedFilesParams(uri, typ);
             Set<LanguageServerWrapper> wrappers = IntellijLanguageClient.getAllServerWrappersFor(projectUri);
             if (wrappers == null) {

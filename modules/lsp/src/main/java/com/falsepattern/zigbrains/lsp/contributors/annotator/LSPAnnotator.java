@@ -15,6 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.contributors.annotator;
 
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.client.languageserver.ServerStatus;
 import com.falsepattern.zigbrains.lsp.client.languageserver.wrapper.LanguageServerWrapper;
@@ -32,8 +33,10 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.SmartList;
+import lombok.val;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DiagnosticTag;
@@ -103,7 +106,7 @@ public class LSPAnnotator extends ExternalAnnotator<Object, Object> {
 
         VirtualFile virtualFile = file.getVirtualFile();
         if (FileUtils.isFileSupported(virtualFile) && IntellijLanguageClient.isExtensionSupported(virtualFile)) {
-            String uri = FileUtils.VFSToURI(virtualFile);
+            String uri = FileUtil.URIFromVirtualFile(virtualFile);
             // TODO annotations are applied to a file / document not to an editor. so store them by file and not by editor..
             EditorEventManager eventManager = EditorEventManagerBase.forUri(uri);
             if (eventManager == null) {
@@ -161,14 +164,17 @@ public class LSPAnnotator extends ExternalAnnotator<Object, Object> {
     }
 
     @Nullable
-    protected AnnotationBuilder createAnnotation(Editor editor, AnnotationHolder holder, Diagnostic diagnostic) {
+    protected TextRange getTextRange(Editor editor, Diagnostic diagnostic) {
         final int start = DocumentUtils.LSPPosToOffset(editor, diagnostic.getRange().getStart());
         final int end = DocumentUtils.LSPPosToOffset(editor, diagnostic.getRange().getEnd());
-        if (start >= end) {
+        if (start > end) {
             return null;
         }
-        final TextRange range = new TextRange(start, end);
+        return new TextRange(start, end);
+    }
 
+    @NotNull
+    protected AnnotationBuilder createAnnotation(@NotNull TextRange range, AnnotationHolder holder, Diagnostic diagnostic) {
         return holder.newAnnotation(lspToIntellijAnnotationsMap.get(diagnostic.getSeverity()), diagnostic.getMessage())
                      .range(range);
     }
@@ -176,18 +182,47 @@ public class LSPAnnotator extends ExternalAnnotator<Object, Object> {
     private void createAnnotations(AnnotationHolder holder, EditorEventManager eventManager) {
         final List<Diagnostic> diagnostics = eventManager.getDiagnostics();
         final Editor editor = eventManager.editor;
+        PsiFile file;
+        val document = editor.getDocument();
+        if (document != null) {
+            file = PsiDocumentManager.getInstance(eventManager.getProject()).getPsiFile(document);
+        } else {
+            file = null;
+        }
 
         List<Annotation> annotations = new ArrayList<>();
         diagnostics.forEach(d -> {
-            var annotation = createAnnotation(editor, holder, d);
-            if (annotation != null) {
-                if (d.getTags() != null && d.getTags().contains(DiagnosticTag.Deprecated)) {
-                    annotation = annotation.highlightType(ProblemHighlightType.LIKE_DEPRECATED);
+            var range = getTextRange(editor, d);
+            if (range == null)
+                return;
+            blk:
+            if (file != null && range.getLength() == 0) {
+                val psiElement = file.findElementAt(range.getStartOffset());
+                if (psiElement != null && !psiElement.getText().equals(".")) {
+                    range = psiElement.getTextRange();
+                    break blk;
                 }
-                annotation.create();
-                var theList = (SmartList<Annotation>) holder;
-                annotations.add(theList.get(theList.size() - 1));
+                val psiElementForward = file.findElementAt(range.getStartOffset() + 1);
+                if (psiElementForward != null) {
+                    range = psiElementForward.getTextRange();
+                    break blk;
+                }
+                val psiElementBack = file.findElementAt(range.getStartOffset() - 1);
+                if (psiElementBack != null) {
+                    range = psiElementBack.getTextRange();
+                    break blk;
+                }
+                if (psiElement != null) {
+                    range = psiElement.getTextRange();
+                }
             }
+            var annotation = createAnnotation(range, holder, d);
+            if (d.getTags() != null && d.getTags().contains(DiagnosticTag.Deprecated)) {
+                annotation = annotation.highlightType(ProblemHighlightType.LIKE_DEPRECATED);
+            }
+            annotation.create();
+            var theList = (SmartList<Annotation>) holder;
+            annotations.add(theList.get(theList.size() - 1));
         });
 
         eventManager.setAnnotations(annotations);

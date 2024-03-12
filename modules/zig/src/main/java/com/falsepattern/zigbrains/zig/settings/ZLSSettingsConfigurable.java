@@ -58,6 +58,10 @@ public class ZLSSettingsConfigurable implements Configurable {
         modified |= settings.debug != appSettingsComponent.getDebug();
         modified |= settings.messageTrace != appSettingsComponent.getMessageTrace();
         modified |= settings.increaseTimeouts != appSettingsComponent.getIncreaseTimeouts();
+        modified |= settings.buildOnSave != appSettingsComponent.getBuildOnSave();
+        modified |= !settings.buildOnSaveStep.equals(appSettingsComponent.getBuildOnSaveStep());
+        modified |= settings.highlightGlobalVarDeclarations != appSettingsComponent.getHighlightGlobalVarDeclarations();
+        modified |= settings.dangerousComptimeExperimentsDoNotEnable != appSettingsComponent.getDangerousComptimeExperimentsDoNotEnable();
         return modified;
     }
 
@@ -71,6 +75,11 @@ public class ZLSSettingsConfigurable implements Configurable {
         settings.debug = appSettingsComponent.getDebug();
         settings.messageTrace = appSettingsComponent.getMessageTrace();
         settings.increaseTimeouts = appSettingsComponent.getIncreaseTimeouts();
+
+        settings.buildOnSave = appSettingsComponent.getBuildOnSave();
+        settings.buildOnSaveStep = appSettingsComponent.getBuildOnSaveStep();
+        settings.highlightGlobalVarDeclarations = appSettingsComponent.getHighlightGlobalVarDeclarations();
+        settings.dangerousComptimeExperimentsDoNotEnable = appSettingsComponent.getDangerousComptimeExperimentsDoNotEnable();
         if (reloadZLS) {
             ZLSStartupActivity.initZLS(project);
         }
@@ -86,6 +95,11 @@ public class ZLSSettingsConfigurable implements Configurable {
         appSettingsComponent.setMessageTrace(settings.messageTrace);
         appSettingsComponent.setIncreaseTimeouts(settings.increaseTimeouts);
         appSettingsComponent.setAsyncFolding(settings.asyncFolding);
+
+        appSettingsComponent.setBuildOnSave(settings.buildOnSave);
+        appSettingsComponent.setBuildOnSaveStep(settings.buildOnSaveStep);
+        appSettingsComponent.setHighlightGlobalVarDeclarations(settings.highlightGlobalVarDeclarations);
+        appSettingsComponent.setDangerousComptimeExperimentsDoNotEnable(settings.dangerousComptimeExperimentsDoNotEnable);
     }
 
     @Override

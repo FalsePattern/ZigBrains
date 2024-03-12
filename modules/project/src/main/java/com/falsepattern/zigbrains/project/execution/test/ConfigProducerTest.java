@@ -24,6 +24,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
+import java.util.Objects;
+
 public class ConfigProducerTest extends ConfigProducerBase<ZigExecConfigTest> {
     @Override
     public @NotNull ConfigurationFactory getConfigurationFactory() {
@@ -31,9 +34,9 @@ public class ConfigProducerTest extends ConfigProducerBase<ZigExecConfigTest> {
     }
 
     @Override
-    protected boolean setupConfigurationFromContext(@NotNull ZigExecConfigTest configuration, PsiElement element, String filePath, VirtualFile theFile) {
+    protected boolean setupConfigurationFromContext(@NotNull ZigExecConfigTest configuration, PsiElement element, Path filePath, VirtualFile theFile) {
         if (ZigLineMarkerTest.UTILITY_INSTANCE.elementMatches(element)) {
-            configuration.filePath = filePath;
+            configuration.getFilePath().setPath(filePath);
             configuration.setName("all tests in " + theFile.getPresentableName());
             return true;
         }
@@ -41,8 +44,8 @@ public class ConfigProducerTest extends ConfigProducerBase<ZigExecConfigTest> {
     }
 
     @Override
-    protected boolean isConfigurationFromContext(@NotNull ZigExecConfigTest configuration, String filePath, VirtualFile vFile, PsiElement element) {
-        return configuration.filePath.equals(filePath);
+    protected boolean isConfigurationFromContext(@NotNull ZigExecConfigTest configuration, Path filePath, VirtualFile vFile, PsiElement element) {
+        return Objects.equals(configuration.getFilePath().getPath().orElse(null), filePath);
     }
 
     @Override

@@ -15,8 +15,8 @@
  */
 package com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition;
 
-import com.falsepattern.zigbrains.lsp.client.connection.ProcessStreamConnectionProvider;
-import com.falsepattern.zigbrains.lsp.client.connection.StreamConnectionProvider;
+import com.falsepattern.zigbrains.lspcommon.connection.ProcessStreamConnectionProvider;
+import com.falsepattern.zigbrains.lspcommon.connection.StreamConnectionProvider;
 
 import java.util.Arrays;
 import java.util.Collections;

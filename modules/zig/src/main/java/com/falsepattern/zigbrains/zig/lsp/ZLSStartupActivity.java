@@ -74,14 +74,14 @@ public class ZLSStartupActivity implements ProjectActivity {
                     try {
                         val tmpFile = Files.createTempFile("zigbrains-zls-autoconf", ".json");
                         val config = ZLSConfigProvider.findEnvironment(project);
-                        if (config.zigExePath().isEmpty() && config.zigLibPath().isEmpty()) {
+                        if (config.zig_exe_path().isEmpty() && config.zig_lib_path().isEmpty()) {
                             Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "(ZLS) Failed to detect zig path from project toolchain", NotificationType.WARNING));
                             configOK = false;
                             break blk;
                         }
                         try (val writer = Files.newBufferedWriter(tmpFile)) {
                             val gson = new Gson();
-                            gson.toJson(config.toJson(), writer);
+                            gson.toJson(config, writer);
                         }
                         configPath = tmpFile.toAbsolutePath().toString();
                     } catch (IOException e) {

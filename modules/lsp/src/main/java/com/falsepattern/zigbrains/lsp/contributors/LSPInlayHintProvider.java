@@ -25,11 +25,10 @@ import com.intellij.codeInsight.hints.declarative.InlayTreeSink;
 import com.intellij.codeInsight.hints.declarative.InlineInlayPosition;
 import com.intellij.codeInsight.hints.declarative.OwnBypassCollector;
 import com.intellij.codeInsight.hints.declarative.impl.DeclarativeInlayHintsPassFactory;
+import com.falsepattern.zigbrains.backports.com.intellij.markdown.utils.doc.DocMarkdownToHtmlConverter;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.psi.PsiFile;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.parser.Parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,12 +91,10 @@ public class LSPInlayHintProvider implements InlayHintsProvider {
                     tooltipText = switch (markup.getKind()) {
                         case "markdown" -> {
                             var markedContent = markup.getValue();
-                            if (markedContent.isEmpty()) {
+                            if (markedContent.isBlank()) {
                                 yield "";
                             }
-                            Parser parser = Parser.builder().build();
-                            HtmlRenderer renderer = HtmlRenderer.builder().build();
-                            yield "<html>" + renderer.render(parser.parse(markedContent)) + "</html>";
+                            yield DocMarkdownToHtmlConverter.convert(manager.getProject(), markedContent);
                         }
                         default -> markup.getValue();
                     };
