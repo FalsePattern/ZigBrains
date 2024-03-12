@@ -395,6 +395,7 @@ public class LanguageServerWrapper {
                             uriToEditorManagers.put(uri, set);
                             manager.documentOpened();
                         }
+                        manager.initComplete();
                         LOG.info("Created a manager for " + uri);
                         synchronized (toConnect) {
                             toConnect.remove(editor);

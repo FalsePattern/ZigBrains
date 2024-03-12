@@ -21,6 +21,7 @@ import com.falsepattern.zigbrains.debugger.dap.WrappedDebugServer;
 import com.intellij.execution.ExecutionException;
 import com.intellij.util.system.CpuArch;
 import com.jetbrains.cidr.ArchitectureType;
+import lombok.Cleanup;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -112,7 +113,11 @@ public class WinDAPDriver extends DAPDriver<
                     val hasher = MessageDigest.getInstance("SHA-256");
                     hasher.update(handshake.getValue().getBytes(StandardCharsets.UTF_8));
                     var inflater = new Inflater(true);
-                    val coconut = DAPDebuggerClient.class.getResourceAsStream("/coconut.jpg").readAllBytes();
+                    @Cleanup val coconutJpg = DAPDebuggerClient.class.getResourceAsStream("/coconut.jpg");
+                    if (coconutJpg == null) {
+                        throw new RuntimeException("No coconut");
+                    }
+                    val coconut = coconutJpg.readAllBytes();
                     inflater.setInput(coconut, coconut.length - 80, 77);
                     inflater.finished();
                     var b = new byte[1];

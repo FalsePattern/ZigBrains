@@ -18,7 +18,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
-## [13.0.0]
+## [13.0.1]
+
+### HOTFIX CHANGES
+- Fixed multiple critical null safety problems that caused plugin crashes on some systems
+- Splitting the editor now no longer breaks semantic highlighting
+
+The rest of the 13.0.0 changes are available below:
 
 ### Added
 

@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
+import com.falsepattern.zigbrains.common.util.StringUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider;
@@ -74,7 +75,7 @@ public class ZLSStartupActivity implements ProjectActivity {
                     try {
                         val tmpFile = Files.createTempFile("zigbrains-zls-autoconf", ".json");
                         val config = ZLSConfigProvider.findEnvironment(project);
-                        if (config.zig_exe_path().isEmpty() && config.zig_lib_path().isEmpty()) {
+                        if (StringUtil.isEmpty(config.zig_exe_path()) && StringUtil.isEmpty(config.zig_lib_path())) {
                             Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "(ZLS) Failed to detect zig path from project toolchain", NotificationType.WARNING));
                             configOK = false;
                             break blk;

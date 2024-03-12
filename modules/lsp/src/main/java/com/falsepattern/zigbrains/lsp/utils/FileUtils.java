@@ -117,16 +117,6 @@ public class FileUtils {
     }
 
     /**
-     * Returns a file type given an editor
-     *
-     * @param editor The editor
-     * @return The FileType
-     */
-    public static FileType fileTypeFromEditor(Editor editor) {
-        return FileDocumentManager.getInstance().getFile(editor.getDocument()).getFileType();
-    }
-
-    /**
      * Transforms an editor (Document) identifier to an LSP identifier
      *
      * @param editor The editor

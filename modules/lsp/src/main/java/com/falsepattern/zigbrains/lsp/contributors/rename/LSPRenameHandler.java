@@ -42,6 +42,7 @@ import com.intellij.refactoring.rename.RenamePsiElementProcessor;
 import com.intellij.refactoring.rename.inplace.InplaceRefactoring;
 import com.intellij.refactoring.rename.inplace.MemberInplaceRenameHandler;
 import com.intellij.refactoring.rename.inplace.MemberInplaceRenamer;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
@@ -56,11 +57,14 @@ public class LSPRenameHandler implements RenameHandler {
 
     @Override
     public void invoke(@NotNull Project project, @NotNull PsiElement[] elements, DataContext dataContext) {
+        val editor = dataContext.getData(CommonDataKeys.EDITOR);
+        if (editor == null)
+            return;
         if (elements.length == 1) {
             new MemberInplaceRenameHandler()
-                    .doRename(elements[0], dataContext.getData(CommonDataKeys.EDITOR), dataContext);
+                    .doRename(elements[0], editor, dataContext);
         } else {
-            invoke(project, dataContext.getData(CommonDataKeys.EDITOR), dataContext.getData(CommonDataKeys.PSI_FILE),
+            invoke(project, editor, dataContext.getData(CommonDataKeys.PSI_FILE),
                     dataContext);
         }
     }
