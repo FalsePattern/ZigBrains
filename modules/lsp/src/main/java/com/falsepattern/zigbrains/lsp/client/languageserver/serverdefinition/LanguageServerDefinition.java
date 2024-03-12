@@ -15,7 +15,7 @@
  */
 package com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition;
 
-import com.falsepattern.zigbrains.lsp.common.connection.StreamConnectionProvider;
+import com.falsepattern.zigbrains.lspcommon.connection.StreamConnectionProvider;
 import com.intellij.openapi.diagnostic.Logger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
