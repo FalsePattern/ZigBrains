@@ -108,6 +108,8 @@
                            bundle="zigbrains.zig.Bundle"
                            key="notif-zls"
                            id="ZigBrains.ZLS"/>
+
+        <platform.backend.documentation.linkHandler implementation="com.falsepattern.zigbrains.lsp.contributors.LSPDocumentationLinkHandler"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
