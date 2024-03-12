@@ -45,5 +45,6 @@
         <languageSupport language="Zig" implementationClass="com.falsepattern.zigbrains.debugger.ZigDebuggerLanguageSupport"/>
         <editorsExtension language="Zig" implementationClass="com.falsepattern.zigbrains.debugger.ZigDebuggerEditorsExtension"/>
         <lineBreakpointFileTypesProvider implementation="com.falsepattern.zigbrains.debugger.ZigLineBreakpointFileTypesProvider"/>
+        <localVariablesFilterHandler implementation="com.falsepattern.zigbrains.debugger.ZigVariablesFilterHandler"/>
     </extensions>
 </idea-plugin>
