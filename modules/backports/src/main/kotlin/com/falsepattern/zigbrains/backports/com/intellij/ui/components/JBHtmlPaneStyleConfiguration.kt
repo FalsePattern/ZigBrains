@@ -36,7 +36,7 @@ data class JBHtmlPaneStyleConfiguration(
         // Update here when more colors are used from the colorScheme
         colorScheme.defaultBackground.rgb == colorScheme2.defaultBackground.rgb
                 && colorScheme.defaultForeground.rgb == colorScheme2.defaultForeground.rgb
-                && ControlKind.entries.all {
+                && ControlKind.values().all {
             colorScheme.getAttributes(it.colorSchemeKey) ==
                     colorScheme2.getAttributes(it.colorSchemeKey)
         }
