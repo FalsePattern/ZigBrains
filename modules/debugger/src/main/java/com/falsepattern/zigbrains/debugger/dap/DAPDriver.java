@@ -41,7 +41,6 @@ import com.jetbrains.cidr.execution.debugger.backend.LLFrame;
 import com.jetbrains.cidr.execution.debugger.backend.LLInstruction;
 import com.jetbrains.cidr.execution.debugger.backend.LLMemoryHunk;
 import com.jetbrains.cidr.execution.debugger.backend.LLModule;
-import com.jetbrains.cidr.execution.debugger.backend.LLRegisterSet;
 import com.jetbrains.cidr.execution.debugger.backend.LLSection;
 import com.jetbrains.cidr.execution.debugger.backend.LLSymbolOffset;
 import com.jetbrains.cidr.execution.debugger.backend.LLSymbolicBreakpoint;
@@ -227,25 +226,6 @@ public abstract class DAPDriver<
     public boolean supportsWatchpointLifetime() {
         return false;
     }
-
-    @Override
-    public boolean supportsMemoryWrite() {
-        return true;
-    }
-
-    @Override
-    public void writeMemory(@NotNull Address address, byte[] bytes)
-            throws ExecutionException, DebuggerCommandException {
-        if (!capabilities.getSupportsWriteMemoryRequest())
-            throw new DebuggerCommandException("Memory write is not supported");
-
-        val args = new WriteMemoryArguments();
-        args.setMemoryReference(Util.stringifyAddress(address.getUnsignedLongValue()));
-        args.setData(Base64.getEncoder().encodeToString(bytes));
-        server.writeMemoryNow(args);
-    }
-
-
 
     @Override
     public @NotNull BaseProcessHandler<?> getProcessHandler() {
@@ -716,46 +696,6 @@ public abstract class DAPDriver<
         throw new ExecutionException("GetVariables(long, int) is deprecated!");
     }
 
-    // TODO registers
-    @Override
-    public boolean supportsRegisters() {
-        return true;
-    }
-
-    private final Map<String, List<LLValue>> registerSets = new TreeMap<>();
-
-    @Override
-    public @NotNull List<LLValue> getRegisters(@NotNull LLThread thread, @NotNull LLFrame frame)
-            throws ExecutionException, DebuggerCommandException {
-        return registerSets.values().stream().flatMap(Collection::stream).toList();
-    }
-
-    @Override
-    public @NotNull List<LLValue> getRegisters(@NotNull LLThread thread, @NotNull LLFrame frame, @NotNull Set<String> registerNames)
-            throws ExecutionException, DebuggerCommandException {
-        if (registerNames.isEmpty()) {
-            return registerSets.values().stream().flatMap(Collection::stream).toList();
-        } else {
-            return registerSets.values()
-                               .stream()
-                               .flatMap(Collection::stream)
-                               .filter(reg -> registerNames.contains(reg.getName().toLowerCase()))
-                               .toList();
-        }
-    }
-
-    @Override
-    public @NotNull List<LLRegisterSet> getRegisterSets() throws ExecutionException, DebuggerCommandException {
-        return registerSets.entrySet()
-                           .stream()
-                           .map(entry -> new LLRegisterSet(entry.getKey(),
-                                                           entry.getValue()
-                                                                .stream()
-                                                                .map(LLValue::getName)
-                                                                .toList()))
-                           .toList();
-    }
-
     protected List<LLValue> getWrappedScopes(@NotNull LLFrame frame) throws ExecutionException {
         val scopeArgs = new ScopesArguments();
         val frameID = frame.getIndex();
@@ -765,57 +705,16 @@ public abstract class DAPDriver<
         for (val scope: scopes.getScopes()) {
             val ref = scope.getVariablesReference();
             if ("registers".equalsIgnoreCase(scope.getName())) {
-                updateRegisters(frameID, ref);
+                val llValue = new LLValue("Registers", "registers", null, null, "");
+                llValue.putUserData(LLVALUE_FRAME, frameID);
+                llValue.putUserData(LLVALUE_CHILDREN_REF, ref);
+                llValue.putUserData(LLVALUE_DATA, new LLValueData("", null, false, ref > 0, false));
+                result.add(llValue);
                 continue;
             }
             result.addAll(getVariables(frameID, scope.getVariablesReference(), null, null));
         }
         return result;
-    }
-
-    private static final Pattern HEX_REGEX = Pattern.compile("[0-9a-fA-F]+");
-
-    private void updateRegisters(int frameID, int rootRef) throws ExecutionException {
-        val registerGroups = getVariables(frameID, rootRef, null, null);
-        registerSets.clear();
-        int c = 0;
-        for (val registerGroup: registerGroups) {
-            val name = (c++) + " - " + registerGroup.getName();
-            val ref = registerGroup.getUserData(LLVALUE_CHILDREN_REF);
-            if (ref == 0)
-                continue;
-            val registers = getVariables(frameID, ref, null, null);
-            val renamedRegisters = new ArrayList<LLValue>();
-            for (val register: registers) {
-                val renamedRegister = new LLValue(register.getName().toLowerCase(), register.getType(), register.getDisplayType(), register.getAddress(), register.getTypeClass(), register.getReferenceExpression());
-                register.copyUserDataTo(renamedRegister);
-                val oldData = renamedRegister.getUserData(LLVALUE_DATA);
-                if (oldData != null && HEX_REGEX.matcher(oldData.getValue()).matches()) {
-                    val newData = new LLValueData("0x" + oldData.getValue().toLowerCase(), oldData.getDescription(), oldData.hasLongerDescription(), oldData.mayHaveChildren(), oldData.isSynthetic());
-                    renamedRegister.putUserData(LLVALUE_DATA, newData);
-                }
-                renamedRegisters.add(renamedRegister);
-            }
-            registerSets.put(name, renamedRegisters);
-        }
-        val arch = getArchitecture();
-        if (arch == null) {
-            return;
-        }
-        val toggles = new HashMap<String, Boolean>();
-        boolean first = true;
-        for (val registerSet: registerSets.keySet()) {
-            toggles.put(registerSet, first);
-            first = false;
-        }
-        val settings = CidrDebuggerSettings.getInstance().getRegisterSetSettings(arch, driverName);
-        if (settings == null || !settings.keySet().containsAll(toggles.keySet()))
-            CidrDebuggerSettings.getInstance().setRegisterSetSettings(getArchitecture(), driverName, toggles);
-    }
-
-    @Override
-    public @Nullable String getArchitecture() throws ExecutionException {
-        return null;
     }
 
     protected List<LLValue> getVariables(int frameID, int variablesReference, Integer start, Integer count) throws ExecutionException {

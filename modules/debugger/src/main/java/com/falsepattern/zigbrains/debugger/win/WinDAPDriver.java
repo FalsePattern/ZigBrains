@@ -130,11 +130,6 @@ public class WinDAPDriver extends DAPDriver<
         }
     }
 
-    @Override
-    public @Nullable String getArchitecture() throws ExecutionException {
-        return ArchitectureType.forVmCpuArch(CpuArch.CURRENT).getId();
-    }
-
     @Data
     @NoArgsConstructor
     public static class HandshakeRequest {
