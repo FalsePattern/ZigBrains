@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [13.0.0]
+
 ### Added
 
 - Debugging
