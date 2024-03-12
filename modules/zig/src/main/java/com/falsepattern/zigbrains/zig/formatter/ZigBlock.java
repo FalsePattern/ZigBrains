@@ -17,18 +17,18 @@
 package com.falsepattern.zigbrains.zig.formatter;
 
 import com.falsepattern.zigbrains.zig.psi.ZigTypes;
-import com.intellij.formatting.Indent;
-import com.intellij.formatting.WrapType;
-import com.intellij.psi.TokenType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import com.intellij.formatting.Alignment;
 import com.intellij.formatting.Block;
+import com.intellij.formatting.Indent;
 import com.intellij.formatting.Spacing;
 import com.intellij.formatting.SpacingBuilder;
 import com.intellij.formatting.Wrap;
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.TokenType;
 import com.intellij.psi.formatter.common.AbstractBlock;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 

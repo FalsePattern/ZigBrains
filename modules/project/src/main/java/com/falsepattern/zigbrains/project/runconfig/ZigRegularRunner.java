@@ -22,9 +22,9 @@ import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.executors.DefaultRunExecutor;
+import com.intellij.execution.runners.DefaultProgramRunnerKt;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
-import com.intellij.execution.runners.DefaultProgramRunnerKt;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,6 +52,6 @@ public class ZigRegularRunner extends ZigProgramRunnerBase<ProfileStateBase<?>> 
     @Override
     protected @Nullable RunContentDescriptor doExecute(ProfileStateBase<?> state, AbstractZigToolchain toolchain, ExecutionEnvironment environment)
             throws ExecutionException {
-        return DefaultProgramRunnerKt.showRunContent(state.executeCommandLine(state.getCommandLine(toolchain), environment), environment);
+        return DefaultProgramRunnerKt.showRunContent(state.executeCommandLine(state.getCommandLine(toolchain, false), environment), environment);
     }
 }

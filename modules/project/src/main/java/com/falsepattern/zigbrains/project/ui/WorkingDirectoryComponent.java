@@ -17,17 +17,24 @@
 package com.falsepattern.zigbrains.project.ui;
 
 import com.intellij.execution.ExecutionBundle;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.LabeledComponent;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 
-public class WorkingDirectoryComponent extends LabeledComponent<TextFieldWithBrowseButton> {
-    public WorkingDirectoryComponent() {
-        var component = new TextFieldWithBrowseButton();
+public class WorkingDirectoryComponent extends LabeledComponent<TextFieldWithBrowseButton> implements Disposable {
+    private final TextFieldWithBrowseButton field;
+    public WorkingDirectoryComponent(Disposable parent) {
+        field = new TextFieldWithBrowseButton(null, parent);
         var fileChooser = FileChooserDescriptorFactory.createSingleFolderDescriptor();
         fileChooser.setTitle(ExecutionBundle.message("select.working.directory.message"));
-        component.addBrowseFolderListener(null, null, null, fileChooser);
-        setComponent(component);
+        field.addBrowseFolderListener(null, null, null, fileChooser);
+        setComponent(field);
         setText(ExecutionBundle.message("run.configuration.working.directory.label"));
+    }
+
+    @Override
+    public void dispose() {
+        field.dispose();
     }
 }

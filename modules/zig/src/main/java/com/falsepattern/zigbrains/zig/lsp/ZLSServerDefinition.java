@@ -17,8 +17,11 @@
 package com.falsepattern.zigbrains.zig.lsp;
 
 import com.falsepattern.zigbrains.lsp.client.languageserver.serverdefinition.RawCommandServerDefinition;
+import lombok.val;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.PublishDiagnosticsCapabilities;
+
+import java.util.List;
 
 public class ZLSServerDefinition extends RawCommandServerDefinition {
     public ZLSServerDefinition(String[] command) {
@@ -30,6 +33,18 @@ public class ZLSServerDefinition extends RawCommandServerDefinition {
         var textCaps = params.getCapabilities().getTextDocument();
         if (textCaps.getPublishDiagnostics() == null) {
             textCaps.setPublishDiagnostics(new PublishDiagnosticsCapabilities());
+        }
+        val completion = textCaps.getCompletion();
+        if (completion != null) {
+            val completionItem = completion.getCompletionItem();
+            if (completionItem != null) {
+                completionItem.setDocumentationFormat(List.of("markdown"));
+            }
+        }
+        val hover = textCaps.getHover();
+        if (hover != null) {
+            hover.setContentFormat(List.of("markdown"));
+
         }
     }
 }
