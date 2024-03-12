@@ -46,32 +46,37 @@ public class LSPShowReformatDialogAction extends ShowReformatFileDialog implemen
         Editor editor = e.getData(CommonDataKeys.EDITOR);
         Project project = e.getData(CommonDataKeys.PROJECT);
 
-        if (editor != null && project != null) {
-            PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
-            VirtualFile virFile = FileDocumentManager.getInstance().getFile(editor.getDocument());
-            if (IntellijLanguageClient.isExtensionSupported(virFile)) {
-                boolean hasSelection = editor.getSelectionModel().hasSelection();
-                LayoutCodeDialog dialog = new LayoutCodeDialog(project, psiFile, hasSelection, HELP_ID);
-                dialog.show();
-                if (dialog.isOK()) {
-                    LayoutCodeOptions options = dialog.getRunOptions();
-                    EditorEventManager eventManager = EditorEventManagerBase.forEditor(editor);
-                    if (eventManager != null) {
-                        if (options.getTextRangeType() == TextRangeType.SELECTED_TEXT) {
-                            eventManager.reformatSelection();
-                        } else {
-                            eventManager.reformat();
-                        }
-                    }
-                } else {
-                    // if user chose cancel , the dialog in super.actionPerformed(e) will show again
-                    // super.actionPerformed(e);
-                }
-            } else {
-                super.actionPerformed(e);
-            }
-        } else {
+        if (editor == null || project == null) {
             super.actionPerformed(e);
+            return;
+        }
+        PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
+        if (psiFile == null) {
+            super.actionPerformed(e);
+            return;
+        }
+        VirtualFile virFile = FileDocumentManager.getInstance().getFile(editor.getDocument());
+        if (!IntellijLanguageClient.isExtensionSupported(virFile)) {
+            super.actionPerformed(e);
+            return;
+        }
+        boolean hasSelection = editor.getSelectionModel().hasSelection();
+        LayoutCodeDialog dialog = new LayoutCodeDialog(project, psiFile, hasSelection, HELP_ID);
+        dialog.show();
+        if (!dialog.isOK()) {
+            // if user chose cancel , the dialog in super.actionPerformed(e) will show again
+            // super.actionPerformed(e);
+            return;
+        }
+
+        LayoutCodeOptions options = dialog.getRunOptions();
+        EditorEventManager eventManager = EditorEventManagerBase.forEditor(editor);
+        if (eventManager != null) {
+            if (options.getTextRangeType() == TextRangeType.SELECTED_TEXT) {
+                eventManager.reformatSelection();
+            } else {
+                eventManager.reformat();
+            }
         }
     }
 

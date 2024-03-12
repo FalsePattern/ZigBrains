@@ -789,7 +789,7 @@ public abstract class DAPDriver<
         for (val registerGroup: registerGroups) {
             val name = (c++) + " - " + registerGroup.getName();
             val ref = registerGroup.getUserData(LLVALUE_CHILDREN_REF);
-            if (ref == 0)
+            if (ref == null || ref == 0)
                 continue;
             val registers = getVariables(frameID, ref, null, null);
             val renamedRegisters = new ArrayList<LLValue>();

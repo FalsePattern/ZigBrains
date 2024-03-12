@@ -17,6 +17,7 @@
 package com.falsepattern.zigbrains.common.util;
 
 import lombok.val;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -29,6 +30,9 @@ public class StringUtil {
         return value == null ? "" : value;
     }
 
+    public static boolean isEmpty(@Nullable String str) {
+        return str == null || str.isEmpty();
+    }
 
     private static final char[] VT100_CHARS = new char[256];
 
