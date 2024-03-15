@@ -1026,6 +1026,8 @@ public class EditorEventManager {
                 return;
             }
             commands.stream().map(c -> {
+                if (c == null)
+                    return null;
                 ExecuteCommandParams params = new ExecuteCommandParams();
                 params.setArguments(c.getArguments());
                 params.setCommand(c.getCommand());
