@@ -18,6 +18,24 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [13.1.0]
+
+### Added
+
+- Zig
+  - Parameter info (CTRL + P) is now properly integrated
+  - Parser error recovery (completion will still work even with missing semicolons in a statement)
+
+### Fixed
+
+- LSP
+  - The registry IDs of some of the LSP handlers were colliding with the Rust intellij plugin
+  - Autocompletion insertion is now fully handled by intellij, this should fix some of the weirdness
+
+- Zig
+  - Indent support for function parameters and struct initializers
+  - Updated to latest grammar spec (https://github.com/ziglang/zig-spec/commit/78c2e2e5cfa7090965deaf631cb8ca6f405b7c42)
+
 ## [13.0.1]
 
 ### HOTFIX CHANGES
