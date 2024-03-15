@@ -109,6 +109,9 @@
                            key="notif-zls"
                            id="ZigBrains.ZLS"/>
 
+        <codeInsight.parameterInfo language="Zig"
+                                   implementationClass="com.falsepattern.zigbrains.zig.completion.ZigParameterInfoHandler"/>
+
         <platform.backend.documentation.linkHandler implementation="com.falsepattern.zigbrains.lsp.contributors.LSPDocumentationLinkHandler"/>
     </extensions>
 

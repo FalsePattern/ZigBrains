@@ -29,22 +29,8 @@ import org.jetbrains.annotations.NotNull;
  * This class notifies an EditorEventManager that a character has been typed in the editor
  */
 public class LSPTypedHandler extends TypedHandlerDelegate {
-
     @Override
-    public Result charTyped(char c, Project project, @NotNull Editor editor, @NotNull PsiFile file) {
-        if (!FileUtils.isFileSupported(file.getVirtualFile())) {
-            return Result.CONTINUE;
-        }
-
-        EditorEventManager eventManager = EditorEventManagerBase.forEditor(editor);
-        if (eventManager != null) {
-            eventManager.characterTyped(c);
-        }
-        return Result.CONTINUE;
-    }
-
-    @Override
-    public Result checkAutoPopup(char charTyped, @NotNull Project project, @NotNull Editor editor, @NotNull PsiFile file) {
+    public @NotNull Result checkAutoPopup(char charTyped, @NotNull Project project, @NotNull Editor editor, @NotNull PsiFile file) {
         if (!FileUtils.isFileSupported(file.getVirtualFile())) {
             return Result.CONTINUE;
         }
