@@ -26,11 +26,17 @@ import com.intellij.formatting.Wrap;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.formatter.common.AbstractBlock;
+import com.intellij.psi.tree.IElementType;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.BLOCK;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.EXPR_LIST;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.INIT_LIST;
 
 public class ZigBlock extends AbstractBlock {
 
@@ -69,16 +75,22 @@ public class ZigBlock extends AbstractBlock {
 
     @Override
     protected @Nullable Indent getChildIndent() {
-        if (myNode.getElementType() == ZigTypes.BLOCK) {
-            return Indent.getNormalIndent();
-        }
-
-        return Indent.getNoneIndent();
+        return getIndentBasedOnParentType(getNode().getElementType());
     }
 
     @Override
     public Indent getIndent() {
-        if (myNode.getElementType() == ZigTypes.STATEMENT) {
+        val parent = getNode().getTreeParent();
+        if (parent != null) {
+            return getIndentBasedOnParentType(parent.getElementType());
+        }
+        return Indent.getNoneIndent();
+    }
+
+    private static Indent getIndentBasedOnParentType(IElementType elementType) {
+        if (elementType == BLOCK ||
+            elementType == INIT_LIST ||
+            elementType == EXPR_LIST) {
             return Indent.getNormalIndent();
         }
 
