@@ -192,7 +192,7 @@ ContainerField ::= DOC_COMMENT? KEYWORD_COMPTUME? !KEYWORD_FN (IDENTIFIER COLON)
 
 // *** Block Level ***
 Statement
-::= KEYWORD_COMPTIME? ComptimeStatement
+::= KEYWORD_COMPTIME ComptimeStatement
   | KEYWORD_NOSUSPEND BlockExprStatement
   | KEYWORD_DEFER BlockExprStatement
   | KEYWORD_ERRDEFER Payload? BlockExprStatement
@@ -272,7 +272,9 @@ PrimaryExpr
 
 IfExpr ::= IfPrefix Expr (KEYWORD_ELSE Payload? Expr)?
 
-Block ::= LBRACE Statement* RBRACE
+Block ::= LBRACE ZB_Block_Statement* RBRACE {pin(".*")=1}
+
+private ZB_Block_Statement ::= Statement {recoverWhile="#auto"}
 
 LoopExpr ::= KEYWORD_INLINE? (ForExpr | WhileExpr)
 
@@ -283,9 +285,12 @@ WhileExpr ::= WhilePrefix Expr (KEYWORD_ELSE Payload? Expr)?
 CurlySuffixExpr ::= TypeExpr InitList?
 
 InitList
-    ::= LBRACE FieldInit (COMMA FieldInit)* COMMA? RBRACE
-     | LBRACE Expr (COMMA Expr)* COMMA? RBRACE
-     | LBRACE RBRACE
+    ::= LBRACE FieldInit (COMMA ZB_InitList_FieldInit)* COMMA? RBRACE
+     | LBRACE Expr (COMMA ZB_InitList_Expr)* COMMA? RBRACE
+     | LBRACE RBRACE {pin=1}
+
+private ZB_InitList_FieldInit ::= FieldInit {recoverWhile="#auto"}
+private ZB_InitList_Expr ::= Expr {recoverWhile="#auto"}
 
 TypeExpr ::= PrefixTypeOp* ErrorUnionExpr
 

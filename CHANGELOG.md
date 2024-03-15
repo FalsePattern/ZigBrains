@@ -22,6 +22,7 @@ Changelog structure reference:
 
 - Zig
   - Parameter info (CTRL + P) is now properly integrated
+  - Parser error recovery (completion will still work even with missing semicolons in a statement)
 
 ### Fixed
 
