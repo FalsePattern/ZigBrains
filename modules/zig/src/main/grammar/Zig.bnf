@@ -188,9 +188,7 @@ VarDeclProto ::= (KEYWORD_CONST | KEYWORD_VAR) IDENTIFIER (COLON TypeExpr)? Byte
 
 GlobalVarDecl ::= VarDeclProto (EQUAL Expr)? SEMICOLON
 
-ContainerField
-::= DOC_COMMENT? KEYWORD_COMPTIME? IDENTIFIER (COLON (KEYWORD_ANYTYPE | TypeExpr) ByteAlign?)? (EQUAL Expr)?
-  | DOC_COMMENT? KEYWORD_COMPTIME? (IDENTIFIER COLON)? !KEYWORD_FN TypeExpr ByteAlign? (EQUAL Expr)?
+ContainerField ::= DOC_COMMENT? KEYWORD_COMPTUME? !KEYWORD_FN (IDENTIFIER COLON)? TypeExpr ByteAlign? (EQUAL Expr)?
 
 // *** Block Level ***
 Statement

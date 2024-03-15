@@ -31,6 +31,7 @@ Changelog structure reference:
 
 - Zig
   - Indent support for function parameters and struct initializers
+  - Updated to latest grammar spec (https://github.com/ziglang/zig-spec/commit/78c2e2e5cfa7090965deaf631cb8ca6f405b7c42)
 
 ## [13.0.1]
 
