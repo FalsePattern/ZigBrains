@@ -18,6 +18,16 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - Parameter info (CTRL + P) is now properly integrated
+
+### Fixed
+
+- Zig
+  - Indent support for function parameters and struct initializers
+
 ## [13.0.1]
 
 ### HOTFIX CHANGES
