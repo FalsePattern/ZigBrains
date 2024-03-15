@@ -25,6 +25,9 @@ Changelog structure reference:
 
 ### Fixed
 
+- LSP
+  - The registry IDs of some of the LSP handlers were colliding with the Rust intellij plugin
+
 - Zig
   - Indent support for function parameters and struct initializers
 
