@@ -764,8 +764,6 @@ public class EditorEventManager {
 
         if (addTextEdits != null) {
             builder = builder.withInsertHandler((InsertionContext context, LookupElement lookupElement) -> invokeLater(() -> {
-                applyInitialTextEdit(item, context, lookupString);
-
                 if (format == InsertTextFormat.Snippet) {
                     context.commitDocument();
                     prepareAndRunSnippet(lookupString);
@@ -779,8 +777,6 @@ public class EditorEventManager {
             }));
         } else if (command != null) {
             builder = builder.withInsertHandler((InsertionContext context, LookupElement lookupElement) -> {
-                applyInitialTextEdit(item, context, lookupString);
-
                 if (format == InsertTextFormat.Snippet) {
                     context.commitDocument();
                     prepareAndRunSnippet(lookupString);
@@ -790,8 +786,6 @@ public class EditorEventManager {
             });
         } else {
             builder = builder.withInsertHandler((InsertionContext context, LookupElement lookupElement) -> {
-                applyInitialTextEdit(item, context, lookupString);
-
                 if (format == InsertTextFormat.Snippet) {
                     context.commitDocument();
                     prepareAndRunSnippet(lookupString);
@@ -800,37 +794,6 @@ public class EditorEventManager {
         }
 
         return builder;
-    }
-
-    private void applyInitialTextEdit(CompletionItem item, InsertionContext context, String lookupString) {
-        if (item.getTextEdit() != null) {
-            // remove intellij edit, server is controlling insertion
-            writeAction(() -> {
-                Runnable runnable = () -> this.editor.getDocument().deleteString(context.getStartOffset(), context.getTailOffset());
-
-                CommandProcessor.getInstance()
-                        .executeCommand(project, runnable, "Removing Intellij Completion", "LSPPlugin", editor.getDocument());
-            });
-            context.commitDocument();
-
-            if(item.getTextEdit().isLeft()) {
-                item.getTextEdit().getLeft().setNewText(getLookupStringWithoutPlaceholders(item, lookupString));
-            }
-
-            applyEdit(Integer.MAX_VALUE, Collections.singletonList(item.getTextEdit()), "text edit", false, true);
-        } else {
-            // client handles insertion, determine a prefix (to allow completions of partially matching items)
-            int prefixLength = getCompletionPrefixLength(context.getStartOffset());
-
-            writeAction(() -> {
-                Runnable runnable = () -> this.editor.getDocument().deleteString(context.getStartOffset() - prefixLength, context.getStartOffset());
-
-                CommandProcessor.getInstance()
-                        .executeCommand(project, runnable, "Removing Prefix", "LSPPlugin", editor.getDocument());
-            });
-            context.commitDocument();
-
-        }
     }
 
     private int getCompletionPrefixLength(int offset) {

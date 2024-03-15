@@ -27,6 +27,7 @@ Changelog structure reference:
 
 - LSP
   - The registry IDs of some of the LSP handlers were colliding with the Rust intellij plugin
+  - Autocompletion insertion is now fully handled by intellij, this should fix some of the weirdness
 
 - Zig
   - Indent support for function parameters and struct initializers
