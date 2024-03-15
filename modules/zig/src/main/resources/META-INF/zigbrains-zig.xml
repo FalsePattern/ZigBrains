@@ -38,29 +38,29 @@
                                 language="any"/>
         <!-- needed for completion as well as signature help -->
         <typedHandler implementation="com.falsepattern.zigbrains.lsp.listeners.LSPTypedHandler"
-                      id="LSPTypedHandler"/>
+                      id="ZBLSPTypedHandler"/>
 
         <!-- needed for code diagnostics -->
-        <externalAnnotator id="LSPAnnotator"
+        <externalAnnotator id="ZBLSPAnnotator"
                            language="Zig"
                            implementationClass="com.falsepattern.zigbrains.lsp.contributors.annotator.LSPAnnotator"/>
 
         <!-- needed for Workspace Symbols -->
         <gotoSymbolContributor implementation="com.falsepattern.zigbrains.lsp.contributors.symbol.LSPSymbolContributor"
-                               id="LSPSymbolContributor"/>
+                               id="ZBLSPSymbolContributor"/>
 
         <!-- needed for renaming -->
         <renameHandler implementation="com.falsepattern.zigbrains.lsp.contributors.rename.LSPRenameHandler"
-                       id="LSPRenameHandler"
+                       id="ZBLSPRenameHandler"
                        order="first"/>
         <renamePsiElementProcessor implementation="com.falsepattern.zigbrains.lsp.contributors.rename.LSPRenameProcessor"
-                                   id="LSPRenameProcessor"
+                                   id="ZBLSPRenameProcessor"
                                    order="first"/>
 
         <!-- needed for folding support -->
         <lang.foldingBuilder language="Zig"
                              implementationClass="com.falsepattern.zigbrains.zig.ide.ZigFoldingRangeProvider"
-                             id="LSPFoldingRangeProvider"
+                             id="ZBLSPFoldingRangeProvider"
                              order="first"/>
 
         <!-- needed for documentation -->
@@ -109,6 +109,9 @@
                            key="notif-zls"
                            id="ZigBrains.ZLS"/>
 
+        <codeInsight.parameterInfo language="Zig"
+                                   implementationClass="com.falsepattern.zigbrains.zig.completion.ZigParameterInfoHandler"/>
+
         <platform.backend.documentation.linkHandler implementation="com.falsepattern.zigbrains.lsp.contributors.LSPDocumentationLinkHandler"/>
     </extensions>
 
@@ -123,7 +126,7 @@
 
         <!-- needed for find references -->
         <action class="com.falsepattern.zigbrains.lsp.actions.LSPReferencesAction"
-                id="LSPFindUsages">
+                id="ZBLSPFindUsages">
             <keyboard-shortcut first-keystroke="shift alt F7"
                                keymap="$default"/>
         </action>

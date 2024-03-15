@@ -35,7 +35,6 @@ import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.GUIUtils;
 import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
-import com.intellij.codeInsight.hint.HintManager;
 import com.intellij.codeInsight.lookup.AutoCompletionPolicy;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
@@ -96,7 +95,6 @@ import org.eclipse.lsp4j.InsertReplaceEdit;
 import org.eclipse.lsp4j.InsertTextFormat;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
-import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ReferenceContext;
@@ -144,7 +142,6 @@ import static com.falsepattern.zigbrains.common.util.ApplicationUtil.invokeLater
 import static com.falsepattern.zigbrains.common.util.ApplicationUtil.pool;
 import static com.falsepattern.zigbrains.common.util.ApplicationUtil.writeAction;
 import static com.falsepattern.zigbrains.lsp.utils.DocumentUtils.toEither;
-import static com.falsepattern.zigbrains.lsp.utils.GUIUtils.createAndShowEditorHint;
 
 /**
  * Class handling events related to an Editor (a Document)
@@ -234,17 +231,6 @@ public class EditorEventManager {
     @SuppressWarnings("unused")
     public TextDocumentIdentifier getIdentifier() {
         return identifier;
-    }
-
-    /**
-     * Calls onTypeFormatting or signatureHelp if the character typed was a trigger character
-     *
-     * @param c The character just typed
-     */
-    public void characterTyped(char c) {
-        if (signatureTriggers.contains(Character.toString(c))) {
-            signatureHelp();
-        }
     }
 
     private boolean isSupportedLanguageFile(PsiFile file) {
@@ -518,70 +504,40 @@ public class EditorEventManager {
         return null;
     }
 
-    /**
-     * Calls signatureHelp at the current editor caret position
-     */
-    @SuppressWarnings("WeakerAccess")
-    public void signatureHelp() {
+    public CompletableFuture<SignatureHelp> getSignatureHelp(int offset) {
         if (editor.isDisposed()) {
-            return;
+            return CompletableFuture.failedFuture(new RuntimeException("Editor is disposed"));
         }
-        LogicalPosition lPos = editor.getCaretModel().getCurrentCaret().getLogicalPosition();
-        Point point = editor.logicalPositionToXY(lPos);
-        SignatureHelpParams params = new SignatureHelpParams(identifier, DocumentUtils.logicalToLSPPos(lPos, editor));
+        SignatureHelpParams params = new SignatureHelpParams(identifier, DocumentUtils.offsetToLSPPos(editor, offset));
+        val result = new CompletableFuture<SignatureHelp>();
         pool(() -> {
-            CompletableFuture<SignatureHelp> future = wrapper.getRequestManager().signatureHelp(params);
+            val future = wrapper.getRequestManager().signatureHelp(params);
             if (future == null) {
+                result.complete(null);
                 return;
             }
             try {
-                SignatureHelp signatureResp = future.get(Timeout.getTimeout(Timeouts.SIGNATURE), TimeUnit.MILLISECONDS);
+                val signatureResp = future.get(Timeout.getTimeout(Timeouts.SIGNATURE), TimeUnit.MILLISECONDS);
                 wrapper.notifySuccess(Timeouts.SIGNATURE);
                 if (signatureResp == null) {
+                    result.complete(null);
                     return;
                 }
-                List<SignatureInformation> signatures = signatureResp.getSignatures();
-                if (signatures == null || signatures.isEmpty()) {
-                    return;
-                }
-                int activeSignatureIndex = signatureResp.getActiveSignature();
-                int activeParameterIndex = signatureResp.getActiveParameter();
-
-                String activeParameter = signatures.get(activeSignatureIndex).getParameters().size() > activeParameterIndex ?
-                        extractLabel(signatures.get(activeSignatureIndex), signatures.get(activeSignatureIndex).getParameters().get(activeParameterIndex).getLabel()) : "";
-                Either<String, MarkupContent> signatureDescription = signatures.get(activeSignatureIndex).getDocumentation();
-
-                StringBuilder builder = new StringBuilder();
-                builder.append("<html>");
-                if (signatureDescription == null) {
-                    builder.append("<b>").append(signatures.get(activeSignatureIndex).getLabel().
-                            replace(" " + activeParameter, String.format("<font color=\"orange\"> %s</font>",
-                                    activeParameter))).append("</b>");
-                } else if (signatureDescription.isLeft()) {
-                    // Todo - Add parameter Documentation
-                    String descriptionLeft = signatureDescription.getLeft().replace(System.lineSeparator(), "<br />");
-                    builder.append("<b>").append(signatures.get(activeSignatureIndex).getLabel()
-                            .replace(" " + activeParameter, String.format("<font color=\"orange\"> %s</font>",
-                                    activeParameter))).append("</b>");
-                    builder.append("<div>").append(descriptionLeft).append("</div>");
-                } else if (signatureDescription.isRight()) {
-                    // Todo - Add marked content parsing
-                    builder.append("<b>").append(signatures.get(activeSignatureIndex).getLabel()).append("</b>");
-                }
-
-                builder.append("</html>");
-                invokeLater(() -> currentHint = createAndShowEditorHint(editor, builder.toString(), point, HintManager.UNDER, HintManager.HIDE_BY_OTHER_HINT));
-
+                result.complete(signatureResp);
             } catch (TimeoutException e) {
                 LOG.warn(e);
                 wrapper.notifyFailure(Timeouts.SIGNATURE);
+                result.completeExceptionally(e);
             } catch (JsonRpcException | ExecutionException | InterruptedException e) {
                 LOG.warn(e);
                 wrapper.crashed(e);
+                result.completeExceptionally(e);
             } catch (Exception e) {
                 LOG.warn("Internal error occurred when processing signature help");
+                result.completeExceptionally(e);
             }
         });
+        return result;
     }
 
     private String extractLabel(SignatureInformation signatureInformation, Either<String, Tuple.Two<Integer, Integer>> label) {
@@ -808,8 +764,6 @@ public class EditorEventManager {
 
         if (addTextEdits != null) {
             builder = builder.withInsertHandler((InsertionContext context, LookupElement lookupElement) -> invokeLater(() -> {
-                applyInitialTextEdit(item, context, lookupString);
-
                 if (format == InsertTextFormat.Snippet) {
                     context.commitDocument();
                     prepareAndRunSnippet(lookupString);
@@ -823,8 +777,6 @@ public class EditorEventManager {
             }));
         } else if (command != null) {
             builder = builder.withInsertHandler((InsertionContext context, LookupElement lookupElement) -> {
-                applyInitialTextEdit(item, context, lookupString);
-
                 if (format == InsertTextFormat.Snippet) {
                     context.commitDocument();
                     prepareAndRunSnippet(lookupString);
@@ -834,8 +786,6 @@ public class EditorEventManager {
             });
         } else {
             builder = builder.withInsertHandler((InsertionContext context, LookupElement lookupElement) -> {
-                applyInitialTextEdit(item, context, lookupString);
-
                 if (format == InsertTextFormat.Snippet) {
                     context.commitDocument();
                     prepareAndRunSnippet(lookupString);
@@ -844,37 +794,6 @@ public class EditorEventManager {
         }
 
         return builder;
-    }
-
-    private void applyInitialTextEdit(CompletionItem item, InsertionContext context, String lookupString) {
-        if (item.getTextEdit() != null) {
-            // remove intellij edit, server is controlling insertion
-            writeAction(() -> {
-                Runnable runnable = () -> this.editor.getDocument().deleteString(context.getStartOffset(), context.getTailOffset());
-
-                CommandProcessor.getInstance()
-                        .executeCommand(project, runnable, "Removing Intellij Completion", "LSPPlugin", editor.getDocument());
-            });
-            context.commitDocument();
-
-            if(item.getTextEdit().isLeft()) {
-                item.getTextEdit().getLeft().setNewText(getLookupStringWithoutPlaceholders(item, lookupString));
-            }
-
-            applyEdit(Integer.MAX_VALUE, Collections.singletonList(item.getTextEdit()), "text edit", false, true);
-        } else {
-            // client handles insertion, determine a prefix (to allow completions of partially matching items)
-            int prefixLength = getCompletionPrefixLength(context.getStartOffset());
-
-            writeAction(() -> {
-                Runnable runnable = () -> this.editor.getDocument().deleteString(context.getStartOffset() - prefixLength, context.getStartOffset());
-
-                CommandProcessor.getInstance()
-                        .executeCommand(project, runnable, "Removing Prefix", "LSPPlugin", editor.getDocument());
-            });
-            context.commitDocument();
-
-        }
     }
 
     private int getCompletionPrefixLength(int offset) {
@@ -1107,6 +1026,8 @@ public class EditorEventManager {
                 return;
             }
             commands.stream().map(c -> {
+                if (c == null)
+                    return null;
                 ExecuteCommandParams params = new ExecuteCommandParams();
                 params.setArguments(c.getArguments());
                 params.setCommand(c.getCommand());
