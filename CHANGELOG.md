@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Accidental regression while renaming the action IDs that broke "find usages"
+
 ## [13.1.0]
 
 ### Added

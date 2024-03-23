@@ -1228,7 +1228,7 @@ public class EditorEventManager {
 
         if (loc == null) {
             LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
-                                                                                      .getAction("LSPFindUsages");
+                                                                                      .getAction("ZBLSPFindUsages");
             if (referencesAction != null) {
                 referencesAction.forManagerAndOffset(this, sourceOffset);
             }
@@ -1241,7 +1241,7 @@ public class EditorEventManager {
                 && sourceOffset >= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getStart())
                 && sourceOffset <= DocumentUtils.LSPPosToOffset(editor, loc.getRange().getEnd())) {
             LSPReferencesAction referencesAction = (LSPReferencesAction) ActionManager.getInstance()
-                    .getAction("LSPFindUsages");
+                    .getAction("ZBLSPFindUsages");
             if (referencesAction != null) {
                 referencesAction.forManagerAndOffset(this, sourceOffset);
             }
