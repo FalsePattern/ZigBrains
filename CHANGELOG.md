@@ -20,6 +20,9 @@ Changelog structure reference:
 
 ### Fixed
 
+- Project
+  - Creating new project throws a write access error when git is enabled
+
 - Zig
   - Accidental regression while renaming the action IDs that broke "find usages"
 

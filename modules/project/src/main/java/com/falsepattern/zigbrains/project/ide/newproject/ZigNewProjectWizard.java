@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.project.ide.newproject;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.project.ide.util.projectwizard.ZigModuleBuilder;
 import com.falsepattern.zigbrains.project.platform.ZigProjectGeneratorPeer;
 import com.falsepattern.zigbrains.zig.Icons;
@@ -94,7 +95,7 @@ public class ZigNewProjectWizard implements LanguageGeneratorNewProjectWizard {
                     return;
                 }
                 if (gitData.getGit()) {
-                    createGitIgnoreFile(getContext().getProjectDirectory(), module);
+                    ApplicationUtil.writeAction(() -> createGitIgnoreFile(getContext().getProjectDirectory(), module));
                 }
             });
         }
