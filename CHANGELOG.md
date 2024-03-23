@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [13.1.1]
+
 ### Fixed
 
 - Project
