@@ -18,6 +18,29 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Debugging
+  - For Zig build tasks, the target executable is now auto-detected in `zig-out/bin` if not specified.
+  Autodetect fails if multiple executables are present for consistency's sake.
+  - You can specify custom command line arguments for the debugged executable.
+
+- Project
+  - The line marker generated `zig build` now defaults to the `run` step.
+
+### Changed
+
+- Project
+  - `zig build` steps are now specified separately from miscellaneous command line arguments.
+  This is needed for the debugger to work properly.
+  - The zig build debug executable target configs are now hidden from Zig build tasks in IDEs without native debugging support.
+  - Native Application (Zig) is now hidden in IDEs without native debugging support.
+
+### Fixed
+
+- Debugging
+  - Debugger locks up when trying to debug `zig build run` tasks.
+
 ## [13.1.1]
 
 ### Fixed

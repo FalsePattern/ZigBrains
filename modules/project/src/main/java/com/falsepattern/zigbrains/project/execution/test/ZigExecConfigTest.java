@@ -34,7 +34,7 @@ import java.util.List;
 @Getter
 public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
     private ZigConfigEditor.FilePathConfigurable filePath = new ZigConfigEditor.FilePathConfigurable("filePath", "File path");
-    private ZigConfigEditor.ColoredConfigurable colored = new ZigConfigEditor.ColoredConfigurable("colored");
+    private ZigConfigEditor.CheckboxConfigurable colored = ZigConfigEditor.coloredConfigurable("colored");
     private ZigConfigEditor.OptimizationConfigurable optimization = new ZigConfigEditor.OptimizationConfigurable("optimization");
     public ZigExecConfigTest(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Test");
@@ -42,15 +42,15 @@ public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
 
     @Override
     public String[] buildCommandLineArgs() {
-        return new String[]{"test", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name()};
+        return new String[]{"test", "--color", colored.value ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name()};
     }
 
     @Override
     public String[] buildDebugCommandLineArgs() {
         if (optimization.forced) {
-            return new String[]{"test", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec", "-O", optimization.level.name()};
+            return new String[]{"test", "--color", colored.value ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec", "-O", optimization.level.name()};
         } else {
-            return new String[]{"test", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec"};
+            return new String[]{"test", "--color", colored.value ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec"};
         }
     }
 
