@@ -19,6 +19,8 @@
     <resource-bundle>zigbrains.debugger.Bundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
+        <configurationType implementation="com.falsepattern.zigbrains.debugger.execution.binary.ConfigTypeBinary"/>
+
         <programRunner implementation="com.falsepattern.zigbrains.debugger.runner.run.ZigDebugRunnerRun"
                        id="ZigDebugRunnerRun"/>
         <programRunner implementation="com.falsepattern.zigbrains.debugger.runner.test.ZigDebugRunnerTest"
@@ -39,6 +41,10 @@
         <applicationConfigurable parentId="project.propDebugger"
                                  instance="com.falsepattern.zigbrains.debugger.win.config.WinDebuggerConfigurable"
                                  displayName="Zig (Windows)"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <featureProvider implementation="com.falsepattern.zigbrains.debugger.DebuggerFeatures"/>
     </extensions>
 
     <extensions defaultExtensionNs="cidr.debugger">

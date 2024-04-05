@@ -17,7 +17,7 @@
 package com.falsepattern.zigbrains.debugger.runner.binary;
 
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
-import com.falsepattern.zigbrains.project.execution.binary.ProfileStateBinary;
+import com.falsepattern.zigbrains.debugger.execution.binary.ProfileStateBinary;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;

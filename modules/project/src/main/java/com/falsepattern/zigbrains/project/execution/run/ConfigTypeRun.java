@@ -33,7 +33,7 @@ public class ConfigTypeRun extends ConfigurationTypeBase {
     }
 
     public ConfigTypeRun() {
-        super(IDENTIFIER, "ZigRun", "Zig Run", Icons.ZIG);
+        super(IDENTIFIER, "Zig run", "Execute \"zig run\" on a specific file", Icons.ZIG);
         addFactory(new ConfigFactoryRun());
     }
 
