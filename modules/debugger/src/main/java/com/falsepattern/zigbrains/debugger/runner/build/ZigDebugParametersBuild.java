@@ -24,15 +24,19 @@ import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.jetbrains.cidr.execution.Installer;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
+import lombok.Cleanup;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileStateBuild> {
+    private static final String BoilerplateNotice = "\nPlease edit this intellij build configuration and specify the path of the executable created by \"zig build\" directly!";
     public ZigDebugParametersBuild(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateBuild profileStateBuild) {
         super(driverConfiguration, toolchain, profileStateBuild);
     }
@@ -43,11 +47,6 @@ public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileState
             private File executableFile;
             @Override
             public @NotNull GeneralCommandLine install() throws ExecutionException {
-                val exePath = profileState.configuration().getExePath().getPath();
-                if (exePath.isEmpty()) {
-                    throw new ExecutionException("Please specify the output exe path to debug \"zig build\" tasks!");
-                }
-                Path exe = exePath.get();
                 val commandLine = profileState.getCommandLine(toolchain, true);
                 val outputOpt = CLIUtil.execute(commandLine, Integer.MAX_VALUE);
                 if (outputOpt.isEmpty()) {
@@ -58,16 +57,45 @@ public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileState
                     throw new ExecutionException("Zig compilation failed with exit code " + output.getExitCode() + "\nError output:\n" + output.getStdout() + "\n" + output.getStderr());
                 }
 
-                if (!Files.exists(exe) || !Files.isExecutable(exe)) {
-                    throw new ExecutionException("File " + exe + " does not exist or is not executable!");
+                val cfg = profileState.configuration();
+                val workingDir = cfg.getWorkingDirectory().getPath().orElse(null);
+                val exePath = profileState.configuration().getExePath().getPath();
+                Path exe;
+                if (exePath.isEmpty()) {
+                    //Attempt autodetect, should work for trivial cases, and make basic users happy, while advanced
+                    // users can use manual executable paths.
+                    if (workingDir == null) {
+                        throw new ExecutionException("Cannot find working directory to run debugged executable!" + BoilerplateNotice);
+                    }
+                    val expectedOutputDir = workingDir.resolve(Path.of("zig-out", "bin"));
+                    if (!Files.exists(expectedOutputDir)) {
+                        throw new ExecutionException("Could not auto-detect default executable output directory \"zig-out/bin\"!" + BoilerplateNotice);
+                    }
+                    try (val filesInOutput = Files.list(expectedOutputDir)) {
+                        val executables = filesInOutput.filter(Files::isRegularFile).filter(Files::isExecutable).toList();
+                        if (executables.size() > 1) {
+                            throw new ExecutionException("Multiple executables found!" + BoilerplateNotice);
+                        }
+                        exe = executables.get(0);
+                    } catch (IOException e) {
+                        throw new ExecutionException("Could not scan output directory \"" + expectedOutputDir + "\"!" + BoilerplateNotice);
+                    }
+                } else {
+                    exe = exePath.get();
+                }
+
+                if (!Files.exists(exe)) {
+                    throw new ExecutionException("File " + exe + " does not exist!");
+                } else if (!Files.isExecutable(exe)) {
+                    throw new ExecutionException("File " + exe + " is not executable!");
                 }
 
                 executableFile = exe.toFile();
 
                 //Construct new command line
-                val cfg = profileState.configuration();
                 val cli = new GeneralCommandLine().withExePath(executableFile.getAbsolutePath());
                 cfg.getWorkingDirectory().getPath().ifPresent(x -> cli.setWorkDirectory(x.toFile()));
+                cli.addParameters(cfg.getExeArgs().args);
                 cli.withCharset(StandardCharsets.UTF_8);
                 cli.withRedirectErrorStream(true);
                 return cli;

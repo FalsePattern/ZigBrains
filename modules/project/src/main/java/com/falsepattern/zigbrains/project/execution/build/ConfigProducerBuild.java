@@ -34,7 +34,8 @@ public class ConfigProducerBuild extends ConfigProducerBase<ZigExecConfigBuild> 
     @Override
     protected boolean setupConfigurationFromContext(@NotNull ZigExecConfigBuild configuration, PsiElement element, Path filePath, VirtualFile theFile) {
         if (ZigLineMarkerBuild.UTILITY_INSTANCE.elementMatches(element)) {
-            configuration.setName("Build");
+            configuration.setName("Build and Run");
+            configuration.getBuildSteps().args = new String[]{"run"};
             return true;
         }
         return false;

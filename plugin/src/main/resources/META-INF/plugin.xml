@@ -25,5 +25,8 @@
         <extensionPoint
                 interface="com.falsepattern.zigbrains.debugbridge.DebuggerDriverProvider" dynamic="true"
                 name="debuggerDriverProvider"/>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.common.ZBFeatures" dynamic="true"
+                name="featureProvider"/>
     </extensionPoints>
 </idea-plugin>

@@ -32,7 +32,7 @@ public class ConfigTypeTest extends ConfigurationTypeBase {
     }
 
     public ConfigTypeTest() {
-        super(IDENTIFIER, "ZigTest", "Zig Test", Icons.ZIG);
+        super(IDENTIFIER, "Zig test", "Execute \"zig test\" on a specific file", Icons.ZIG);
         addFactory(new ConfigFactoryTest());
     }
 

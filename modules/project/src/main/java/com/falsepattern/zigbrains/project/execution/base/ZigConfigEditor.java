@@ -30,6 +30,7 @@ import com.intellij.ui.dsl.builder.AlignX;
 import com.intellij.ui.dsl.builder.AlignY;
 import com.intellij.ui.dsl.builder.Panel;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -154,7 +155,10 @@ public class ZigConfigEditor<T extends ZigExecConfigBase<T>> extends SettingsEdi
         @Override
         public void readExternal(@NotNull Element element) {
             try {
-                ElementUtil.readString(element, getSerializedName()).map(Paths::get).ifPresent(x -> path = x);
+                ElementUtil.readString(element, getSerializedName())
+                           .filter(str -> !str.isBlank())
+                           .map(Paths::get)
+                           .ifPresent(x -> path = x);
             } catch (InvalidPathException ignored){}
         }
 
@@ -175,7 +179,12 @@ public class ZigConfigEditor<T extends ZigExecConfigBase<T>> extends SettingsEdi
             @Override
             public void apply(T s) throws ConfigurationException {
                 try {
-                    s.setPath(Paths.get(getString()));
+                    val str = getString();
+                    if (str.isBlank()) {
+                        s.setPath(null);
+                    } else {
+                        s.setPath(Paths.get(str));
+                    }
                 } catch (InvalidPathException e) {
                     throw new ConfigurationException(e.getMessage(), e, "Invalid Path");
                 }
@@ -281,56 +290,58 @@ public class ZigConfigEditor<T extends ZigExecConfigBase<T>> extends SettingsEdi
         }
     }
 
-    @RequiredArgsConstructor
-    public static class ColoredConfigurable implements ZigConfigurable<ColoredConfigurable> {
+    @AllArgsConstructor
+    public static class CheckboxConfigurable implements ZigConfigurable<CheckboxConfigurable> {
         private transient final String serializedName;
-        public boolean colored = true;
+        private transient final String label;
+        public boolean value;
 
         @Override
         public void readExternal(@NotNull Element element) {
-            ElementUtil.readBoolean(element, serializedName).ifPresent(x -> colored = x);
+            ElementUtil.readBoolean(element, serializedName).ifPresent(x -> value = x);
         }
 
         @Override
         public void writeExternal(@NotNull Element element) {
-            ElementUtil.writeBoolean(element, serializedName, colored);
+            ElementUtil.writeBoolean(element, serializedName, value);
         }
 
         @Override
-        public ColoredConfigModule createEditor() {
-            return new ColoredConfigModule(serializedName);
+        public CheckboxConfigModule createEditor() {
+            return new CheckboxConfigModule(serializedName, label);
         }
 
         @Override
         @SneakyThrows
-        public ColoredConfigurable clone() {
-            return (ColoredConfigurable) super.clone();
+        public CheckboxConfigurable clone() {
+            return (CheckboxConfigurable) super.clone();
         }
 
 
         @RequiredArgsConstructor
-        public static class ColoredConfigModule implements ZigConfigModule<ColoredConfigurable> {
+        public static class CheckboxConfigModule implements ZigConfigModule<CheckboxConfigurable> {
             private final String serializedName;
+            private final String label;
             private final JBCheckBox checkBox = new JBCheckBox();
 
             @Override
-            public @Nullable ColoredConfigurable tryMatch(ZigConfigurable<?> cfg) {
-                return cfg instanceof ColoredConfigurable cfg$ && cfg$.serializedName.equals(serializedName) ? cfg$ : null;
+            public @Nullable ZigConfigEditor.CheckboxConfigurable tryMatch(ZigConfigurable<?> cfg) {
+                return cfg instanceof ZigConfigEditor.CheckboxConfigurable cfg$ && cfg$.serializedName.equals(serializedName) ? cfg$ : null;
             }
 
             @Override
-            public void apply(ColoredConfigurable s) throws ConfigurationException {
-                s.colored = checkBox.isSelected();
+            public void apply(CheckboxConfigurable s) throws ConfigurationException {
+                s.value = checkBox.isSelected();
             }
 
             @Override
-            public void reset(ColoredConfigurable s) {
-                checkBox.setSelected(s.colored);
+            public void reset(CheckboxConfigurable s) {
+                checkBox.setSelected(s.value);
             }
 
             @Override
             public void construct(Panel p) {
-                p.row("Colored terminal", (r) -> {
+                p.row(label, (r) -> {
                     r.cell(checkBox);
                     return null;
                 });
@@ -341,6 +352,10 @@ public class ZigConfigEditor<T extends ZigExecConfigBase<T>> extends SettingsEdi
 
             }
         }
+    }
+
+    public static CheckboxConfigurable coloredConfigurable(String serializedName) {
+        return new CheckboxConfigurable(serializedName, "Colored terminal", true);
     }
 
     @RequiredArgsConstructor

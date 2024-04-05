@@ -33,7 +33,7 @@ import java.util.List;
 @Getter
 public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
     private ZigConfigEditor.FilePathConfigurable filePath = new ZigConfigEditor.FilePathConfigurable("filePath", "File Path");
-    private ZigConfigEditor.ColoredConfigurable colored = new ZigConfigEditor.ColoredConfigurable("colored");
+    private ZigConfigEditor.CheckboxConfigurable colored = ZigConfigEditor.coloredConfigurable("colored");
     private ZigConfigEditor.OptimizationConfigurable optimization = new ZigConfigEditor.OptimizationConfigurable("optimization");
     private ZigConfigEditor.ArgsConfigurable exeArgs = new ZigConfigEditor.ArgsConfigurable("exeArgs", "Arguments for the compile exe");
     public ZigExecConfigRun(@NotNull Project project, @NotNull ConfigurationFactory factory) {
@@ -42,15 +42,15 @@ public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
 
     @Override
     public String[] buildCommandLineArgs() {
-        return CollectionUtil.concat(new String[]{"run", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name(), "--"}, exeArgs.args);
+        return CollectionUtil.concat(new String[]{"run", "--color", colored.value ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name(), "--"}, exeArgs.args).toArray(String[]::new);
     }
 
     @Override
     public String[] buildDebugCommandLineArgs() {
         if (optimization.forced) {
-            return new String[]{"build-exe", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name()};
+            return new String[]{"build-exe", "--color", colored.value ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name()};
         } else {
-            return new String[]{"build-exe", "--color", colored.colored ? "on" : "off", filePath.getPathOrThrow().toString()};
+            return new String[]{"build-exe", "--color", colored.value ? "on" : "off", filePath.getPathOrThrow().toString()};
         }
     }
 
