@@ -63,9 +63,9 @@ public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends 
         getConfigurables().forEach(cfg -> cfg.writeExternal(element));
     }
 
-    public abstract String[] buildCommandLineArgs();
+    public abstract String[] buildCommandLineArgs() throws ExecutionException;
 
-    public String[] buildDebugCommandLineArgs() {
+    public String[] buildDebugCommandLineArgs() throws ExecutionException {
         return buildCommandLineArgs();
     }
 

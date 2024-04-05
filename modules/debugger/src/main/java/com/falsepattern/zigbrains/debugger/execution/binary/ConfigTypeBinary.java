@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.execution.binary;
+package com.falsepattern.zigbrains.debugger.execution.binary;
 
 import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.execution.configurations.ConfigurationFactory;
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 public class ConfigTypeBinary extends ConfigurationTypeBase {
     public static final String IDENTIFIER = "ZIGBRAINS_BINARY";
     public ConfigTypeBinary() {
-        super(IDENTIFIER, "Zig-compiled native executable", "Binary executable compiled from zig code", Icons.ZIG);
+        super(IDENTIFIER, "Native Application (Zig)", "Binary executable compiled from zig code (useful for debugging on Windows)", Icons.ZIG);
         addFactory(new ConfigFactoryBinary());
     }
 

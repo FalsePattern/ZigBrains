@@ -33,7 +33,7 @@ public class ConfigTypeBuild extends ConfigurationTypeBase {
     }
 
     public ConfigTypeBuild() {
-        super(IDENTIFIER, "ZigBuild", "Zig Build", Icons.ZIG);
+        super(IDENTIFIER, "Zig build", "Execute \"zig build\" with custom steps", Icons.ZIG);
         addFactory(new ConfigFactoryBuild());
     }
 
