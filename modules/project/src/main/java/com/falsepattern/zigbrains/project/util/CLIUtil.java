@@ -27,6 +27,7 @@ import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.StringTokenizer;
 
@@ -118,5 +119,9 @@ public class CLIUtil {
             throw new ConfigurationException("unbalanced quotes in " + toProcess);
         }
         return result.toArray(new String[0]);
+    }
+
+    public static List<String> colored(boolean colored) {
+        return List.of("--colored", colored ? "on" : "off");
     }
 }
