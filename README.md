@@ -1,5 +1,9 @@
 # ZigBrains
 
+### [Website](https://falsepattern.com/zigbrains)
+
+### [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/22456-zigbrains)
+
 ## Developer guide
 
 ### All platforms
