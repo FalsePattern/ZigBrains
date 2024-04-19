@@ -17,20 +17,14 @@
 package com.falsepattern.zigbrains.lsp.actions;
 
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
-import com.intellij.codeInsight.navigation.CtrlMouseAction;
-import com.intellij.codeInsight.navigation.CtrlMouseData;
 import com.intellij.codeInsight.navigation.actions.GotoImplementationAction;
 import com.intellij.idea.ActionsBundle;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PerformWithDocumentsCommitted;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.psi.PsiFile;
 import lombok.val;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class LSPGotoImplementationAction extends WrappedAction<GotoImplementationAction> implements CtrlMouseAction,
-        PerformWithDocumentsCommitted {
+public class LSPGotoImplementationAction extends WrappedAction<GotoImplementationAction> implements PerformWithDocumentsCommitted {
     public LSPGotoImplementationAction(GotoImplementationAction wrapped) {
         super(wrapped);
     }
@@ -51,10 +45,5 @@ public class LSPGotoImplementationAction extends WrappedAction<GotoImplementatio
             e.getPresentation().setText(ActionsBundle.actionText("GotoImplementation"));
             e.getPresentation().setDescription(ActionsBundle.actionDescription("GotoImplementation"));
         }
-    }
-
-    @Override
-    public @Nullable CtrlMouseData getCtrlMouseData(@NotNull Editor editor, @NotNull PsiFile psiFile, int i) {
-        return wrapped.getCtrlMouseData(editor, psiFile, i);
     }
 }

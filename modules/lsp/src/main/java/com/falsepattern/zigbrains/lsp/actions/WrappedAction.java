@@ -24,7 +24,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.OverridingAction;
-import com.intellij.openapi.actionSystem.ShortcutSet;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import lombok.val;
@@ -140,12 +139,6 @@ public abstract class WrappedAction<T extends AnAction> extends AnAction impleme
     @Override
     public boolean useSmallerFontForTextInToolbar() {
         return super.useSmallerFontForTextInToolbar();
-    }
-
-    @Override
-    public void setShortcutSet(@NotNull ShortcutSet shortcutSet) {
-        super.setShortcutSet(shortcutSet);
-        wrapped.setShortcutSet(shortcutSet);
     }
 
     @Override
