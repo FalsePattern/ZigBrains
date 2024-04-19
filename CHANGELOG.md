@@ -18,6 +18,12 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- LSP
+  - The injection of the various language actions (Go to declaration/implementation, reformat, etc.) has been
+  reimplemented from the ground up to be much more reliable and compatible in the presence of other languages and plugins. 
+
 ### Fixed
 
 - Project

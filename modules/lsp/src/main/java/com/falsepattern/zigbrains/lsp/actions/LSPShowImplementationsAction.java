@@ -20,42 +20,31 @@ import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.intellij.codeInsight.hint.actions.ShowImplementationsAction;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-public class LSPGotoDefinitionAction extends ShowImplementationsAction {
+public class LSPShowImplementationsAction extends WrappedAction<ShowImplementationsAction> implements DumbAware {
+    public LSPShowImplementationsAction(ShowImplementationsAction wrapped) {
+        super(wrapped);
+    }
+
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
-        Project project = e.getData(CommonDataKeys.PROJECT);
-        Editor editor = e.getData(CommonDataKeys.EDITOR);
-        if (editor == null || project == null) {
-            super.actionPerformed(e);
-            return;
-        }
-        PsiFile file = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
-        if (file == null || !IntellijLanguageClient.isExtensionSupported(file.getVirtualFile())) {
-            super.actionPerformed(e);
-            return;
-        }
-        EditorEventManager manager = EditorEventManagerBase.forEditor(editor);
-        if (manager == null) {
-            super.actionPerformed(e);
-            return;
-        }
-        val offset = editor.getCaretModel().getOffset();
+    public void actionPerformedLSP(@NotNull AnActionEvent e, EditorEventManager manager, PsiFile file) {
+        val offset = manager.editor.getCaretModel().getOffset();
         val psiElement = file.findElementAt(offset);
         if (psiElement == null) {
-            super.actionPerformed(e);
             return;
         }
-        if (!manager.gotoDefinition(psiElement)) {
-            super.actionPerformed(e);
-        }
+        manager.gotoDefinition(psiElement);
     }
 }

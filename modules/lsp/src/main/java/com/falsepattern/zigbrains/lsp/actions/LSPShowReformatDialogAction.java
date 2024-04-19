@@ -22,6 +22,7 @@ import com.intellij.codeInsight.actions.LayoutCodeDialog;
 import com.intellij.codeInsight.actions.LayoutCodeOptions;
 import com.intellij.codeInsight.actions.ShowReformatFileDialog;
 import com.intellij.codeInsight.actions.TextRangeType;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
@@ -32,32 +33,30 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 /**
  * Class overriding the default action handling the Reformat dialog event (CTRL+ALT+SHIFT+L by default)
  * Fallback to the default action if the language is already supported or not supported by any language server
  */
-public class LSPShowReformatDialogAction extends ShowReformatFileDialog implements DumbAware {
+public class LSPShowReformatDialogAction extends WrappedAction<ShowReformatFileDialog> implements DumbAware {
+
     private String HELP_ID = "editing.codeReformatting";
     private Logger LOG = Logger.getInstance(LSPShowReformatDialogAction.class);
 
-    @Override
-    public void actionPerformed(AnActionEvent e) {
-        Editor editor = e.getData(CommonDataKeys.EDITOR);
-        Project project = e.getData(CommonDataKeys.PROJECT);
+    public LSPShowReformatDialogAction(ShowReformatFileDialog wrapped) {
+        super(wrapped);
+    }
 
-        if (editor == null || project == null) {
-            super.actionPerformed(e);
-            return;
-        }
-        PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
-        if (psiFile == null) {
-            super.actionPerformed(e);
-            return;
-        }
+    @Override
+    public void actionPerformedLSP(AnActionEvent e, EditorEventManager manager, PsiFile psiFile) {
+        val editor = manager.editor;
+        val project = manager.getProject();
         VirtualFile virFile = FileDocumentManager.getInstance().getFile(editor.getDocument());
         if (!IntellijLanguageClient.isExtensionSupported(virFile)) {
-            super.actionPerformed(e);
+            wrapped.actionPerformed(e);
             return;
         }
         boolean hasSelection = editor.getSelectionModel().hasSelection();
@@ -78,11 +77,6 @@ public class LSPShowReformatDialogAction extends ShowReformatFileDialog implemen
                 eventManager.reformat();
             }
         }
-    }
-
-    @Override
-    public void update(AnActionEvent event) {
-        super.update(event);
     }
 }
 
