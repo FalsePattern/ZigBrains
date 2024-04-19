@@ -18,6 +18,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [14.0.0]
+
 ### Added
 
 - LSP
