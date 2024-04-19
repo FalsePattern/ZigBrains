@@ -92,7 +92,7 @@ public class ZigNewProjectPanel implements Disposable {
         if (handleGit) {
             p.row("Create Git repository", r -> r.cell(git));
         }
-        p.group("Zig Project Template", (p2) -> {
+        p.group("Zig Project Template", true, (p2) -> {
             p2.row((r) -> {
                 r.resizableRow();
                 r.cell(templateToolbar.createPanel())

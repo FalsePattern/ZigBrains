@@ -76,7 +76,7 @@ public class ZLSSettingsPanel implements Disposable {
         Optional.ofNullable(ZLSProjectSettingsService.getInstance(ProjectManager.getInstance().getDefaultProject()))
                 .map(ZLSProjectSettingsService::getState)
                 .ifPresent(this::setData);
-        panel.group("ZLS launch settings", p -> {
+        panel.group("ZLS launch settings", true, p -> {
             p.row("Executable path", r -> {
                 r.cell(zlsPath).resizableColumn().align(AlignX.FILL);
                 r.button("Autodetect", $f(this::autodetect));
@@ -85,7 +85,7 @@ public class ZLSSettingsPanel implements Disposable {
             p.cell("Increase timeouts", increaseTimeouts);
             p.cell("Asynchronous code folding ranges", asyncFolding);
         });
-        panel.group("ZLS Configuration", p -> {
+        panel.group("ZLS Configuration", false, p -> {
             p.cell("Build on save", buildOnSave);
             p.row("Build on save step", r -> {
                 r.cell(buildOnSaveStep).resizableColumn().align(AlignX.FILL);
@@ -93,7 +93,7 @@ public class ZLSSettingsPanel implements Disposable {
             p.cell("Highlight global variable declarations", highlightGlobalVarDeclarations);
             p.cell("Dangerous comptime experiments (do not enable)", dangerousComptimeExperimentsDoNotEnable);
         });
-        panel.group("ZLS Developer settings", p -> {
+        panel.group("ZLS Developer settings", false, p -> {
             p.cell("Debug log", debug);
             p.cell("Message trace", messageTrace);
         });

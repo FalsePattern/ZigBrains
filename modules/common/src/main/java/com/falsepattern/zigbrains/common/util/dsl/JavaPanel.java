@@ -94,10 +94,10 @@ public class JavaPanel {
         });
     }
 
-    public void group(String title, Consumer<JavaPanel> c) {
-        panel.groupRowsRange(title, false, null, null, (p) -> {
+    public void group(String title, boolean open, Consumer<JavaPanel> c) {
+        panel.collapsibleGroup(title, true, p -> {
             c.accept(new JavaPanel(p));
             return null;
-        });
+        }).setExpanded(open);
     }
 }

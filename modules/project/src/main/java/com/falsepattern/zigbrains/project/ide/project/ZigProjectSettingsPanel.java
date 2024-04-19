@@ -91,7 +91,7 @@ public class ZigProjectSettingsPanel implements MyDisposable {
         Optional.ofNullable(ZigProjectSettingsService.getInstance(ProjectManager.getInstance().getDefaultProject()))
                 .map(ZigProjectSettingsService::getState)
                 .ifPresent(this::setData);
-        p.group("Zig Settings", p2 -> {
+        p.group("Zig Settings", true, p2 -> {
             p2.row("Toolchain location", r -> {
                 r.cell(pathToToolchain).resizableColumn().align(AlignX.FILL);
                 r.button("Autodetect", $f(this::autodetect));
