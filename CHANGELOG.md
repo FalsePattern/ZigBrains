@@ -20,6 +20,9 @@ Changelog structure reference:
 
 ### Added
 
+- LSP
+  - The status widget now auto-hides itself when the selected editor is not a zig file in the current window
+
 - Project
   - Completely overhauled the configuration system and the new project creation window. All the configs have been unified
   into a single screen, and project creation has been fully integrated as a mainline feature, instead of just a "nice to have".
