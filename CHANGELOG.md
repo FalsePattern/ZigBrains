@@ -18,6 +18,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - More robust indentation logic, also works with semi-invalid syntax now
+
 ## [13.2.0]
 
 ### Added
