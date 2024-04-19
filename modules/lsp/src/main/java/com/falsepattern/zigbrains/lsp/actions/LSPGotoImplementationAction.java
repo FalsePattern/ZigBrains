@@ -23,7 +23,6 @@ import com.intellij.codeInsight.navigation.actions.GotoImplementationAction;
 import com.intellij.idea.ActionsBundle;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PerformWithDocumentsCommitted;
-import com.intellij.openapi.actionSystem.ex.ActionUtil;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.psi.PsiFile;
 import lombok.val;

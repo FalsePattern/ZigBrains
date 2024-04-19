@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.zig.formatter;
 
-import com.falsepattern.zigbrains.zig.psi.ZigTypes;
 import com.intellij.formatting.Alignment;
 import com.intellij.formatting.Block;
 import com.intellij.formatting.Indent;

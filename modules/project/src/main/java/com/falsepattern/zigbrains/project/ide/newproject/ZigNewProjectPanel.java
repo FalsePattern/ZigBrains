@@ -108,6 +108,8 @@ public class ZigNewProjectPanel implements Disposable {
 
     @Override
     public void dispose() {
+        projConf.dispose();
+        zlsConf.dispose();
         projConf = null;
         zlsConf = null;
     }

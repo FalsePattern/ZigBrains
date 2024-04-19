@@ -16,22 +16,14 @@
 
 package com.falsepattern.zigbrains.lsp.actions;
 
-import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
-import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
 import com.intellij.codeInsight.navigation.CtrlMouseAction;
 import com.intellij.codeInsight.navigation.CtrlMouseData;
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationAction;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.DumbAware;
-import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

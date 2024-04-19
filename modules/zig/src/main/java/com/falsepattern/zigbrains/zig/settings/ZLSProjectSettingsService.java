@@ -21,14 +21,9 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.SystemInfo;
 import lombok.val;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service(Service.Level.PROJECT)
 @State(name = "ZLSSettings",

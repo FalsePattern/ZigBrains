@@ -27,7 +27,6 @@ import com.falsepattern.zigbrains.zig.ide.SemaEdit;
 import com.falsepattern.zigbrains.zig.util.HighlightingUtil;
 import com.falsepattern.zigbrains.zig.util.TokenDecoder;
 import com.intellij.lang.annotation.Annotation;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentListener;
 import lombok.val;

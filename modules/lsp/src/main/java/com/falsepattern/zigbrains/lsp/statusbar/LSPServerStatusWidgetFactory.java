@@ -17,7 +17,6 @@ package com.falsepattern.zigbrains.lsp.statusbar;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.StatusBarWidget;
 import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFactory;
 import lombok.val;
@@ -26,9 +25,7 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class LSPServerStatusWidgetFactory extends StatusBarEditorBasedWidgetFactory {
      public static final Key<List<LSPServerStatusWidget>> LSP_WIDGETS = Key.create("ZB_LSP_KEYS");

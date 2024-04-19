@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
-import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.common.util.StringUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
