@@ -16,16 +16,15 @@
 
 package com.falsepattern.zigbrains.zig.settings;
 
+import com.falsepattern.zigbrains.common.SubConfigurable;
+import com.falsepattern.zigbrains.common.util.dsl.JavaPanel;
 import com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity;
-import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.project.Project;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
-
-public class ZLSSettingsConfigurable implements Configurable {
-    private ZLSSettingsComponent appSettingsComponent;
+public class ZLSSettingsConfigurable implements SubConfigurable {
+    private ZLSSettingsPanel appSettingsComponent;
 
     private final Project project;
 
@@ -34,52 +33,24 @@ public class ZLSSettingsConfigurable implements Configurable {
     }
 
     @Override
-    public String getDisplayName() {
-        return "Zig";
-    }
-
-    @Override
-    public @Nullable JComponent createComponent() {
-        appSettingsComponent = new ZLSSettingsComponent();
-        return appSettingsComponent.getPanel();
+    public void createComponent(JavaPanel panel) {
+        appSettingsComponent = new ZLSSettingsPanel();
+        appSettingsComponent.attachPanelTo(panel);
     }
 
     @Override
     public boolean isModified() {
-        var settings = ZLSSettingsState.getInstance(project);
-        boolean modified = zlsSettingsModified(settings);
-        modified |= settings.asyncFolding != appSettingsComponent.getAsyncFolding();
-        return modified;
-    }
-
-    private boolean zlsSettingsModified(ZLSSettingsState settings) {
-        boolean modified = !settings.zlsPath.equals(appSettingsComponent.getZLSPath());
-        modified |= !settings.zlsConfigPath.equals(appSettingsComponent.getZLSConfigPath());
-        modified |= settings.debug != appSettingsComponent.getDebug();
-        modified |= settings.messageTrace != appSettingsComponent.getMessageTrace();
-        modified |= settings.increaseTimeouts != appSettingsComponent.getIncreaseTimeouts();
-        modified |= settings.buildOnSave != appSettingsComponent.getBuildOnSave();
-        modified |= !settings.buildOnSaveStep.equals(appSettingsComponent.getBuildOnSaveStep());
-        modified |= settings.highlightGlobalVarDeclarations != appSettingsComponent.getHighlightGlobalVarDeclarations();
-        modified |= settings.dangerousComptimeExperimentsDoNotEnable != appSettingsComponent.getDangerousComptimeExperimentsDoNotEnable();
-        return modified;
+        var settings = ZLSProjectSettingsService.getInstance(project);
+        val data = appSettingsComponent.getData();
+        return settings.isModified(data);
     }
 
     @Override
     public void apply() {
-        var settings = ZLSSettingsState.getInstance(project);
-        boolean reloadZLS = zlsSettingsModified(settings);
-        settings.zlsPath = appSettingsComponent.getZLSPath();
-        settings.zlsConfigPath = appSettingsComponent.getZLSConfigPath();
-        settings.asyncFolding = appSettingsComponent.getAsyncFolding();
-        settings.debug = appSettingsComponent.getDebug();
-        settings.messageTrace = appSettingsComponent.getMessageTrace();
-        settings.increaseTimeouts = appSettingsComponent.getIncreaseTimeouts();
-
-        settings.buildOnSave = appSettingsComponent.getBuildOnSave();
-        settings.buildOnSaveStep = appSettingsComponent.getBuildOnSaveStep();
-        settings.highlightGlobalVarDeclarations = appSettingsComponent.getHighlightGlobalVarDeclarations();
-        settings.dangerousComptimeExperimentsDoNotEnable = appSettingsComponent.getDangerousComptimeExperimentsDoNotEnable();
+        var settings = ZLSProjectSettingsService.getInstance(project);
+        val data = appSettingsComponent.getData();
+        boolean reloadZLS = settings.zlsSettingsModified(data);
+        settings.loadState(data);
         if (reloadZLS) {
             ZLSStartupActivity.initZLS(project);
         }
@@ -87,19 +58,8 @@ public class ZLSSettingsConfigurable implements Configurable {
 
     @Override
     public void reset() {
-        var settings = ZLSSettingsState.getInstance(project);
-        appSettingsComponent.setZLSPath(settings.zlsPath);
-        appSettingsComponent.setZLSConfigPath(settings.zlsConfigPath);
-        appSettingsComponent.setDebug(settings.debug);
-        appSettingsComponent.setAsyncFolding(settings.asyncFolding);
-        appSettingsComponent.setMessageTrace(settings.messageTrace);
-        appSettingsComponent.setIncreaseTimeouts(settings.increaseTimeouts);
-        appSettingsComponent.setAsyncFolding(settings.asyncFolding);
-
-        appSettingsComponent.setBuildOnSave(settings.buildOnSave);
-        appSettingsComponent.setBuildOnSaveStep(settings.buildOnSaveStep);
-        appSettingsComponent.setHighlightGlobalVarDeclarations(settings.highlightGlobalVarDeclarations);
-        appSettingsComponent.setDangerousComptimeExperimentsDoNotEnable(settings.dangerousComptimeExperimentsDoNotEnable);
+        var settings = ZLSProjectSettingsService.getInstance(project);
+        appSettingsComponent.setData(settings.getState());
     }
 
     @Override

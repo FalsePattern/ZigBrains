@@ -16,10 +16,13 @@
 
 package com.falsepattern.zigbrains.project.ide.project;
 
+import com.falsepattern.zigbrains.common.util.PathUtil;
 import com.falsepattern.zigbrains.common.util.StringUtil;
 import com.falsepattern.zigbrains.common.util.TextFieldUtil;
+import com.falsepattern.zigbrains.common.util.dsl.JavaPanel;
 import com.falsepattern.zigbrains.project.openapi.MyDisposable;
 import com.falsepattern.zigbrains.project.openapi.UIDebouncer;
+import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettings;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider;
@@ -29,26 +32,25 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Pair;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.dsl.builder.AlignX;
-import com.intellij.ui.dsl.builder.Panel;
 import lombok.Getter;
 import lombok.val;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JLabel;
+import java.awt.event.ActionEvent;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
+
+import static com.falsepattern.zigbrains.common.util.KtUtil.$f;
 
 public class ZigProjectSettingsPanel implements MyDisposable {
     @Getter
     private boolean disposed = false;
 
-    public record SettingsData(@Nullable String explicitPathToStd,
-                               @Nullable AbstractZigToolchain toolchain) {}
-
     private final UIDebouncer versionUpdateDebouncer = new UIDebouncer(this);
 
-    private final ZigToolchainPathChooserComboBox toolchainPathChooserComboBox = new ZigToolchainPathChooserComboBox(this::updateUI);
+    private final TextFieldWithBrowseButton pathToToolchain = TextFieldUtil.pathToDirectoryTextField(this,
+                                                                                                     "Path to the Zig Toolchain",
+                                                                                                     this::updateUI);
 
     private final JLabel toolchainVersion = new JLabel();
 
@@ -56,56 +58,57 @@ public class ZigProjectSettingsPanel implements MyDisposable {
                                                                                                     "Path to Standard Library",
                                                                                                     () -> {});
 
-    public SettingsData getData() {
-        val toolchain = Optional.ofNullable(toolchainPathChooserComboBox.getSelectedPath())
-                                .map(ZigToolchainProvider::findToolchain)
-                                .orElse(null);
-        return new SettingsData(StringUtil.blankToNull(pathToStdField.getText()), toolchain);
+    private void autodetect(ActionEvent e) {
+        autodetect();
     }
 
-    public void setData(SettingsData value) {
-        toolchainPathChooserComboBox.setSelectedPath(Optional.ofNullable(value.toolchain()).map(tc -> tc.location).orElse(null));
+    public void autodetect() {
+        val tc = AbstractZigToolchain.suggest();
+        if (tc != null) {
+            pathToToolchain.setText(PathUtil.stringFromPath(tc.getLocation()));
+            updateUI();
+        }
+    }
 
-        pathToStdField.setText(Optional.ofNullable(value.explicitPathToStd()).orElse(""));
+    public ZigProjectSettings getData() {
+        val toolchain = Optional.of(pathToToolchain.getText())
+                                .map(PathUtil::pathFromString)
+                                .map(ZigToolchainProvider::findToolchain)
+                                .orElse(null);
+        return new ZigProjectSettings(StringUtil.blankToNull(pathToStdField.getText()), toolchain);
+    }
+
+    public void setData(ZigProjectSettings value) {
+        pathToToolchain.setText(Optional.ofNullable(value.getToolchainHomeDirectory())
+                                        .orElse(""));
+
+        pathToStdField.setText(Optional.ofNullable(value.getExplicitPathToStd()).orElse(""));
 
         updateUI();
     }
 
-    public void attachPanelTo(Panel panel) {
-        setData(new SettingsData(null,
-                                 Optional.ofNullable(ProjectManager.getInstance()
-                                                                   .getDefaultProject()
-                                                                   .getService(ZigProjectSettingsService.class))
-                                         .map(ZigProjectSettingsService::getToolchain)
-                                         .orElse(AbstractZigToolchain.suggest(Paths.get(".")))));
-
-        panel.row("Toolchain Location", (r) -> {
-            r.cell(toolchainPathChooserComboBox)
-             .align(AlignX.FILL);
-
-            return null;
-        });
-
-        panel.row("Toolchain Version", (r) -> {
-            r.cell(toolchainVersion);
-            return null;
-        });
-
-        panel.row("Standard Library Location", (r) -> {
-            r.cell(pathToStdField)
-             .align(AlignX.FILL);
-            return null;
+    public void attachPanelTo(JavaPanel p) {
+        Optional.ofNullable(ZigProjectSettingsService.getInstance(ProjectManager.getInstance().getDefaultProject()))
+                .map(ZigProjectSettingsService::getState)
+                .ifPresent(this::setData);
+        p.group("Zig Settings", p2 -> {
+            p2.row("Toolchain location", r -> {
+                r.cell(pathToToolchain).resizableColumn().align(AlignX.FILL);
+                r.button("Autodetect", $f(this::autodetect));
+            });
+            p2.cell("Toolchain version", toolchainVersion);
+            p2.cell("Standard library location", pathToStdField, AlignX.FILL);
         });
     }
 
     @Override
     public void dispose() {
         disposed = true;
-        Disposer.dispose(toolchainPathChooserComboBox);
+        Disposer.dispose(pathToToolchain);
     }
 
     private void updateUI() {
-        val pathToToolchain = toolchainPathChooserComboBox.getSelectedPath();
+        val pathToToolchain = PathUtil.pathFromString(this.pathToToolchain.getText());
 
         versionUpdateDebouncer.run(
                 () -> {

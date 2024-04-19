@@ -18,11 +18,21 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Project
+  - Completely overhauled the configuration system and the new project creation window. All the configs have been unified
+  into a single screen, and project creation has been fully integrated as a mainline feature, instead of just a "nice to have".
+
 ### Changed
 
 - LSP
   - The injection of the various language actions (Go to declaration/implementation, reformat, etc.) has been
-  reimplemented from the ground up to be much more reliable and compatible in the presence of other languages and plugins. 
+  reimplemented from the ground up to be much more reliable and compatible in the presence of other languages and plugins.
+
+- Zig, ZLS
+  - The configurations have been unified into a single cohesive interface
+  - Improved auto-detection for both Zig and ZLS
 
 ### Fixed
 

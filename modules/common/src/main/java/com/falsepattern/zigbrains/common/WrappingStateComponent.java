@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.openapi.components;
+package com.falsepattern.zigbrains.common;
 
-import com.falsepattern.zigbrains.common.WrappingStateComponent;
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.project.Project;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class AbstractZigProjectSettingsService<T> extends WrappingStateComponent<T> {
-    public final transient Project project;
-    public AbstractZigProjectSettingsService(Project project, @NotNull T initialState) {
-        super(initialState);
-        this.project = project;
+public abstract class WrappingStateComponent<T> implements PersistentStateComponent<T> {
+    private T state;
+    public WrappingStateComponent(@NotNull T initialState) {
+        this.state = initialState;
+    }
+
+    @Override
+    public @NotNull T getState() {
+        return state;
+    }
+
+    @Override
+    public void loadState(@NotNull T state) {
+        this.state = state;
     }
 }

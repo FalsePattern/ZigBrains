@@ -24,7 +24,7 @@ import lombok.val;
 public class ZLSSettingsConfigProvider implements ZLSConfigProvider {
     @Override
     public void getEnvironment(Project project, ZLSConfig.ZLSConfigBuilder builder) {
-        val state = ZLSSettingsState.getInstance(project);
+        val state = ZLSProjectSettingsService.getInstance(project).getState();
         builder.enable_build_on_save(state.buildOnSave);
         builder.build_on_save_step(state.buildOnSaveStep);
         builder.highlight_global_var_declarations(state.highlightGlobalVarDeclarations);

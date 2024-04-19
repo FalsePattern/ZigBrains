@@ -16,19 +16,23 @@
 
 package com.falsepattern.zigbrains.project.ide.newproject;
 
+import com.falsepattern.zigbrains.common.util.dsl.JavaPanel;
 import com.falsepattern.zigbrains.project.ide.project.ZigDefaultTemplate;
 import com.falsepattern.zigbrains.project.ide.project.ZigProjectSettingsPanel;
 import com.falsepattern.zigbrains.project.ide.project.ZigProjectTemplate;
+import com.falsepattern.zigbrains.zig.settings.ZLSSettingsPanel;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.ColoredListCellRenderer;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.ToolbarDecorator;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.dsl.builder.AlignX;
 import com.intellij.ui.dsl.builder.AlignY;
 import com.intellij.ui.dsl.builder.Panel;
 import com.intellij.util.ui.JBUI;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.DefaultListModel;
@@ -40,11 +44,20 @@ import java.util.List;
 import java.util.Optional;
 
 public class ZigNewProjectPanel implements Disposable {
-    private final ZigProjectSettingsPanel projectSettingsPanel = new ZigProjectSettingsPanel();
+    private boolean handleGit;
+    private JBCheckBox git = new JBCheckBox();
+    private ZigProjectSettingsPanel projConf;
+    private ZLSSettingsPanel zlsConf;
+
+    public ZigNewProjectPanel(boolean handleGit) {
+        this.handleGit = handleGit;
+        projConf = new ZigProjectSettingsPanel();
+        zlsConf = new ZLSSettingsPanel();
+    }
 
     public ZigProjectConfigurationData getData() {
         ZigProjectTemplate selectedTemplate = templateList.getSelectedValue();
-        return new ZigProjectConfigurationData(projectSettingsPanel.getData(), selectedTemplate);
+        return new ZigProjectConfigurationData(handleGit && git.isSelected(), projConf.getData(), zlsConf.getData(), selectedTemplate);
     }
 
     private final List<ZigProjectTemplate> defaultTemplates = Arrays.asList(
@@ -75,23 +88,27 @@ public class ZigNewProjectPanel implements Disposable {
             .disableAddAction()
             .disableRemoveAction();
 
-    public void attachPanelTo(Panel panel) {
-        projectSettingsPanel.attachPanelTo(panel);
-
-        panel.groupRowsRange("Zig Project Template", false, null, null, (p) -> {
-            p.row((JLabel) null, (r) -> {
+    public void attachPanelTo(JavaPanel p) {
+        if (handleGit) {
+            p.row("Create Git repository", r -> r.cell(git));
+        }
+        p.group("Zig Project Template", (p2) -> {
+            p2.row((r) -> {
                 r.resizableRow();
                 r.cell(templateToolbar.createPanel())
                  .align(AlignX.FILL)
                  .align(AlignY.FILL);
-                return null;
             });
-            return null;
         });
+        projConf.attachPanelTo(p);
+        zlsConf.attachPanelTo(p);
+        projConf.autodetect();
+        zlsConf.autodetect();
     }
 
     @Override
     public void dispose() {
-        Disposer.dispose(projectSettingsPanel);
+        projConf = null;
+        zlsConf = null;
     }
 }

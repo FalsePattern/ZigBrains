@@ -17,6 +17,7 @@
 package com.falsepattern.zigbrains.common.util;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +25,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class FileUtil {
     private static final Logger LOG = Logger.getInstance(FileUtil.class);
@@ -96,6 +99,10 @@ public class FileUtil {
         return LocalFileSystem.getInstance().findFileByIoFile(new File(uri));
     }
 
+    public static VirtualFile virtualFileFromPath(Path path) {
+        return LocalFileSystem.getInstance().findFileByNioFile(path);
+    }
+
     /**
      * Transforms an URI string into a VFS file
      *
@@ -123,6 +130,28 @@ public class FileUtil {
 
     public static String pathToUri(@Nullable Path path) {
         return path != null ? sanitizeURI(path.toUri().toString()) : null;
+    }
+
+    public static Optional<Path> findExecutableOnPATH(String exe) {
+        var exeName = SystemInfo.isWindows ? exe + ".exe" : exe;
+        var PATH = System.getenv("PATH").split(File.pathSeparator);
+        for (var dir: PATH) {
+            var path = Path.of(dir);
+            try {
+                path = path.toAbsolutePath();
+            } catch (Exception ignored) {
+                continue;
+            }
+            if (!Files.exists(path) || !Files.isDirectory(path)) {
+                continue;
+            }
+            var exePath = path.resolve(exeName).toAbsolutePath();
+            if (!Files.isRegularFile(exePath) || !Files.isExecutable(exePath)) {
+                continue;
+            }
+            return Optional.of(exePath);
+        }
+        return Optional.empty();
     }
 
     /**

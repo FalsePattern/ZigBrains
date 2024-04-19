@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.platform;
+package com.falsepattern.zigbrains.project.ide.newproject;
 
-import com.falsepattern.zigbrains.project.ide.newproject.ZigNewProjectPanel;
-import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectConfigurationData;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.platform.GeneratorPeerImpl;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JComponent;
 
-import static com.intellij.ui.dsl.builder.BuilderKt.panel;
+import static com.falsepattern.zigbrains.common.util.dsl.JavaPanel.newPanel;
 
 public class ZigProjectGeneratorPeer extends GeneratorPeerImpl<ZigProjectConfigurationData> {
-    private final ZigNewProjectPanel newProjectPanel = new ZigNewProjectPanel();
+    private final ZigNewProjectPanel newProjectPanel;
+
+    public ZigProjectGeneratorPeer(boolean handleGit) {
+        newProjectPanel = new ZigNewProjectPanel(handleGit);
+    }
 
     @Override
     public @NotNull ZigProjectConfigurationData getSettings() {
@@ -35,9 +38,10 @@ public class ZigProjectGeneratorPeer extends GeneratorPeerImpl<ZigProjectConfigu
 
     @Override
     public @NotNull JComponent getComponent() {
-        return panel((p) -> {
-            newProjectPanel.attachPanelTo(p);
-            return null;
-        });
+        return newPanel(newProjectPanel::attachPanelTo);
+    }
+
+    public void dispose() {
+        Disposer.dispose(newProjectPanel);
     }
 }

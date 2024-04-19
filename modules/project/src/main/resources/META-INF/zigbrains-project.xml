@@ -32,13 +32,13 @@
         <runLineMarkerContributor language="Zig"
                                   implementationClass="com.falsepattern.zigbrains.project.execution.build.ZigLineMarkerBuild"/>
 
-        <directoryProjectGenerator implementation="com.falsepattern.zigbrains.project.platform.ZigDirectoryProjectGenerator"/>
+        <directoryProjectGenerator implementation="com.falsepattern.zigbrains.project.ide.newproject.ZigDirectoryProjectGenerator"/>
         <newProjectWizard.languageGenerator implementation="com.falsepattern.zigbrains.project.ide.newproject.ZigNewProjectWizard"/>
 
         <moduleBuilder builderClass="com.falsepattern.zigbrains.project.ide.util.projectwizard.ZigModuleBuilder"/>
         <projectConfigurable parentId="language"
-                             instance="com.falsepattern.zigbrains.project.ide.project.ZigProjectConfigurable"
-                             id="com.falsepattern.zigbrains.project.ide.project.ZigProjectConfigurable"
+                             instance="com.falsepattern.zigbrains.project.ide.config.ZigConfigurable"
+                             id="com.falsepattern.zigbrains.project.ide.config.ZigConfigurable"
                              displayName="Zig"/>
 
 

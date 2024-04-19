@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.ide.util.projectwizard;
+package com.falsepattern.zigbrains.project.ide.newproject;
 
-import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectConfigurationData;
 import com.falsepattern.zigbrains.project.openapi.module.ZigModuleType;
+import com.falsepattern.zigbrains.project.util.ExperimentUtil;
 import com.intellij.ide.util.projectWizard.ModuleBuilder;
 import com.intellij.ide.util.projectWizard.ModuleWizardStep;
 import com.intellij.ide.util.projectWizard.WizardContext;
+import com.intellij.ide.wizard.CommitStepException;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.roots.ModifiableRootModel;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.util.ui.JBUI;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.JComponent;
+
 public class ZigModuleBuilder extends ModuleBuilder {
     public @Nullable ZigProjectConfigurationData configurationData = null;
+    public boolean forceGitignore = false;
 
     @Override
     public ModuleType<?> getModuleType() {
@@ -39,7 +44,7 @@ public class ZigModuleBuilder extends ModuleBuilder {
 
     @Override
     public void setupRootModel(@NotNull ModifiableRootModel modifiableRootModel) {
-        createProject(modifiableRootModel, "git");
+        createProject(modifiableRootModel);
     }
 
     @Override
@@ -49,8 +54,8 @@ public class ZigModuleBuilder extends ModuleBuilder {
         return step;
     }
 
-    public void createProject(ModifiableRootModel modifiableRootModel, @Nullable String vcs) {
-        val contentEntry = doAddContentEntry(modifiableRootModel);
+    public void createProject(ModifiableRootModel rootModel) {
+        val contentEntry = doAddContentEntry(rootModel);
         if (contentEntry == null) {
             return;
         }
@@ -58,7 +63,36 @@ public class ZigModuleBuilder extends ModuleBuilder {
         if (root == null) {
             return;
         }
-        modifiableRootModel.inheritSdk();
+        if (configurationData == null) {
+            return;
+        }
+        configurationData.generateProject(this, rootModel.getProject(), root, forceGitignore);
         root.refresh(false, true);
+    }
+
+    public class ZigModuleWizardStep extends ModuleWizardStep {
+        private final ZigProjectGeneratorPeer peer = new ZigProjectGeneratorPeer(true);
+
+        @Override
+        public JComponent getComponent() {
+            return withBorderIfNeeded(peer.getComponent());
+        }
+
+        @Override
+        public void disposeUIResources() {
+            peer.dispose();
+        }
+
+        @Override
+        public void updateDataModel() {
+            ZigModuleBuilder.this.configurationData = peer.getSettings();
+        }
+
+        private <T extends JComponent> T withBorderIfNeeded(T component) {
+            if (ExperimentUtil.isNewWizard()) {
+                component.setBorder(JBUI.Borders.empty(14, 20));
+            }
+            return component;
+        }
     }
 }

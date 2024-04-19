@@ -19,6 +19,7 @@ package com.falsepattern.zigbrains.project.toolchain;
 import com.falsepattern.zigbrains.project.toolchain.flavours.AbstractZigToolchainFlavour;
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,8 +27,9 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 @RequiredArgsConstructor
+@Getter
 public abstract class AbstractZigToolchain {
-    public final Path location;
+    private final Path location;
 
     public static @Nullable AbstractZigToolchain suggest() {
         return suggest(null);

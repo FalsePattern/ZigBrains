@@ -98,11 +98,6 @@
 
         <lang.formatter language="Zig" implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>
 
-        <projectConfigurable parentId="language"
-                             instance="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable"
-                             id="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable"
-                             displayName="ZLS"/>
-
         <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
         <notificationGroup displayType="BALLOON"
                            bundle="zigbrains.zig.Bundle"
