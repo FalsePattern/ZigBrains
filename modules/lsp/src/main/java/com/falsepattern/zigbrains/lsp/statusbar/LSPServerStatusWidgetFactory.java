@@ -16,19 +16,19 @@
 package com.falsepattern.zigbrains.lsp.statusbar;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.StatusBar;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.wm.StatusBarWidget;
-import com.intellij.openapi.wm.StatusBarWidgetFactory;
+import com.intellij.openapi.wm.impl.status.widget.StatusBarEditorBasedWidgetFactory;
+import lombok.val;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-public class LSPServerStatusWidgetFactory implements StatusBarWidgetFactory {
-    private final Map<Project, LSPServerStatusWidget> widgetForProject = new HashMap<>();
-
+public class LSPServerStatusWidgetFactory extends StatusBarEditorBasedWidgetFactory {
+     public static final Key<List<LSPServerStatusWidget>> LSP_WIDGETS = Key.create("ZB_LSP_KEYS");
     @Override
     public @NonNls
     @NotNull
@@ -44,29 +44,26 @@ public class LSPServerStatusWidgetFactory implements StatusBarWidgetFactory {
     }
 
     @Override
-    public boolean isAvailable(@NotNull Project project) {
-        return true;
-    }
-
-    @Override
-    public
-    StatusBarWidget createWidget(@NotNull Project project) {
-        return widgetForProject.computeIfAbsent(project, (k) -> new LSPServerStatusWidget(project));
-    }
-
-    @Override
-    public void disposeWidget(@NotNull StatusBarWidget statusBarWidget) {
-        if (statusBarWidget instanceof LSPServerStatusWidget) {
-            widgetForProject.remove(((LSPServerStatusWidget) statusBarWidget).getProject());
+    public @NotNull StatusBarWidget createWidget(@NotNull Project project) {
+        var keys = project.getUserData(LSP_WIDGETS);
+        if (keys == null) {
+            keys = new ArrayList<>();
+            project.putUserData(LSP_WIDGETS, keys);
         }
+        val widget = new LSPServerStatusWidget(project);
+        keys.add(widget);
+        return widget;
     }
 
     @Override
-    public boolean canBeEnabledOn(@NotNull StatusBar statusBar) {
-        return true;
-    }
-
-    public LSPServerStatusWidget getWidget(Project project) {
-        return widgetForProject.get(project);
+    public void disposeWidget(@NotNull StatusBarWidget widget) {
+        if (widget instanceof LSPServerStatusWidget w) {
+            val project = w.project();
+            val keys = project.getUserData(LSP_WIDGETS);
+            if (keys != null) {
+                keys.remove(widget);
+            }
+        }
+        super.disposeWidget(widget);
     }
 }

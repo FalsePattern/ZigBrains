@@ -1,5 +1,9 @@
 # ZigBrains
 
+### [Website](https://falsepattern.com/zigbrains)
+
+### [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/22456-zigbrains)
+
 ## Developer guide
 
 ### All platforms
@@ -50,24 +54,15 @@ and might as well utilize the full semver string for extra information.
 # Description
 
 <!-- Plugin description -->
-A multifunctional Zig Programming Language plugin for the IDEA platform.
+Adds support for the Zig Language, utilizing the ZLS language server for advanced coding assistance.
 
-Core features:
-- Uses ZLS (Zig Language Server) for code assistance, syntax highlighting, and anything to do with coding assistance
-- Supports build.zig.zon files with autocomplete
-- Per-project Zig toolchain integration
-- Debugging support for CLion (builtin), and IDEA Ultimate [With this plugin](https://plugins.jetbrains.com/plugin/12775-native-debugging-support)
-- Gutter icon for running main(), tests, and build
+## Quick setup guide for Zig and ZLS
 
-
-## Setting up the language server
-
-If you have `zls` available on PATH, ZigBrains will automatically discover it. If not, follow this guide:
-
-1. Download or compile the ZLS language server, available at https://github.com/zigtools/zls
-2. Go to `Settings` -> `Languages & Frameworks` -> `ZLS` -> `ZLS path` -> set the path to the `zls` executable you downloaded or compiled
-3. Open a .zig file, and wait for the circle in the bottom status bar to turn Green (empty).
-See below for an explanation on what the circle means.
+1. Download the latest version of Zig from https://ziglang.org/download
+2. Download and compile the ZLS language server, available at https://github.com/zigtools/zls
+3. Go to `Settings` -> `Languages & Frameworks` -> `Zig`, and point the `Toolchain Location` and `ZLS path` to the correct places
+4. Open a .zig file, and wait for the circle in the bottom status bar to turn Green (empty).
+   See below (`LSP status icon explanation`) for an explanation on what the circle means.
 
 ### LSP status icon explanation
 Red (X symbol):
@@ -80,6 +75,13 @@ Green (empty):
 LSP server is running.
 
 ## Debugging
+
+### Note
+Debugging on Linux/MacOS/Unix is only available in CLion, as ZigBrains depends on the C++ toolchains system.
+
+On Windows, debugging is also available with the help of the
+[Native Debugging Support](https://plugins.jetbrains.com/plugin/12775-native-debugging-support), which is unfortunately
+only compatible with paid IDEs.
 
 ### Windows
 
@@ -101,40 +103,5 @@ an error popup will be shown when you try to run with debugging.
 Note: There is a small issue with the LLDB debugger which does not happen with GDB: The debugger will pause on the first
 instruction (usually, deep inside the zig standard library's startup code). Unfortunately, we have not found a fix for
 this yet, but fortunately it doesn't break anything, just a bit of inconvenience.
-
-## Feature tracker:
-
-### .zig files:
-- Code completion
-- Code folding
-- Code formatting
-- Syntax highlighting
-- Inlay hints
-- Basic error diagnostics
-- Go to definition
-- Rename symbol
-- Hover documentation
-- Go to implementations / find usages
-- Brace/Parenthesis/Bracket matching
-- Debugging (CLion/CLion Nova)
-- File creation prompt
-- Gutter launch buttons
-- Commenter (thanks @MarioAriasC !)
-
-- TODO:
-  - Workspace Symbols
-
-### .zon files:
-- Syntax highlighting
-- Formatting and indentation
-- Code completion
-- Brace folding
-- Automatic brace and quote pairing
-
-### Toolchain:
-- Basic per-project toolchain management
-- Run configurations
-- Debugging (CLion/IDEA Ultimate)
-- Project generation (thanks @JensvandeWiel !)
 
 <!-- Plugin description end -->

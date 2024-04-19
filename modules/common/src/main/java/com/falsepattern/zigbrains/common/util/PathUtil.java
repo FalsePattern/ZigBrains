@@ -17,8 +17,11 @@
 package com.falsepattern.zigbrains.common.util;
 
 import com.intellij.openapi.util.SystemInfo;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 
 public class PathUtil {
@@ -29,5 +32,23 @@ public class PathUtil {
     public static Path pathToExecutable(Path path, String toolName) {
         var exeName = SystemInfo.isWindows ? toolName + ".exe" : toolName;
         return path.resolve(exeName).toAbsolutePath();
+    }
+
+    public static @Nullable Path pathFromString(@Nullable String pathString) {
+        if (pathString == null || pathString.isBlank()) {
+            return null;
+        }
+        try {
+            return Path.of(pathString);
+        } catch (InvalidPathException e) {
+            return null;
+        }
+    }
+
+    public static @NotNull String stringFromPath(@Nullable Path path) {
+        if (path == null) {
+            return "";
+        }
+        return path.toString();
     }
 }

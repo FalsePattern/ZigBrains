@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.ide.util.projectwizard;
+package com.falsepattern.zigbrains.project.ide.newproject;
 
 import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectConfigurationData;
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep;

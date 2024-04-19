@@ -40,8 +40,8 @@ public class ZigExecConfigBinary extends ZigExecConfigBase<ZigExecConfigBinary> 
     }
 
     @Override
-    public String[] buildCommandLineArgs() {
-        return args.args;
+    public List<String> buildCommandLineArgs(boolean debug) {
+        return List.of(args.args);
     }
 
     @Override

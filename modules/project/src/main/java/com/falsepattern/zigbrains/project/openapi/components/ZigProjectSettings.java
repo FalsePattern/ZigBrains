@@ -20,20 +20,23 @@ import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider;
 import com.intellij.util.io.PathKt;
 import com.intellij.util.xmlb.annotations.Transient;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ZigProjectSettings {
-    public String toolchainHomeDirectory = null;
-    public String explicitPathToStd = null;
+    public String explicitPathToStd;
+    public String toolchainHomeDirectory;
 
-    public String getExplicitPathToStd() {
-        return explicitPathToStd;
-    }
-
-    public void setExplicitPathToStd(String value) {
-        explicitPathToStd = value;
+    public ZigProjectSettings(String explicitPathToStd, AbstractZigToolchain toolchain) {
+        this(explicitPathToStd, (String)null);
+        setToolchain(toolchain);
     }
 
     @Transient
@@ -50,7 +53,7 @@ public class ZigProjectSettings {
             toolchainHomeDirectory = null;
             return;
         }
-        var loc = value.location;
+        var loc = value.getLocation();
         if (loc == null) {
             toolchainHomeDirectory = null;
             return;

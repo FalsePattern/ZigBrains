@@ -16,7 +16,7 @@
 
 package com.falsepattern.zigbrains.project.openapi.module;
 
-import com.falsepattern.zigbrains.project.ide.util.projectwizard.ZigModuleBuilder;
+import com.falsepattern.zigbrains.project.ide.newproject.ZigModuleBuilder;
 import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.openapi.module.ModuleType;
 import org.jetbrains.annotations.Nls;
