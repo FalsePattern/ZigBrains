@@ -20,6 +20,9 @@ Changelog structure reference:
 
 ### Fixed
 
+- Project
+  - Fixed invalid --colored command line argument for zig tasks
+
 - Zig
   - More robust indentation logic, also works with semi-invalid syntax now
 

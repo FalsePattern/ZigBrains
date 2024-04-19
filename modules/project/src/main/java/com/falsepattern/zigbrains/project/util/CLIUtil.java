@@ -122,6 +122,6 @@ public class CLIUtil {
     }
 
     public static List<String> colored(boolean colored) {
-        return List.of("--colored", colored ? "on" : "off");
+        return List.of("--color", colored ? "on" : "off");
     }
 }
