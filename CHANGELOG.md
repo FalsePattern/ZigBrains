@@ -39,6 +39,9 @@ Changelog structure reference:
 
 ### Fixed
 
+- LSP
+  - Putting the caret on a diagnostics error now no longer highlights the whole file
+
 - Project
   - Fixed invalid --colored command line argument for zig tasks
 
