@@ -28,8 +28,9 @@ import java.nio.file.Path;
 public class ToolchainZLSConfigProvider implements ZLSConfigProvider {
     @Override
     public void getEnvironment(Project project, ZLSConfig.ZLSConfigBuilder builder) {
-        val projectSettings = ZigProjectSettingsService.getInstance(project);
-        val toolchain = projectSettings.getToolchain();
+        val svc = ZigProjectSettingsService.getInstance(project);
+        val state = svc.getState();
+        val toolchain = state.getToolchain();
         if (toolchain == null)
             return;
         val projectDir = ProjectUtil.guessProjectDir(project);

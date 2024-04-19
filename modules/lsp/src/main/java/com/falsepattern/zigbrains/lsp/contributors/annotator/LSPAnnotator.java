@@ -143,20 +143,17 @@ public class LSPAnnotator extends ExternalAnnotator<Object, Object> {
         annotations.forEach(annotation -> {
             if  (annotation.getQuickFixes() != null && !annotation.getQuickFixes().isEmpty()) {
                 AnnotationBuilder builder = holder.newAnnotation(annotation.getSeverity(), annotation.getMessage());
-                boolean range = true;
+                builder = builder.range(TextRange.create(annotation.getStartOffset(), annotation.getEndOffset()));
                 for (Annotation.QuickFixInfo quickFixInfo : annotation.getQuickFixes()) {
-                    if (range) {
-                        builder = builder.range(quickFixInfo.textRange);
-                        range = false;
-                    }
-                    builder = builder.withFix(quickFixInfo.quickFix);
+                    builder = builder.newFix(quickFixInfo.quickFix).range(quickFixInfo.textRange).key(quickFixInfo.key).registerFix();
                 }
                 builder.create();
             } else if (requests.containsKey(annotation)) {
-                AnnotationBuilder builder = holder.newAnnotation(annotation.getSeverity(), annotation.getMessage());
+                 AnnotationBuilder builder = holder.newAnnotation(annotation.getSeverity(), annotation.getMessage());
+                builder = builder.range(TextRange.create(annotation.getStartOffset(), annotation.getEndOffset()));
                 var request = requests.remove(annotation);
                 for (var quickFixInfo: request) {
-                    builder = builder.withFix(quickFixInfo.action());
+                    builder = builder.newFix(quickFixInfo.action()).range(quickFixInfo.range()).registerFix();
                 }
                 builder.create();
             }

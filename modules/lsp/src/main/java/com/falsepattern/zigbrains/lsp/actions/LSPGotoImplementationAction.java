@@ -17,27 +17,37 @@
 package com.falsepattern.zigbrains.lsp.actions;
 
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
-import com.intellij.codeInsight.navigation.actions.GotoDeclarationAction;
+import com.intellij.codeInsight.navigation.actions.GotoImplementationAction;
+import com.intellij.idea.ActionsBundle;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.PerformWithDocumentsCommitted;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiFile;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class LSPGotoDeclarationAction extends WrappedAction<GotoDeclarationAction> implements DumbAware {
-    public LSPGotoDeclarationAction(GotoDeclarationAction wrapped) {
+public class LSPGotoImplementationAction extends WrappedAction<GotoImplementationAction> implements PerformWithDocumentsCommitted {
+    public LSPGotoImplementationAction(GotoImplementationAction wrapped) {
         super(wrapped);
     }
 
     @Override
-    public void actionPerformedLSP(@NotNull AnActionEvent e, EditorEventManager manager, PsiFile file) {
+    protected void actionPerformedLSP(AnActionEvent e, EditorEventManager manager, PsiFile file) {
         val offset = manager.editor.getCaretModel().getOffset();
         val psiElement = file.findElementAt(offset);
         if (psiElement == null) {
             return;
         }
-        manager.gotoDeclarationOrUsages(psiElement);
+        manager.gotoDefinition(psiElement);
     }
+
+    @Override
+    protected void updateLSP(AnActionEvent e, EditorEventManager manager, PsiFile file) {
+        if (e.getPresentation().getTextWithMnemonic() == null) {
+            e.getPresentation().setText(ActionsBundle.actionText("GotoImplementation"));
+            e.getPresentation().setDescription(ActionsBundle.actionDescription("GotoImplementation"));
+        }
+    }
+
 }

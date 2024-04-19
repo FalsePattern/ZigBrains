@@ -38,6 +38,6 @@ public class LocalZigToolchain extends AbstractZigToolchain{
 
     @Override
     public Path pathToExecutable(String toolName) {
-        return PathUtil.pathToExecutable(location, toolName);
+        return PathUtil.pathToExecutable(getLocation(), toolName);
     }
 }

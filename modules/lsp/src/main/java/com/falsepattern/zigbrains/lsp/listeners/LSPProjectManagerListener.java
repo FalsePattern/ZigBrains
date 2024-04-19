@@ -34,7 +34,6 @@ public class LSPProjectManagerListener implements ProjectManagerListener {
             Set<LanguageServerWrapper> languageServerWrappers = IntellijLanguageClient.getAllServerWrappersFor(FileUtils.projectToUri(project));
             languageServerWrappers.forEach(wrapper -> {
                 wrapper.stop(false);
-                wrapper.removeWidget();
                 IntellijLanguageClient.removeWrapper(wrapper);
             });
     }

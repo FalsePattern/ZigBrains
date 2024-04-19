@@ -20,6 +20,7 @@ import com.falsepattern.zigbrains.common.util.CollectionUtil;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
+import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.runners.ExecutionEnvironment;
@@ -29,6 +30,7 @@ import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -41,17 +43,18 @@ public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
     }
 
     @Override
-    public String[] buildCommandLineArgs() {
-        return new String[]{"test", "--color", colored.value ? "on" : "off", filePath.getPathOrThrow().toString(), "-O", optimization.level.name()};
-    }
-
-    @Override
-    public String[] buildDebugCommandLineArgs() {
-        if (optimization.forced) {
-            return new String[]{"test", "--color", colored.value ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec", "-O", optimization.level.name()};
-        } else {
-            return new String[]{"test", "--color", colored.value ? "on" : "off", filePath.getPathOrThrow().toString(), "--test-no-exec"};
+    public List<String> buildCommandLineArgs(boolean debug) {
+        val result = new ArrayList<String>();
+        result.add("test");
+        result.addAll(CLIUtil.colored(colored.value));
+        result.add(filePath.getPathOrThrow().toString());
+        if (!debug || optimization.forced) {
+            result.addAll(List.of("-O", optimization.level.name()));
         }
+        if (debug) {
+            result.add("--test-no-exec");
+        }
+        return result;
     }
 
     @Override

@@ -172,23 +172,22 @@ private ContainerMembers ::= ContainerDeclarations (ContainerField COMMA)* (Cont
 
 ContainerDeclarations ::= (TestDecl | ComptimeDecl | DOC_COMMENT? KEYWORD_PUB? Decl)*
 
+TestDecl ::= DOC_COMMENT? KEYWORD_TEST (STRING_LITERAL_SINGLE | IDENTIFIER)? Block {pin=2}
 
-TestDecl ::= DOC_COMMENT? KEYWORD_TEST (STRING_LITERAL_SINGLE | IDENTIFIER)? Block
-
-ComptimeDecl ::= KEYWORD_COMPTIME Block
+ComptimeDecl ::= KEYWORD_COMPTIME Block {pin=1}
 
 Decl
 ::= (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE? | KEYWORD_INLINE | KEYWORD_NOILINE)? FnProto (SEMICOLON | Block)
   | (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE?)? KEYWORD_THREADLOCAL? GlobalVarDecl
   | KEYWORD_USINGNAMESPACE Expr SEMICOLON
 
-FnProto ::= KEYWORD_FN IDENTIFIER? LPAREN ParamDeclList RPAREN ByteAlign? AddrSpace? LinkSection? CallConv? EXCLAMATIONMARK? TypeExpr
+FnProto ::= KEYWORD_FN IDENTIFIER? LPAREN ParamDeclList RPAREN ByteAlign? AddrSpace? LinkSection? CallConv? EXCLAMATIONMARK? TypeExpr {pin=1}
 
-VarDeclProto ::= (KEYWORD_CONST | KEYWORD_VAR) IDENTIFIER (COLON TypeExpr)? ByteAlign? AddrSpace? LinkSection?
+VarDeclProto ::= (KEYWORD_CONST | KEYWORD_VAR) IDENTIFIER (COLON TypeExpr)? ByteAlign? AddrSpace? LinkSection? {pin=1}
 
-GlobalVarDecl ::= VarDeclProto (EQUAL Expr)? SEMICOLON
+GlobalVarDecl ::= VarDeclProto (EQUAL Expr)? SEMICOLON {pin=1}
 
-ContainerField ::= DOC_COMMENT? KEYWORD_COMPTUME? !KEYWORD_FN (IDENTIFIER COLON)? TypeExpr ByteAlign? (EQUAL Expr)?
+ContainerField ::= DOC_COMMENT? KEYWORD_COMPTUME? !KEYWORD_FN (IDENTIFIER COLON)? TypeExpr ByteAlign? (EQUAL Expr)? {pin=5}
 
 // *** Block Level ***
 Statement
@@ -207,7 +206,7 @@ ComptimeStatement
 
 IfStatement
 ::= IfPrefix BlockExpr ( KEYWORD_ELSE Payload? Statement )?
-  | IfPrefix AssignExpr ( SEMICOLON | KEYWORD_ELSE Payload? Statement )
+  | IfPrefix AssignExpr ( SEMICOLON | KEYWORD_ELSE Payload? Statement ) {pin(".*")=1}
 
 LabeledStatement ::= BlockLabel? (Block | LoopStatement)
 
@@ -215,22 +214,24 @@ LoopStatement ::= KEYWORD_INLINE? (ForStatement | WhileStatement)
 
 ForStatement
 ::= ForPrefix BlockExpr ( KEYWORD_ELSE Statement )?
-  | ForPrefix AssignExpr ( SEMICOLON | KEYWORD_ELSE Statement )
+  | ForPrefix AssignExpr ( SEMICOLON | KEYWORD_ELSE Statement ) {pin(".*")=1}
 
 WhileStatement
 ::= WhilePrefix BlockExpr ( KEYWORD_ELSE Payload? Statement )?
-  | WhilePrefix AssignExpr ( SEMICOLON | KEYWORD_ELSE Payload? Statement)
+  | WhilePrefix AssignExpr ( SEMICOLON | KEYWORD_ELSE Payload? Statement) {pin(".*") =1}
 
 BlockExprStatement
 ::= BlockExpr
-  | AssignExpr SEMICOLON
+  | ZB_BlockExprStatement_AssignExpr
+
+private ZB_BlockExprStatement_AssignExpr ::= AssignExpr SEMICOLON {pin=1}
 
 BlockExpr ::= BlockLabel? Block
 
 //An expression, assignment, or any destructure, as a statement.
 VarDeclExprStatement
 ::= VarDeclProto (COMMA (VarDeclProto | Expr))* EQUAL Expr SEMICOLON
-  | Expr (AssignOp Expr | (COMMA (VarDeclProto | Expr))+ EQUAL Expr)? SEMICOLON
+  | Expr (AssignOp Expr | (COMMA (VarDeclProto | Expr))+ EQUAL Expr)? SEMICOLON {pin(".*")=1}
 
 // *** Expression Level ***
 
@@ -272,9 +273,11 @@ PrimaryExpr
 
 IfExpr ::= IfPrefix Expr (KEYWORD_ELSE Payload? Expr)?
 
-Block ::= LBRACE ZB_Block_Statement* RBRACE {pin(".*")=1}
+Block ::= LBRACE ZB_Block_Statement RBRACE {pin(".*")=1}
 
-private ZB_Block_Statement ::= Statement {recoverWhile="#auto"}
+private ZB_Block_Statement ::= Statement* {recoverWhile="ZB_Block_Statement_recover"}
+
+private ZB_Block_Statement_recover ::= !(RBRACE)
 
 LoopExpr ::= KEYWORD_INLINE? (ForExpr | WhileExpr)
 
@@ -379,14 +382,16 @@ ParamType
   | TypeExpr
 
 // Control flow prefixes
-IfPrefix ::= KEYWORD_IF LPAREN Expr RPAREN PtrPayload?
+IfPrefix ::= KEYWORD_IF LPAREN Expr RPAREN PtrPayload? {pin=1}
 
-WhilePrefix ::= KEYWORD_WHILE LPAREN Expr RPAREN PtrPayload? WhileContinueExpr?
+WhilePrefix ::= KEYWORD_WHILE LPAREN Expr RPAREN PtrPayload? WhileContinueExpr? {pin=1}
 
 ForRange ::= Expr DOT2 Expr?
 ForOperand ::= ForRange | Expr
 
-ForPrefix ::= KEYWORD_FOR LPAREN (ForOperand COMMA)* ForOperand RPAREN PtrIndexPayload
+ForPrefix ::= KEYWORD_FOR LPAREN ZB_ForPrefix_Operands RPAREN PtrIndexPayload {pin=1}
+
+private ZB_ForPrefix_Operands ::= (ForOperand COMMA)* ForOperand {recoverWhile="#auto"}
 
 // Payloads
 Payload ::= PIPE IDENTIFIER PIPE
@@ -485,7 +490,11 @@ SuffixOp
   | DOTASTERISK
   | DOTQUESTIONMARK
 
-FnCallArguments ::= LPAREN ExprList RPAREN
+FnCallArguments ::= LPAREN ZB_FnCallArguments_ExprList RPAREN {pin=1}
+
+private ZB_FnCallArguments_ExprList ::= ExprList {recoverWhile="ZB_FnCallArguments_ExprList_recover"}
+
+private ZB_FnCallArguments_ExprList_recover ::= !(RPAREN)
 
 // Ptr specific
 SliceTypeStart ::= LBRACKET (COLON Expr)? RBRACKET
@@ -498,13 +507,19 @@ PtrTypeStart
 ArrayTypeStart ::= LBRACKET Expr (COLON Expr)? RBRACKET
 
 // ContainerDecl specific
-ContainerDeclAuto ::= ContainerDeclType LBRACE CONTAINER_DOC_COMMENT? ContainerMembers RBRACE
+ContainerDeclAuto ::= ContainerDeclType LBRACE CONTAINER_DOC_COMMENT? ZB_ContainerDeclAuto_ContainerMembers RBRACE {pin=2}
+
+private ZB_ContainerDeclAuto_ContainerMembers ::= ContainerMembers {recoverWhile="ZB_ContainerDeclAuto_ContainerMembers_recover"}
+private ZB_ContainerDeclAuto_ContainerMembers_recover ::= !(RBRACE)
 
 ContainerDeclType
-::= KEYWORD_STRUCT (LPAREN Expr RPAREN)?
+::= KEYWORD_STRUCT (LPAREN ZB_ContainerDeclType_Expr RPAREN)?
   | KEYWORD_OPAQUE
-  | KEYWORD_ENUM (LPAREN Expr RPAREN)?
-  | KEYWORD_UNION (LPAREN (KEYWORD_ENUM (LPAREN Expr RPAREN)? | Expr) RPAREN)?
+  | KEYWORD_ENUM (LPAREN ZB_ContainerDeclType_Expr RPAREN)?
+  | KEYWORD_UNION (LPAREN (KEYWORD_ENUM (LPAREN ZB_ContainerDeclType_Expr RPAREN)? | ZB_ContainerDeclType_Expr) RPAREN)? {pin(".*")=1}
+
+private ZB_ContainerDeclType_Expr ::= Expr {recoverWhile="ZB_ContainerDeclType_Expr_recover"}
+private ZB_ContainerDeclType_Expr_recover ::= !(RPAREN)
 
 // Alignment
 ByteAlign ::= KEYWORD_ALIGN LPAREN Expr RPAREN
