@@ -18,6 +18,38 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [14.0.0]
+
+### Added
+
+- LSP
+  - The status widget now auto-hides itself when the selected editor is not a zig file in the current window
+
+- Project
+  - Completely overhauled the configuration system and the new project creation window. All the configs have been unified
+  into a single screen, and project creation has been fully integrated as a mainline feature, instead of just a "nice to have".
+
+### Changed
+
+- LSP
+  - The injection of the various language actions (Go to declaration/implementation, reformat, etc.) has been
+  reimplemented from the ground up to be much more reliable and compatible in the presence of other languages and plugins.
+
+- Zig, ZLS
+  - The configurations have been unified into a single cohesive interface
+  - Improved auto-detection for both Zig and ZLS
+
+### Fixed
+
+- LSP
+  - Putting the caret on a diagnostics error now no longer highlights the whole file
+
+- Project
+  - Fixed invalid --colored command line argument for zig tasks
+
+- Zig
+  - More robust indentation logic, also works with semi-invalid syntax now
+
 ## [13.2.0]
 
 ### Added

@@ -20,6 +20,7 @@ import com.falsepattern.zigbrains.common.ZBFeatures;
 import com.falsepattern.zigbrains.common.util.CollectionUtil;
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
+import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
@@ -44,30 +45,28 @@ public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
         super(project, factory, "Zig Build");
     }
 
-    private String[] buildWithSteps(String[] steps) throws ExecutionException {
-        val base = new String[]{"build", "--color", colored.value ? "on" : "off"};
-        return CollectionUtil.concat(base, steps, extraArgs.args).toArray(String[]::new);
-    }
-
     @Override
-    public String[] buildCommandLineArgs() throws ExecutionException {
-        return buildWithSteps(buildSteps.args);
-    }
-
-    @Override
-    public String[] buildDebugCommandLineArgs() throws ExecutionException {
-        var steps = buildSteps.args;
-        val truncatedSteps = new ArrayList<String>();
-        for (int i = 0; i < steps.length; i++) {
-            if (steps[i].equals("run")) {
-                continue;
+    public List<String> buildCommandLineArgs(boolean debug) throws ExecutionException {
+        val result = new ArrayList<String>();
+        result.add("build");
+        var steps = List.of(buildSteps.args);
+        if (debug) {
+            val truncatedSteps = new ArrayList<String>();
+            for (int i = 0, size = steps.size(); i < size; i++) {
+                if (steps.get(i).equals("run")) {
+                    continue;
+                }
+                if (steps.get(i).equals("test")) {
+                    throw new ExecutionException("Debugging \"zig build test\" is not supported yet.");
+                }
+                truncatedSteps.add(steps.get(i));
             }
-            if (steps[i].equals("test")) {
-                throw new ExecutionException("Debugging \"zig build test\" is not supported yet.");
-            }
-            truncatedSteps.add(steps[i]);
+            steps = truncatedSteps;
         }
-        return buildWithSteps(truncatedSteps.toArray(String[]::new));
+        result.addAll(steps);
+        result.addAll(CLIUtil.colored(colored.value));
+        result.addAll(List.of(extraArgs.args));
+        return result;
     }
 
     @Override

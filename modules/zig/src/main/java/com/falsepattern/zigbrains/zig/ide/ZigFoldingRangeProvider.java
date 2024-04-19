@@ -17,7 +17,7 @@
 package com.falsepattern.zigbrains.zig.ide;
 
 import com.falsepattern.zigbrains.lsp.contributors.LSPFoldingRangeProvider;
-import com.falsepattern.zigbrains.zig.settings.ZLSSettingsState;
+import com.falsepattern.zigbrains.zig.settings.ZLSProjectSettingsService;
 import com.intellij.openapi.project.Project;
 import org.eclipse.lsp4j.FoldingRange;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +42,6 @@ public class ZigFoldingRangeProvider extends LSPFoldingRangeProvider {
 
     @Override
     protected boolean async(Project project) {
-        return ZLSSettingsState.getInstance(project).asyncFolding;
+        return ZLSProjectSettingsService.getInstance(project).getState().asyncFolding;
     }
 }

@@ -23,6 +23,7 @@ import com.intellij.openapi.ui.TextComponentAccessor;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.ui.DocumentAdapter;
+import com.intellij.ui.components.fields.ExtendableTextField;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +54,7 @@ public class TextFieldUtil {
                                                           Disposable disposable,
                                                           @NlsContexts.DialogTitle String dialogTitle,
                                                           Runnable onTextChanged) {
-        val component = new TextFieldWithBrowseButton(null, disposable);
+        val component = new TextFieldWithBrowseButton(new ExtendableTextField(), null, disposable);
         component.addBrowseFolderListener(dialogTitle, null, null, fileChooserDescriptor, TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
         addTextChangeListener(component.getChildComponent(), ignored -> onTextChanged.run());
 

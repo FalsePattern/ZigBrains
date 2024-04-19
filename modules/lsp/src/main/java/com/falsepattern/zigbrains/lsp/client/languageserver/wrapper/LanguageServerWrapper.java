@@ -47,7 +47,6 @@ import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.remoteServer.util.CloudNotifier;
@@ -261,7 +260,7 @@ public class LanguageServerWrapper {
     }
 
     public void notifyResult(Timeouts timeouts, boolean success) {
-        getWidget().ifPresent(widget -> widget.notifyResult(timeouts, success));
+        getWidgets().forEach(widget -> widget.notifyResult(timeouts, success));
     }
 
     public void notifySuccess(Timeouts timeouts) {
@@ -624,7 +623,7 @@ public class LanguageServerWrapper {
 
     private void setStatus(ServerStatus status) {
         this.status = status;
-        getWidget().ifPresent(widget -> widget.setStatus(status));
+        getWidgets().forEach(widget -> widget.setStatus(status));
         synchronized (shutdownHook) {
             if ((status == STARTED || status == INITIALIZED) && shutdownHook.get() == null) {
                 shutdownHook.set(new Thread(() -> {
@@ -694,10 +693,6 @@ public class LanguageServerWrapper {
         return connected;
     }
 
-    public void removeWidget() {
-        getWidget().ifPresent(LSPServerStatusWidget::dispose);
-    }
-
     /**
      * Disconnects an editor from the LanguageServer
      *
@@ -726,7 +721,7 @@ public class LanguageServerWrapper {
         if (connectedEditors.isEmpty()) {
             stop(true);
 
-            getWidget().ifPresent(widget -> widget.setStatus(ServerStatus.NONEXISTENT));
+            getWidgets().forEach(widget -> widget.setStatus(ServerStatus.NONEXISTENT));
         }
     }
 
@@ -764,13 +759,12 @@ public class LanguageServerWrapper {
         if (connectedEditors.isEmpty()) {
             stop(true);
 
-            getWidget().ifPresent(widget -> widget.setStatus(ServerStatus.NONEXISTENT));
+            getWidgets().forEach(widget -> widget.setStatus(ServerStatus.NONEXISTENT));
         }
     }
 
     public void removeServerWrapper() {
         stop(true);
-        removeWidget();
         IntellijLanguageClient.removeWrapper(this);
     }
 
@@ -805,13 +799,8 @@ public class LanguageServerWrapper {
         });
     }
 
-    private Optional<LSPServerStatusWidget> getWidget() {
-        LSPServerStatusWidgetFactory factory = ((LSPServerStatusWidgetFactory) project.getService(StatusBarWidgetsManager.class).findWidgetFactory("LSP"));
-        if (factory != null) {
-            return Optional.of(factory.getWidget(project));
-        } else {
-            return Optional.empty();
-        }
+    private List<LSPServerStatusWidget> getWidgets() {
+        return Optional.ofNullable(project.getUserData(LSPServerStatusWidgetFactory.LSP_WIDGETS)).orElse(List.of());
     }
 
     /**

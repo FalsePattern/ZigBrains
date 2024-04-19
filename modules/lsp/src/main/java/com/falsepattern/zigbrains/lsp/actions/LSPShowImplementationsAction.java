@@ -17,17 +17,15 @@
 package com.falsepattern.zigbrains.lsp.actions;
 
 import com.falsepattern.zigbrains.lsp.editor.EditorEventManager;
-import com.intellij.codeInsight.navigation.actions.GotoDeclarationAction;
+import com.intellij.codeInsight.hint.actions.ShowImplementationsAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiFile;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public class LSPGotoDeclarationAction extends WrappedAction<GotoDeclarationAction> implements DumbAware {
-    public LSPGotoDeclarationAction(GotoDeclarationAction wrapped) {
+public class LSPShowImplementationsAction extends WrappedAction<ShowImplementationsAction> implements DumbAware {
+    public LSPShowImplementationsAction(ShowImplementationsAction wrapped) {
         super(wrapped);
     }
 
@@ -38,6 +36,6 @@ public class LSPGotoDeclarationAction extends WrappedAction<GotoDeclarationActio
         if (psiElement == null) {
             return;
         }
-        manager.gotoDeclarationOrUsages(psiElement);
+        manager.gotoDefinition(psiElement);
     }
 }

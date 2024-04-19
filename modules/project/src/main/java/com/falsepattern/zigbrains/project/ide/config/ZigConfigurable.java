@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.project.openapi.components;
+package com.falsepattern.zigbrains.project.ide.config;
 
-import com.falsepattern.zigbrains.common.WrappingStateComponent;
-import com.intellij.openapi.components.PersistentStateComponent;
+import com.falsepattern.zigbrains.common.MultiConfigurable;
+import com.falsepattern.zigbrains.project.ide.project.ZigProjectConfigurable;
+import com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigurable;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.intellij.openapi.util.NlsContexts;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class AbstractZigProjectSettingsService<T> extends WrappingStateComponent<T> {
-    public final transient Project project;
-    public AbstractZigProjectSettingsService(Project project, @NotNull T initialState) {
-        super(initialState);
-        this.project = project;
+public class ZigConfigurable extends MultiConfigurable {
+    public ZigConfigurable(@NotNull Project project) {
+        super(new ZigProjectConfigurable(project), new ZLSSettingsConfigurable(project));
+    }
+    @Override
+    public @NlsContexts.ConfigurableName String getDisplayName() {
+        return "Zig";
     }
 }

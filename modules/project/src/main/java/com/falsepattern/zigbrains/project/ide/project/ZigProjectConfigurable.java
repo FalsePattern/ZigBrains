@@ -16,23 +16,17 @@
 
 package com.falsepattern.zigbrains.project.ide.project;
 
+import com.falsepattern.zigbrains.common.SubConfigurable;
+import com.falsepattern.zigbrains.common.util.dsl.JavaPanel;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity;
-import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.util.NlsContexts;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import javax.swing.JComponent;
-import java.util.Objects;
-
-import static com.intellij.ui.dsl.builder.BuilderKt.panel;
-
-public class ZigProjectConfigurable implements Configurable {
+public class ZigProjectConfigurable implements SubConfigurable {
     private ZigProjectSettingsPanel settingsPanel;
 
     private final Project project;
@@ -42,36 +36,22 @@ public class ZigProjectConfigurable implements Configurable {
     }
 
     @Override
-    public @NlsContexts.ConfigurableName String getDisplayName() {
-        return "Zig";
-    }
-
-    @Override
-    public @Nullable JComponent createComponent() {
+    public void createComponent(JavaPanel panel) {
         settingsPanel = new ZigProjectSettingsPanel();
-        return panel((p) -> {
-            settingsPanel.attachPanelTo(p);
-            return null;
-        });
+        settingsPanel.attachPanelTo(panel);
     }
 
     @Override
     public boolean isModified() {
-        var zigSettings = ZigProjectSettingsService.getInstance(project);
-        var settingsData = settingsPanel.getData();
-        return !Objects.equals(settingsData.toolchain(), zigSettings.getToolchain()) ||
-               !Objects.equals(settingsData.explicitPathToStd(), zigSettings.getExplicitPathToStd());
+        return ZigProjectSettingsService.getInstance(project).isModified(settingsPanel.getData());
     }
 
     @Override
     public void apply() throws ConfigurationException {
-        val zigSettings = ZigProjectSettingsService.getInstance(project);
-        val settingsData = settingsPanel.getData();
-        boolean modified = isModified();
-        zigSettings.modify((settings) -> {
-            settings.setToolchain(settingsData.toolchain());
-            settings.setExplicitPathToStd(settingsData.explicitPathToStd());
-        });
+        val service = ZigProjectSettingsService.getInstance(project);
+        val data = settingsPanel.getData();
+        val modified = service.isModified(data);
+        service.loadState(data);
         if (modified) {
             ZLSStartupActivity.initZLS(project);
         }
@@ -80,10 +60,7 @@ public class ZigProjectConfigurable implements Configurable {
     @Override
     public void reset() {
         val zigSettings = ZigProjectSettingsService.getInstance(project);
-        settingsPanel.setData(new ZigProjectSettingsPanel.SettingsData(
-                zigSettings.getExplicitPathToStd(),
-                zigSettings.getToolchain()
-        ));
+        settingsPanel.setData(zigSettings.getState());
     }
 
     @Override

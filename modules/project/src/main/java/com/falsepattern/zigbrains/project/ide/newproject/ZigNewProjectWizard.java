@@ -16,26 +16,20 @@
 
 package com.falsepattern.zigbrains.project.ide.newproject;
 
-import com.falsepattern.zigbrains.common.util.ApplicationUtil;
-import com.falsepattern.zigbrains.project.ide.util.projectwizard.ZigModuleBuilder;
-import com.falsepattern.zigbrains.project.platform.ZigProjectGeneratorPeer;
+import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep;
 import com.intellij.ide.wizard.GitNewProjectWizardData;
 import com.intellij.ide.wizard.LanguageNewProjectWizard;
 import com.intellij.ide.wizard.NewProjectWizardLanguageStep;
 import com.intellij.ide.wizard.NewProjectWizardStep;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootModificationUtil;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.ui.dsl.builder.AlignX;
 import com.intellij.ui.dsl.builder.Panel;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.JLabel;
-import java.io.IOException;
-import java.nio.file.Path;
 
 public class ZigNewProjectWizard implements LanguageNewProjectWizard {
     @NotNull
@@ -56,7 +50,7 @@ public class ZigNewProjectWizard implements LanguageNewProjectWizard {
     }
 
     private static class ZigNewProjectWizardStep extends AbstractNewProjectWizardStep {
-        private final ZigProjectGeneratorPeer peer = new ZigProjectGeneratorPeer();
+        private final ZigProjectGeneratorPeer peer = new ZigProjectGeneratorPeer(false);
 
         public ZigNewProjectWizardStep(@NotNull NewProjectWizardStep parentStep) {
             super(parentStep);
@@ -74,42 +68,10 @@ public class ZigNewProjectWizard implements LanguageNewProjectWizard {
         @Override
         public void setupProject(@NotNull Project project) {
             val builder = new ZigModuleBuilder();
-            val modList = builder.commit(project);
-            if (modList == null || modList.size() == 0) {
-                return;
-            }
-            val module = modList.get(0);
-
-            //noinspection UsagesOfObsoleteApi
-            ModuleRootModificationUtil.updateModel(module, rootModel -> {
-                builder.configurationData = peer.getSettings();
-                builder.createProject(rootModel, "none");
-                var gitData = GitNewProjectWizardData.Companion.getGitData(this);
-                if (gitData == null) {
-                    return;
-                }
-                if (gitData.getGit()) {
-                    ApplicationUtil.writeAction(() -> createGitIgnoreFile(getContext().getProjectDirectory(), module));
-                }
-            });
-        }
-
-        private static final String GITIGNORE = ".gitignore";
-
-        private static void createGitIgnoreFile(Path projectDir, Module module) {
-            try {
-                val directory = VfsUtil.createDirectoryIfMissing(projectDir.toString());
-                if (directory == null) {
-                    return;
-                }
-                val existingFile = directory.findChild(GITIGNORE);
-                if (existingFile != null) {
-                    return;
-                }
-                directory.createChildData(module, GITIGNORE);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            builder.configurationData = peer.getSettings();
+            var gitData = GitNewProjectWizardData.Companion.getGitData(this);
+            builder.forceGitignore = gitData != null && gitData.getGit();
+            builder.commit(project);
         }
     }
 }
