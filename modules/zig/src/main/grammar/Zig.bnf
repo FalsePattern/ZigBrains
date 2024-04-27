@@ -205,8 +205,11 @@ ComptimeStatement
   | VarDeclExprStatement
 
 IfStatement
-::= IfPrefix BlockExpr ( KEYWORD_ELSE Payload? Statement )?
-  | IfPrefix AssignExpr ( SEMICOLON | KEYWORD_ELSE Payload? Statement ) {pin(".*")=1}
+::= IfPrefix ZB_IfStatement_Body {pin(".*")=1}
+
+private ZB_IfStatement_Body
+::= BlockExpr ( KEYWORD_ELSE Payload? Statement )?
+  | AssignExpr ( SEMICOLON | KEYWORD_ELSE Payload? Statement )
 
 LabeledStatement ::= BlockLabel? (Block | LoopStatement)
 

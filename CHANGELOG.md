@@ -18,6 +18,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [14.0.1]
+
+### Fixed
+
+- Zig
+  - If statements without a block always showed an error
+
 ## [14.0.0]
 
 ### Added
