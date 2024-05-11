@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.common.util.StringUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
@@ -40,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ZLSStartupActivity implements ProjectActivity {
@@ -76,7 +78,8 @@ public class ZLSStartupActivity implements ProjectActivity {
                         val tmpFile = Files.createTempFile("zigbrains-zls-autoconf", ".json");
                         val config = ZLSConfigProvider.findEnvironment(project);
                         if (StringUtil.isEmpty(config.zig_exe_path()) && StringUtil.isEmpty(config.zig_lib_path())) {
-                            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "(ZLS) Failed to detect zig path from project toolchain", NotificationType.WARNING));
+                            // TODO this generates unnecessary noise in non-zig projects, find an alternative.
+                            // Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "(ZLS) Failed to detect zig path from project toolchain", NotificationType.WARNING));
                             configOK = false;
                             break blk;
                         }
@@ -172,6 +175,9 @@ public class ZLSStartupActivity implements ProjectActivity {
 
         if (zlsPath == null) {
             //Project creation
+            ApplicationUtil.pool(() -> {
+                initZLS(project);
+            }, 5, TimeUnit.SECONDS);
             return null;
         }
 

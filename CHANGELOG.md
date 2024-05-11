@@ -18,6 +18,14 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- LSP
+  - No more notification popup about zig env not being detected when not in a zig projects.
+
+- Project
+  - ZLS should now be detected more reliably when creating new projects
+
 ## [14.0.1]
 
 ### Fixed
