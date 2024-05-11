@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [14.1.0]
+
 ### Fixed
 
 - Debugging
