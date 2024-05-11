@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.debugger.runner.binary;
 
+import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstaller;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
 import com.falsepattern.zigbrains.debugger.execution.binary.ProfileStateBinary;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
@@ -29,25 +30,14 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 
 public class ZigDebugParametersBinary extends ZigDebugParametersBase<ProfileStateBinary> {
-    public ZigDebugParametersBinary(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateBinary profileStateBinary) {
+    private final File executableFile;
+    public ZigDebugParametersBinary(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateBinary profileStateBinary) throws ExecutionException {
         super(driverConfiguration, toolchain, profileStateBinary);
+        executableFile = profileState.configuration().getExePath().getPathOrThrow().toFile();
     }
 
     @Override
     public @NotNull Installer getInstaller() {
-        return new Installer() {
-            private File executableFile;
-            @Override
-            public @NotNull GeneralCommandLine install() throws ExecutionException {
-                val cli = profileState.getCommandLine(toolchain, true);
-                executableFile = profileState.configuration().getExePath().getPathOrThrow().toFile();
-                return cli;
-            }
-
-            @Override
-            public @NotNull File getExecutableFile() {
-                return executableFile;
-            }
-        };
+        return new ZigDebugEmitBinaryInstaller<>(profileState, toolchain, executableFile, profileState.configuration().getArgs().args);
     }
 }

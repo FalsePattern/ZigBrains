@@ -18,24 +18,22 @@ package com.falsepattern.zigbrains.debugger.runner.run;
 
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstaller;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
+import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersEmitBinaryBase;
 import com.falsepattern.zigbrains.project.execution.run.ProfileStateRun;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
+import com.intellij.execution.ExecutionException;
 import com.jetbrains.cidr.execution.Installer;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-public class ZigDebugParametersRun extends ZigDebugParametersBase<ProfileStateRun> {
-    public ZigDebugParametersRun(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateRun profileState) {
-        super(driverConfiguration, toolchain, profileState);
+public class ZigDebugParametersRun extends ZigDebugParametersEmitBinaryBase<ProfileStateRun> {
+    public ZigDebugParametersRun(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateRun profileState)
+            throws ExecutionException {
+        super(driverConfiguration, toolchain, profileState, "run");
     }
 
     @Override
     public @NotNull Installer getInstaller() {
-        return new ZigDebugEmitBinaryInstaller<>("run", profileState, toolchain) {
-            @Override
-            public String[] getExeArgs() {
-                return profileState.configuration().getExeArgs().args;
-            }
-        };
+        return new ZigDebugEmitBinaryInstaller<>(profileState, toolchain, executableFile, profileState.configuration().getExeArgs().args);
     }
 }

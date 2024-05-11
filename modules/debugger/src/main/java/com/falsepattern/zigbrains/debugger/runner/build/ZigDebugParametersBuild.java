@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.debugger.runner.build;
 
+import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstaller;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
 import com.falsepattern.zigbrains.project.execution.build.ProfileStateBuild;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
@@ -37,74 +38,57 @@ import java.util.Arrays;
 
 public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileStateBuild> {
     private static final String BoilerplateNotice = "\nPlease edit this intellij build configuration and specify the path of the executable created by \"zig build\" directly!";
-    public ZigDebugParametersBuild(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateBuild profileStateBuild) {
+    private final File executableFile;
+    public ZigDebugParametersBuild(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateBuild profileStateBuild) throws ExecutionException {
         super(driverConfiguration, toolchain, profileStateBuild);
+        val commandLine = profileState.getCommandLine(toolchain, true);
+        val outputOpt = CLIUtil.execute(commandLine, Integer.MAX_VALUE);
+        if (outputOpt.isEmpty()) {
+            throw new ExecutionException("Failed to execute \"zig " + commandLine.getParametersList().getParametersString() + "\"!");
+        }
+        val output = outputOpt.get();
+        if (output.getExitCode() != 0) {
+            throw new ExecutionException("Zig compilation failed with exit code " + output.getExitCode() + "\nError output:\n" + output.getStdout() + "\n" + output.getStderr());
+        }
+
+        val cfg = profileState.configuration();
+        val workingDir = cfg.getWorkingDirectory().getPath().orElse(null);
+        val exePath = profileState.configuration().getExePath().getPath();
+        Path exe;
+        if (exePath.isEmpty()) {
+            //Attempt autodetect, should work for trivial cases, and make basic users happy, while advanced
+            // users can use manual executable paths.
+            if (workingDir == null) {
+                throw new ExecutionException("Cannot find working directory to run debugged executable!" + BoilerplateNotice);
+            }
+            val expectedOutputDir = workingDir.resolve(Path.of("zig-out", "bin"));
+            if (!Files.exists(expectedOutputDir)) {
+                throw new ExecutionException("Could not auto-detect default executable output directory \"zig-out/bin\"!" + BoilerplateNotice);
+            }
+            try (val filesInOutput = Files.list(expectedOutputDir)) {
+                val executables = filesInOutput.filter(Files::isRegularFile).filter(Files::isExecutable).toList();
+                if (executables.size() > 1) {
+                    throw new ExecutionException("Multiple executables found!" + BoilerplateNotice);
+                }
+                exe = executables.get(0);
+            } catch (IOException e) {
+                throw new ExecutionException("Could not scan output directory \"" + expectedOutputDir + "\"!" + BoilerplateNotice);
+            }
+        } else {
+            exe = exePath.get();
+        }
+
+        if (!Files.exists(exe)) {
+            throw new ExecutionException("File " + exe + " does not exist!");
+        } else if (!Files.isExecutable(exe)) {
+            throw new ExecutionException("File " + exe + " is not executable!");
+        }
+
+        executableFile = exe.toFile();
     }
 
     @Override
     public @NotNull Installer getInstaller() {
-        return new Installer() {
-            private File executableFile;
-            @Override
-            public @NotNull GeneralCommandLine install() throws ExecutionException {
-                val commandLine = profileState.getCommandLine(toolchain, true);
-                val outputOpt = CLIUtil.execute(commandLine, Integer.MAX_VALUE);
-                if (outputOpt.isEmpty()) {
-                    throw new ExecutionException("Failed to execute \"zig " + commandLine.getParametersList().getParametersString() + "\"!");
-                }
-                val output = outputOpt.get();
-                if (output.getExitCode() != 0) {
-                    throw new ExecutionException("Zig compilation failed with exit code " + output.getExitCode() + "\nError output:\n" + output.getStdout() + "\n" + output.getStderr());
-                }
-
-                val cfg = profileState.configuration();
-                val workingDir = cfg.getWorkingDirectory().getPath().orElse(null);
-                val exePath = profileState.configuration().getExePath().getPath();
-                Path exe;
-                if (exePath.isEmpty()) {
-                    //Attempt autodetect, should work for trivial cases, and make basic users happy, while advanced
-                    // users can use manual executable paths.
-                    if (workingDir == null) {
-                        throw new ExecutionException("Cannot find working directory to run debugged executable!" + BoilerplateNotice);
-                    }
-                    val expectedOutputDir = workingDir.resolve(Path.of("zig-out", "bin"));
-                    if (!Files.exists(expectedOutputDir)) {
-                        throw new ExecutionException("Could not auto-detect default executable output directory \"zig-out/bin\"!" + BoilerplateNotice);
-                    }
-                    try (val filesInOutput = Files.list(expectedOutputDir)) {
-                        val executables = filesInOutput.filter(Files::isRegularFile).filter(Files::isExecutable).toList();
-                        if (executables.size() > 1) {
-                            throw new ExecutionException("Multiple executables found!" + BoilerplateNotice);
-                        }
-                        exe = executables.get(0);
-                    } catch (IOException e) {
-                        throw new ExecutionException("Could not scan output directory \"" + expectedOutputDir + "\"!" + BoilerplateNotice);
-                    }
-                } else {
-                    exe = exePath.get();
-                }
-
-                if (!Files.exists(exe)) {
-                    throw new ExecutionException("File " + exe + " does not exist!");
-                } else if (!Files.isExecutable(exe)) {
-                    throw new ExecutionException("File " + exe + " is not executable!");
-                }
-
-                executableFile = exe.toFile();
-
-                //Construct new command line
-                val cli = new GeneralCommandLine().withExePath(executableFile.getAbsolutePath());
-                cfg.getWorkingDirectory().getPath().ifPresent(x -> cli.setWorkDirectory(x.toFile()));
-                cli.addParameters(cfg.getExeArgs().args);
-                cli.withCharset(StandardCharsets.UTF_8);
-                cli.withRedirectErrorStream(true);
-                return cli;
-            }
-
-            @Override
-            public @NotNull File getExecutableFile() {
-                return executableFile;
-            }
-        };
+        return new ZigDebugEmitBinaryInstaller<>(profileState, toolchain, executableFile, profileState.configuration().getExeArgs().args);
     }
 }
