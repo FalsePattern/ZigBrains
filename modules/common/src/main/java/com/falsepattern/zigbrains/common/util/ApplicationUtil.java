@@ -22,15 +22,17 @@ import lombok.val;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ApplicationUtil {
 
-    private final static ExecutorService EXECUTOR_SERVICE;
+    private final static ScheduledExecutorService EXECUTOR_SERVICE;
 
     static {
         // Single threaded executor is used to simulate a behavior of async sequencial execution.
         // All runnables are executed asyncly but they are executed in the order of their submission.
-        EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+        EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
@@ -46,6 +48,10 @@ public class ApplicationUtil {
 
     static public void pool(Runnable runnable) {
         EXECUTOR_SERVICE.submit(runnable);
+    }
+
+    public static void pool(Runnable runnable, long delay, TimeUnit timeUnit) {
+        EXECUTOR_SERVICE.schedule(runnable, delay, timeUnit);
     }
 
     static public <T> T computableReadAction(Computable<T> computable) {

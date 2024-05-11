@@ -17,6 +17,7 @@
 package com.falsepattern.zigbrains.project.toolchain;
 
 import com.falsepattern.zigbrains.common.util.PathUtil;
+import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 
 import java.nio.file.Path;
@@ -39,5 +40,12 @@ public class LocalZigToolchain extends AbstractZigToolchain{
     @Override
     public Path pathToExecutable(String toolName) {
         return PathUtil.pathToExecutable(getLocation(), toolName);
+    }
+
+    public static LocalZigToolchain ensureLocal(AbstractZigToolchain toolchain) throws ExecutionException {
+        if (!(toolchain instanceof LocalZigToolchain $toolchain)) {
+            throw new ExecutionException("The debugger only supports local zig toolchains!");
+        }
+        return $toolchain;
     }
 }

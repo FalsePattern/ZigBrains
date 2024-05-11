@@ -23,6 +23,7 @@ import com.falsepattern.zigbrains.debugger.execution.binary.ProfileStateBinary;
 import com.falsepattern.zigbrains.debugger.execution.binary.ZigExecConfigBinary;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain;
+import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.notification.Notification;
@@ -46,12 +47,8 @@ public class ZigDebugRunnerBinary extends ZigDebugRunnerBase<ProfileStateBinary>
     }
 
     @Override
-    protected @Nullable ZigDebugParametersBase<ProfileStateBinary> getDebugParameters(ProfileStateBinary profileStateBinary, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain$) {
-        if (!(toolchain$ instanceof LocalZigToolchain toolchain)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Error", "The debugger only supports local zig toolchains!", NotificationType.ERROR));
-            return null;
-        }
-        return new ZigDebugParametersBinary(debuggerDriver, toolchain, profileStateBinary);
+    protected @Nullable ZigDebugParametersBase<ProfileStateBinary> getDebugParameters(ProfileStateBinary profileStateBinary, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain) throws ExecutionException {
+        return new ZigDebugParametersBinary(debuggerDriver, LocalZigToolchain.ensureLocal(toolchain), profileStateBinary);
     }
 
     @Override

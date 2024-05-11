@@ -27,6 +27,7 @@ import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.StringTokenizer;
@@ -121,7 +122,13 @@ public class CLIUtil {
         return result.toArray(new String[0]);
     }
 
-    public static List<String> colored(boolean colored) {
-        return List.of("--color", colored ? "on" : "off");
+    public static List<String> colored(boolean colored, boolean debug) {
+        // TODO remove this check once JetBrains implements colored terminal in the debugger
+        // https://youtrack.jetbrains.com/issue/CPP-11622/ANSI-color-codes-not-honored-in-Debug-Run-Configuration-output-window
+        if (debug) {
+            return Collections.emptyList();
+        } else {
+            return List.of("--color", colored ? "on" : "off");
+        }
     }
 }

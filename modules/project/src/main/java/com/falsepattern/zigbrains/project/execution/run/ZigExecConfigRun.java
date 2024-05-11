@@ -46,7 +46,7 @@ public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
     public List<String> buildCommandLineArgs(boolean debug) {
         val result = new ArrayList<String>();
         result.add("run");
-        result.addAll(CLIUtil.colored(colored.value));
+        result.addAll(CLIUtil.colored(colored.value, debug));
         result.add(filePath.getPathOrThrow().toString());
         if (!debug || optimization.forced) {
             result.addAll(List.of("-O", optimization.level.name()));

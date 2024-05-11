@@ -23,12 +23,14 @@ import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugRunnerBase;
+import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
+import lombok.val;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,12 +48,9 @@ public class ZigDebugRunnerBuild extends ZigDebugRunnerBase<ProfileStateBuild> {
     }
 
     @Override
-    protected @Nullable ZigDebugParametersBase<ProfileStateBuild> getDebugParameters(ProfileStateBuild profileStateBuild, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain$) {
-        if (!(toolchain$ instanceof LocalZigToolchain toolchain)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Error", "The debugger only supports local zig toolchains!", NotificationType.ERROR));
-            return null;
-        }
-        return new ZigDebugParametersBuild(debuggerDriver, toolchain, profileStateBuild);
+    protected @Nullable ZigDebugParametersBase<ProfileStateBuild> getDebugParameters(ProfileStateBuild profileStateBuild, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain) throws
+            ExecutionException {
+        return new ZigDebugParametersBuild(debuggerDriver, LocalZigToolchain.ensureLocal(toolchain), profileStateBuild);
     }
 
     @Override
