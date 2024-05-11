@@ -64,7 +64,7 @@ public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
             steps = truncatedSteps;
         }
         result.addAll(steps);
-        result.addAll(CLIUtil.colored(colored.value));
+        result.addAll(CLIUtil.colored(colored.value, debug));
         result.addAll(List.of(extraArgs.args));
         return result;
     }

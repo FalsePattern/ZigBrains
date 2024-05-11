@@ -11,7 +11,6 @@ Changelog structure reference:
 "Category" should be something that can be quickly recognized by readers ("Highlighting", "Code Completion", "Folding", etc.)
 
 "Type" ALWAYS follows the order in the list above
-"Category" ALWAYS alphabetically sorted
 -->
 
 # ZigBrains
@@ -19,6 +18,10 @@ Changelog structure reference:
 ## [Unreleased]
 
 ### Fixed
+
+- Debugging
+    - Huge rework for starting the various debugging runs, and more robust compilation error visualization instead of a tiny
+      popup
 
 - LSP
   - No more notification popup about zig env not being detected when not in a zig projects.
