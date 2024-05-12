@@ -52,6 +52,8 @@
 
         <consoleFilterProvider implementation="com.falsepattern.zigbrains.project.console.ZigConsoleFilterProvider"/>
         <analyzeStacktraceFilter implementation="com.falsepattern.zigbrains.project.console.ZigSourceFileFilter"/>
+
+        <additionalLibraryRootsProvider implementation="com.falsepattern.zigbrains.project.toolchain.stdlib.ZigLibraryRootProvider"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">

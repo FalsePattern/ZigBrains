@@ -1,8 +1,26 @@
 # ZigBrains
 
-### [Website](https://falsepattern.com/zigbrains)
+Zig language support for IntelliJ IDEA, CLion, and other JetBrains IDEs.
 
-### [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/22456-zigbrains)
+## Installing
+
+You can either install this plugin from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/22456-zigbrains), or from FalsePattern's [website](https://falsepattern.com/zigbrains).
+
+See [the quick setup guide](#quick-setup-guide-for-zig-and-zls) for how to set up language server integration.
+
+Note: marketplace updates are usually delayed by a few days from the actual release, so if you want to always have the
+latest builds of ZigBrains, you can set up your IDE to download signed releases directly from FalsePattern's website
+through the built-in plugin browser:
+
+1. Go to `Settings -> Plugins`
+2. To the right of the `Installed` button at the top, click on the `...` dropdown menu, then select `Manage Plugin Repositories...`
+3. Click the add button, and then enter the ZigBrains updater URL, based on your IDE version:
+   - `2024.1.*`: https://falsepattern.com/zigbrains/updatePlugins-241.xml
+   - `2023.3.*`: https://falsepattern.com/zigbrains/updatePlugins-233.xml
+   - `2023.2.*`: https://falsepattern.com/zigbrains/updatePlugins-232.xml
+   - `2023.1.*`: https://falsepattern.com/zigbrains/updatePlugins-231.xml
+4. Click `OK`, and your IDE should now automatically detect the latest version
+(both in the Installed tab and in the Marketplace tab), even if it's not yet verified on the official JetBrains marketplace yet.
 
 ## Developer guide
 

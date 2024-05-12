@@ -16,20 +16,45 @@
 
 package com.falsepattern.zigbrains.project.toolchain.tools;
 
+import com.falsepattern.zigbrains.common.util.Lazy;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainEnvironmentSerializable;
 import com.google.gson.Gson;
 import com.intellij.execution.process.ProcessOutput;
+import com.intellij.openapi.application.ApplicationManager;
+import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 public class ZigCompilerTool extends AbstractZigTool{
     public static final String TOOL_NAME = "zig";
+    private final Lazy<Optional<String>> version;
+    private final Lazy<Optional<String>> stdPath;
 
     public ZigCompilerTool(AbstractZigToolchain toolchain) {
         super(toolchain, TOOL_NAME);
+        val app = ApplicationManager.getApplication();
+        val baseFuture = app.executeOnPooledThread(() -> getEnv(null));
+        version = new Lazy<>(() -> {
+            try {
+                return baseFuture.get().map(ZigToolchainEnvironmentSerializable::version);
+            } catch (InterruptedException | ExecutionException e) {
+                return Optional.empty();
+            }
+        });
+        stdPath = new Lazy<>(() -> {
+            try {
+                return baseFuture.get().map(ZigToolchainEnvironmentSerializable::stdDirectory);
+            } catch (InterruptedException | ExecutionException e) {
+                return Optional.empty();
+            }
+        });
     }
 
     public Optional<ZigToolchainEnvironmentSerializable> getEnv(@Nullable Path workingDirectory) {
@@ -39,11 +64,11 @@ public class ZigCompilerTool extends AbstractZigTool{
 
     }
 
-    public Optional<String> getStdPath(@Nullable Path workingDirectory) {
-        return getEnv(workingDirectory).map(ZigToolchainEnvironmentSerializable::stdDirectory);
+    public Optional<String> getStdPath() {
+        return stdPath.get();
     }
 
-    public Optional<String> queryVersion(@Nullable Path workingDirectory) {
-        return getEnv(workingDirectory).map(ZigToolchainEnvironmentSerializable::version);
+    public Optional<String> queryVersion() {
+        return version.get();
     }
 }
