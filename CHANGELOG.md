@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - External Libraries support for zig stdlib
+
 ## [14.1.0]
 
 ### Fixed

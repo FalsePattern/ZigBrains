@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.project.toolchain;
 
+import com.falsepattern.zigbrains.common.util.Lazy;
 import com.falsepattern.zigbrains.project.toolchain.flavours.AbstractZigToolchainFlavour;
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -30,6 +31,8 @@ import java.util.Objects;
 @Getter
 public abstract class AbstractZigToolchain {
     private final Path location;
+
+    private final Lazy<ZigCompilerTool> zig = new Lazy<>(() -> new ZigCompilerTool(this));
 
     public static @Nullable AbstractZigToolchain suggest() {
         return suggest(null);
@@ -46,7 +49,7 @@ public abstract class AbstractZigToolchain {
     }
 
     public ZigCompilerTool zig() {
-        return new ZigCompilerTool(this);
+        return zig.get();
     }
 
     public abstract int executionTimeoutInMilliseconds();
