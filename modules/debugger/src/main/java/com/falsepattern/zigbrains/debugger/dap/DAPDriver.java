@@ -863,16 +863,11 @@ public abstract class DAPDriver<
      */
     @Override
     public @NotNull LLValueData getData(@NotNull LLValue value) throws ExecutionException, DebuggerCommandException {
-        String result;
+        String result = "";
         int childrenRef = 0;
+        boolean failed = false;
         if (value.getReferenceExpression().isBlank()) {
-            val known = value.getUserData(LLVALUE_DATA);
-            if (known != null)
-                return known;
-            val cRef = value.getUserData(LLVALUE_CHILDREN_REF);
-            if (cRef != null)
-                childrenRef = cRef;
-            result = "";
+            failed = true;
         } else {
             val args = new EvaluateArguments();
             args.setContext(EvaluateArgumentsContext.VARIABLES);
@@ -882,7 +877,26 @@ public abstract class DAPDriver<
             childrenRef = res.getVariablesReference();
             if (childrenRef > 0)
                 value.putUserData(LLVALUE_CHILDREN_REF, childrenRef);
+            val hint = res.getPresentationHint();
+            if (hint != null) {
+                val attribs = hint.getAttributes();
+                if (attribs != null) {
+                    for (val attrib: attribs) {
+                        if ("failedEvaluation".equals(attrib)) {
+                            failed = true;
+                        }
+                    }
+                }
+            }
             result = res.getResult();
+        }
+        if (failed) {
+            val known = value.getUserData(LLVALUE_DATA);
+            if (known != null)
+                return known;
+            val cRef = value.getUserData(LLVALUE_CHILDREN_REF);
+            if (cRef != null)
+                childrenRef = cRef;
         }
         return new LLValueData(result, null, false, childrenRef > 0, false);
     }
