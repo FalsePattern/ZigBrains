@@ -44,7 +44,7 @@ public class DocumentEventManager {
     private final TextDocumentSyncKind syncKind;
     private final LanguageServerWrapper wrapper;
     private final TextDocumentIdentifier identifier;
-    private int version = -1;
+    private int version = 0;
     protected Logger LOG = Logger.getInstance(EditorEventManager.class);
 
     private final Set<Document> openDocuments = new HashSet<>();

@@ -36,6 +36,7 @@ import com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidget;
 import com.falsepattern.zigbrains.lsp.statusbar.LSPServerStatusWidgetFactory;
 import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.lsp.utils.LSPException;
+import com.google.gson.GsonBuilder;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.diagnostic.Logger;
@@ -514,16 +515,28 @@ public class LanguageServerWrapper {
                     Class<? extends LanguageServer> remoteServerInterFace = extManager.getExtendedServerInterface();
                     client = extManager.getExtendedClientFor(new ServerWrapperBaseClientContext(this));
 
-                    Launcher<? extends LanguageServer> launcher = Launcher
-                            .createLauncher(client, remoteServerInterFace, inputStream, outputStream, executorService,
-                                    messageHandler);
+                    val launcher = new Launcher.Builder<LanguageServer>()
+                                           .setLocalService(client)
+                                           .setRemoteInterface(remoteServerInterFace)
+                                           .setInput(inputStream)
+                                           .setOutput(outputStream)
+                                           .setExecutorService(executorService)
+                                           .wrapMessages(messageHandler)
+                                           .configureGson(GsonBuilder::disableHtmlEscaping)
+                                           .create();
                     languageServer = launcher.getRemoteProxy();
                     launcherFuture = launcher.startListening();
                 } else {
                     client = new DefaultLanguageClient(new ServerWrapperBaseClientContext(this));
-                    Launcher<LanguageServer> launcher = Launcher
-                            .createLauncher(client, LanguageServer.class, inputStream, outputStream, executorService,
-                                    messageHandler);
+                    val launcher = new Launcher.Builder<LanguageServer>()
+                                           .setLocalService(client)
+                                           .setRemoteInterface(LanguageServer.class)
+                                           .setInput(inputStream)
+                                           .setOutput(outputStream)
+                                           .setExecutorService(executorService)
+                                           .wrapMessages(messageHandler)
+                                           .configureGson(GsonBuilder::disableHtmlEscaping)
+                                           .create();
                     languageServer = launcher.getRemoteProxy();
                     launcherFuture = launcher.startListening();
                 }
@@ -559,8 +572,13 @@ public class LanguageServerWrapper {
     private InitializeParams getInitParams() throws URISyntaxException {
         InitializeParams initParams = new InitializeParams();
         String projectRootUri = FileUtil.pathToUri(projectRootPath);
+        if (projectRootUri.endsWith("/")) {
+            projectRootUri = projectRootUri.substring(0, projectRootUri.length() - 1);
+        }
         WorkspaceFolder workspaceFolder = new WorkspaceFolder(projectRootUri, this.project.getName());
         initParams.setWorkspaceFolders(Collections.singletonList(workspaceFolder));
+        initParams.setProcessId((int) ProcessHandle.current().pid());
+        initParams.setLocale("en-us");
 
         // workspace capabilities
         WorkspaceClientCapabilities workspaceClientCapabilities = new WorkspaceClientCapabilities();

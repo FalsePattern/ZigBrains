@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettings;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider;
+import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.Disposer;
@@ -114,8 +115,8 @@ public class ZigProjectSettingsPanel implements MyDisposable {
                 () -> {
                     val toolchain = Optional.ofNullable(pathToToolchain).map(ZigToolchainProvider::findToolchain).orElse(null);
                     val zig = Optional.ofNullable(toolchain).map(AbstractZigToolchain::zig).orElse(null);
-                    val version = Optional.ofNullable(zig).flatMap(z -> z.queryVersion(Path.of("."))).orElse(null);
-                    val stdPath = Optional.ofNullable(zig).flatMap(z -> z.getStdPath(Path.of("."))).orElse(null);
+                    val version = Optional.ofNullable(zig).flatMap(ZigCompilerTool::queryVersion).orElse(null);
+                    val stdPath = Optional.ofNullable(zig).flatMap(ZigCompilerTool::getStdPath).orElse(null);
 
                     return new Pair<>(version, stdPath);
                     },

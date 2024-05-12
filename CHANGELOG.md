@@ -17,6 +17,18 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [14.2.0]
+
+### Added
+
+- Zig
+  - External Libraries support for zig stdlib
+
+### Fixed
+
+- Debugging (Windows)
+  - Variables sometimes don't show up in the variable inspector when in breakpoint state
+
 ## [14.1.0]
 
 ### Fixed
