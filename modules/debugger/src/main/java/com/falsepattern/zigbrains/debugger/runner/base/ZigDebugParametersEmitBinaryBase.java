@@ -16,10 +16,12 @@
 
 package com.falsepattern.zigbrains.debugger.runner.base;
 
+import com.falsepattern.zigbrains.debugger.Utils;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
-import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.ExecutionException;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.util.io.FileUtil;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.val;
 
@@ -27,11 +29,19 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
-public abstract class ZigDebugParametersEmitBinaryBase<ProfileState extends ProfileStateBase<?>> extends ZigDebugParametersBase<ProfileState> {
-    protected final File executableFile;
-    public ZigDebugParametersEmitBinaryBase(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileState profileState, String kind) throws ExecutionException {
+public abstract class ZigDebugParametersEmitBinaryBase<ProfileState extends ProfileStateBase<?>> extends ZigDebugParametersBase<ProfileState> implements PreLaunchAware {
+    protected volatile File executableFile;
+    private final String kind;
+    public ZigDebugParametersEmitBinaryBase(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileState profileState, String kind) {
         super(driverConfiguration, toolchain, profileState);
+        this.kind = kind;
+    }
+
+    private File compileExe()
+            throws ExecutionException, Utils.ProcessException {
+        final File executableFile;
         val commandLine = profileState.getCommandLine(toolchain, true);
         final Path tmpDir;
         try {
@@ -41,14 +51,7 @@ public abstract class ZigDebugParametersEmitBinaryBase<ProfileState extends Prof
         }
         val exe = tmpDir.resolve("executable").toFile();
         commandLine.addParameters("-femit-bin=" + exe.getAbsolutePath());
-        val outputOpt = CLIUtil.execute(commandLine, Integer.MAX_VALUE);
-        if (outputOpt.isEmpty()) {
-            throw new ExecutionException("Failed to execute \"zig " + commandLine.getParametersList().getParametersString() + "\"!");
-        }
-        val output = outputOpt.get();
-        if (output.getExitCode() != 0) {
-            throw new ExecutionException("Zig compilation failed with exit code " + output.getExitCode() + "\nError output:\n" + output.getStdout() + "\n" + output.getStderr());
-        }
+        Utils.executeCommandLineWithErrorChecks(commandLine);
         //Find our binary
         try (val stream = Files.list(tmpDir)){
             executableFile = stream.filter(file -> !file.getFileName().toString().endsWith(".o"))
@@ -60,5 +63,12 @@ public abstract class ZigDebugParametersEmitBinaryBase<ProfileState extends Prof
         } catch (Exception e) {
             throw new ExecutionException("Failed to find compiled binary! " + e.getMessage(), e);
         }
+        return executableFile;
     }
+
+    @Override
+    public void preLaunch() throws Exception {
+        this.executableFile = compileExe();
+    }
+
 }

@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Debugging
+  - The debugger no longer freezes the IDE while zig is compiling
+
 ## [14.2.0]
 
 ### Added
