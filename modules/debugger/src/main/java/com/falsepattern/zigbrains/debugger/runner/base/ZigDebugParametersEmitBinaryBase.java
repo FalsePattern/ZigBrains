@@ -35,7 +35,7 @@ public abstract class ZigDebugParametersEmitBinaryBase<ProfileState extends Prof
         val commandLine = profileState.getCommandLine(toolchain, true);
         final Path tmpDir;
         try {
-            tmpDir = Files.createTempDirectory("zigbrains_debug").toAbsolutePath();
+            tmpDir = FileUtil.createTempDirectory("zigbrains_debug", "", true).toPath();
         } catch (IOException e) {
             throw new ExecutionException("Failed to create temporary directory for " + kind + " binary", e);
         }
