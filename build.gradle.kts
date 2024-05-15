@@ -9,7 +9,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 plugins {
     id("java") // Java support
     id("java-library")
-    id("org.jetbrains.intellij") version("1.17.2")
+    id("org.jetbrains.intellij") version("1.17.3")
     id("org.jetbrains.changelog") version("2.2.0")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
     id("com.palantir.git-version") version("3.0.0")
@@ -23,7 +23,7 @@ val rootPackage = "com.falsepattern.zigbrains"
 val rootPackagePath = rootPackage.replace('.', '/')
 
 // Keep these in sync with whatever the oldest IDE version we're targeting in gradle.properties needs
-val javaLangVersion: JavaLanguageVersion? = JavaLanguageVersion.of(17)
+val javaLangVersion: JavaLanguageVersion = JavaLanguageVersion.of(17)
 val javaVersion = JavaVersion.VERSION_17
 
 val baseIDE: String = properties("baseIDE").get()
