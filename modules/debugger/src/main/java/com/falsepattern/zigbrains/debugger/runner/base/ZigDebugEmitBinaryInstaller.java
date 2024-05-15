@@ -16,8 +16,10 @@
 
 package com.falsepattern.zigbrains.debugger.runner.base;
 
+import com.falsepattern.zigbrains.common.util.Lazy;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
+import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.jetbrains.cidr.execution.Installer;
 import lombok.RequiredArgsConstructor;
