@@ -218,6 +218,7 @@ public class LSPAnnotator extends ExternalAnnotator<Object, Object> {
                 annotation = annotation.highlightType(ProblemHighlightType.LIKE_DEPRECATED);
             }
             annotation.create();
+            @SuppressWarnings("unchecked")
             var theList = (SmartList<Annotation>) holder;
             annotations.add(theList.get(theList.size() - 1));
         });

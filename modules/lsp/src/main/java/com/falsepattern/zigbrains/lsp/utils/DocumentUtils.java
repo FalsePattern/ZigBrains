@@ -163,7 +163,7 @@ public class DocumentUtils {
         return computableReadAction(() -> !editor.getSettings().isUseTabCharacter(editor.getProject()));
     }
 
-    public static List<Either<TextEdit, InsertReplaceEdit>> toEither(List<TextEdit> edits) {
+    public static List<Either<TextEdit, InsertReplaceEdit>> toEither(List<? extends TextEdit> edits) {
         return edits.stream().map(Either::<TextEdit, InsertReplaceEdit>forLeft).collect(Collectors.toList());
     }
 }

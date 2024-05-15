@@ -30,6 +30,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
+import com.intellij.openapi.util.io.FileUtil;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import lombok.val;
@@ -75,7 +76,7 @@ public class ZLSStartupActivity implements ProjectActivity {
                 if (configPath == null || configPath.isBlank()) {
                     blk:
                     try {
-                        val tmpFile = Files.createTempFile("zigbrains-zls-autoconf", ".json");
+                        val tmpFile = FileUtil.createTempFile("zigbrains-zls-autoconf", ".json", true).toPath();
                         val config = ZLSConfigProvider.findEnvironment(project);
                         if (StringUtil.isEmpty(config.zig_exe_path()) && StringUtil.isEmpty(config.zig_lib_path())) {
                             // TODO this generates unnecessary noise in non-zig projects, find an alternative.

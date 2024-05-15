@@ -18,6 +18,9 @@ package com.falsepattern.zigbrains.debugger;
 
 import com.falsepattern.zigbrains.debugbridge.DebuggerDriverProvider;
 import com.falsepattern.zigbrains.debugger.win.WinDebuggerDriverConfiguration;
+import com.falsepattern.zigbrains.project.util.CLIUtil;
+import com.intellij.execution.ExecutionException;
+import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -25,6 +28,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.util.system.OS;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,5 +54,24 @@ public class Utils {
         } else {
             return null;
         }
+    }
+
+    public static void executeCommandLineWithErrorChecks(GeneralCommandLine cli) throws ExecutionException, ProcessException {
+        val outputOpt = CLIUtil.execute(cli, Integer.MAX_VALUE);
+        if (outputOpt.isEmpty()) {
+            throw new ExecutionException("Failed to execute \"" + cli.getCommandLineString() + "\"!");
+        }
+        val output = outputOpt.get();
+        if (output.getExitCode() != 0) {
+            throw new ProcessException(cli.getCommandLineString(), output.getStdout(), output.getStderr(), output.getExitCode());
+        }
+    }
+
+    @RequiredArgsConstructor
+    public static class ProcessException extends Exception {
+        public final String command;
+        public final String stdout;
+        public final String stderr;
+        public final int exitCode;
     }
 }
