@@ -16,13 +16,13 @@
 
 package com.falsepattern.zigbrains.debugger.runner.base;
 
+import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.runconfig.ZigProgramRunnerBase;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.debugger.Utils;
 import com.falsepattern.zigbrains.debugger.ZigLocalDebugProcess;
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.filters.Filter;
@@ -40,16 +40,17 @@ import com.intellij.xdebugger.XDebugProcess;
 import com.intellij.xdebugger.XDebugProcessStarter;
 import com.intellij.xdebugger.XDebugSession;
 import com.intellij.xdebugger.XDebuggerManager;
-import com.jetbrains.cidr.execution.Installer;
-import com.jetbrains.cidr.execution.TrivialRunParameters;
+import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriver;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?>> extends ZigProgramRunnerBase<ProfileState> {
     public ZigDebugRunnerBase() {
@@ -72,35 +73,12 @@ public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?
             Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Error", "Couldn't find a working GDB or LLDB debugger! Please check your Toolchains! (Settings | Build, Execution, Deployment | Toolchains)", NotificationType.ERROR));
             return null;
         }
-        Either<ZigDebugParametersBase<ProfileState>, ExecutionException> runParameters;
-
-        try {
-            runParameters = ApplicationManager.getApplication().executeOnPooledThread(() -> getDebugParametersSafe(state, environment, debuggerDriver, toolchain)).get();
-        } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
-            e.printStackTrace();
-            Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Error", e.getMessage(), NotificationType.ERROR));
-            return null;
-        }
+        ZigDebugParametersBase<ProfileState> runParameters = getDebugParameters(state, environment, debuggerDriver, toolchain);
         if (runParameters == null) {
-            //Assume that getDebugParameters reports the bug in a notification already
             return null;
         }
 
-        if (runParameters.isRight()) {
-            return startSession(environment, new ErrorProcessStarter(state, runParameters.getRight(), debuggerDriver));
-        } else if (runParameters.isLeft()) {
-            return startSession(environment, new ZigLocalDebugProcessStarter(runParameters.getLeft(), state, environment));
-        } else {
-            return null;
-        }
-    }
-
-    private Either<ZigDebugParametersBase<ProfileState>, ExecutionException> getDebugParametersSafe(ProfileState state, ExecutionEnvironment environment, DebuggerDriverConfiguration debuggerDriver, AbstractZigToolchain toolchain) {
-        try {
-            return Either.forLeft(getDebugParameters(state, environment, debuggerDriver, toolchain));
-        } catch (ExecutionException e) {
-            return Either.forRight(e);
-        }
+        return startSession(environment, new ZigLocalDebugProcessStarter(runParameters, state, environment));
     }
 
     @Override
@@ -113,30 +91,33 @@ public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?
         private final ZigDebugParametersBase<ProfileState> params;
         private final ProfileState state;
         private final ExecutionEnvironment environment;
+        private static class Carrier {
+            volatile ConsoleView console;
+            final Map<ConsoleViewContentType, List<String>> outputs = new HashMap<>();
 
-        @Override
-        public @NotNull XDebugProcess start(@NotNull XDebugSession session) throws ExecutionException {
-            val process = new ZigLocalDebugProcess(params, session, state.getConsoleBuilder());
-            ProcessTerminatedListener.attach(process.getProcessHandler(), environment.getProject());
-            process.start();
-            return process;
+            void handleOutput(String text, ConsoleViewContentType type) {
+                if (console != null) {
+                    console.print(text, type);
+                } else {
+                    outputs.computeIfAbsent(type, (ignored) -> new ArrayList<>()).add(text);
+                }
+            }
         }
-    }
-
-    @RequiredArgsConstructor
-    private class ErrorProcessStarter extends XDebugProcessStarter {
-        private final ProfileState state;
-        private final ExecutionException exception;
-        private final DebuggerDriverConfiguration debuggerDriver;
 
         @Override
         public @NotNull XDebugProcess start(@NotNull XDebugSession session) throws ExecutionException {
             val cb = state.getConsoleBuilder();
+            val carrier = new Carrier();
             val wrappedBuilder = new TextConsoleBuilder() {
                 @Override
                 public @NotNull ConsoleView getConsole() {
                     val console = cb.getConsole();
-                    console.print(exception.getMessage(), ConsoleViewContentType.ERROR_OUTPUT);
+                    for (val output: carrier.outputs.entrySet()) {
+                        for (val line: output.getValue()) {
+                            console.print(line + "\n", output.getKey());
+                        }
+                    }
+                    carrier.console = console;
                     return console;
                 }
 
@@ -150,18 +131,35 @@ public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?
                     cb.setViewer(isViewer);
                 }
             };
-            val process = new ZigLocalDebugProcess(new TrivialRunParameters(debuggerDriver, new Installer() {
-                @Override
-                public @NotNull GeneralCommandLine install() throws ExecutionException {
-                    throw new ExecutionException("Failed to start debugging");
-                }
+            val process = new ZigLocalDebugProcess(params, session, wrappedBuilder);
+            ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                ProcessTerminatedListener.attach(process.getProcessHandler(), environment.getProject());
 
-                @Override
-                public @NotNull File getExecutableFile() {
-                    return null;
+                if (params instanceof PreLaunchAware pla) {
+                    try {
+                        pla.preLaunch();
+                    } catch (Exception e) {
+                        ApplicationUtil.invokeLater(() -> {
+                            if (e instanceof Utils.ProcessException pe) {
+                                carrier.handleOutput(pe.command + "\n", ConsoleViewContentType.SYSTEM_OUTPUT);
+                                carrier.handleOutput("Compilation failure!\n", ConsoleViewContentType.SYSTEM_OUTPUT);
+                                carrier.handleOutput(pe.stdout, ConsoleViewContentType.NORMAL_OUTPUT);
+                                carrier.handleOutput(pe.stderr, ConsoleViewContentType.ERROR_OUTPUT);
+                                process.handleTargetTerminated(new DebuggerDriver.ExitStatus(pe.exitCode));
+                            } else {
+                                carrier.handleOutput("Exception while compiling binary:\n", ConsoleViewContentType.SYSTEM_OUTPUT);
+                                carrier.handleOutput(e.getMessage(), ConsoleViewContentType.ERROR_OUTPUT);
+                                process.handleTargetTerminated(new DebuggerDriver.ExitStatus(-1));
+                            }
+                            process.stop();
+                            ApplicationManager.getApplication().executeOnPooledThread(() -> process.unSuppress(false));
+                        });
+                        return;
+                    }
                 }
-            }), session, wrappedBuilder);
-            process.start();
+                process.unSuppress(true);
+            });
+            process.doStart();
             return process;
         }
     }

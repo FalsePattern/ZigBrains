@@ -16,6 +16,8 @@
 
 package com.falsepattern.zigbrains.debugger.runner.build;
 
+import com.falsepattern.zigbrains.debugger.Utils;
+import com.falsepattern.zigbrains.debugger.runner.base.PreLaunchAware;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstaller;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
 import com.falsepattern.zigbrains.project.execution.build.ProfileStateBuild;
@@ -23,6 +25,7 @@ import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.openapi.application.ApplicationManager;
 import com.jetbrains.cidr.execution.Installer;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.Cleanup;
@@ -35,22 +38,21 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
-public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileStateBuild> {
+public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileStateBuild> implements PreLaunchAware {
     private static final String BoilerplateNotice = "\nPlease edit this intellij build configuration and specify the path of the executable created by \"zig build\" directly!";
-    private final File executableFile;
-    public ZigDebugParametersBuild(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateBuild profileStateBuild) throws ExecutionException {
-        super(driverConfiguration, toolchain, profileStateBuild);
-        val commandLine = profileState.getCommandLine(toolchain, true);
-        val outputOpt = CLIUtil.execute(commandLine, Integer.MAX_VALUE);
-        if (outputOpt.isEmpty()) {
-            throw new ExecutionException("Failed to execute \"zig " + commandLine.getParametersList().getParametersString() + "\"!");
-        }
-        val output = outputOpt.get();
-        if (output.getExitCode() != 0) {
-            throw new ExecutionException("Zig compilation failed with exit code " + output.getExitCode() + "\nError output:\n" + output.getStdout() + "\n" + output.getStderr());
-        }
 
+    private volatile File executableFile;
+
+    public ZigDebugParametersBuild(DebuggerDriverConfiguration driverConfiguration, AbstractZigToolchain toolchain, ProfileStateBuild profileStateBuild) {
+        super(driverConfiguration, toolchain, profileStateBuild);
+
+    }
+
+    private File compileExe() throws ExecutionException, Utils.ProcessException {
+        val commandLine = profileState.getCommandLine(toolchain, true);
+        Utils.executeCommandLineWithErrorChecks(commandLine);
         val cfg = profileState.configuration();
         val workingDir = cfg.getWorkingDirectory().getPath().orElse(null);
         val exePath = profileState.configuration().getExePath().getPath();
@@ -84,11 +86,17 @@ public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileState
             throw new ExecutionException("File " + exe + " is not executable!");
         }
 
-        executableFile = exe.toFile();
+        return exe.toFile();
+    }
+
+    @Override
+    public void preLaunch() throws Exception {
+        this.executableFile = compileExe();
     }
 
     @Override
     public @NotNull Installer getInstaller() {
+        assert executableFile != null;
         return new ZigDebugEmitBinaryInstaller<>(profileState, toolchain, executableFile, profileState.configuration().getExeArgs().args);
     }
 }

@@ -17,7 +17,11 @@
 package com.falsepattern.zigbrains.project.execution.run;
 
 import com.falsepattern.zigbrains.common.util.CollectionUtil;
-import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.ArgsConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.CheckboxConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.FilePathConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.OptimizationConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.ZigConfigurable;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.Executor;
@@ -32,12 +36,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.coloredConfigurable;
+
 @Getter
 public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
-    private ZigConfigEditor.FilePathConfigurable filePath = new ZigConfigEditor.FilePathConfigurable("filePath", "File Path");
-    private ZigConfigEditor.CheckboxConfigurable colored = ZigConfigEditor.coloredConfigurable("colored");
-    private ZigConfigEditor.OptimizationConfigurable optimization = new ZigConfigEditor.OptimizationConfigurable("optimization");
-    private ZigConfigEditor.ArgsConfigurable exeArgs = new ZigConfigEditor.ArgsConfigurable("exeArgs", "Arguments for the compile exe");
+    private FilePathConfigurable filePath = new FilePathConfigurable("filePath", "File Path");
+    private CheckboxConfigurable colored = coloredConfigurable("colored");
+    private OptimizationConfigurable optimization = new OptimizationConfigurable("optimization");
+    private ArgsConfigurable compilerArgs = new ArgsConfigurable("compilerArgs", "Extra compiler command line arguments");
+    private ArgsConfigurable exeArgs = new ArgsConfigurable("exeArgs", "Output program command line arguments");
     public ZigExecConfigRun(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Run");
     }
@@ -51,6 +58,7 @@ public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
         if (!debug || optimization.forced) {
             result.addAll(List.of("-O", optimization.level.name()));
         }
+        result.addAll(List.of(compilerArgs.args));
         if (!debug) {
             result.add("--");
             result.addAll(List.of(exeArgs.args));
@@ -68,14 +76,15 @@ public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
         val clone = super.clone();
         clone.filePath = filePath.clone();
         clone.colored = colored.clone();
+        clone.compilerArgs = compilerArgs.clone();
         clone.optimization = optimization.clone();
         clone.exeArgs = exeArgs.clone();
         return clone;
     }
 
     @Override
-    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
-        return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored);
+    public @NotNull List<ZigConfigurable<?>> getConfigurables() {
+        return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored, compilerArgs, exeArgs);
     }
 
     @Override

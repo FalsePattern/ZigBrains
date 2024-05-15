@@ -18,7 +18,9 @@ package com.falsepattern.zigbrains.project.execution.build;
 
 import com.falsepattern.zigbrains.common.ZBFeatures;
 import com.falsepattern.zigbrains.common.util.CollectionUtil;
-import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.ArgsConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.CheckboxConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.FilePathConfigurable;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.ExecutionException;
@@ -34,13 +36,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.*;
+
 @Getter
 public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
-    private ZigConfigEditor.ArgsConfigurable buildSteps = new ZigConfigEditor.ArgsConfigurable("buildSteps", "Build steps");
-    private ZigConfigEditor.ArgsConfigurable extraArgs = new ZigConfigEditor.ArgsConfigurable("extraArgs", "Extra command line arguments");
-    private ZigConfigEditor.CheckboxConfigurable colored = ZigConfigEditor.coloredConfigurable("colored");
-    private ZigConfigEditor.FilePathConfigurable exePath = new ZigConfigEditor.FilePathConfigurable("exePath", "Output executable created by the build (debugging, autodetect if empty)");
-    private ZigConfigEditor.ArgsConfigurable exeArgs = new ZigConfigEditor.ArgsConfigurable("exeArgs", "Command line arguments for executable (debugging)");
+    private ArgsConfigurable buildSteps = new ArgsConfigurable("buildSteps", "Build steps");
+    private ArgsConfigurable extraArgs = new ArgsConfigurable("extraArgs", "Extra command line arguments");
+    private CheckboxConfigurable colored = coloredConfigurable("colored");
+    private FilePathConfigurable exePath = new FilePathConfigurable("exePath", "Output executable created by the build (debugging, autodetect if empty)");
+    private ArgsConfigurable exeArgs = new ArgsConfigurable("exeArgs", "Command line arguments for executable (debugging)");
     public ZigExecConfigBuild(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Build");
     }
@@ -75,7 +79,7 @@ public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {
     }
 
     @Override
-    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
+    public @NotNull List<ZigConfigurable<?>> getConfigurables() {
         val baseCfg = CollectionUtil.concat(super.getConfigurables(), buildSteps, extraArgs, colored);
         if (ZBFeatures.debug()) {
             return CollectionUtil.concat(baseCfg, exePath, exeArgs);

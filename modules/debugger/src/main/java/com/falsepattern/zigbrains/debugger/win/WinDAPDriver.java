@@ -96,7 +96,8 @@ public class WinDAPDriver extends DAPDriver<
         return capabilitiesCompletableFuture.thenCombine(handshakeFuture, (res, hs) -> res);
     }
 
-    @SuppressWarnings("unused")
+    //Weird nested generics interaction, not suppressing unchecked causes a linter error, I have no idea how to fix this
+    @SuppressWarnings({"unchecked", "RedundantSuppression"})
     protected class WinDAPDebuggerClient extends DAPDebuggerClient {
         @Override
         public void output(OutputEventArguments args) {

@@ -572,7 +572,7 @@ public class EditorEventManager {
             try {
                 request.thenAccept(formatting -> {
                     if (formatting != null) {
-                        invokeLater(() -> applyEdit(toEither((List<TextEdit>) formatting), "Reformat document", false));
+                        invokeLater(() -> applyEdit(toEither(formatting), "Reformat document", false));
                     }
                 });
             } catch (IndexOutOfBoundsException e) {
@@ -614,7 +614,7 @@ public class EditorEventManager {
                 }
                 invokeLater(() -> {
                     if (!editor.isDisposed()) {
-                        applyEdit(toEither((List<TextEdit>) formatting), "Reformat selection", false);
+                        applyEdit(toEither(formatting), "Reformat selection", false);
                     }
                 });
             });
@@ -1347,13 +1347,15 @@ public class EditorEventManager {
                                            .withFix(new LSPCodeActionFix(FileUtils.editorToURIString(editor), codeAction))
                                            .create();
 
-                            SmartList<Annotation> asList = (SmartList<Annotation>) this.anonHolder;
+                            @SuppressWarnings("unchecked")
+                            SmartList<? extends Annotation> asList = (SmartList<Annotation>) this.anonHolder;
                             this.annotations.add(asList.get(asList.size() - 1));
 
 
                             diagnosticSyncRequired = true;
-                        } catch (IllegalArgumentException ignored) {
+                        } catch (IllegalArgumentException e) {
                             //TODO Suppressed error, fix this somehow
+                            e.printStackTrace();
                         }
                     }
                 }

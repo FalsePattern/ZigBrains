@@ -17,7 +17,9 @@
 package com.falsepattern.zigbrains.debugger.execution.binary;
 
 import com.falsepattern.zigbrains.common.util.CollectionUtil;
-import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.ArgsConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.FilePathConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.ZigConfigurable;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
@@ -32,8 +34,8 @@ import java.util.List;
 
 @Getter
 public class ZigExecConfigBinary extends ZigExecConfigBase<ZigExecConfigBinary> {
-    private ZigConfigEditor.FilePathConfigurable exePath = new ZigConfigEditor.FilePathConfigurable("exePath", "Executable program path (not the zig compiler)");
-    private ZigConfigEditor.ArgsConfigurable args = new ZigConfigEditor.ArgsConfigurable("args", "Command line arguments");
+    private FilePathConfigurable exePath = new FilePathConfigurable("exePath", "Executable program path (not the zig compiler)");
+    private ArgsConfigurable args = new ArgsConfigurable("args", "Command line arguments");
 
     public ZigExecConfigBinary(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig-compiled native executable");
@@ -59,7 +61,7 @@ public class ZigExecConfigBinary extends ZigExecConfigBase<ZigExecConfigBinary> 
     }
 
     @Override
-    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
+    public @NotNull List<ZigConfigurable<?>> getConfigurables() {
         return CollectionUtil.concat(super.getConfigurables(), exePath, args);
     }
 

@@ -23,8 +23,11 @@ import com.jetbrains.cidr.ArchitectureType;
 import com.jetbrains.cidr.execution.RunParameters;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.CompletableFuture;
 
 
 @RequiredArgsConstructor
