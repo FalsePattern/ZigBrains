@@ -18,7 +18,11 @@ package com.falsepattern.zigbrains.project.execution.test;
 
 import com.falsepattern.zigbrains.common.util.CollectionUtil;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
-import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.ArgsConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.CheckboxConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.FilePathConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.OptimizationConfigurable;
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.ZigConfigurable;
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfigBase;
 import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.Executor;
@@ -33,12 +37,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.coloredConfigurable;
+
 @Getter
 public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
-    private ZigConfigEditor.FilePathConfigurable filePath = new ZigConfigEditor.FilePathConfigurable("filePath", "File path");
-    private ZigConfigEditor.CheckboxConfigurable colored = ZigConfigEditor.coloredConfigurable("colored");
-    private ZigConfigEditor.OptimizationConfigurable optimization = new ZigConfigEditor.OptimizationConfigurable("optimization");
-    private ZigConfigEditor.ArgsConfigurable compilerArgs = new ZigConfigEditor.ArgsConfigurable("compilerArgs", "Extra compiler command line arguments");
+    private FilePathConfigurable filePath = new FilePathConfigurable("filePath", "File path");
+    private CheckboxConfigurable colored = coloredConfigurable("colored");
+    private OptimizationConfigurable optimization = new OptimizationConfigurable("optimization");
+    private ArgsConfigurable compilerArgs = new ArgsConfigurable("compilerArgs", "Extra compiler command line arguments");
     public ZigExecConfigTest(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Test");
     }
@@ -80,7 +86,7 @@ public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
     }
 
     @Override
-    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
+    public @NotNull List<ZigConfigurable<?>> getConfigurables() {
         return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored, compilerArgs);
     }
 }
