@@ -75,7 +75,7 @@ public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
 
     @Override
     public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
-        return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored);
+        return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored, exeArgs);
     }
 
     @Override

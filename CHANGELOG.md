@@ -22,6 +22,9 @@ Changelog structure reference:
 - Debugging
   - The debugger no longer freezes the IDE while zig is compiling
 
+- Project
+  - Exe args for zig run not visible in the GUI
+
 ## [14.2.0]
 
 ### Added
