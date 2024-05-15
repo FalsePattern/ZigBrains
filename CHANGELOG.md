@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Project
+  - Extra compiler arguments field for zig test/run tasks
+
 ### Fixed
 
 - Debugging

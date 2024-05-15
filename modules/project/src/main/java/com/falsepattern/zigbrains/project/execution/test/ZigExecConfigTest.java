@@ -38,6 +38,7 @@ public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
     private ZigConfigEditor.FilePathConfigurable filePath = new ZigConfigEditor.FilePathConfigurable("filePath", "File path");
     private ZigConfigEditor.CheckboxConfigurable colored = ZigConfigEditor.coloredConfigurable("colored");
     private ZigConfigEditor.OptimizationConfigurable optimization = new ZigConfigEditor.OptimizationConfigurable("optimization");
+    private ZigConfigEditor.ArgsConfigurable compilerArgs = new ZigConfigEditor.ArgsConfigurable("compilerArgs", "Extra compiler command line arguments");
     public ZigExecConfigTest(@NotNull Project project, @NotNull ConfigurationFactory factory) {
         super(project, factory, "Zig Test");
     }
@@ -51,6 +52,7 @@ public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
         if (!debug || optimization.forced) {
             result.addAll(List.of("-O", optimization.level.name()));
         }
+        result.addAll(List.of(compilerArgs.args));
         if (debug) {
             result.add("--test-no-exec");
         }
@@ -73,11 +75,12 @@ public class ZigExecConfigTest extends ZigExecConfigBase<ZigExecConfigTest> {
         clone.filePath = filePath.clone();
         clone.colored = colored.clone();
         clone.optimization = optimization.clone();
+        clone.compilerArgs = compilerArgs.clone();
         return clone;
     }
 
     @Override
     public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
-        return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored);
+        return CollectionUtil.concat(super.getConfigurables(), filePath, optimization, colored, compilerArgs);
     }
 }
