@@ -800,22 +800,21 @@ public class EditorEventManager {
         return getCompletionPrefix(this.editor, offset).length();
     }
 
+    private static final List<String> WHITESPACE_DELIMITERS = Arrays.asList(" \t\n\r".split(""));
+
     @NotNull
     public String getCompletionPrefix(Editor editor, int offset) {
-        List<String> delimiters = new ArrayList<>(this.completionTriggers);
-        // add whitespace as delimiter, otherwise forced completion does not work
-        delimiters.addAll(Arrays.asList(" \t\n\r".split("")));
-
         StringBuilder s = new StringBuilder();
         String documentText = editor.getDocument().getText();
         for (int i = 0; i < offset; i++) {
             char singleLetter = documentText.charAt(offset - i - 1);
-            if (delimiters.contains(String.valueOf(singleLetter))) {
-                return s.reverse().toString();
+            val letterString = String.valueOf(singleLetter);
+            if (WHITESPACE_DELIMITERS.contains(letterString) || completionTriggers.contains(letterString)) {
+                break;
             }
             s.append(singleLetter);
         }
-        return "";
+        return s.reverse().toString();
     }
 
     @SuppressWarnings("WeakerAccess")
