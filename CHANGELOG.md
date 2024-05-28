@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Fixed indentation to be more consistent with zig fmt
+
 ## [14.3.0]
 
 ### Added
