@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-declare -a branches=("master" "233" "232" "231")
+declare -a branches=("master" "241" "233" "232" "231")
 
 DEFAULT_BRANCH="${branches[0]}"
 

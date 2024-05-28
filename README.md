@@ -15,6 +15,7 @@ through the built-in plugin browser:
 1. Go to `Settings -> Plugins`
 2. To the right of the `Installed` button at the top, click on the `...` dropdown menu, then select `Manage Plugin Repositories...`
 3. Click the add button, and then enter the ZigBrains updater URL, based on your IDE version:
+   - `2024.2.*`: https://falsepattern.com/zigbrains/updatePlugins-242.xml
    - `2024.1.*`: https://falsepattern.com/zigbrains/updatePlugins-241.xml
    - `2023.3.*`: https://falsepattern.com/zigbrains/updatePlugins-233.xml
    - `2023.2.*`: https://falsepattern.com/zigbrains/updatePlugins-232.xml
@@ -22,7 +23,7 @@ through the built-in plugin browser:
 4. Click `OK`, and your IDE should now automatically detect the latest version
 (both in the Installed tab and in the Marketplace tab), even if it's not yet verified on the official JetBrains marketplace yet.
 
-(optional) If you want to access the latest development versions (`2024.1.*` ONLY), you can use this updater URL:
+(optional) If you want to access the latest development versions (`2024.2.*` ONLY), you can use this updater URL:
 https://falsepattern.com/zigbrains/updatePlugins-dev.xml
 
 These dev releases are based on the latest public commits on the `master` branch, so they're not backported to older IDE versions, only tagged releases are.
