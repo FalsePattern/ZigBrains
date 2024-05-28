@@ -47,7 +47,6 @@ import static com.falsepattern.zigbrains.zig.psi.ZigTypes.INIT_LIST;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.KEYWORD_ELSE;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.LBRACE;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.LPAREN;
-import static com.falsepattern.zigbrains.zig.psi.ZigTypes.PARAM_DECL;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.PARAM_DECL_LIST;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.RBRACE;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.RPAREN;

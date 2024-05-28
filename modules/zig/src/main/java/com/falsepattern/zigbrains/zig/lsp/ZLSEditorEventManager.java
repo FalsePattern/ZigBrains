@@ -29,14 +29,11 @@ import com.falsepattern.zigbrains.zig.util.TokenDecoder;
 import com.intellij.lang.annotation.Annotation;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentListener;
-import lombok.val;
-import org.eclipse.lsp4j.InsertReplaceEdit;
 import org.eclipse.lsp4j.SemanticTokens;
 import org.eclipse.lsp4j.SemanticTokensDelta;
 import org.eclipse.lsp4j.SemanticTokensDeltaParams;
 import org.eclipse.lsp4j.SemanticTokensEdit;
 import org.eclipse.lsp4j.SemanticTokensParams;
-import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.JsonRpcException;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
