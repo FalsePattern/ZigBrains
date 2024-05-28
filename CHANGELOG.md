@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- Project
+  - Updated new project templates to the latest Zig 0.13.0 init files
+
 ### Fixed
 
 - Zig
