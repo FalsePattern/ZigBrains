@@ -22,6 +22,11 @@ Changelog structure reference:
 - Zig
   - Fixed inconsistent caret indenting for switches and function parameters
 
+### Removed
+
+- LSP
+  - Notification spam about ZLS missing in non-zig projects
+
 ## [14.4.0]
 
 ### Fixed
