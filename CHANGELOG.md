@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Fixed inconsistent caret indenting for switches and function parameters
+
 ## [14.4.0]
 
 ### Fixed

@@ -404,7 +404,7 @@ PtrPayload ::= PIPE ASTERISK? IDENTIFIER PIPE
 PtrIndexPayload ::= PIPE (ASTERISK? IDENTIFIER COMMA)* (ASTERISK? IDENTIFIER) PIPE
 
 // Switch specific
-SwitchProng ::= KEYWORD_INLINE? SwitchCase EQUALRARROW PtrIndexPayload? SingleAssignExpr
+SwitchProng ::= KEYWORD_INLINE? SwitchCase EQUALRARROW PtrIndexPayload? SingleAssignExpr {pin=3}
 
 SwitchCase
 ::= SwitchItem (COMMA SwitchItem)* COMMA?
@@ -493,11 +493,7 @@ SuffixOp
   | DOTASTERISK
   | DOTQUESTIONMARK
 
-FnCallArguments ::= LPAREN ZB_FnCallArguments_ExprList RPAREN {pin=1}
-
-private ZB_FnCallArguments_ExprList ::= ExprList {recoverWhile="ZB_FnCallArguments_ExprList_recover"}
-
-private ZB_FnCallArguments_ExprList_recover ::= !(RPAREN)
+FnCallArguments ::= LPAREN ExprList RPAREN {pin=1}
 
 // Ptr specific
 SliceTypeStart ::= LBRACKET (COLON Expr)? RBRACKET
@@ -530,7 +526,7 @@ ByteAlign ::= KEYWORD_ALIGN LPAREN Expr RPAREN
 // Lists
 IdentifierList ::= (DOC_COMMENT? IDENTIFIER COMMA)* (DOC_COMMENT? IDENTIFIER)?
 
-SwitchProngList ::= (SwitchProng COMMA)* SwitchProng?
+SwitchProngList ::= (SwitchProng COMMA)* SwitchProng? {recoverWhile="#auto"}
 
 AsmOutputList ::= (AsmOutputItem COMMA)* AsmOutputItem?
 
@@ -540,6 +536,9 @@ StringList ::= (StringLiteral COMMA)* StringLiteral?
 
 ParamDeclList ::= (ParamDecl COMMA)* ParamDecl?
 
-ExprList ::= (Expr COMMA)* Expr?
+ExprList ::= (ZB_ExprList_Expr COMMA)* ZB_ExprList_Expr?
+
+private ZB_ExprList_Expr ::= Expr {recoverWhile="ZB_ExprList_recover"}
+private ZB_ExprList_recover ::= !(RPAREN | COMMA)
 
 StringLiteral ::= STRING_LITERAL_SINGLE | STRING_LITERAL_MULTI
