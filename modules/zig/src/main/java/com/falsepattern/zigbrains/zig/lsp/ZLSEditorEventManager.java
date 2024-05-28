@@ -118,13 +118,7 @@ public class ZLSEditorEventManager extends EditorEventManager {
     }
 
     @Override
-    public Runnable getEditsRunnable(int version, List<Either<TextEdit, InsertReplaceEdit>> edits, String name, boolean setCaret) {
-        val run = super.getEditsRunnable(version, edits, name, setCaret);
-        return () -> {
-            run.run();
-            if (!editor.isDisposed()) {
-                HighlightingUtil.refreshHighlighting(this);
-            }
-        };
+    protected void postEdit() {
+        HighlightingUtil.refreshHighlighting(this);
     }
 }

@@ -770,7 +770,7 @@ public class EditorEventManager {
                 }
 
                 context.commitDocument();
-                applyEdit(Integer.MAX_VALUE, toEither(addTextEdits), "Completion : " + label, false, false);
+                applyEdit(Integer.MAX_VALUE, toEither(addTextEdits), "Completion : " + label, false);
                 if (command != null) {
                     executeCommands(Collections.singletonList(command));
                 }
@@ -893,7 +893,7 @@ public class EditorEventManager {
     }
 
     boolean applyEdit(List<Either<TextEdit, InsertReplaceEdit>> edits, String name, boolean setCaret) {
-        return applyEdit(Integer.MAX_VALUE, edits, name, false, setCaret);
+        return applyEdit(Integer.MAX_VALUE, edits, name, setCaret);
     }
 
     /**
@@ -902,24 +902,28 @@ public class EditorEventManager {
      * @param version    The version of the edits (will be discarded if older than current version)
      * @param edits      The edits to apply
      * @param name       The name of the edits (Rename, for example)
-     * @param closeAfter will close the file after edits if set to true
      * @return True if the edits were applied, false otherwise
      */
-    boolean applyEdit(int version, List<Either<TextEdit, InsertReplaceEdit>> edits, String name, boolean closeAfter, boolean setCaret) {
+    boolean applyEdit(int version, List<Either<TextEdit, InsertReplaceEdit>> edits, String name, boolean setCaret) {
         Runnable runnable = getEditsRunnable(version, edits, name, setCaret);
         writeAction(() -> {
             if (runnable != null) {
                 CommandProcessor.getInstance()
                         .executeCommand(project, runnable, name, "LSPPlugin", editor.getDocument());
             }
-            if (closeAfter) {
-                PsiFile file = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
-                if (file != null) {
-                    FileEditorManager.getInstance(project).closeFile(file.getVirtualFile());
-                }
-            }
+            postEdit();
+//            if (closeAfter) {
+//                PsiFile file = PsiDocumentManager.getInstance(project).getPsiFile(editor.getDocument());
+//                if (file != null) {
+//                    FileEditorManager.getInstance(project).closeFile(file.getVirtualFile());
+//                }
+//            }
         });
         return runnable != null;
+    }
+
+    protected void postEdit() {
+
     }
 
     /**
