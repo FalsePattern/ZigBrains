@@ -17,6 +17,14 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [14.4.0]
+
+### Fixed
+
+- Zig
+  - Fixed indentation to be more consistent with zig fmt
+  - Code completion now works correctly on the first line in a file too
+
 ## [14.3.0]
 
 ### Added
