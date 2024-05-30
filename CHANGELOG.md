@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [14.5.0]
+
 ### Changed
 
 - Project
