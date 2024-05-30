@@ -23,11 +23,6 @@ through the built-in plugin browser:
 4. Click `OK`, and your IDE should now automatically detect the latest version
 (both in the Installed tab and in the Marketplace tab), even if it's not yet verified on the official JetBrains marketplace yet.
 
-(optional) If you want to access the latest development versions (`2024.2.*` ONLY), you can use this updater URL:
-https://falsepattern.com/zigbrains/updatePlugins-dev.xml
-
-These dev releases are based on the latest public commits on the `master` branch, so they're not backported to older IDE versions, only tagged releases are.
-
 ## Developer guide
 
 ### All platforms
