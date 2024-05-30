@@ -17,6 +17,25 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [14.5.0]
+
+### Changed
+
+- Project
+  - Updated new project templates to the latest Zig 0.13.0 init files
+
+### Fixed
+
+- Zig
+  - Fixed inconsistent caret indenting for switches and function parameters
+  - More robust highlighting when auto-formatting
+  - Fixed multiple grammar errors
+
+### Removed
+
+- LSP
+  - Notification spam about ZLS missing in non-zig projects
+
 ## [14.4.0]
 
 ### Fixed

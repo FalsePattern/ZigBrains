@@ -68,7 +68,7 @@ public class ZLSStartupActivity implements ProjectActivity {
                 }
                 var configPath = state.zlsConfigPath;
                 boolean configOK = true;
-                if (!configPath.isEmpty() && !validatePath("ZLS Config", configPath, false)) {
+                if (!configPath.isBlank() && !validatePath("ZLS Config", configPath, false)) {
                     Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Using default config path.",
                                                               NotificationType.INFORMATION));
                     configPath = null;
@@ -138,7 +138,6 @@ public class ZLSStartupActivity implements ProjectActivity {
 
     private static boolean validatePath(String name, String pathTxt, boolean dir) {
         if (pathTxt == null || pathTxt.isBlank()) {
-            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Missing " + name, "No path was specified", NotificationType.WARNING));
             return false;
         }
         Path path;
