@@ -27,6 +27,7 @@ Changelog structure reference:
 - Zig
   - Fixed inconsistent caret indenting for switches and function parameters
   - More robust highlighting when auto-formatting
+  - Fixed multiple grammar errors
 
 ### Removed
 

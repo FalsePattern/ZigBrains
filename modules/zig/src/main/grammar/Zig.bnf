@@ -177,7 +177,7 @@ TestDecl ::= DOC_COMMENT? KEYWORD_TEST (STRING_LITERAL_SINGLE | IDENTIFIER)? Blo
 ComptimeDecl ::= KEYWORD_COMPTIME Block {pin=1}
 
 Decl
-::= (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE? | KEYWORD_INLINE | KEYWORD_NOILINE)? FnProto (SEMICOLON | Block)
+::= (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE? | KEYWORD_INLINE | KEYWORD_NOINLINE)? FnProto (SEMICOLON | Block)
   | (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE?)? KEYWORD_THREADLOCAL? GlobalVarDecl
   | KEYWORD_USINGNAMESPACE Expr SEMICOLON
 
@@ -216,12 +216,18 @@ LabeledStatement ::= BlockLabel? (Block | LoopStatement)
 LoopStatement ::= KEYWORD_INLINE? (ForStatement | WhileStatement)
 
 ForStatement
-::= ForPrefix BlockExpr ( KEYWORD_ELSE Statement )?
-  | ForPrefix AssignExpr ( SEMICOLON | KEYWORD_ELSE Statement ) {pin(".*")=1}
+::= ForPrefix ZB_ForStatement_Body {pin(".*")=1}
+
+private ZB_ForStatement_Body
+::= BlockExpr ( KEYWORD_ELSE Statement )?
+  | AssignExpr ( SEMICOLON | KEYWORD_ELSE Statement )
 
 WhileStatement
-::= WhilePrefix BlockExpr ( KEYWORD_ELSE Payload? Statement )?
-  | WhilePrefix AssignExpr ( SEMICOLON | KEYWORD_ELSE Payload? Statement) {pin(".*") =1}
+::= WhilePrefix ZB_WhileStatement_Body {pin(".*") =1}
+
+private ZB_WhileStatement_Body
+::= BlockExpr ( KEYWORD_ELSE Payload? Statement )?
+  | AssignExpr ( SEMICOLON | KEYWORD_ELSE Payload? Statement)
 
 BlockExprStatement
 ::= BlockExpr
@@ -276,7 +282,7 @@ PrimaryExpr
 
 IfExpr ::= IfPrefix Expr (KEYWORD_ELSE Payload? Expr)?
 
-Block ::= LBRACE ZB_Block_Statement RBRACE {pin(".*")=1}
+Block ::= LBRACE ZB_Block_Statement RBRACE {pin=1}
 
 private ZB_Block_Statement ::= Statement* {recoverWhile="ZB_Block_Statement_recover"}
 
@@ -291,9 +297,12 @@ WhileExpr ::= WhilePrefix Expr (KEYWORD_ELSE Payload? Expr)?
 CurlySuffixExpr ::= TypeExpr InitList?
 
 InitList
-    ::= LBRACE FieldInit (COMMA ZB_InitList_FieldInit)* COMMA? RBRACE
-     | LBRACE Expr (COMMA ZB_InitList_Expr)* COMMA? RBRACE
-     | LBRACE RBRACE {pin=1}
+::= LBRACE ZB_InitList_Body {pin=1}
+
+private ZB_InitList_Body
+::= FieldInit (COMMA ZB_InitList_FieldInit)* COMMA? RBRACE
+  | Expr (COMMA ZB_InitList_Expr)* COMMA? RBRACE
+  | RBRACE {pin(".*")=1}
 
 private ZB_InitList_FieldInit ::= FieldInit {recoverWhile="#auto"}
 private ZB_InitList_Expr ::= Expr {recoverWhile="#auto"}
