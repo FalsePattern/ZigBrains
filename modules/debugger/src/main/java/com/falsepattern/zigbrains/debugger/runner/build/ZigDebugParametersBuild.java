@@ -22,23 +22,16 @@ import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstall
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
 import com.falsepattern.zigbrains.project.execution.build.ProfileStateBuild;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
-import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.configurations.GeneralCommandLine;
-import com.intellij.openapi.application.ApplicationManager;
 import com.jetbrains.cidr.execution.Installer;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
-import lombok.Cleanup;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 
 public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileStateBuild> implements PreLaunchAware {
     private static final String BoilerplateNotice = "\nPlease edit this intellij build configuration and specify the path of the executable created by \"zig build\" directly!";

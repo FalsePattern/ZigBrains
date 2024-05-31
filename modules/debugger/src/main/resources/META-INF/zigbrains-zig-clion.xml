@@ -14,10 +14,12 @@
   ~ limitations under the License.
   -->
 
-<idea-plugin package="com.falsepattern.zigbrains.cpp">
+<idea-plugin package="com.falsepattern.zigbrains.clion">
     <depends>com.intellij.modules.clion</depends>
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
-        <debuggerDriverProvider implementation="com.falsepattern.zigbrains.cpp.CPPDebuggerDriverProvider"/>
+        <debuggerDriverProvider id="ZigClionDebuggerDriverConfiguration"
+                                implementation="com.falsepattern.zigbrains.clion.ZigClionDebuggerDriverConfigurationProvider"
+                                order="before ZigDefaultDebuggerDriverConfigurationProvider"/>
     </extensions>
 
 </idea-plugin>

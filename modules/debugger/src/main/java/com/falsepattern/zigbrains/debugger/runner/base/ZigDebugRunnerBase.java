@@ -17,11 +17,12 @@
 package com.falsepattern.zigbrains.debugger.runner.base;
 
 import com.falsepattern.zigbrains.common.util.ApplicationUtil;
+import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider;
+import com.falsepattern.zigbrains.debugger.Utils;
+import com.falsepattern.zigbrains.debugger.ZigLocalDebugProcess;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.runconfig.ZigProgramRunnerBase;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
-import com.falsepattern.zigbrains.debugger.Utils;
-import com.falsepattern.zigbrains.debugger.ZigLocalDebugProcess;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.executors.DefaultDebugExecutor;
@@ -32,9 +33,6 @@ import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.execution.ui.RunContentDescriptor;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.xdebugger.XDebugProcess;
 import com.intellij.xdebugger.XDebugProcessStarter;
@@ -68,9 +66,18 @@ public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?
     protected RunContentDescriptor doExecute(ProfileState state, AbstractZigToolchain toolchain, ExecutionEnvironment environment)
             throws ExecutionException {
         val project = environment.getProject();
-        val debuggerDriver = Utils.getDebuggerConfiguration(project);
+        val providers = ZigDebuggerDriverConfigurationProvider.findDebuggerConfigurations(project, false, false)
+                                                              .toList();
+
+        DebuggerDriverConfiguration debuggerDriver = null;
+
+        for (val provider: providers) {
+            debuggerDriver = provider.get();
+            if (debuggerDriver != null)
+                break;
+        }
+
         if (debuggerDriver == null) {
-            Notifications.Bus.notify(new Notification("ZigBrains.Debugger.Error", "Couldn't find a working GDB or LLDB debugger! Please check your Toolchains! (Settings | Build, Execution, Deployment | Toolchains)", NotificationType.ERROR));
             return null;
         }
         ZigDebugParametersBase<ProfileState> runParameters = getDebugParameters(state, environment, debuggerDriver, toolchain);
@@ -132,10 +139,9 @@ public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?
                 }
             };
             val process = new ZigLocalDebugProcess(params, session, wrappedBuilder);
-            ApplicationManager.getApplication().executeOnPooledThread(() -> {
-                ProcessTerminatedListener.attach(process.getProcessHandler(), environment.getProject());
-
-                if (params instanceof PreLaunchAware pla) {
+            if (params instanceof PreLaunchAware pla) {
+                ApplicationManager.getApplication().executeOnPooledThread(() -> {
+                    ProcessTerminatedListener.attach(process.getProcessHandler(), environment.getProject());
                     try {
                         pla.preLaunch();
                     } catch (Exception e) {
@@ -156,9 +162,9 @@ public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?
                         });
                         return;
                     }
-                }
-                process.unSuppress(true);
-            });
+                    process.unSuppress(true);
+                });
+            }
             process.doStart();
             return process;
         }

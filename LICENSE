@@ -34,7 +34,11 @@ These art assets are licensed under Creative Commons Attribution-ShareAlike 4.0 
 Parts of the codebase are based on the intellij-zig plugin,
 developed by HTGAzureX1212 (https://github.com/HTGAzureX1212), licensed under the Apache 2.0 license.
 --------------------------------
+Parts of the codebase are based on the intellij-rust plugin,
+developed by the intellij-rust team (https://github.com/intellij-rust), licensed under the intellij-rust MIT license.
+--------------------------------
 
 All of the licenses listed here are available in the following files, bundled with the plugin:
 - licenses/APACHE_2.0.LICENSE
 - licenses/CC_BY_SA_4.0.LICENSE
+- licenses/INTELLIJ-RUST.LICENSE

@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.debugger.win;
 
+import com.falsepattern.zigbrains.debugger.dap.DAPDebuggerDriverConfiguration;
 import com.falsepattern.zigbrains.debugger.dap.DAPDriver;
 import com.falsepattern.zigbrains.debugger.dap.WrappedDebugServer;
 import com.intellij.execution.ExecutionException;
@@ -51,7 +52,7 @@ public class WinDAPDriver extends DAPDriver<
         WinDAPDriver.WinDAPDebuggerClient
         > {
     private final CompletableFuture<HandshakeResponse> handshakeFuture = new CompletableFuture<>();
-    public WinDAPDriver(@NotNull Handler handler, WinDebuggerDriverConfiguration config) throws ExecutionException {
+    public WinDAPDriver(@NotNull Handler handler, DAPDebuggerDriverConfiguration config) throws ExecutionException {
         super(handler, config);
         DAPDriver$postConstructor();
     }

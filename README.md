@@ -19,7 +19,6 @@ through the built-in plugin browser:
    - `2024.1.*`: https://falsepattern.com/zigbrains/updatePlugins-241.xml
    - `2023.3.*`: https://falsepattern.com/zigbrains/updatePlugins-233.xml
    - `2023.2.*`: https://falsepattern.com/zigbrains/updatePlugins-232.xml
-   - `2023.1.*`: https://falsepattern.com/zigbrains/updatePlugins-231.xml
 4. Click `OK`, and your IDE should now automatically detect the latest version
 (both in the Installed tab and in the Marketplace tab), even if it's not yet verified on the official JetBrains marketplace yet.
 
@@ -37,14 +36,18 @@ complain about missing files
 ## Special Thanks
 
 - The [ZigTools](https://github.com/zigtools/) team for developing the Zig Language Server.
+
 - [HTGAzureX1212](https://github.com/HTGAzureX1212) for developing [intellij-zig](https://github.com/intellij-zig/intellij-zig),
-which served as a fantastic reference for deep IDE integration features
+which served as a fantastic reference for deep IDE integration features.
 
 - The members of the `Zig Programming Language` discord server's `#tooling-dev` channel for providing encouragement,
 feedback, and lots of bug reports. 
 
 - The Ballerina Platform developers for `lsp4intellij`, the language server connector between the IntelliJ platform
-and the Eclipse LSP4J project
+and the Eclipse LSP4J project.
+
+- The developers of the [intellij-rust](https://github.com/intellij-rust/intellij-rust/) plugin for providing an
+excellent example on how to write debugger support that doesn't depend on CLion.
 
 - All the people who have generously funded the project
   - gree7
@@ -67,7 +70,7 @@ Z - Patch version, incremented only when a fix is purely an internal change and 
 of complexity (determined at the discretion of FalsePattern)
 
 Note: before version 11, the version scheme used was 0.X.Y, without separate patch versions.
-As this plugin will constantly be evolving together with the zig language, it makes not sense to keep the 0 prefix,
+As this plugin will constantly be evolving together with the zig language, it makes no sense to keep the 0 prefix,
 and might as well utilize the full semver string for extra information.
 
 # Description
@@ -95,32 +98,37 @@ LSP server is running.
 
 ## Debugging
 
-### Note
-Debugging on Linux/MacOS/Unix is only available in CLion, as ZigBrains depends on the C++ toolchains system.
+Debugger settings are available in the `Settings | Build, Execution, Deployment | Debugger` menu, under the `Zig` section. 
 
-On Windows, debugging is also available with the help of the
-[Native Debugging Support](https://plugins.jetbrains.com/plugin/12775-native-debugging-support), which is unfortunately
-only compatible with paid IDEs.
+### IDE Compatibility
+Debugging Zig code is supported in any native debugging capable IDE. The following have been verified to work so far:
+
+- CLion
+- IntelliJ IDEA Ultimate
+- RustRover (including the non-commercial free version too)
+- GoLand
+- PyCharm Professional
+
+Additionally, in CLion, the plugin uses the C++ Toolchains for sourcing the debugger (this can be toggled off in the settings).
+
+The open-source Community edition IDEs don't have the native debugging code as it's a proprietary module, so you cannot
+debug zig code with them. You can still use those IDEs to develop code and use everything else the plugin has to offer.
 
 ### Windows
 
-Due to technical limitations, the C++ toolchains cannot be used for debugging zig code on windows.
+Supported debuggers: `MSVC`
 
-Go to `Settings | Build, Execution, Deployment | Debugger | Zig (Windows)` and follow the steps shown there to set up a
-zig-compatible debugger.
+Debugging on Windows requires you to set up the Microsoft debugger.
 
-### Linux / MacOS / Unix
+To do this, go to the following URL and install the MSVC compiler toolset according to step 3 in the prerequisites:
+https://code.visualstudio.com/docs/cpp/config-msvc
 
-ZigBrains uses the CLion C++ toolchains `Settings | Build, Execution, Deployment | Toolchains` for debugging purposes,
-and it is fully compatible with both GDB and LLDB debuggers.
+### Linux
 
-Additionally, ZigBrains will prioritize a toolchain if it is called `Zig`, otherwise it will use the default toolchain.
+Supported debuggers: `LLDB`, `GDB`
 
-If no toolchain is available, ZigBrains will attempt to use the bundled LLDB debugger, and if that is not available either,
-an error popup will be shown when you try to run with debugging.
+### MacOS
 
-Note: There is a small issue with the LLDB debugger which does not happen with GDB: The debugger will pause on the first
-instruction (usually, deep inside the zig standard library's startup code). Unfortunately, we have not found a fix for
-this yet, but fortunately it doesn't break anything, just a bit of inconvenience.
+Supported debuggers: `LLDB`
 
 <!-- Plugin description end -->

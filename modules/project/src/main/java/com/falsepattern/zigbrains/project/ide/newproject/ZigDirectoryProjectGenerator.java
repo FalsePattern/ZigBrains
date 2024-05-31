@@ -16,36 +16,21 @@
 
 package com.falsepattern.zigbrains.project.ide.newproject;
 
-import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectConfigurationData;
-import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectGeneratorPeer;
-import com.falsepattern.zigbrains.project.ide.project.ZigDefaultTemplate;
-import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectSettingsStep;
-import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.zig.Icons;
-import com.falsepattern.zigbrains.zig.settings.ZLSProjectSettingsService;
 import com.intellij.facet.ui.ValidationResult;
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep;
 import com.intellij.ide.util.projectWizard.CustomStepProjectGenerator;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.NlsContexts;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.impl.welcomeScreen.AbstractActionWithPanel;
 import com.intellij.platform.DirectoryProjectGenerator;
 import com.intellij.platform.ProjectGeneratorPeer;
-import com.intellij.util.ResourceUtil;
-import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class ZigDirectoryProjectGenerator implements DirectoryProjectGenerator<ZigProjectConfigurationData>,
         CustomStepProjectGenerator<ZigProjectConfigurationData> {
