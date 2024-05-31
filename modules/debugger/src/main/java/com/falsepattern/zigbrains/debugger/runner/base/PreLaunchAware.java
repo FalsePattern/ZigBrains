@@ -16,8 +16,6 @@
 
 package com.falsepattern.zigbrains.debugger.runner.base;
 
-import java.util.concurrent.CompletableFuture;
-
 public interface PreLaunchAware {
     void preLaunch() throws Exception;
 }

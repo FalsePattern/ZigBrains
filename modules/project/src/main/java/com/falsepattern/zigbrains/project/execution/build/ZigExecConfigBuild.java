@@ -36,7 +36,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.*;
+import static com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.ZigConfigurable;
+import static com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.coloredConfigurable;
 
 @Getter
 public class ZigExecConfigBuild extends ZigExecConfigBase<ZigExecConfigBuild> {

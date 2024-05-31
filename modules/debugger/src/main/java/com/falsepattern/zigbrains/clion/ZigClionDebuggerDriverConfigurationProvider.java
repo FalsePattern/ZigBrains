@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package com.falsepattern.zigbrains.cpp;
+package com.falsepattern.zigbrains.clion;
 
-import com.falsepattern.zigbrains.debugbridge.DebuggerDriverProvider;
+import com.falsepattern.zigbrains.common.ObjectHolder;
+import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider;
+import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.SystemInfo;
 import com.jetbrains.cidr.cpp.execution.debugger.backend.CLionGDBDriverConfiguration;
 import com.jetbrains.cidr.cpp.execution.debugger.backend.CLionLLDBDriverConfiguration;
 import com.jetbrains.cidr.cpp.toolchains.CPPToolchains;
@@ -26,10 +29,17 @@ import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
-public class CPPDebuggerDriverProvider implements DebuggerDriverProvider {
-    private static final Logger LOG = Logger.getInstance(CPPDebuggerDriverProvider.class);
+public class ZigClionDebuggerDriverConfigurationProvider implements ZigDebuggerDriverConfigurationProvider {
+    private static final Logger LOG = Logger.getInstance(ZigClionDebuggerDriverConfigurationProvider.class);
+
     @Override
-    public @Nullable DebuggerDriverConfiguration getDebuggerConfiguration(Project project) {
+    public @Nullable ObjectHolder<DebuggerDriverConfiguration> getDebuggerConfiguration(Project project, boolean isElevated, boolean emulateTerminal) {
+        if (SystemInfo.isWindows)
+            return null;
+
+        if (!ZigDebuggerSettings.getInstance().useClion)
+            return null;
+
         val toolchains = CPPToolchains.getInstance();
         var toolchain = toolchains.getToolchainByNameOrDefault("Zig");
         if (toolchain == null || !toolchain.isDebuggerSupported()) {
@@ -42,8 +52,8 @@ public class CPPDebuggerDriverProvider implements DebuggerDriverProvider {
         }
 
         return switch (toolchain.getDebuggerKind()) {
-            case CUSTOM_GDB, BUNDLED_GDB -> new CLionGDBDriverConfiguration(project, toolchain);
-            case BUNDLED_LLDB -> new CLionLLDBDriverConfiguration(project, toolchain);
+            case CUSTOM_GDB, BUNDLED_GDB -> new ObjectHolder<>(new CLionGDBDriverConfiguration(project, toolchain));
+            case BUNDLED_LLDB -> new ObjectHolder<>(new CLionLLDBDriverConfiguration(project, toolchain));
         };
     }
 }

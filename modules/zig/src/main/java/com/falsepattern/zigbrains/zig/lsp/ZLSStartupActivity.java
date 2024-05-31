@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.zig.lsp;
 
+import com.falsepattern.zigbrains.ZigBundle;
 import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.common.util.StringUtil;
 import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
@@ -23,11 +24,18 @@ import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider;
 import com.falsepattern.zigbrains.zig.settings.ZLSProjectSettingsService;
 import com.google.gson.Gson;
+import com.intellij.ide.BrowserUtil;
+import com.intellij.ide.plugins.PluginManager;
+import com.intellij.ide.plugins.PluginManagerConfigurable;
 import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
 import com.intellij.openapi.util.io.FileUtil;
@@ -166,11 +174,42 @@ public class ZLSStartupActivity implements ProjectActivity {
         return true;
     }
 
+    private static boolean firstInit = true;
+
     @Nullable
     @Override
     public Object execute(@NotNull Project project, @NotNull Continuation<? super Unit> continuation) {
         val svc = ZLSProjectSettingsService.getInstance(project);
         val state = svc.getState();
+        if (firstInit) {
+            firstInit = false;
+            if (!PluginManager.isPluginInstalled(PluginId.getId("com.intellij.modules.cidr.debugger")) && PluginManager.isPluginInstalled(PluginId.getId("com.intellij.modules.nativeDebug-plugin-capable"))) {
+                val notif = new Notification(
+                        "ZigBrains",
+                        ZigBundle.message("notification.nativedebug.title"),
+                        ZigBundle.message("notification.nativedebug.text"),
+                        NotificationType.INFORMATION
+                );
+                notif.addAction(new NotificationAction(ZigBundle.message("notification.nativedebug.market")) {
+                    @Override
+                    public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
+                        val configurable = new PluginManagerConfigurable();
+                        ShowSettingsUtil.getInstance().editConfigurable((Project)null,
+                                                                        configurable,
+                                                                        () -> {
+                                                                            configurable.openMarketplaceTab("/vendor:\"JetBrains s.r.o.\" /tag:Debugging \"Native Debugging Support\"");
+                                                                        });
+                    }
+                });
+                notif.addAction(new NotificationAction(ZigBundle.message("notification.nativedebug.browser")) {
+                    @Override
+                    public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
+                        BrowserUtil.browse("https://plugins.jetbrains.com/plugin/12775-native-debugging-support");
+                    }
+                });
+                Notifications.Bus.notify(notif);
+            }
+        }
         var zlsPath = state.zlsPath;
 
         if (zlsPath == null) {

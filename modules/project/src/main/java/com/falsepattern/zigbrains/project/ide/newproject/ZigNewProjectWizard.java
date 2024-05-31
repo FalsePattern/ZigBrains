@@ -16,14 +16,12 @@
 
 package com.falsepattern.zigbrains.project.ide.newproject;
 
-import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep;
 import com.intellij.ide.wizard.GitNewProjectWizardData;
 import com.intellij.ide.wizard.NewProjectWizardStep;
 import com.intellij.ide.wizard.language.LanguageGeneratorNewProjectWizard;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootModificationUtil;
 import com.intellij.ui.dsl.builder.AlignX;
 import com.intellij.ui.dsl.builder.Panel;
 import lombok.val;
