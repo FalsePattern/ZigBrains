@@ -20,7 +20,6 @@ import com.falsepattern.zigbrains.debugger.Utils;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.execution.ExecutionException;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.io.FileUtil;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.val;
@@ -29,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
 
 public abstract class ZigDebugParametersEmitBinaryBase<ProfileState extends ProfileStateBase<?>> extends ZigDebugParametersBase<ProfileState> implements PreLaunchAware {
     protected volatile File executableFile;

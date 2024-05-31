@@ -16,15 +16,13 @@
 
 package com.falsepattern.zigbrains.debugger.runner.binary;
 
+import com.falsepattern.zigbrains.debugger.execution.binary.ProfileStateBinary;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstaller;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
-import com.falsepattern.zigbrains.debugger.execution.binary.ProfileStateBinary;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.configurations.GeneralCommandLine;
 import com.jetbrains.cidr.execution.Installer;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
-import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

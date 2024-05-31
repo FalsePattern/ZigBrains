@@ -1,5 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude" require-restart="true">
+    <resource-bundle>zigbrains.Bundle</resource-bundle>
     <id>com.falsepattern.zigbrains</id>
     <name>ZigBrains</name>
     <vendor>FalsePattern</vendor>
@@ -10,8 +11,14 @@
     <xi:include href="/META-INF/zigbrains-zon.xml"/>
     <xi:include href="/META-INF/zigbrains-project.xml"/>
     <depends optional="true" config-file="zigbrains-zig-debugger.xml">com.intellij.modules.cidr.debugger</depends>
-    <depends optional="true" config-file="zigbrains-zig-cpp.xml">com.intellij.modules.clion</depends>
+    <depends optional="true" config-file="zigbrains-zig-clion.xml">com.intellij.modules.clion</depends>
 
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup displayType="BALLOON"
+                           bundle="zigbrains.Bundle"
+                           key="notif-zb"
+                           id="ZigBrains"/>
+    </extensions>
     <extensionPoints>
         <extensionPoint
                 interface="com.falsepattern.zigbrains.project.toolchain.flavours.AbstractZigToolchainFlavour" dynamic="true"
@@ -23,7 +30,7 @@
                 interface="com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider" dynamic="true"
                 name="zlsConfigProvider"/>
         <extensionPoint
-                interface="com.falsepattern.zigbrains.debugbridge.DebuggerDriverProvider" dynamic="true"
+                interface="com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider" dynamic="true"
                 name="debuggerDriverProvider"/>
         <extensionPoint
                 interface="com.falsepattern.zigbrains.common.ZBFeatures" dynamic="true"
