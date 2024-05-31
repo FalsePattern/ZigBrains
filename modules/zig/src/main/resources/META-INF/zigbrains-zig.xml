@@ -15,7 +15,6 @@
   -->
 
 <idea-plugin package="com.falsepattern.zigbrains.zig">
-    <resource-bundle>zigbrains.zig.Bundle</resource-bundle>
     <extensions defaultExtensionNs="com.intellij">
         <!-- region LSP -->
 
@@ -68,7 +67,7 @@
 
         <!-- needed for inlay hints -->
         <codeInsight.declarativeInlayProvider implementationClass="com.falsepattern.zigbrains.lsp.contributors.LSPInlayHintProvider"
-                                              bundle="zigbrains.zig.Bundle"
+                                              bundle="zigbrains.Bundle"
                                               nameKey="inlayprovider"
                                               providerId="ZigBrains"
                                               isEnabledByDefault="true"
@@ -100,8 +99,8 @@
 
         <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
         <notificationGroup displayType="BALLOON"
-                           bundle="zigbrains.zig.Bundle"
-                           key="notif-zls"
+                           bundle="zigbrains.Bundle"
+                           key="notif-zls-error"
                            id="ZigBrains.ZLS"/>
 
         <codeInsight.parameterInfo language="Zig"

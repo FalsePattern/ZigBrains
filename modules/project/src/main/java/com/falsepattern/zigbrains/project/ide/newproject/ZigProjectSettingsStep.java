@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.project.ide.newproject;
 
-import com.falsepattern.zigbrains.project.ide.newproject.ZigProjectConfigurationData;
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep;
 import com.intellij.ide.util.projectWizard.ProjectSettingsStepBase;
 import com.intellij.platform.DirectoryProjectGenerator;

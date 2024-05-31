@@ -16,7 +16,6 @@
 
 <idea-plugin package="com.falsepattern.zigbrains.debugger">
     <depends>com.intellij.modules.cidr.debugger</depends>
-    <resource-bundle>zigbrains.debugger.Bundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="com.falsepattern.zigbrains.debugger.execution.binary.ConfigTypeBinary"/>
@@ -30,21 +29,27 @@
         <programRunner implementation="com.falsepattern.zigbrains.debugger.runner.binary.ZigDebugRunnerBinary"
                        id="ZigDebugRunnerBinary"/>
 
+        <xdebugger.settings implementation="com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings"/>
+
         <notificationGroup displayType="BALLOON"
-                           bundle="zigbrains.debugger.Bundle"
-                           key="notif-debug-error"
-                           id="ZigBrains.Debugger.Error"/>
+                           bundle="zigbrains.Bundle"
+                           key="notif-debug-info"
+                           id="ZigBrains.Debugger.Info"/>
         <notificationGroup displayType="BALLOON"
-                           bundle="zigbrains.debugger.Bundle"
+                           bundle="zigbrains.Bundle"
                            key="notif-debug-warn"
                            id="ZigBrains.Debugger.Warn"/>
-        <applicationConfigurable parentId="project.propDebugger"
-                                 instance="com.falsepattern.zigbrains.debugger.win.config.WinDebuggerConfigurable"
-                                 displayName="Zig (Windows)"/>
+        <notificationGroup displayType="BALLOON"
+                           bundle="zigbrains.Bundle"
+                           key="notif-debug-error"
+                           id="ZigBrains.Debugger.Error"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
         <featureProvider implementation="com.falsepattern.zigbrains.debugger.DebuggerFeatures"/>
+        <debuggerDriverProvider id="ZigDefaultDebuggerDriverConfigurationProvider"
+                                implementation="com.falsepattern.zigbrains.debugger.ZigDefaultDebuggerDriverConfigurationProvider"
+                                order="last"/>
     </extensions>
 
     <extensions defaultExtensionNs="cidr.debugger">

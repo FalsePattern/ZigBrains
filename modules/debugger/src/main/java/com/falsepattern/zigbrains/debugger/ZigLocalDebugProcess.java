@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.debugger;
 
+import com.falsepattern.zigbrains.debugger.runner.base.PreLaunchAware;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.filters.Filter;
 import com.intellij.execution.filters.TextConsoleBuilder;
@@ -41,19 +42,21 @@ public class ZigLocalDebugProcess extends CidrLocalDebugProcess {
         PostStart,
         Unsuppressed
     }
-    private volatile SuppressionLevel suppressionLevel = SuppressionLevel.PreStart;
+    private volatile SuppressionLevel suppressionLevel;
     private final List<Runnable> preStart = new ArrayList<>();
     private final List<Runnable> postStart = new ArrayList<>();
     public ZigLocalDebugProcess(@NotNull RunParameters parameters, @NotNull XDebugSession session, @NotNull TextConsoleBuilder consoleBuilder)
             throws ExecutionException {
         super(parameters, session, consoleBuilder, (project) -> Filter.EMPTY_ARRAY, false);
+        suppressionLevel = parameters instanceof PreLaunchAware ? SuppressionLevel.PreStart : SuppressionLevel.Unsuppressed;
     }
 
     public void doStart() {
         start();
         lock.lock();
         try {
-            suppressionLevel = SuppressionLevel.PostStart;
+            if (suppressionLevel == SuppressionLevel.PreStart)
+                suppressionLevel = SuppressionLevel.PostStart;
         } finally {
             lock.unlock();
         }
@@ -82,7 +85,8 @@ public class ZigLocalDebugProcess extends CidrLocalDebugProcess {
 
         lock.lock();
         try {
-            if (suppressionLevel == SuppressionLevel.Unsuppressed)
+            val level = suppressionLevel;
+            if (level == SuppressionLevel.Unsuppressed)
                 return original.get();
 
             val bypass = new CompletableFuture<T>();
@@ -93,7 +97,7 @@ public class ZigLocalDebugProcess extends CidrLocalDebugProcess {
                                 bypass.completeExceptionally(ex);
                                 return null;
                             });
-            switch (suppressionLevel) {
+            switch (level) {
                 case PreStart -> preStart.add(task);
                 case PostStart -> postStart.add(task);
             }

@@ -17,9 +17,7 @@
 package com.falsepattern.zigbrains.project.openapi.components;
 
 import com.falsepattern.zigbrains.common.WrappingStateComponent;
-import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractZigProjectSettingsService<T> extends WrappingStateComponent<T> {

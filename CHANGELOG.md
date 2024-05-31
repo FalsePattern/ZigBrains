@@ -17,10 +17,15 @@ Changelog structure reference:
 
 ## [Unreleased]
 
-## [14.5.0]
+## [15.0.0]
 
 ### Changed
 
+- Debugging
+  - Major update, debugging on linux now works outside CLion (confirmed working in RustRover, IDEA Ultimate)
+  - Windows debugging has been made much more streamlined, user doesn't need to download random files manually anymore
+(except the visual studio debugging sdk of course)
+  - debugging support on macOS with LLDB
 - Project
   - Updated new project templates to the latest Zig 0.13.0 init files
 

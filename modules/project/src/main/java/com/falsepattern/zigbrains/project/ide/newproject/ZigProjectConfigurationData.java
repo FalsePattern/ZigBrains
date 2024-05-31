@@ -16,21 +16,18 @@
 
 package com.falsepattern.zigbrains.project.ide.newproject;
 
-import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.project.ide.project.ZigDefaultTemplate;
 import com.falsepattern.zigbrains.project.ide.project.ZigProjectTemplate;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettings;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.zig.settings.ZLSProjectSettingsService;
 import com.falsepattern.zigbrains.zig.settings.ZLSSettings;
-import com.intellij.ide.wizard.GitNewProjectWizardData;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.GitRepositoryInitializer;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -41,7 +38,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 
 public record ZigProjectConfigurationData(boolean git, ZigProjectSettings projConf, ZLSSettings zlsConf, ZigProjectTemplate selectedTemplate) {
 
