@@ -1,3 +1,4 @@
+# ZigBrains for 2023.1 is no longer maintained
 # ZigBrains
 
 Zig language support for IntelliJ IDEA, CLion, and other JetBrains IDEs.
