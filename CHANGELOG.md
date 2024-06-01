@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [15.0.1]
+
 ### Fixed
 
 - Zig
