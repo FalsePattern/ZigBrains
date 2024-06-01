@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Trailing commas in struct initializers showed an error
+
 ## [15.0.0]
 
 ### Changed
