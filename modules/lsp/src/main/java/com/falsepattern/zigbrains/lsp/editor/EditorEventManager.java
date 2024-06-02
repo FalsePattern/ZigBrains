@@ -801,6 +801,7 @@ public class EditorEventManager {
     }
 
     private static final List<String> WHITESPACE_DELIMITERS = Arrays.asList(" \t\n\r".split(""));
+    private static final List<String> SYMBOL_DELIMITERS = Arrays.asList("()[]{};,".split(""));
 
     @NotNull
     public String getCompletionPrefix(Editor editor, int offset) {
@@ -809,7 +810,7 @@ public class EditorEventManager {
         for (int i = 0; i < offset; i++) {
             char singleLetter = documentText.charAt(offset - i - 1);
             val letterString = String.valueOf(singleLetter);
-            if (WHITESPACE_DELIMITERS.contains(letterString) || completionTriggers.contains(letterString)) {
+            if (WHITESPACE_DELIMITERS.contains(letterString) || SYMBOL_DELIMITERS.contains(letterString) || completionTriggers.contains(letterString)) {
                 break;
             }
             s.append(singleLetter);
