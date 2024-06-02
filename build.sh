@@ -26,17 +26,17 @@ if [[ -z "${PRIVATE_KEY_PASSWORD}" ]]; then
   exit 1
 fi
 
-if [[ -z "${MAVEN_DEPLOY_USER}"]]; then
+if [[ -z "${MAVEN_DEPLOY_USER}" ]]; then
   echo "MAVEN_DEPLOY_USER missing!"
   exit 1
 fi
 
-if [[ -z "${MAVEN_DEPLOY_PASSWORD}"]]; then
+if [[ -z "${MAVEN_DEPLOY_PASSWORD}" ]]; then
   echo "MAVEN_DEPLOY_USER missing!"
   exit 1
 fi
 
-if [[ -z "${IJ_PUBLISH_TOKEN}"]]; then
+if [[ -z "${IJ_PUBLISH_TOKEN}" ]]; then
   echo "MAVEN_DEPLOY_USER missing!"
   exit 1
 fi
