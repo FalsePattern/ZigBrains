@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Autocomplete not working when the caret is placed right after a "("
+
 ## [15.0.1]
 
 ### Fixed
