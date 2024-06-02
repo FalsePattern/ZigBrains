@@ -1,19 +1,24 @@
 import groovy.xml.XmlParser
+import groovy.xml.XmlSlurper
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
+import org.jetbrains.intellij.tasks.PublishPluginTask
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
     id("java") // Java support
+    `maven-publish`
     id("java-library")
     id("org.jetbrains.intellij") version("1.17.3")
     id("org.jetbrains.changelog") version("2.2.0")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
     id("com.palantir.git-version") version("3.0.0")
 }
+
+val publishVersions = listOf("232", "233", "241", "242")
 
 val gitVersion: groovy.lang.Closure<String> by extra
 
@@ -391,15 +396,45 @@ project(":plugin") {
         listProductsReleases {
             types = listOf("IU", "IC", "CL")
         }
+    }
+}
 
-//    publishPlugin {
-//        dependsOn("patchChangelog")
-//        token = environment("PUBLISH_TOKEN")
-//        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
-//        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
-//        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-//        channels = properties("pluginVersion").map { listOf(it.split('-').getOrElse(1) { "default" }.split('.').first()) }
-//    }
+fun distFile(it: String) = layout.buildDirectory.file("dist/ZigBrains-${pluginVersion().get()}-$it-signed.zip")
+
+publishVersions.forEach {
+    tasks.register<PublishPluginTask>("jbpublish-$it") {
+        distributionFile.set(distFile(it))
+        token = environment("IJ_PUBLISH_TOKEN")
+    }
+    tasks.named("publish") {
+        dependsOn("jbpublish-$it")
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.falsepattern"
+            artifactId = "zigbrains"
+            version = pluginVersion().get()
+
+            publishVersions.forEach {
+                artifact(distFile(it)) {
+                    classifier = "$it-signed"
+                    extension = "zip"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "mavenpattern"
+            url = uri("https://mvn.falsepattern.com/releases/");
+            credentials {
+                username = System.getenv("MAVEN_DEPLOY_USER")
+                password = System.getenv("MAVEN_DEPLOY_PASSWORD")
+            }
+        }
     }
 }
 

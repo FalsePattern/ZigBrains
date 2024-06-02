@@ -15,12 +15,29 @@
 # limitations under the License.
 #
 
+set -e
+
 declare -a branches=("master" "241" "233" "232")
 
 DEFAULT_BRANCH="${branches[0]}"
 
 if [[ -z "${PRIVATE_KEY_PASSWORD}" ]]; then
-  echo "Private key password does not exist!"
+  echo "PRIVATE_KEY_PASSWORD missing!"
+  exit 1
+fi
+
+if [[ -z "${MAVEN_DEPLOY_USER}"]]; then
+  echo "MAVEN_DEPLOY_USER missing!"
+  exit 1
+fi
+
+if [[ -z "${MAVEN_DEPLOY_PASSWORD}"]]; then
+  echo "MAVEN_DEPLOY_USER missing!"
+  exit 1
+fi
+
+if [[ -z "${IJ_PUBLISH_TOKEN}"]]; then
+  echo "MAVEN_DEPLOY_USER missing!"
   exit 1
 fi
 
@@ -60,3 +77,5 @@ git checkout "$DEFAULT_BRANCH"
 mkdir -p build/dist
 
 cp plugin/build/distributions/*-signed.zip build/dist/
+
+./gradlew publish
