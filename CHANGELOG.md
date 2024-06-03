@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [15.0.3]
+
+### Fixed
+
+- Zig
+  - More autocomplete fixes
+
 ## [15.0.2]
 
 ### Fixed
