@@ -26,28 +26,28 @@ if [[ -z "${PRIVATE_KEY_PASSWORD}" ]]; then
   exit 1
 fi
 
-if [[ -z "${MAVEN_DEPLOY_USER}"]]; then
+if [[ -z "${MAVEN_DEPLOY_USER}" ]]; then
   echo "MAVEN_DEPLOY_USER missing!"
   exit 1
 fi
 
-if [[ -z "${MAVEN_DEPLOY_PASSWORD}"]]; then
-  echo "MAVEN_DEPLOY_USER missing!"
+if [[ -z "${MAVEN_DEPLOY_PASSWORD}" ]]; then
+  echo "MAVEN_DEPLOY_PASSWORD missing!"
   exit 1
 fi
 
-if [[ -z "${IJ_PUBLISH_TOKEN}"]]; then
-  echo "MAVEN_DEPLOY_USER missing!"
+if [[ -z "${IJ_PUBLISH_TOKEN}" ]]; then
+  echo "IJ_PUBLISH_TOKEN missing!"
   exit 1
 fi
 
 if [ ! -f secrets/chain.crt ]; then
-  echo "Certificate chain does not exist!"
+  echo "secrets/chain.crt missing!"
   exit 1
 fi
 
 if [ ! -f secrets/private.pem ]; then
-  echo "Plugin signing key does not exist!"
+  echo "secrets/private.pem missing!"
   exit 1
 fi
 

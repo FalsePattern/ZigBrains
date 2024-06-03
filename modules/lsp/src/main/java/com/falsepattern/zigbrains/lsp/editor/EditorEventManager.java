@@ -801,7 +801,7 @@ public class EditorEventManager {
     }
 
     private static final List<String> WHITESPACE_DELIMITERS = Arrays.asList(" \t\n\r".split(""));
-    private static final List<String> SYMBOL_DELIMITERS = Arrays.asList("()[]{};,".split(""));
+    private static final List<String> SYMBOL_DELIMITERS = Arrays.asList("()[]{};,&=*%|^:?><+-/~'\"!".split(""));
 
     @NotNull
     public String getCompletionPrefix(Editor editor, int offset) {
