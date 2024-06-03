@@ -24,6 +24,7 @@ import com.intellij.execution.DefaultExecutionResult;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.CommandLineState;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.configurations.PtyCommandLine;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.process.ProcessTerminatedListener;
 import com.intellij.execution.runners.ExecutionEnvironment;
@@ -54,7 +55,9 @@ public abstract class ProfileStateBase<T extends ZigExecConfigBase<T>> extends C
         val workingDirectory = configuration.getWorkingDirectory();
         val zigExecutablePath = toolchain.pathToExecutable("zig");
 
-        val cli = new GeneralCommandLine();
+        // TODO remove this check once JetBrains implements colored terminal in the debugger
+        // https://youtrack.jetbrains.com/issue/CPP-11622/ANSI-color-codes-not-honored-in-Debug-Run-Configuration-output-window
+        val cli = debug ? new GeneralCommandLine() : new PtyCommandLine();
         cli.setExePath(zigExecutablePath.toString());
         workingDirectory.getPath().ifPresent(x -> cli.setWorkDirectory(x.toFile()));
         cli.setCharset(StandardCharsets.UTF_8);
