@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [15.1.0]
+
+### Added
+
+- Project
+  - PTY emulation for non-debug runs. Fixes colored output in Ziglings.
+
 ## [15.0.3]
 
 ### Fixed
