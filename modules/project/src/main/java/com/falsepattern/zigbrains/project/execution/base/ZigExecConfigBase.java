@@ -38,6 +38,7 @@ import java.util.Optional;
 @Getter
 public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends LocatableConfigurationBase<ProfileStateBase<T>> {
     private ZigConfigEditor.WorkDirectoryConfigurable workingDirectory = new ZigConfigEditor.WorkDirectoryConfigurable("workingDirectory");
+    private ZigConfigEditor.CheckboxConfigurable pty = new ZigConfigEditor.CheckboxConfigurable("pty", "Emulate Terminal", false);
     public ZigExecConfigBase(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
         super(project, factory, name);
         workingDirectory.setPath(getProject().isDefault() ? null : Optional.ofNullable(ProjectUtil.guessProjectDir(getProject()))
@@ -64,10 +65,15 @@ public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends 
 
     public abstract List<String> buildCommandLineArgs(boolean debug) throws ExecutionException;
 
+    public boolean emulateTerminal() {
+        return pty.value;
+    }
+
     @Override
     public T clone() {
         val myClone = (ZigExecConfigBase<?>) super.clone();
         myClone.workingDirectory = workingDirectory.clone();
+        myClone.pty = pty.clone();
         return (T) myClone;
     }
 
@@ -79,6 +85,6 @@ public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends 
             throws ExecutionException;
 
     public @NotNull List<ZigConfigEditor.@NotNull ZigConfigurable<?>> getConfigurables() {
-        return List.of(workingDirectory);
+        return List.of(workingDirectory, pty);
     }
 }

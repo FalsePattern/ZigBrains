@@ -57,7 +57,7 @@ public abstract class ProfileStateBase<T extends ZigExecConfigBase<T>> extends C
 
         // TODO remove this check once JetBrains implements colored terminal in the debugger
         // https://youtrack.jetbrains.com/issue/CPP-11622/ANSI-color-codes-not-honored-in-Debug-Run-Configuration-output-window
-        val cli = debug ? new GeneralCommandLine() : new PtyCommandLine();
+        val cli = configuration.emulateTerminal() && !debug ? new PtyCommandLine() : new GeneralCommandLine();
         cli.setExePath(zigExecutablePath.toString());
         workingDirectory.getPath().ifPresent(x -> cli.setWorkDirectory(x.toFile()));
         cli.setCharset(StandardCharsets.UTF_8);
