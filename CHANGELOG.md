@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - PTY emulation is now opt-in in run configurations
+
 ## [15.1.0]
 
 ### Added
