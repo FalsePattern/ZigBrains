@@ -41,6 +41,7 @@ public final class ZigProjectSettingsService extends AbstractZigProjectSettingsS
     public boolean isModified(ZigProjectSettings otherData) {
         val myData = getState();
         return !Objects.equals(myData.toolchainHomeDirectory, otherData.toolchainHomeDirectory) ||
-               !Objects.equals(myData.explicitPathToStd, otherData.explicitPathToStd);
+               !Objects.equals(myData.explicitPathToStd, otherData.explicitPathToStd) ||
+               !Objects.equals(myData.overrideStdPath, otherData.overrideStdPath);
     }
 }

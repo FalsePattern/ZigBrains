@@ -35,6 +35,6 @@ public class ToolchainZLSConfigProvider implements ZLSConfigProvider {
             return;
         val projectDir = ProjectUtil.guessProjectDir(project);
         val env = toolchain.zig().getEnv(projectDir == null ? Path.of(".") : projectDir.toNioPath());
-        env.ifPresent(e -> builder.zig_exe_path(e.zigExecutable()).zig_lib_path(e.libDirectory()));
+        env.ifPresent(e -> builder.zig_exe_path(e.zigExecutable()).zig_lib_path(state.overrideStdPath ? Path.of(state.explicitPathToStd).getParent().toString() : e.libDirectory()));
     }
 }
