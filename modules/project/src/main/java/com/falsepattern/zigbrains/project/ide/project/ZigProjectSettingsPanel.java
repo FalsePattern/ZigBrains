@@ -32,11 +32,15 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Pair;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.dsl.builder.AlignX;
 import lombok.Getter;
 import lombok.val;
 
 import javax.swing.JLabel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -55,9 +59,22 @@ public class ZigProjectSettingsPanel implements MyDisposable {
 
     private final JLabel toolchainVersion = new JLabel();
 
+    private final JBCheckBox stdFieldOverride = new JBCheckBox("Override");
+
     private final TextFieldWithBrowseButton pathToStdField = TextFieldUtil.pathToDirectoryTextField(this,
                                                                                                     "Path to Standard Library",
                                                                                                     () -> {});
+
+    {
+        stdFieldOverride.addChangeListener(e -> {
+            if (stdFieldOverride.isSelected()) {
+                pathToStdField.setEnabled(true);
+            } else {
+                pathToStdField.setEnabled(false);
+                updateUI();
+            }
+        });
+    }
 
     private void autodetect(ActionEvent e) {
         autodetect();
@@ -83,7 +100,11 @@ public class ZigProjectSettingsPanel implements MyDisposable {
         pathToToolchain.setText(Optional.ofNullable(value.getToolchainHomeDirectory())
                                         .orElse(""));
 
+        stdFieldOverride.setSelected(value.overrideStdPath);
+
         pathToStdField.setText(Optional.ofNullable(value.getExplicitPathToStd()).orElse(""));
+
+        pathToStdField.setEnabled(value.overrideStdPath);
 
         updateUI();
     }
@@ -98,7 +119,11 @@ public class ZigProjectSettingsPanel implements MyDisposable {
                 r.button("Autodetect", $f(this::autodetect));
             });
             p2.cell("Toolchain version", toolchainVersion);
-            p2.cell("Standard library location", pathToStdField, AlignX.FILL);
+            p2.cell("Override standard library path", stdFieldOverride);
+            p2.row("Standard library location", row -> {
+                row.cell(pathToStdField).resizableColumn().align(AlignX.FILL);
+                row.cell(stdFieldOverride);
+            });
         });
     }
 
@@ -126,7 +151,8 @@ public class ZigProjectSettingsPanel implements MyDisposable {
                     toolchainVersion.setText(StringUtil.orEmpty(zigVersion));
                     toolchainVersion.setForeground(JBColor.foreground());
 
-                    pathToStdField.setText(StringUtil.orEmpty(stdPath));
+                    if (!stdFieldOverride.isSelected())
+                        pathToStdField.setText(StringUtil.orEmpty(stdPath));
                 });
     }
 }

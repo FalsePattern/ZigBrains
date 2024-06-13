@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Project
+  - Modifying the standard library path now also applies to ZLS
+
 ## [15.1.1]
 
 ### Fixed

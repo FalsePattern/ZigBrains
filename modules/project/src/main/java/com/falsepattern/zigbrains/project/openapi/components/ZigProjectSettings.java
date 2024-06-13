@@ -31,11 +31,12 @@ import java.nio.file.Path;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ZigProjectSettings {
+    public boolean overrideStdPath;
     public String explicitPathToStd;
     public String toolchainHomeDirectory;
 
     public ZigProjectSettings(String explicitPathToStd, AbstractZigToolchain toolchain) {
-        this(explicitPathToStd, (String)null);
+        this(true, explicitPathToStd, (String)null);
         setToolchain(toolchain);
     }
 
