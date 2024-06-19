@@ -39,7 +39,7 @@ public class ZigCapturingProcessHandler extends CapturingAnsiEscapesAwareProcess
     }
 
     @Override
-    protected BaseOutputReader.@NotNull Options readerOptions() {
+    protected @NotNull BaseOutputReader.Options readerOptions() {
         return BaseOutputReader.Options.BLOCKING;
     }
 }

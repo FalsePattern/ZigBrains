@@ -83,18 +83,6 @@ Adds support for the Zig Language, utilizing the ZLS language server for advance
 1. Download the latest version of Zig from https://ziglang.org/download
 2. Download and compile the ZLS language server, available at https://github.com/zigtools/zls
 3. Go to `Settings` -> `Languages & Frameworks` -> `Zig`, and point the `Toolchain Location` and `ZLS path` to the correct places
-4. Open a .zig file, and wait for the circle in the bottom status bar to turn Green (empty).
-   See below (`LSP status icon explanation`) for an explanation on what the circle means.
-
-### LSP status icon explanation
-Red (X symbol):
-LSP server is stopped. You either don't have a proper ZLS path set, or you don't have a .zig file open.
-
-Yellow ("refresh arrow" symbol):
-LSP server is starting, please be patient.
-
-Green (empty):
-LSP server is running.
 
 ## Debugging
 

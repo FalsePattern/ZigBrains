@@ -17,6 +17,16 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Color settings has more accurate color preview text.
+
+### Changed
+
+- LSP
+  - Migrated to Red Hat's LSP4IJ LSP adapter.
+
 ## [15.2.0]
 
 ### Added

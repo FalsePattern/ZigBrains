@@ -1,0 +1,186 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude" require-restart="true">
+    <resource-bundle>zigbrains.Bundle</resource-bundle>
+    <id>com.falsepattern.zigbrains</id>
+    <name>ZigBrains</name>
+    <vendor>FalsePattern</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <depends>com.redhat.devtools.lsp4ij</depends>
+
+    <!-- region Zig -->
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Zig File"
+                  implementationClass="com.falsepattern.zigbrains.zig.ZigFileType"
+                  fieldName="INSTANCE"
+                  language="Zig"
+                  extensions="zig"/>
+
+        <lang.parserDefinition language="Zig"
+                               implementationClass="com.falsepattern.zigbrains.zig.parser.ZigParserDefinition"/>
+
+        <colorSettingsPage implementation="com.falsepattern.zigbrains.zig.highlighter.ZigColorSettingsPage"/>
+
+        <lang.syntaxHighlighterFactory language="Zig"
+                                       implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>
+
+        <lang.braceMatcher language="Zig"
+                           implementationClass="com.falsepattern.zigbrains.zig.pairing.ZigBraceMatcher"/>
+
+        <lang.commenter language="Zig" implementationClass="com.falsepattern.zigbrains.zig.comments.ZigCommenter"/>
+
+        <lang.formatter language="Zig" implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>
+
+        <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
+
+        <!-- LSP textDocument/signatureHelp -->
+        <codeInsight.parameterInfo
+                language="Zig"
+                implementationClass="com.redhat.devtools.lsp4ij.features.signatureHelp.LSPParameterInfoHandler"/>
+        <!-- LSP textDocument/folding -->
+        <lang.foldingBuilder language="Zig"
+                             implementationClass="com.redhat.devtools.lsp4ij.features.foldingRange.LSPFoldingRangeBuilder"
+                             order="first"/>
+
+        <notificationGroup displayType="BALLOON"
+                           bundle="zigbrains.Bundle"
+                           key="notif-zls-error"
+                           id="ZigBrains.ZLS"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <zlsConfigProvider implementation="com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigProvider"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
+        <server id="ZigBrains"
+                name="Zig ZLS"
+                factoryClass="com.falsepattern.zigbrains.zig.lsp.ZLSLanguageServerFactory">
+            <description><![CDATA[
+The <a href="https://github.com/Zigtools/ZLS">Zig Language Server</a>, for ZigBrains
+]]>
+            </description>
+        </server>
+        <languageMapping language="Zig" serverId="ZigBrains" languageId="zig"/>
+        <semanticTokensColorsProvider serverId="ZigBrains"
+                                      class="com.falsepattern.zigbrains.zig.lsp.ZLSSemanticTokensColorsProvider"/>
+    </extensions>
+    <!-- endregion Zig -->
+
+    <!-- region Zon -->
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="ZON File"
+                  implementationClass="com.falsepattern.zigbrains.zon.ZonFileType"
+                  fieldName="INSTANCE"
+                  language="Zon"
+                  extensions="zon"/>
+
+        <lang.parserDefinition language="Zon"
+                               implementationClass="com.falsepattern.zigbrains.zon.parser.ZonParserDefinition"/>
+
+        <lang.syntaxHighlighterFactory language="Zon"
+                                       implementationClass="com.falsepattern.zigbrains.zon.highlight.ZonSyntaxHighlighterFactory"/>
+
+        <colorSettingsPage implementation="com.falsepattern.zigbrains.zon.highlight.ZonColorSettingsPage"/>
+
+        <lang.braceMatcher language="Zon"
+                           implementationClass="com.falsepattern.zigbrains.zon.pairing.ZonBraceMatcher"/>
+
+        <completion.contributor language="Zon"
+                                implementationClass="com.falsepattern.zigbrains.zon.completion.ZonCompletionContributor"/>
+
+        <lang.formatter language="Zon"
+                        implementationClass="com.falsepattern.zigbrains.zon.formatter.ZonFormattingModelBuilder"/>
+
+        <lang.quoteHandler language="Zon"
+                           implementationClass="com.falsepattern.zigbrains.zon.pairing.ZonQuoteHandler"/>
+
+        <lang.foldingBuilder language="Zon"
+                             implementationClass="com.falsepattern.zigbrains.zon.folding.ZonFoldingBuilder"/>
+    </extensions>
+    <!-- endregion Zon -->
+
+    <!-- region Project -->
+    <extensions defaultExtensionNs="com.intellij">
+        <configurationType implementation="com.falsepattern.zigbrains.project.execution.run.ConfigTypeRun"/>
+        <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.run.ConfigProducerRun"/>
+        <runLineMarkerContributor language="Zig"
+                                  implementationClass="com.falsepattern.zigbrains.project.execution.run.ZigLineMarkerRun"/>
+
+        <configurationType implementation="com.falsepattern.zigbrains.project.execution.test.ConfigTypeTest"/>
+        <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.test.ConfigProducerTest"/>
+        <runLineMarkerContributor language="Zig"
+                                  implementationClass="com.falsepattern.zigbrains.project.execution.test.ZigLineMarkerTest"/>
+
+        <configurationType implementation="com.falsepattern.zigbrains.project.execution.build.ConfigTypeBuild"/>
+        <runConfigurationProducer implementation="com.falsepattern.zigbrains.project.execution.build.ConfigProducerBuild"/>
+        <runLineMarkerContributor language="Zig"
+                                  implementationClass="com.falsepattern.zigbrains.project.execution.build.ZigLineMarkerBuild"/>
+
+        <directoryProjectGenerator implementation="com.falsepattern.zigbrains.project.ide.newproject.ZigDirectoryProjectGenerator"/>
+        <newProjectWizard.language implementation="com.falsepattern.zigbrains.project.ide.newproject.ZigNewProjectWizard"/>
+
+        <moduleBuilder builderClass="com.falsepattern.zigbrains.project.ide.newproject.ZigModuleBuilder"/>
+        <projectConfigurable parentId="language"
+                             instance="com.falsepattern.zigbrains.project.ide.config.ZigConfigurable"
+                             id="com.falsepattern.zigbrains.project.ide.config.ZigConfigurable"
+                             displayName="Zig"/>
+
+
+        <programRunner implementation="com.falsepattern.zigbrains.project.runconfig.ZigRegularRunner"
+                       id="ZigDebugRunner"/>
+
+        <notificationGroup displayType="BALLOON"
+                           bundle="zigbrains.Bundle"
+                           key="notif-zig-project"
+                           id="ZigBrains.Project"/>
+
+        <consoleFilterProvider implementation="com.falsepattern.zigbrains.project.console.ZigConsoleFilterProvider"/>
+        <analyzeStacktraceFilter implementation="com.falsepattern.zigbrains.project.console.ZigSourceFileFilter"/>
+
+        <additionalLibraryRootsProvider implementation="com.falsepattern.zigbrains.project.toolchain.stdlib.ZigLibraryRootProvider"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <toolchainFlavour implementation="com.falsepattern.zigbrains.project.toolchain.flavours.ZigSystemPathToolchainFlavour"/>
+        <toolchainProvider implementation="com.falsepattern.zigbrains.project.toolchain.LocalZigToolchainProvider"/>
+        <zlsConfigProvider implementation="com.falsepattern.zigbrains.project.toolchain.ToolchainZLSConfigProvider"/>
+    </extensions>
+
+    <actions>
+        <action class="com.falsepattern.zigbrains.project.ide.actions.ZigNewFileAction"
+                text="New Zig File"
+                id="NewZigFile">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+        </action>
+    </actions>
+    <!-- endregion Project -->
+
+    <depends optional="true" config-file="zigbrains-zig-debugger.xml">com.intellij.modules.cidr.debugger</depends>
+    <depends optional="true" config-file="zigbrains-zig-clion.xml">com.intellij.modules.clion</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup displayType="BALLOON"
+                           bundle="zigbrains.Bundle"
+                           key="notif-zb"
+                           id="ZigBrains"/>
+    </extensions>
+    <extensionPoints>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.project.toolchain.flavours.AbstractZigToolchainFlavour" dynamic="true"
+                name="toolchainFlavour"/>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider" dynamic="true"
+                name="toolchainProvider"/>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider" dynamic="true"
+                name="zlsConfigProvider"/>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider" dynamic="true"
+                name="debuggerDriverProvider"/>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.common.ZBFeatures" dynamic="true"
+                name="featureProvider"/>
+    </extensionPoints>
+</idea-plugin>

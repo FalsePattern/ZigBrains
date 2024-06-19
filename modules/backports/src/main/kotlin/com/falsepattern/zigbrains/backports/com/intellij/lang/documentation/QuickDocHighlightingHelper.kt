@@ -4,15 +4,10 @@ package com.falsepattern.zigbrains.backports.com.intellij.lang.documentation
 import com.intellij.lang.Language
 import com.intellij.lang.documentation.DocumentationMarkup.*
 import com.intellij.lang.documentation.DocumentationSettings.InlineCodeHighlightingMode
-import com.intellij.openapi.editor.colors.EditorColorsScheme
-import com.intellij.openapi.editor.colors.TextAttributesKey
-import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsSafe
-import com.intellij.psi.PsiElement
-import com.falsepattern.zigbrains.backports.com.intellij.ui.components.JBHtmlPaneStyleConfiguration
 import com.falsepattern.zigbrains.backports.com.intellij.ui.components.JBHtmlPaneStyleConfiguration.*
 import com.intellij.lang.documentation.DocumentationSettings
 import com.intellij.util.concurrency.annotations.RequiresReadLock

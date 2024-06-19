@@ -1128,12 +1128,12 @@ public abstract class DAPDriver<
         }
 
         @Override
-        public void write(byte @NotNull [] b) throws IOException {
+        public void write(@NotNull byte[] b) throws IOException {
             inferior().write(b);
         }
 
         @Override
-        public void write(byte @NotNull [] b, int off, int len) throws IOException {
+        public void write(@NotNull byte[] b, int off, int len) throws IOException {
             inferior().write(b, off, len);
         }
 

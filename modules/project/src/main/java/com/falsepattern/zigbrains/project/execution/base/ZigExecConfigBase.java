@@ -84,7 +84,7 @@ public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends 
     public abstract @Nullable ProfileStateBase<T> getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment)
             throws ExecutionException;
 
-    public @NotNull List<ZigConfigEditor.@NotNull ZigConfigurable<?>> getConfigurables() {
+    public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
         return List.of(workingDirectory, pty);
     }
 }

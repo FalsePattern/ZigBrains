@@ -31,7 +31,7 @@ public abstract class MSVCDriverConfiguration extends DAPDebuggerDriverConfigura
     protected abstract Path getDebuggerExecutable();
 
     @Override
-    public @NotNull DebuggerDriver createDriver(DebuggerDriver.@NotNull Handler handler, @NotNull ArchitectureType architectureType)
+    public @NotNull DebuggerDriver createDriver(@NotNull DebuggerDriver.Handler handler, @NotNull ArchitectureType architectureType)
             throws ExecutionException {
         return new WinDAPDriver(handler, this);
     }

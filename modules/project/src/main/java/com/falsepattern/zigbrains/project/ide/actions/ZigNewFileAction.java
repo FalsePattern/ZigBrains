@@ -40,7 +40,7 @@ public class ZigNewFileAction extends CreateFileFromTemplateAction {
     }
 
     @Override
-    protected void buildDialog(@NotNull Project project, @NotNull PsiDirectory directory, CreateFileFromTemplateDialog.@NotNull Builder builder) {
+    protected void buildDialog(@NotNull Project project, @NotNull PsiDirectory directory, @NotNull CreateFileFromTemplateDialog.Builder builder) {
         builder.setTitle(TITLE)
                .addKind("Empty file", Icons.ZIG, "Zig File");
     }

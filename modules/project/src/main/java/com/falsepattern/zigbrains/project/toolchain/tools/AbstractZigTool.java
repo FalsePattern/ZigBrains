@@ -47,13 +47,13 @@ public abstract class AbstractZigTool {
     }
 
     protected final GeneralCommandLine createBaseCommandLine(@Nullable Path workingDirectory,
-                                                             String @NotNull... parameters) {
+                                                             @NotNull String... parameters) {
         return createBaseCommandLine(workingDirectory, Collections.emptyMap(), parameters);
     }
 
     protected final GeneralCommandLine createBaseCommandLine(@Nullable Path workingDirectory,
                                                              @NotNull Map<String, String> environment,
-                                                             String @NotNull... parameters) {
+                                                             @NotNull String... parameters) {
         return createBaseCommandLine(workingDirectory, environment, List.of(parameters));
     }
 

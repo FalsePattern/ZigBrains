@@ -29,7 +29,7 @@ public class ZonBraceMatcher implements PairedBraceMatcher {
     private static final BracePair[] PAIRS = new BracePair[]{PAIR};
 
     @Override
-    public BracePair @NotNull [] getPairs() {
+    public @NotNull BracePair[] getPairs() {
         return PAIRS;
     }
 

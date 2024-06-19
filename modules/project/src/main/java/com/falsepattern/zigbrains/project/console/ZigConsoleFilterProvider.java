@@ -22,8 +22,9 @@ import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
 public class ZigConsoleFilterProvider implements ConsoleFilterProvider {
+    @NotNull
     @Override
-    public Filter @NotNull [] getDefaultFilters(@NotNull Project project) {
+    public Filter[] getDefaultFilters(@NotNull Project project) {
         return new Filter[]{new ZigSourceFileFilter(project)};
     }
 }
