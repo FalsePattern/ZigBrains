@@ -16,27 +16,26 @@
 
 package com.falsepattern.zigbrains.debugbridge;
 
-import com.falsepattern.zigbrains.common.ObjectHolder;
 import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.project.Project;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public interface ZigDebuggerDriverConfigurationProvider {
     ExtensionPointName<ZigDebuggerDriverConfigurationProvider> EXTENSION_POINT_NAME = ExtensionPointName.create("com.falsepattern.zigbrains.debuggerDriverProvider");
 
-    static @NotNull Stream<Supplier<DebuggerDriverConfiguration>> findDebuggerConfigurations(Project project, boolean isElevated, boolean emulateTerminal) {
+    static @NotNull Stream<DebuggerDriverConfiguration> findDebuggerConfigurations(Project project, boolean isElevated, boolean emulateTerminal) {
         return EXTENSION_POINT_NAME.getExtensionList()
                                    .stream()
-                                   .map(it -> (Supplier<DebuggerDriverConfiguration>) () -> Optional.ofNullable(it.getDebuggerConfiguration(project, isElevated, emulateTerminal))
-                                           .map(ObjectHolder::value)
-                                           .orElse(null));
+                                   .map(it -> it.getDebuggerConfiguration(project, isElevated, emulateTerminal))
+                                   .filter(Objects::nonNull)
+                                   .map(Supplier::get);
     }
 
-    @Nullable ObjectHolder<DebuggerDriverConfiguration> getDebuggerConfiguration(Project project, boolean isElevated, boolean emulateTerminal);
+    @Nullable Supplier<DebuggerDriverConfiguration> getDebuggerConfiguration(Project project, boolean isElevated, boolean emulateTerminal);
 }

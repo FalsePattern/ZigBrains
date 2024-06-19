@@ -94,69 +94,72 @@ public class ZigColorSettingsPage implements ColorSettingsPage {
     public String getDemoText() {
         return """
                 ///This is a documentation comment
-                const <ns>std</ns> = @import("std");
-                               
-                const <enumDecl>AnEnum</enumDecl> = enum {
-                    <enumMemberDecl>A</enumMemberDecl>,
-                    <enumMemberDecl>B</enumMemberDecl>,
-                    <enumMemberDecl>C</enumMemberDecl>,
+                const <ns_decl>std</ns_decl> = @import("std");
+                
+                const <enum_decl>AnEnum</enum_decl> = enum {
+                    <enum_member_decl>A</enum_member_decl>,
+                    <enum_member_decl>B</enum_member_decl>,
+                    <enum_member_decl>C</enum_member_decl>,
                 };
-                               
-                const <structDecl>AStruct</structDecl> = struct {
-                    <propertyDecl>fieldA</propertyDecl>: <type>u32</type>,
-                    <propertyDecl>fieldB</propertyDecl>: <type>u16</type>
+                
+                const <struct_decl>AStruct</struct_decl> = struct {
+                    <property_decl>fieldA</property_decl>: <type>u32</type>,
+                    <property_decl>fieldB</property_decl>: <type>u16</type>
                 };
-                               
-                const <typeDecl>AnErrorType</typeDecl> = error {
-                    <etagDecl>SomeError</etagDecl>
+                
+                const <type_decl>AnError</type_decl> = error {
+                    <error_tag_decl>SomeError</error_tag_decl>
                 };
-                                
-                pub fn <fn>main</fn>() <type>AnError</type>.SomeError!<type>void</type> {
+                
+                pub fn <function_decl>main</function_decl>() <type>AnError</type>.<error_tag>SomeError</error_tag>!<type>void</type> {
                     // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-                    <ns>std</ns>.<ns>debug</ns>.<fn>print</fn>("All your {s} are belong to us.\\n", .{"codebase"});
-                                
+                    <namespace>std</namespace>.<namespace>debug</namespace>.<function>print</function>("All your {s} are belong to us.\\n", .{"codebase"});
+                
                     // stdout is for the actual output of your application, for example if you
                     // are implementing gzip, then only the compressed bytes should be sent to
                     // stdout, not any debugging messages.
-                    const <varDecl>stdout_file</varDecl> = <ns>std</ns>.<ns>io</ns>.<fn>getStdOut</fn>().<md>writer</md>();
-                    var <varDecl>bw</varDecl> = <ns>std</ns>.<ns>io</ns>.<fn>bufferedWriter</fn>(<var>stdout_file</var>);
-                    const <varDecl>stdout</varDecl> = <var>bw</var>.<md>writer</md>();
-                                
-                    try <var>stdout</var>.<md>print</md>(\\\\Run `zig build test` to run the tests.
+                    const <variable_decl>stdout_file</variable_decl> = <namespace>std</namespace>.<namespace>io</namespace>.<function>getStdOut</function>().<method>writer</method>();
+                    var <variable_decl>bw</variable_decl> = <namespace>std</namespace>.<namespace>io</namespace>.<function>bufferedWriter</function>(<variable>stdout_file</variable>);
+                    const <variable_decl>stdout</variable_decl> = <variable>bw</variable>.<method>writer</method>();
+                
+                    try <variable>stdout</variable>.<method>print</method>(\\\\Run `zig build test` to run the tests.
                                                          \\\\
                                                          , .{});
-                    
-                    _ = <enum>AnEnum</enum>.<enumMember>A</enumMember>;
-                                
-                    try <var>bw</var>.<md>flush</md>(); // don't forget to flush!
+                
+                    _ = <enum>AnEnum</enum>.<enum_member>A</enum_member>;
+                
+                    try <variable>bw</variable>.<method>flush</method>(); // don't forget to flush!
                 }
-                                
+                
                 test "simple test" {
-                    var <varDecl>list</varDecl> = <ns>std</ns>.<type>ArrayList</type>(<type>i32</type>).<md>init</md>(<ns>std</ns>.<ns>testing</ns>.<type>allocator</type>);
-                    defer <var>list</var>.<md>deinit</md>(); // try commenting this out and see if zig detects the memory leak!
-                    try <var>list</var>.<md>append</md>(42);
-                    try <ns>std</ns>.<ns>testing</ns>.<fn>expectEqual</fn>(@as(i32, 42), <var>list</var>.<md>pop</md>());
+                    var <variable_decl>list</variable_decl> = <namespace>std</namespace>.<type>ArrayList</type>(<type>i32</type>).<function>init</function>(<namespace>std</namespace>.<namespace>testing</namespace>.<variable>allocator</variable>);
+                    defer <variable>list</variable>.<method>deinit</method>(); // try commenting this out and see if zig detects the memory leak!
+                    try <variable>list</variable>.<method>append</method>(42);
+                    try <namespace>std</namespace>.<namespace>testing</namespace>.<method_gen>expectEqual</method_gen>(@as(<type>i32</type>, 42), <variable>list</variable>.<method>pop</method>());
                 }
                 """;
     }
 
     private static final Map<String, TextAttributesKey> ADD_HIGHLIGHT = new HashMap<>();
     static {
-        ADD_HIGHLIGHT.put("typeDecl", ZigSyntaxHighlighter.TYPE_DECL);
-        ADD_HIGHLIGHT.put("etagDecl", ZigSyntaxHighlighter.ERROR_TAG_DECL);
-        ADD_HIGHLIGHT.put("struct", ZigSyntaxHighlighter.STRUCT_REF);
         ADD_HIGHLIGHT.put("enum", ZigSyntaxHighlighter.ENUM_REF);
-        ADD_HIGHLIGHT.put("enumDecl", ZigSyntaxHighlighter.ENUM_DECL);
-        ADD_HIGHLIGHT.put("enumMember", ZigSyntaxHighlighter.ENUM_MEMBER_REF);
-        ADD_HIGHLIGHT.put("enumMemberDecl", ZigSyntaxHighlighter.ENUM_MEMBER_DECL);
-        ADD_HIGHLIGHT.put("varDecl", ZigSyntaxHighlighter.VARIABLE_DECL);
-        ADD_HIGHLIGHT.put("propertyDecl", ZigSyntaxHighlighter.PROPERTY_DECL);
-        ADD_HIGHLIGHT.put("structDecl", ZigSyntaxHighlighter.STRUCT_DECL);
-        ADD_HIGHLIGHT.put("var", ZigSyntaxHighlighter.VARIABLE_REF);
-        ADD_HIGHLIGHT.put("ns", ZigSyntaxHighlighter.NAMESPACE_REF);
+        ADD_HIGHLIGHT.put("enum_decl", ZigSyntaxHighlighter.ENUM_DECL);
+        ADD_HIGHLIGHT.put("enum_member", ZigSyntaxHighlighter.ENUM_MEMBER_REF);
+        ADD_HIGHLIGHT.put("enum_member_decl", ZigSyntaxHighlighter.ENUM_MEMBER_DECL);
+        ADD_HIGHLIGHT.put("error_tag", ZigSyntaxHighlighter.ERROR_TAG_REF);
+        ADD_HIGHLIGHT.put("error_tag_decl", ZigSyntaxHighlighter.ERROR_TAG_DECL);
+        ADD_HIGHLIGHT.put("function", ZigSyntaxHighlighter.FUNCTION_REF);
+        ADD_HIGHLIGHT.put("function_decl", ZigSyntaxHighlighter.FUNCTION_DECL);
+        ADD_HIGHLIGHT.put("method", ZigSyntaxHighlighter.METHOD_REF);
+        ADD_HIGHLIGHT.put("method_gen", ZigSyntaxHighlighter.METHOD_REF_GEN);
+        ADD_HIGHLIGHT.put("namespace", ZigSyntaxHighlighter.NAMESPACE_REF);
+        ADD_HIGHLIGHT.put("property_decl", ZigSyntaxHighlighter.PROPERTY_DECL);
+        ADD_HIGHLIGHT.put("struct", ZigSyntaxHighlighter.STRUCT_REF);
+        ADD_HIGHLIGHT.put("struct_decl", ZigSyntaxHighlighter.STRUCT_DECL);
         ADD_HIGHLIGHT.put("type", ZigSyntaxHighlighter.TYPE_REF);
-        ADD_HIGHLIGHT.put("fn", ZigSyntaxHighlighter.FUNCTION_REF);
-        ADD_HIGHLIGHT.put("md", ZigSyntaxHighlighter.METHOD_REF);
+        ADD_HIGHLIGHT.put("type_decl", ZigSyntaxHighlighter.TYPE_DECL);
+        ADD_HIGHLIGHT.put("variable", ZigSyntaxHighlighter.VARIABLE_REF);
+        ADD_HIGHLIGHT.put("variable_decl", ZigSyntaxHighlighter.VARIABLE_DECL);
     }
 
     @Nullable
