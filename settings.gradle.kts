@@ -1,10 +1,10 @@
 rootProject.name = "ZigBrains"
 
-include("plugin")
-
 File(rootDir, "modules").eachDir { dir ->
-    include(dir.name)
-    project(":${dir.name}").projectDir = dir
+    if (dir.resolve("src").exists()) {
+        include(dir.name)
+        project(":${dir.name}").projectDir = dir
+    }
 }
 
 fun File.eachDir(block: (File) -> Unit) {

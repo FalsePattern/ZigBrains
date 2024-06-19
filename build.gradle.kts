@@ -2,20 +2,22 @@ import groovy.xml.XmlParser
 import groovy.xml.XmlSlurper
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.tasks.PatchPluginXmlTask
-import org.jetbrains.intellij.tasks.PublishPluginTask
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
+import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
-    id("java") // Java support
+    java
     `maven-publish`
-    id("java-library")
-    id("org.jetbrains.intellij") version("1.17.3")
+    `java-library`
+    id("org.jetbrains.intellij.platform") version("2.0.0-beta7")
     id("org.jetbrains.changelog") version("2.2.0")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
-    id("com.palantir.git-version") version("3.0.0")
 }
 
 val publishVersions = listOf("232", "233", "241", "242")
@@ -31,14 +33,9 @@ val rootPackagePath = rootPackage.replace('.', '/')
 val javaLangVersion: JavaLanguageVersion = JavaLanguageVersion.of(17)
 val javaVersion = JavaVersion.VERSION_17
 
-val baseIDE: String = properties("baseIDE").get()
-val ideaVersion: String = properties("ideaVersion").get()
-val clionVersion: String = properties("clionVersion").get()
-val baseVersion = when(baseIDE) {
-    "idea" -> ideaVersion
-    "clion" -> clionVersion
-    else -> error("Unexpected IDE name: `$baseIDE")
-}
+val baseIDE = properties("baseIDE").get()
+val ideaVersion = properties("ideaVersion").get()
+val clionVersion = properties("clionVersion").get()
 
 val clionPlugins = listOf("com.intellij.clion", "com.intellij.cidr.lang", "com.intellij.cidr.base", "com.intellij.nativeDebug")
 
@@ -48,27 +45,10 @@ tasks {
     }
 }
 
-fun pluginVersionGit(): Provider<String> {
-    return provider {
-        try {
-            gitVersion()
-        } catch (_: java.lang.Exception) {
-            error("Git version not found and RELEASE_VERSION environment variable is not set!")
-        }
-    }
-}
-
 fun pluginVersion(): Provider<String> {
     return provider {
         System.getenv("RELEASE_VERSION")
-    }.orElse(pluginVersionGit().map {
-        val suffix = "-" + properties("pluginSinceBuild").get()
-        if (it.endsWith(suffix)) {
-            it.substring(0, it.length - suffix.length)
-        } else {
-            it
-        }
-    })
+    }.orElse(properties("pluginVersion"))
 }
 
 fun pluginVersionFull(): Provider<String> {
@@ -77,32 +57,73 @@ fun pluginVersionFull(): Provider<String> {
 
 allprojects {
     apply {
-        plugin("org.jetbrains.grammarkit")
-        plugin("org.jetbrains.intellij")
+        plugin("org.jetbrains.intellij.platform")
     }
     repositories {
         mavenCentral()
-        maven("https://cache-redirector.jetbrains.com/repo.maven.apache.org/maven2")
-        maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
-    }
-    dependencies {
-        compileOnly("org.projectlombok:lombok:1.18.30")
-        annotationProcessor("org.projectlombok:lombok:1.18.30")
-    }
-    intellij {
-        version = baseVersion
-        updateSinceUntilBuild = true
-        instrumentCode = false
-    }
-    sourceSets {
-        main {
-            java {
-                srcDirs(
-                    "${grammarKitGenDir}/lexer",
-                    "${grammarKitGenDir}/parser"
-                )
+        intellijPlatform {
+            localPlatformArtifacts {
+                content {
+                    includeGroup("bundledPlugin")
+                }
+            }
+            snapshots {
+                content {
+                    includeModule("com.jetbrains.intellij.clion", "clion")
+                    includeModule("com.jetbrains.intellij.idea", "ideaIC")
+                }
             }
         }
+    }
+    dependencies {
+        compileOnly("org.projectlombok:lombok:1.18.32")
+        annotationProcessor("org.projectlombok:lombok:1.18.32")
+        if (path !in listOf(":", ":debugger")) {
+            intellijPlatform {
+                intellijIdeaCommunity(ideaVersion)
+            }
+        }
+    }
+
+    if (path in listOf(":zig", ":zon")) {
+        apply {
+            plugin("org.jetbrains.grammarkit")
+        }
+        sourceSets {
+            main {
+                java {
+                    srcDirs(
+                        "${grammarKitGenDir}/lexer",
+                        "${grammarKitGenDir}/parser"
+                    )
+                }
+            }
+        }
+        tasks {
+
+            generateLexer {
+                enabled = true
+                purgeOldFiles = true
+            }
+
+            generateParser {
+                enabled = true
+                targetRootOutputDir = file("${grammarKitGenDir}/parser")
+            }
+
+
+            register<DefaultTask>("generateGrammars") {
+                description = "Generate source code from parser/lexer definitions"
+                group = "build setup"
+                dependsOn("generateLexer")
+                dependsOn("generateParser")
+            }
+
+            compileJava {
+                dependsOn("generateGrammars")
+            }
+        }
+
     }
 
     configure<JavaPluginExtension> {
@@ -125,80 +146,22 @@ allprojects {
         runIde { enabled = false }
         prepareSandbox { enabled = false }
         buildSearchableOptions { enabled = false }
+        verifyPlugin { enabled = false }
+        buildPlugin { enabled = false }
+        signPlugin { enabled = false }
 
         withType<PatchPluginXmlTask> {
             sinceBuild = properties("pluginSinceBuild")
             untilBuild = properties("pluginUntilBuild")
         }
-
-        withType<org.jetbrains.intellij.tasks.RunIdeBase> {
-            rootProject.file("jbr/lib/openjdk/bin/java")
-                .takeIf { it.exists() }
-                ?.let { projectExecutable.set(it.toString()) }
-        }
-
-        withType<org.jetbrains.intellij.tasks.RunPluginVerifierTask> {
-            rootProject.file("jbr/lib/openjdk")
-                .takeIf { it.exists() }
-                ?.let { runtimeDir.set(it.toString()) }
-        }
-
-        generateLexer {
-            purgeOldFiles = true
-        }
-        generateParser {
-            targetRootOutputDir = file("${grammarKitGenDir}/parser")
-            purgeOldFiles = true
-        }
-
-        register<DefaultTask>("generateGrammars") {
-            description = "Generate source code from parser/lexer definitions"
-            group = "build setup"
-            dependsOn("generateLexer")
-            dependsOn("generateParser")
-        }
-
-        verifyPlugin {
-            enabled = false
-        }
+    }
+    intellijPlatform {
+        instrumentCode = false
     }
 }
 
-project(":") {
-    apply {
-        plugin("org.jetbrains.changelog")
-    }
-    task<Exec>("nixos_jbr") {
-        description = "Create a symlink to package jetbrains.jdk"
-        group = "build setup"
-        commandLine("nix-build", "<nixpkgs>", "-A", "jetbrains.jdk", "-o", "jbr")
-    }
+project(":common") {
 
-    tasks {
-        buildPlugin {
-            enabled = false
-        }
-    }
-
-    changelog {
-        groups.empty()
-        repositoryUrl = properties("pluginRepositoryUrl")
-    }
-}
-
-project(":debugger") {
-    dependencies {
-        implementation(project(":zig"))
-        implementation(project(":project"))
-        implementation(project(":common"))
-        implementation(project(":lsp-common"))
-        implementation(project(":lsp"))
-        implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.22.0")
-    }
-    intellij {
-        version = clionVersion
-        plugins = clionPlugins
-    }
 }
 
 project(":lsp-common") {
@@ -228,22 +191,15 @@ project(":zig") {
     }
     tasks {
         generateLexer {
-            enabled = true
             sourceFile = file("src/main/grammar/Zig.flex")
             targetOutputDir = file("${grammarKitGenDir}/lexer/${rootPackagePath}/zig/lexer")
         }
 
         generateParser {
-            enabled = true
             sourceFile = file("src/main/grammar/Zig.bnf")
             pathToParser = "${rootPackagePath}/zig/psi/ZigParser.java"
             pathToPsiRoot = "${rootPackagePath}/zig/psi"
         }
-
-        compileJava {
-            dependsOn("generateGrammars")
-        }
-
     }
 }
 
@@ -254,148 +210,167 @@ project(":project") {
     }
 }
 
+project(":debugger") {
+    dependencies {
+        implementation(project(":zig"))
+        implementation(project(":project"))
+        implementation(project(":common"))
+        implementation(project(":lsp-common"))
+        implementation(project(":lsp"))
+        implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.22.0")
+        intellijPlatform {
+            clion(clionVersion)
+            for (p in clionPlugins) {
+                bundledPlugin(p)
+            }
+        }
+    }
+}
+
 project(":zon") {
     dependencies {
         implementation(project(":common"))
     }
     tasks {
         generateLexer {
-            enabled = true
             sourceFile = file("src/main/grammar/Zon.flex")
             targetOutputDir = file("${grammarKitGenDir}/lexer/${rootPackagePath}/zon/lexer")
         }
 
         generateParser {
-            enabled = true
             sourceFile = file("src/main/grammar/Zon.bnf")
             pathToParser = "${rootPackagePath}/zon/psi/ZonParser.java"
             pathToPsiRoot = "${rootPackagePath}/zon/psi"
         }
+    }
+}
 
-        compileJava {
-            dependsOn("generateGrammars")
+dependencies {
+    implementation(project(":zig"))
+    implementation(project(":project"))
+    implementation(project(":zon"))
+    implementation(project(":debugger"))
+    intellijPlatform {
+        zipSigner()
+        pluginVerifier()
+        when (baseIDE) {
+            "idea" -> intellijIdeaCommunity(ideaVersion)
+            "clion" -> clion(clionVersion)
         }
     }
 }
 
-project(":plugin") {
-    apply {
-        plugin("org.jetbrains.changelog")
-    }
+intellijPlatform {
+    pluginConfiguration {
+        name = properties("pluginName")
+        description = providers.fileContents(rootProject.layout.projectDirectory.file("README.md")).asText.map {
+            val start = "<!-- Plugin description -->"
+            val end = "<!-- Plugin description end -->"
 
-    dependencies {
-        implementation(project(":zig"))
-        implementation(project(":project"))
-        implementation(project(":zon"))
-        implementation(project(":debugger"))
-        implementation(project(":"))
+            with(it.lines()) {
+                if (!containsAll(listOf(start, end))) {
+                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                }
+                subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
+            }
+        }
+        changeNotes = pluginVersion().map { pluginVersion ->
+            with(rootProject.changelog) {
+                renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
+                        .withHeader(false)
+                        .withEmptySections(false),
+                    Changelog.OutputType.HTML,
+                )
+            }
+        }
+        version = pluginVersionFull()
     }
-
-    intellij {
-        pluginName = properties("pluginName")
+    signing {
+        certificateChainFile = rootProject.file("secrets/chain.crt")
+        privateKeyFile = rootProject.file("secrets/private.pem")
+        password = environment("PRIVATE_KEY_PASSWORD")
     }
+    verifyPlugin {
+        ides {
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion)
+            ide(IntelliJPlatformType.IntellijIdeaUltimate, ideaVersion)
+            ide(IntelliJPlatformType.CLion, clionVersion)
+        }
+    }
+}
 
 // Include the generated files in the source set
 
-    // Collects all jars produced by compilation of project modules and merges them into singe one.
-    // We need to put all plugin manifest files into single jar to make new plugin model work
-    val mergePluginJarTask = task<Jar>("mergePluginJars") {
-        duplicatesStrategy = DuplicatesStrategy.FAIL
-        archiveBaseName.set("ZigBrains")
+// Collects all jars produced by compilation of project modules and merges them into singe one.
+// We need to put all plugin manifest files into single jar to make new plugin model work
+val mergePluginJarTask = task<Jar>("mergePluginJars") {
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    archiveBaseName.set("ZigBrains")
 
-        exclude("META-INF/MANIFEST.MF")
-        exclude("**/classpath.index")
+    exclude("META-INF/MANIFEST.MF")
+    exclude("**/classpath.index")
 
-        val pluginLibDir by lazy {
-            val sandboxTask = tasks.prepareSandbox.get()
-            sandboxTask.destinationDir.resolve("${sandboxTask.pluginName.get()}/lib")
-        }
+    val pluginLibDir by lazy {
+        val sandboxTask = tasks.prepareSandbox.get()
+        sandboxTask.destinationDir.resolve("${project.extensionProvider.map { it.projectName }.get()}/lib")
+    }
 
-        val pluginJars by lazy {
-            pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
-        }
+    val pluginJars by lazy {
+        pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
+    }
 
-        destinationDirectory.set(project.layout.dir(provider { pluginLibDir }))
+    destinationDirectory.set(project.layout.dir(provider { pluginLibDir }))
 
-        doFirst {
-            for (file in pluginJars) {
-                from(zipTree(file))
-            }
-        }
-
-        doLast {
-            delete(pluginJars)
+    doFirst {
+        for (file in pluginJars) {
+            from(zipTree(file))
         }
     }
 
-    tasks {
+    doLast {
+        delete(pluginJars)
+    }
+}
 
-        buildPlugin {
-            archiveBaseName.set("ZigBrains")
-        }
+tasks {
+    runIde {
+        dependsOn(mergePluginJarTask)
+        enabled = true
+    }
 
-        runIde {
-            dependsOn(mergePluginJarTask)
-            enabled = true
-        }
+    prepareSandbox {
+        finalizedBy(mergePluginJarTask)
+        enabled = true
+    }
 
-        prepareSandbox {
-            finalizedBy(mergePluginJarTask)
-            enabled = true
-        }
+    buildSearchableOptions {
+        dependsOn(mergePluginJarTask)
+    }
 
-        buildSearchableOptions {
-            dependsOn(mergePluginJarTask)
-        }
+    verifyPlugin {
+        dependsOn(mergePluginJarTask)
+        enabled = true
+    }
 
-        patchPluginXml {
-            version = pluginVersionFull()
+    signPlugin {
+        enabled = true
+    }
 
-            // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-            pluginDescription = providers.fileContents(rootProject.layout.projectDirectory.file("README.md")).asText.map {
-                val start = "<!-- Plugin description -->"
-                val end = "<!-- Plugin description end -->"
+    verifyPluginSignature {
+        dependsOn(signPlugin)
+    }
 
-                with (it.lines()) {
-                    if (!containsAll(listOf(start, end))) {
-                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
-                    }
-                    subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
-                }
-            }
+    buildPlugin {
+        enabled = true
+    }
 
-            val changelog = rootProject.changelog // local variable for configuration cache compatibility
-            // Get the latest available change notes from the changelog file
-            changeNotes = pluginVersion().map { pluginVersion ->
-                with(changelog) {
-                    renderItem(
-                        (getOrNull(pluginVersion) ?: getUnreleased())
-                            .withHeader(false)
-                            .withEmptySections(false),
-                        Changelog.OutputType.HTML,
-                    )
-                }
-            }
-        }
+    generateLexer {
+        enabled = false
+    }
 
-        signPlugin {
-            certificateChainFile = rootProject.file("secrets/chain.crt")
-            privateKeyFile = rootProject.file("secrets/private.pem")
-            password = environment("PRIVATE_KEY_PASSWORD")
-        }
-
-        verifyPluginSignature {
-            certificateChainFile = rootProject.file("secrets/chain.crt")
-        }
-
-        verifyPlugin {
-            dependsOn(mergePluginJarTask)
-            enabled = true
-        }
-
-        listProductsReleases {
-            types = listOf("IU", "IC", "CL")
-        }
+    generateParser {
+        enabled = false
     }
 }
 
@@ -403,7 +378,7 @@ fun distFile(it: String) = layout.buildDirectory.file("dist/ZigBrains-${pluginVe
 
 publishVersions.forEach {
     tasks.register<PublishPluginTask>("jbpublish-$it") {
-        distributionFile.set(distFile(it))
+        archiveFile = distFile(it)
         token = environment("IJ_PUBLISH_TOKEN")
     }
     tasks.named("publish") {

@@ -64,7 +64,7 @@ fi
 for i in "${branches[@]}"
 do
   echo "Building branch $i"
-  git checkout "$i" && ./gradlew :plugin:verifyPluginSignature
+  git checkout "$i" && ./gradlew :verifyPluginSignature
   RESULT=$?
   if  [ $RESULT != 0 ]; then
     echo "Failed to build plugin on branch $i!"
@@ -76,6 +76,6 @@ git checkout "$DEFAULT_BRANCH"
 
 mkdir -p build/dist
 
-cp plugin/build/distributions/*-signed.zip build/dist/
+cp build/distributions/*-signed.zip build/dist/
 
 ./gradlew publish
