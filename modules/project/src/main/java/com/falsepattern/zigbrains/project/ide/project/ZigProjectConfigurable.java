@@ -53,7 +53,7 @@ public class ZigProjectConfigurable implements SubConfigurable {
         val modified = service.isModified(data);
         service.loadState(data);
         if (modified) {
-            ZLSStartupActivity.initZLS(project);
+            ZLSStartupActivity.startLSP(project, true);
         }
     }
 

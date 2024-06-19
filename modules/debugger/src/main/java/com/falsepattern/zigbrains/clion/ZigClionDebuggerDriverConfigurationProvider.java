@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.clion;
 
-import com.falsepattern.zigbrains.common.ObjectHolder;
 import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider;
 import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings;
 import com.intellij.openapi.diagnostic.Logger;
@@ -29,11 +28,13 @@ import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 public class ZigClionDebuggerDriverConfigurationProvider implements ZigDebuggerDriverConfigurationProvider {
     private static final Logger LOG = Logger.getInstance(ZigClionDebuggerDriverConfigurationProvider.class);
 
     @Override
-    public @Nullable ObjectHolder<DebuggerDriverConfiguration> getDebuggerConfiguration(Project project, boolean isElevated, boolean emulateTerminal) {
+    public @Nullable Supplier<DebuggerDriverConfiguration> getDebuggerConfiguration(Project project, boolean isElevated, boolean emulateTerminal) {
         if (SystemInfo.isWindows)
             return null;
 
@@ -51,9 +52,10 @@ public class ZigClionDebuggerDriverConfigurationProvider implements ZigDebuggerD
             return null;
         }
 
+        CPPToolchains.Toolchain finalToolchain = toolchain;
         return switch (toolchain.getDebuggerKind()) {
-            case CUSTOM_GDB, BUNDLED_GDB -> new ObjectHolder<>(new CLionGDBDriverConfiguration(project, toolchain));
-            case BUNDLED_LLDB -> new ObjectHolder<>(new CLionLLDBDriverConfiguration(project, toolchain));
+            case CUSTOM_GDB, BUNDLED_GDB -> () -> new CLionGDBDriverConfiguration(project, finalToolchain);
+            case BUNDLED_LLDB -> () -> new CLionLLDBDriverConfiguration(project, finalToolchain);
         };
     }
 }

@@ -52,7 +52,7 @@ public class ZLSSettingsConfigurable implements SubConfigurable {
         boolean reloadZLS = settings.zlsSettingsModified(data);
         settings.loadState(data);
         if (reloadZLS) {
-            ZLSStartupActivity.initZLS(project);
+            ZLSStartupActivity.startLSP(project, true);
         }
     }
 
