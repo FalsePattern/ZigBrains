@@ -1,7 +1,6 @@
 package com.falsepattern.zigbrains.debugger;
 
 import com.falsepattern.zigbrains.ZigBundle;
-import com.falsepattern.zigbrains.common.ObjectHolder;
 import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider;
 import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings;
 import com.falsepattern.zigbrains.debugger.toolchain.DebuggerAvailability;
@@ -26,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.function.Supplier;
 
 public class ZigDefaultDebuggerDriverConfigurationProvider implements ZigDebuggerDriverConfigurationProvider {
     private static boolean availabilityCheck(Project project, DebuggerKind kind) {
@@ -79,7 +79,7 @@ public class ZigDefaultDebuggerDriverConfigurationProvider implements ZigDebugge
     }
 
     @Override
-    public @Nullable ObjectHolder<DebuggerDriverConfiguration> getDebuggerConfiguration(Project project, boolean isElevated, boolean emulateTerminal) {
+    public @Nullable Supplier<DebuggerDriverConfiguration> getDebuggerConfiguration(Project project, boolean isElevated, boolean emulateTerminal) {
         val settings = ZigDebuggerSettings.getInstance();
         val service = ZigDebuggerToolchainService.getInstance();
         val kind = settings.debuggerKind;
@@ -88,14 +88,14 @@ public class ZigDefaultDebuggerDriverConfigurationProvider implements ZigDebugge
         }
         val availability = service.debuggerAvailability(kind);
         return switch (availability.kind()) {
-            case Bundled -> new ObjectHolder<>(switch (kind) {
+            case Bundled -> () -> (switch (kind) {
                 case LLDB -> new ZigLLDBDriverConfiguration(isElevated, emulateTerminal);
                 case GDB -> new ZigGDBDriverConfiguration(isElevated, emulateTerminal);
                 case MSVC -> throw new AssertionError("MSVC is never bundled");
             });
             case Binaries -> {
                 val bin = (DebuggerAvailability.Binaries) availability;
-                yield new ObjectHolder<>(switch (bin.binariesKind()) {
+                yield () -> (switch (bin.binariesKind()) {
                     case LLDB -> new ZigCustomBinariesLLDBDriverConfiguration((LLDBBinaries) bin, isElevated, emulateTerminal);
                     case GDB -> new ZigCustomBinariesGDBDriverConfiguration((GDBBinaries) bin, isElevated, emulateTerminal);
                     case MSVC -> new ZigMSVCDriverConfiguration((MSVCBinaries) bin, isElevated, emulateTerminal);

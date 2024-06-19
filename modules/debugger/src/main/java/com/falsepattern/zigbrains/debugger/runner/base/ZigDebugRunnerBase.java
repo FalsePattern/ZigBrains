@@ -66,26 +66,19 @@ public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?
     protected RunContentDescriptor doExecute(ProfileState state, AbstractZigToolchain toolchain, ExecutionEnvironment environment)
             throws ExecutionException {
         val project = environment.getProject();
-        val providers = ZigDebuggerDriverConfigurationProvider.findDebuggerConfigurations(project, false, false)
+        val drivers = ZigDebuggerDriverConfigurationProvider.findDebuggerConfigurations(project, false, false)
                                                               .toList();
 
-        DebuggerDriverConfiguration debuggerDriver = null;
-
-        for (val provider: providers) {
-            debuggerDriver = provider.get();
-            if (debuggerDriver != null)
-                break;
+        for (val debuggerDriver: drivers) {
+            if (debuggerDriver == null)
+                continue;
+            ZigDebugParametersBase<ProfileState> runParameters = getDebugParameters(state, environment, debuggerDriver, toolchain);
+            if (runParameters == null) {
+                continue;
+            }
+            return startSession(environment, new ZigLocalDebugProcessStarter(runParameters, state, environment));
         }
-
-        if (debuggerDriver == null) {
-            return null;
-        }
-        ZigDebugParametersBase<ProfileState> runParameters = getDebugParameters(state, environment, debuggerDriver, toolchain);
-        if (runParameters == null) {
-            return null;
-        }
-
-        return startSession(environment, new ZigLocalDebugProcessStarter(runParameters, state, environment));
+        return null;
     }
 
     @Override
