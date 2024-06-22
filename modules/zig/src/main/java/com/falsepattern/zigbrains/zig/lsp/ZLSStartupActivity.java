@@ -19,8 +19,6 @@ package com.falsepattern.zigbrains.zig.lsp;
 import com.falsepattern.zigbrains.ZigBundle;
 import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.common.util.StringUtil;
-import com.falsepattern.zigbrains.lsp.IntellijLanguageClient;
-import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider;
 import com.falsepattern.zigbrains.zig.settings.ZLSProjectSettingsService;
 import com.google.gson.Gson;
@@ -39,6 +37,8 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.ProjectActivity;
 import com.intellij.openapi.util.io.FileUtil;
+import com.redhat.devtools.lsp4ij.LanguageServerManager;
+import com.redhat.devtools.lsp4ij.ServerStatus;
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
 import lombok.val;
@@ -50,97 +50,80 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class ZLSStartupActivity implements ProjectActivity {
     private static final Logger LOG = Logger.getInstance(ZLSStartupActivity.class);
-    private static final ReentrantLock lock = new ReentrantLock();
 
-    public static void initZLS(Project project) {
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            lock.lock();
+    public static List<String> getCommand(Project project) {
+        var svc = ZLSProjectSettingsService.getInstance(project);
+        val state = svc.getState();
+        var zlsPath = state.zlsPath;
+        if (!validatePath("ZLS Binary", zlsPath, false)) {
+            return null;
+        }
+        var configPath = state.zlsConfigPath;
+        boolean configOK = true;
+        if (!configPath.isBlank() && !validatePath("ZLS Config", configPath, false)) {
+            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Using default config path.",
+                                                      NotificationType.INFORMATION));
+            configPath = null;
+        }
+        if (configPath == null || configPath.isBlank()) {
+            blk:
             try {
-                var wrappers = IntellijLanguageClient.getAllServerWrappersFor(FileUtils.projectToUri(project));
-                for (var wrapper : wrappers) {
-                    if (wrapper.serverDefinition.ext.equals("zig")) {
-                        wrapper.stop(false);
-                        IntellijLanguageClient.removeWrapper(wrapper);
-                    }
+                val tmpFile = FileUtil.createTempFile("zigbrains-zls-autoconf", ".json", true).toPath();
+                val config = ZLSConfigProvider.findEnvironment(project);
+                if (StringUtil.isEmpty(config.zig_exe_path()) && StringUtil.isEmpty(config.zig_lib_path())) {
+                    // TODO this generates unnecessary noise in non-zig projects, find an alternative.
+                    // Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "(ZLS) Failed to detect zig path from project toolchain", NotificationType.WARNING));
+                    configOK = false;
+                    break blk;
                 }
-                var svc = ZLSProjectSettingsService.getInstance(project);
-                val state = svc.getState();
-                var zlsPath = state.zlsPath;
-                if (!validatePath("ZLS Binary", zlsPath, false)) {
-                    return;
+                try (val writer = Files.newBufferedWriter(tmpFile)) {
+                    val gson = new Gson();
+                    gson.toJson(config, writer);
                 }
-                var configPath = state.zlsConfigPath;
-                boolean configOK = true;
-                if (!configPath.isBlank() && !validatePath("ZLS Config", configPath, false)) {
-                    Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Using default config path.",
-                                                              NotificationType.INFORMATION));
-                    configPath = null;
-                }
-                if (configPath == null || configPath.isBlank()) {
-                    blk:
-                    try {
-                        val tmpFile = FileUtil.createTempFile("zigbrains-zls-autoconf", ".json", true).toPath();
-                        val config = ZLSConfigProvider.findEnvironment(project);
-                        if (StringUtil.isEmpty(config.zig_exe_path()) && StringUtil.isEmpty(config.zig_lib_path())) {
-                            // TODO this generates unnecessary noise in non-zig projects, find an alternative.
-                            // Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "(ZLS) Failed to detect zig path from project toolchain", NotificationType.WARNING));
-                            configOK = false;
-                            break blk;
-                        }
-                        try (val writer = Files.newBufferedWriter(tmpFile)) {
-                            val gson = new Gson();
-                            gson.toJson(config, writer);
-                        }
-                        configPath = tmpFile.toAbsolutePath().toString();
-                    } catch (IOException e) {
-                        Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Failed to create automatic zls config file",
-                                                                  NotificationType.WARNING));
-                        LOG.warn(e);
-                        configOK = false;
-                    }
-                }
-
-                if (IntellijLanguageClient.getExtensionManagerFor("zig") == null) {
-                    IntellijLanguageClient.addExtensionManager("zig", new ZLSExtensionManager());
-                }
-                var cmd = new ArrayList<String>();
-                cmd.add(zlsPath);
-                if (configOK) {
-                    cmd.add("--config-path");
-                    cmd.add(configPath);
-                }
-                // TODO make this properly configurable
-                if (state.increaseTimeouts) {
-                    for (var timeout : IntellijLanguageClient.getTimeouts().keySet()) {
-                        IntellijLanguageClient.setTimeout(timeout, 15000);
-                    }
-                }
-
-                if (state.debug) {
-                    cmd.add("--enable-debug-log");
-                }
-                if (state.messageTrace) {
-                    cmd.add("--enable-message-tracing");
-                }
-                for (var wrapper : IntellijLanguageClient.getAllServerWrappersFor("zig")) {
-                    wrapper.removeServerWrapper();
-                }
-                if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                    for (int i = 0; i < cmd.size(); i++) {
-                        if (cmd.get(i).contains(" ")) {
-                            cmd.set(i, '"' + cmd.get(i) + '"');
-                        }
-                    }
-                }
-                IntellijLanguageClient.addServerDefinition(new ZLSServerDefinition(cmd.toArray(String[]::new)), project);
-            } finally {
-                lock.unlock();
+                configPath = tmpFile.toAbsolutePath().toString();
+            } catch (IOException e) {
+                Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Failed to create automatic zls config file",
+                                                          NotificationType.WARNING));
+                LOG.warn(e);
+                configOK = false;
             }
+        }
+
+        var cmd = new ArrayList<String>();
+        cmd.add(zlsPath);
+        if (configOK) {
+            cmd.add("--config-path");
+            cmd.add(configPath);
+        }
+
+        if (state.debug) {
+            cmd.add("--enable-debug-log");
+        }
+        if (state.messageTrace) {
+            cmd.add("--enable-message-tracing");
+        }
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            for (int i = 0; i < cmd.size(); i++) {
+                if (cmd.get(i).contains(" ")) {
+                    cmd.set(i, '"' + cmd.get(i) + '"');
+                }
+            }
+        }
+        return cmd;
+    }
+
+    public static void startLSP(Project project, boolean restart) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            val manager = LanguageServerManager.getInstance(project);
+            val status = manager.getServerStatus("ZigBrains");
+            if ((status == ServerStatus.started || status == ServerStatus.starting) && !restart)
+                return;
+            LanguageServerManager.getInstance(project).start("ZigBrains");
         });
     }
 
@@ -215,7 +198,7 @@ public class ZLSStartupActivity implements ProjectActivity {
         if (zlsPath == null) {
             //Project creation
             ApplicationUtil.pool(() -> {
-                initZLS(project);
+                startLSP(project, false);
             }, 5, TimeUnit.SECONDS);
             return null;
         }
@@ -226,7 +209,7 @@ public class ZLSStartupActivity implements ProjectActivity {
                                                       NotificationType.INFORMATION));
             return null;
         }
-        initZLS(project);
+        startLSP(project, false);
         return null;
     }
 }

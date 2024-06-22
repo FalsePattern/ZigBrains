@@ -7,6 +7,8 @@
 
     <depends>com.intellij.modules.platform</depends>
 
+    <depends>com.redhat.devtools.lsp4ij</depends>
+
     <xi:include href="/META-INF/zigbrains-zig.xml"/>
     <xi:include href="/META-INF/zigbrains-zon.xml"/>
     <xi:include href="/META-INF/zigbrains-project.xml"/>

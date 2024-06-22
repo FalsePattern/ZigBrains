@@ -16,8 +16,6 @@
 
 package com.falsepattern.zigbrains.zig.completion;
 
-import com.falsepattern.zigbrains.lsp.editor.EditorEventManagerBase;
-import com.falsepattern.zigbrains.lsp.utils.FileUtils;
 import com.falsepattern.zigbrains.zig.psi.ZigExprList;
 import com.intellij.lang.parameterInfo.CreateParameterInfoContext;
 import com.intellij.lang.parameterInfo.ParameterInfoHandler;
@@ -58,14 +56,14 @@ public class ZigParameterInfoHandler implements ParameterInfoHandler<PsiElement,
             if (!(element instanceof ZigExprList))
                 return null;
         }
-        val editor = FileUtils.editorFromPsiFile(file);
-        if (editor == null)
-            return null;
-        val manager = EditorEventManagerBase.forEditor(editor);
-        if (manager == null)
-            return null;
-        val request = manager.getSignatureHelp(offset);
-        requests.put(element, request);
+//        val editor = FileUtils.editorFromPsiFile(file);
+//        if (editor == null)
+//            return null;
+//        val manager = EditorEventManagerBase.forEditor(editor);
+//        if (manager == null)
+//            return null;
+//        val request = manager.getSignatureHelp(offset);
+//        requests.put(element, request);
         return element;
     }
 

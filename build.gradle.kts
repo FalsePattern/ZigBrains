@@ -1,11 +1,9 @@
 import groovy.xml.XmlParser
-import groovy.xml.XmlSlurper
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
-import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 fun properties(key: String) = providers.gradleProperty(key)
@@ -39,6 +37,17 @@ val clionVersion = properties("clionVersion").get()
 
 val clionPlugins = listOf("com.intellij.clion", "com.intellij.cidr.lang", "com.intellij.cidr.base", "com.intellij.nativeDebug")
 
+val lsp4jVersion = "0.21.1"
+val lsp4ijVersion = "0.0.2"
+
+val lsp4ijDepString = "${if (lsp4ijVersion.contains("-")) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
+
+val lsp4ijDep: DependencyHandler.() -> Unit = {
+    intellijPlatformPluginDependency(lsp4ijDepString)
+    compileOnlyApi(lsp4ijDepString)
+    compileOnlyApi("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
+}
+
 tasks {
     wrapper {
         gradleVersion = properties("gradleVersion").get()
@@ -65,6 +74,12 @@ allprojects {
             localPlatformArtifacts {
                 content {
                     includeGroup("bundledPlugin")
+                }
+            }
+            marketplace {
+                content {
+                    includeGroup("com.jetbrains.plugins")
+                    includeGroup("nightly.com.jetbrains.plugins")
                 }
             }
             snapshots {
@@ -149,6 +164,7 @@ allprojects {
         verifyPlugin { enabled = false }
         buildPlugin { enabled = false }
         signPlugin { enabled = false }
+        verifyPluginProjectConfiguration { enabled = false }
 
         withType<PatchPluginXmlTask> {
             sinceBuild = properties("pluginSinceBuild")
@@ -164,30 +180,13 @@ project(":common") {
 
 }
 
-project(":lsp-common") {
-    apply {
-        plugin("java-library")
-    }
-    dependencies {
-        api("org.eclipse.lsp4j:org.eclipse.lsp4j:0.22.0")
-    }
-}
-
-project(":lsp") {
-    apply {
-        plugin("java-library")
-    }
-    dependencies {
-        implementation(project(":common"))
-        api(project(":lsp-common"))
-        api("org.apache.commons:commons-lang3:3.14.0")
-    }
-}
-
 project(":zig") {
+    apply {
+        plugin("java-library")
+    }
     dependencies {
-        implementation(project(":lsp"))
         implementation(project(":common"))
+        lsp4ijDep()
     }
     tasks {
         generateLexer {
@@ -215,9 +214,11 @@ project(":debugger") {
         implementation(project(":zig"))
         implementation(project(":project"))
         implementation(project(":common"))
-        implementation(project(":lsp-common"))
-        implementation(project(":lsp"))
-        implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:0.22.0")
+        implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:$lsp4jVersion") {
+            exclude("org.eclipse.lsp4j", "org.eclipse.lsp4j")
+            exclude("org.eclipse.lsp4j", "org.eclipse.lsp4j.jsonrpc")
+            exclude("com.google.code.gson", "gson")
+        }
         intellijPlatform {
             clion(clionVersion)
             for (p in clionPlugins) {
@@ -257,6 +258,7 @@ dependencies {
             "idea" -> intellijIdeaCommunity(ideaVersion)
             "clion" -> clion(clionVersion)
         }
+        plugin("com.redhat.devtools.lsp4ij:$lsp4ijVersion")
     }
 }
 
@@ -350,6 +352,10 @@ tasks {
 
     verifyPlugin {
         dependsOn(mergePluginJarTask)
+        enabled = true
+    }
+
+    verifyPluginProjectConfiguration {
         enabled = true
     }
 
