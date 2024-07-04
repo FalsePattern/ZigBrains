@@ -64,7 +64,7 @@ fi
 for i in "${branches[@]}"
 do
   echo "Building branch $i"
-  git checkout "$i" && ./gradlew :verifyPluginSignature
+  git checkout "$i" && ./gradlew :plugin:verifyPluginSignature
   RESULT=$?
   if  [ $RESULT != 0 ]; then
     echo "Failed to build plugin on branch $i!"
