@@ -13,8 +13,8 @@ plugins {
     java
     `maven-publish`
     `java-library`
-    id("org.jetbrains.intellij.platform") version("2.0.0-beta7")
-    id("org.jetbrains.changelog") version("2.2.0")
+    id("org.jetbrains.intellij.platform") version("2.0.0-beta8")
+    id("org.jetbrains.changelog") version("2.2.1")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
 }
 
@@ -88,6 +88,7 @@ allprojects {
                 content {
                     includeModule("com.jetbrains.intellij.clion", "clion")
                     includeModule("com.jetbrains.intellij.idea", "ideaIC")
+                    includeModule("com.jetbrains.intellij.idea", "ideaIU")
                 }
             }
         }
@@ -397,11 +398,12 @@ dependencies {
 fun distFile(it: String) = layout.buildDirectory.file("dist/ZigBrains-${pluginVersion().get()}-$it-signed.zip")
 
 publishVersions.forEach {
-    tasks.register<PublishPluginTask>("jbpublish-$it") {
+    tasks.register<PublishPluginTask>("jbpublish-$it").configure {
         archiveFile = distFile(it)
         token = environment("IJ_PUBLISH_TOKEN")
+        channels = if (pluginVersion().get().contains("-")) listOf("nightly") else listOf("default")
     }
-    tasks.named("publish") {
+    tasks.named("publish").configure {
         dependsOn("jbpublish-$it")
     }
 }
