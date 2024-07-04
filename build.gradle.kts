@@ -270,6 +270,7 @@ project(":plugin") {
     }
 
     intellijPlatform {
+        projectName = "ZigBrains"
         pluginConfiguration {
             name = properties("pluginName")
             description = providers.fileContents(rootProject.layout.projectDirectory.file("README.md")).asText.map {
@@ -376,6 +377,15 @@ project(":plugin") {
 
         buildPlugin {
             enabled = true
+        }
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        when (baseIDE) {
+            "idea" -> intellijIdeaCommunity(ideaVersion)
+            "clion" -> clion(clionVersion)
         }
     }
 }
