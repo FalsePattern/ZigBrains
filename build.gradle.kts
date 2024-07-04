@@ -38,9 +38,11 @@ val clionVersion = properties("clionVersion").get()
 val clionPlugins = listOf("com.intellij.clion", "com.intellij.cidr.lang", "com.intellij.cidr.base", "com.intellij.nativeDebug")
 
 val lsp4jVersion = "0.21.1"
-val lsp4ijVersion = "0.0.2"
+val lsp4ijVersion = "0.3.0-20240702-174041"
 
-val lsp4ijDepString = "${if (lsp4ijVersion.contains("-")) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
+val lsp4ijNightly = lsp4ijVersion.contains("-")
+val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
+val lsp4ijPluginString = "com.redhat.devtools.lsp4ij:$lsp4ijVersion${if (lsp4ijNightly) "@nightly" else ""}"
 
 val lsp4ijDep: DependencyHandler.() -> Unit = {
     intellijPlatformPluginDependency(lsp4ijDepString)
@@ -138,7 +140,6 @@ allprojects {
                 dependsOn("generateGrammars")
             }
         }
-
     }
 
     configure<JavaPluginExtension> {
@@ -187,6 +188,9 @@ project(":zig") {
     dependencies {
         implementation(project(":common"))
         lsp4ijDep()
+        intellijPlatform {
+            plugin(lsp4ijPluginString)
+        }
     }
     tasks {
         generateLexer {
@@ -246,137 +250,146 @@ project(":zon") {
     }
 }
 
-dependencies {
-    implementation(project(":zig"))
-    implementation(project(":project"))
-    implementation(project(":zon"))
-    implementation(project(":debugger"))
+project(":plugin") {
+    dependencies {
+        implementation(project(":common"))
+        implementation(project(":zig"))
+        implementation(project(":project"))
+        implementation(project(":zon"))
+        implementation(project(":debugger"))
+        intellijPlatform {
+            zipSigner()
+            pluginVerifier()
+            plugin(lsp4ijPluginString)
+        }
+    }
+
     intellijPlatform {
-        zipSigner()
-        pluginVerifier()
-        when (baseIDE) {
-            "idea" -> intellijIdeaCommunity(ideaVersion)
-            "clion" -> clion(clionVersion)
-        }
-        plugin("com.redhat.devtools.lsp4ij:$lsp4ijVersion")
-    }
-}
+        pluginConfiguration {
+            name = properties("pluginName")
+            description = providers.fileContents(rootProject.layout.projectDirectory.file("README.md")).asText.map {
+                val start = "<!-- Plugin description -->"
+                val end = "<!-- Plugin description end -->"
 
-intellijPlatform {
-    pluginConfiguration {
-        name = properties("pluginName")
-        description = providers.fileContents(rootProject.layout.projectDirectory.file("README.md")).asText.map {
-            val start = "<!-- Plugin description -->"
-            val end = "<!-- Plugin description end -->"
-
-            with(it.lines()) {
-                if (!containsAll(listOf(start, end))) {
-                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                with(it.lines()) {
+                    if (!containsAll(listOf(start, end))) {
+                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    }
+                    subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
                 }
-                subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
+            }
+            changeNotes = pluginVersion().map { pluginVersion ->
+                with(rootProject.changelog) {
+                    renderItem(
+                        (getOrNull(pluginVersion) ?: getUnreleased())
+                            .withHeader(false)
+                            .withEmptySections(false),
+                        Changelog.OutputType.HTML,
+                    )
+                }
+            }
+            version = pluginVersionFull()
+        }
+        signing {
+            certificateChainFile = rootProject.file("secrets/chain.crt")
+            privateKeyFile = rootProject.file("secrets/private.pem")
+            password = environment("PRIVATE_KEY_PASSWORD")
+        }
+        verifyPlugin {
+            ides {
+                ide(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion)
+                ide(IntelliJPlatformType.IntellijIdeaUltimate, ideaVersion)
+                ide(IntelliJPlatformType.CLion, clionVersion)
             }
         }
-        changeNotes = pluginVersion().map { pluginVersion ->
-            with(rootProject.changelog) {
-                renderItem(
-                    (getOrNull(pluginVersion) ?: getUnreleased())
-                        .withHeader(false)
-                        .withEmptySections(false),
-                    Changelog.OutputType.HTML,
-                )
+    }
+
+    // Include the generated files in the source set
+
+    // Collects all jars produced by compilation of project modules and merges them into singe one.
+    // We need to put all plugin manifest files into single jar to make new plugin model work
+    val mergePluginJarTask = task<Jar>("mergePluginJars") {
+        duplicatesStrategy = DuplicatesStrategy.FAIL
+        archiveBaseName.set("ZigBrains")
+
+        exclude("META-INF/MANIFEST.MF")
+        exclude("**/classpath.index")
+
+        val pluginLibDir by lazy {
+            val sandboxTask = tasks.prepareSandbox.get()
+            sandboxTask.destinationDir.resolve("${project.extensionProvider.map { it.projectName }.get()}/lib")
+        }
+
+        val pluginJars by lazy {
+            pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
+        }
+
+        destinationDirectory.set(project.layout.dir(provider { pluginLibDir }))
+
+        doFirst {
+            for (file in pluginJars) {
+                from(zipTree(file))
             }
         }
-        version = pluginVersionFull()
-    }
-    signing {
-        certificateChainFile = rootProject.file("secrets/chain.crt")
-        privateKeyFile = rootProject.file("secrets/private.pem")
-        password = environment("PRIVATE_KEY_PASSWORD")
-    }
-    verifyPlugin {
-        ides {
-            ide(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion)
-            ide(IntelliJPlatformType.IntellijIdeaUltimate, ideaVersion)
-            ide(IntelliJPlatformType.CLion, clionVersion)
-        }
-    }
-}
 
-// Include the generated files in the source set
-
-// Collects all jars produced by compilation of project modules and merges them into singe one.
-// We need to put all plugin manifest files into single jar to make new plugin model work
-val mergePluginJarTask = task<Jar>("mergePluginJars") {
-    duplicatesStrategy = DuplicatesStrategy.FAIL
-    archiveBaseName.set("ZigBrains")
-
-    exclude("META-INF/MANIFEST.MF")
-    exclude("**/classpath.index")
-
-    val pluginLibDir by lazy {
-        val sandboxTask = tasks.prepareSandbox.get()
-        sandboxTask.destinationDir.resolve("${project.extensionProvider.map { it.projectName }.get()}/lib")
-    }
-
-    val pluginJars by lazy {
-        pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
-    }
-
-    destinationDirectory.set(project.layout.dir(provider { pluginLibDir }))
-
-    doFirst {
-        for (file in pluginJars) {
-            from(zipTree(file))
+        doLast {
+            delete(pluginJars)
         }
     }
 
-    doLast {
-        delete(pluginJars)
+    tasks {
+        runIde {
+            dependsOn(mergePluginJarTask)
+            enabled = true
+        }
+
+        prepareSandbox {
+            finalizedBy(mergePluginJarTask)
+            enabled = true
+        }
+
+        buildSearchableOptions {
+            dependsOn(mergePluginJarTask)
+        }
+
+        verifyPlugin {
+            dependsOn(mergePluginJarTask)
+            enabled = true
+        }
+
+        verifyPluginProjectConfiguration {
+            enabled = true
+        }
+
+        signPlugin {
+            enabled = true
+        }
+
+        verifyPluginSignature {
+            dependsOn(signPlugin)
+        }
+
+        buildPlugin {
+            enabled = true
+        }
     }
 }
 
 tasks {
-    runIde {
-        dependsOn(mergePluginJarTask)
-        enabled = true
-    }
-
-    prepareSandbox {
-        finalizedBy(mergePluginJarTask)
-        enabled = true
-    }
-
-    buildSearchableOptions {
-        dependsOn(mergePluginJarTask)
-    }
-
-    verifyPlugin {
-        dependsOn(mergePluginJarTask)
-        enabled = true
-    }
-
-    verifyPluginProjectConfiguration {
-        enabled = true
-    }
-
-    signPlugin {
-        enabled = true
-    }
-
-    verifyPluginSignature {
-        dependsOn(signPlugin)
-    }
-
-    buildPlugin {
-        enabled = true
-    }
-
     generateLexer {
         enabled = false
     }
-
     generateParser {
         enabled = false
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        when (baseIDE) {
+            "idea" -> intellijIdeaCommunity(ideaVersion)
+            "clion" -> clion(clionVersion)
+        }
     }
 }
 
