@@ -96,7 +96,7 @@ allprojects {
     dependencies {
         compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")
-        if (path !in listOf(":", ":debugger")) {
+        if (path !in listOf(":", ":plugin", ":debugger")) {
             intellijPlatform {
                 intellijIdeaCommunity(ideaVersion)
             }
@@ -261,6 +261,10 @@ project(":plugin") {
         intellijPlatform {
             zipSigner()
             pluginVerifier()
+            when (baseIDE) {
+                "idea" -> intellijIdeaCommunity(ideaVersion)
+                "clion" -> clion(clionVersion)
+            }
             plugin(lsp4ijPluginString)
         }
     }
@@ -382,16 +386,6 @@ tasks {
     }
     generateParser {
         enabled = false
-    }
-}
-
-dependencies {
-    intellijPlatform {
-        when (baseIDE) {
-            "idea" -> intellijIdeaCommunity(ideaVersion)
-            "clion" -> clion(clionVersion)
-        }
-        plugin(lsp4ijPluginString)
     }
 }
 
