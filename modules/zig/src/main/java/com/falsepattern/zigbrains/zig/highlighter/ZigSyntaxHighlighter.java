@@ -73,7 +73,7 @@ public class ZigSyntaxHighlighter extends SyntaxHighlighterBase {
             TYPE_REF_GEN      = createKey("TYPE_GEN"           , TYPE_REF                                             ),
             TYPE_PARAM        = createKey("TYPE_PARAM"         , SemanticTokensHighlightingColors.TYPE_PARAMETER      ),
             TYPE_PARAM_DECL   = createKey("TYPE_PARAM_DECL"    , TYPE_PARAM                                           ),
-            VARIABLE_DECL     = createKey("VARIABLE_DECL"      , SemanticTokensHighlightingColors.VARIABLE            ),
+            VARIABLE_DECL     = createKey("VARIABLE_DECL"      , DefaultLanguageHighlighterColors.LOCAL_VARIABLE      ),
             VARIABLE_DECL_DEPR= createKey("VARIABLE_DECL_DEPR" , VARIABLE_DECL                                        ),
             VARIABLE_REF      = createKey("VARIABLE"           , VARIABLE_DECL                                        ),
             VARIABLE_REF_DEPR = createKey("VARIABLE_REF_DEPL"  , VARIABLE_REF                                         );

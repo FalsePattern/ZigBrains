@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Color settings has more accurate color preview text.
+
 ### Changed
 
 - LSP
