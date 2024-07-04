@@ -20,7 +20,7 @@ Changelog structure reference:
 ### Changed
 
 - LSP
-  - Migrated to Red Hat's LSP4IJ LSP backend.
+  - Migrated to Red Hat's LSP4IJ LSP adapter.
 
 ## [15.2.0]
 

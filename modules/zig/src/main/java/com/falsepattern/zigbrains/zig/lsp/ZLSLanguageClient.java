@@ -9,11 +9,4 @@ public class ZLSLanguageClient extends LanguageClientImpl {
     public ZLSLanguageClient(Project project) {
         super(project);
     }
-
-    @Override
-    public CompletableFuture<Void> refreshSemanticTokens() {
-        return CompletableFuture.completedFuture(null);
-    }
-
-
 }

@@ -15,6 +15,7 @@
   -->
 
 <idea-plugin package="com.falsepattern.zigbrains.zig">
+    <depends>com.redhat.devtools.lsp4ij</depends>
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Zig File"
                   implementationClass="com.falsepattern.zigbrains.zig.ZigFileType"
@@ -47,6 +48,11 @@
         <lang.foldingBuilder language="Zig"
                              implementationClass="com.redhat.devtools.lsp4ij.features.foldingRange.LSPFoldingRangeBuilder"
                              order="first"/>
+
+        <notificationGroup displayType="BALLOON"
+                           bundle="zigbrains.Bundle"
+                           key="notif-zls-error"
+                           id="ZigBrains.ZLS"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
@@ -63,6 +69,7 @@ The <a href="https://github.com/Zigtools/ZLS">Zig Language Server</a>, for ZigBr
             </description>
         </server>
         <languageMapping language="Zig" serverId="ZigBrains" languageId="zig"/>
-
+        <semanticTokensColorsProvider serverId="ZigBrains"
+                                      class="com.falsepattern.zigbrains.zig.lsp.ZLSSemanticTokensColorsProvider"/>
     </extensions>
 </idea-plugin>
