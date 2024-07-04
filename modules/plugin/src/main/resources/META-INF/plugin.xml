@@ -9,9 +9,9 @@
 
     <depends>com.redhat.devtools.lsp4ij</depends>
 
-    <xi:include href="/META-INF/zigbrains-zig.xml"/>
-    <xi:include href="/META-INF/zigbrains-zon.xml"/>
-    <xi:include href="/META-INF/zigbrains-project.xml"/>
+    <depends config-file="zigbrains-zig.xml">com.intellij.modules.platform</depends>
+    <depends config-file="zigbrains-zon.xml">com.intellij.modules.platform</depends>
+    <depends config-file="zigbrains-project.xml">com.intellij.modules.platform</depends>
     <depends optional="true" config-file="zigbrains-zig-debugger.xml">com.intellij.modules.cidr.debugger</depends>
     <depends optional="true" config-file="zigbrains-zig-clion.xml">com.intellij.modules.clion</depends>
 
