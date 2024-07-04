@@ -76,6 +76,6 @@ git checkout "$DEFAULT_BRANCH"
 
 mkdir -p build/dist
 
-cp build/distributions/*-signed.zip build/dist/
+cp modules/plugin/build/distributions/*-signed.zip build/dist/
 
 ./gradlew publish
