@@ -18,7 +18,6 @@ package com.falsepattern.zigbrains.common;
 
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
-import com.intellij.ui.JBColor;
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
 

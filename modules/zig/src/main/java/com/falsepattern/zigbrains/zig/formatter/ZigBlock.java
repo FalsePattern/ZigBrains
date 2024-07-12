@@ -33,7 +33,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.ADDITION_EXPR;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.ASM_EXPR;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.ASM_INPUT_LIST;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.ASM_OUTPUT_LIST;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.BITWISE_EXPR;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.BIT_SHIFT_EXPR;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.BLOCK;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.BOOL_AND_EXPR;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.BOOL_OR_EXPR;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.COMPARE_EXPR;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.CONTAINER_DECL_AUTO;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.CONTAINER_DECL_TYPE;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.CONTAINER_DOC_COMMENT;
@@ -44,9 +53,12 @@ import static com.falsepattern.zigbrains.zig.psi.ZigTypes.IF_EXPR;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.IF_PREFIX;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.IF_STATEMENT;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.INIT_LIST;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.KEYWORD_ASM;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.KEYWORD_ELSE;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.KEYWORD_VOLATILE;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.LBRACE;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.LPAREN;
+import static com.falsepattern.zigbrains.zig.psi.ZigTypes.MULTIPLY_EXPR;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.PARAM_DECL_LIST;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.RBRACE;
 import static com.falsepattern.zigbrains.zig.psi.ZigTypes.RPAREN;
@@ -92,14 +104,16 @@ public class ZigBlock extends AbstractBlock {
 
     @Override
     protected @Nullable Indent getChildIndent() {
-        return getIndentBasedOnParentType(getNode().getElementType(), PLACEHOLDER);
+        val node = getNode();
+        return getIndentBasedOnParentType(node, null, node.getElementType(), PLACEHOLDER);
     }
 
     @Override
     public Indent getIndent() {
-        val parent = getNode().getTreeParent();
+        val node = getNode();
+        val parent = node.getTreeParent();
         if (parent != null) {
-            return getIndentBasedOnParentType(parent.getElementType(), getNode().getElementType());
+            return getIndentBasedOnParentType(parent, node, parent.getElementType(), node.getElementType());
         }
         return Indent.getNoneIndent();
     }
@@ -112,8 +126,12 @@ public class ZigBlock extends AbstractBlock {
         return element == LPAREN || element == RPAREN;
     }
 
+    private static boolean isEmpty(ASTNode child) {
+        return child.getFirstChildNode() == null;
+    }
 
-    private static Indent getIndentBasedOnParentType(IElementType parentElementType, IElementType childElementType) {
+
+    private static @NotNull Indent getIndentBasedOnParentType(@NotNull ASTNode parent, @Nullable ASTNode child, @NotNull IElementType parentElementType, @NotNull IElementType childElementType) {
         //Statement blocks
         if (parentElementType == BLOCK && !isBrace(childElementType))
             return Indent.getNormalIndent();
@@ -132,6 +150,17 @@ public class ZigBlock extends AbstractBlock {
             parentElementType == FN_PROTO && childElementType == PLACEHOLDER)
             return Indent.getNormalIndent();
 
+        //Chained operations on newlines
+        if ((parentElementType == BOOL_OR_EXPR ||
+            parentElementType == BOOL_AND_EXPR ||
+            parentElementType == COMPARE_EXPR ||
+            parentElementType == BITWISE_EXPR ||
+            parentElementType == BIT_SHIFT_EXPR ||
+            parentElementType == ADDITION_EXPR ||
+            parentElementType == MULTIPLY_EXPR) &&
+            parent.getFirstChildNode() != child)
+            return Indent.getNormalIndent();
+
         //Switch prongs
         if (parentElementType == SWITCH_PRONG_LIST ||
             parentElementType == SWITCH_EXPR && childElementType == PLACEHOLDER)
@@ -141,8 +170,17 @@ public class ZigBlock extends AbstractBlock {
         if ((parentElementType == IF_EXPR || parentElementType == IF_STATEMENT) && childElementType != KEYWORD_ELSE && childElementType != IF_PREFIX)
             return Indent.getNormalIndent();
 
+        //Struct members
         if (parentElementType == CONTAINER_DECL_AUTO && childElementType != CONTAINER_DECL_TYPE && childElementType != CONTAINER_DOC_COMMENT && !isBrace(childElementType))
             return Indent.getNormalIndent();
+
+        //Inline assembly body
+        if (parentElementType == ASM_EXPR && childElementType != KEYWORD_ASM && childElementType != KEYWORD_VOLATILE && !isParen(childElementType))
+            return Indent.getNormalIndent();
+
+        //Assembly params
+        if (parentElementType == ASM_INPUT_LIST || parentElementType == ASM_OUTPUT_LIST)
+            return Indent.getSpaceIndent(2);
 
         return Indent.getNoneIndent();
     }
