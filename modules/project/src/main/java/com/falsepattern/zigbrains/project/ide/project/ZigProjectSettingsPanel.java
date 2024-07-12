@@ -33,16 +33,12 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Pair;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.dsl.builder.AlignX;
 import lombok.Getter;
 import lombok.val;
 
 import javax.swing.JLabel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
-import java.nio.file.Path;
 import java.util.Optional;
 
 import static com.falsepattern.zigbrains.common.util.KtUtil.$f;

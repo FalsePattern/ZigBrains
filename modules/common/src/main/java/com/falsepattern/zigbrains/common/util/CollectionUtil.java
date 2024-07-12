@@ -18,10 +18,8 @@ package com.falsepattern.zigbrains.common.util;
 
 import lombok.val;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class CollectionUtil {
 

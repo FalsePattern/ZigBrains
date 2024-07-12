@@ -23,6 +23,7 @@ import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
 import com.falsepattern.zigbrains.project.execution.build.ProfileStateBuild;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.execution.ExecutionException;
+import com.intellij.openapi.util.SystemInfo;
 import com.jetbrains.cidr.execution.Installer;
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration;
 import lombok.val;
@@ -32,6 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileStateBuild> implements PreLaunchAware {
     private static final String BoilerplateNotice = "\nPlease edit this intellij build configuration and specify the path of the executable created by \"zig build\" directly!";
@@ -61,11 +64,7 @@ public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileState
                 throw new ExecutionException("Could not auto-detect default executable output directory \"zig-out/bin\"!" + BoilerplateNotice);
             }
             try (val filesInOutput = Files.list(expectedOutputDir)) {
-                val executables = filesInOutput.filter(Files::isRegularFile).filter(Files::isExecutable).toList();
-                if (executables.size() > 1) {
-                    throw new ExecutionException("Multiple executables found!" + BoilerplateNotice);
-                }
-                exe = executables.get(0);
+                exe = getExe(filesInOutput);
             } catch (IOException e) {
                 throw new ExecutionException("Could not scan output directory \"" + expectedOutputDir + "\"!" + BoilerplateNotice);
             }
@@ -80,6 +79,20 @@ public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileState
         }
 
         return exe.toFile();
+    }
+
+    private static @NotNull Path getExe(Stream<Path> files) throws ExecutionException {
+        files = files.filter(Files::isRegularFile);
+        if (SystemInfo.isWindows) {
+            files = files.filter(file -> file.getFileName().toString().endsWith(".exe"));
+        } else {
+            files = files.filter(Files::isExecutable);
+        }
+        val executables = files.toList();
+        if (executables.size() > 1) {
+            throw new ExecutionException("Multiple executables found!" + BoilerplateNotice);
+        }
+        return executables.get(0);
     }
 
     @Override
