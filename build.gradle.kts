@@ -1,3 +1,4 @@
+import de.undercouch.gradle.tasks.download.Download
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
@@ -16,6 +17,7 @@ plugins {
     id("org.jetbrains.intellij.platform") version("2.0.0-beta8")
     id("org.jetbrains.changelog") version("2.2.1")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
+    id("de.undercouch.download") version("5.6.0")
 }
 
 val publishVersions = listOf("232", "233", "241", "242")
@@ -38,7 +40,7 @@ val clionVersion = properties("clionVersion").get()
 val clionPlugins = listOf("com.intellij.cidr.base", "com.intellij.clion")
 
 val lsp4jVersion = "0.21.1"
-val lsp4ijVersion = "0.3.0-20240704-134935"
+val lsp4ijVersion = "0.3.0-20240718-013045"
 
 val lsp4ijNightly = lsp4ijVersion.contains("-")
 val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
@@ -146,6 +148,7 @@ allprojects {
     configure<JavaPluginExtension> {
         toolchain {
             languageVersion.set(javaLangVersion)
+            vendor = JvmVendorSpec.JETBRAINS
         }
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
@@ -229,6 +232,19 @@ project(":debugger") {
             for (p in clionPlugins) {
                 bundledPlugin(p)
             }
+        }
+    }
+
+    val genOutputDir = layout.buildDirectory.dir("generated-resources")
+    sourceSets["main"].resources.srcDir(genOutputDir)
+    tasks {
+        register<Download>("downloadProps") {
+            src("https://falsepattern.com/zigbrains/msvc.properties")
+            dest(genOutputDir.map { it.file("msvc.properties") })
+        }
+
+        processResources {
+            dependsOn("downloadProps")
         }
     }
 }

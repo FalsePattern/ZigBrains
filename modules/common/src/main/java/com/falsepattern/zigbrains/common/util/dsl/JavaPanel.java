@@ -16,17 +16,12 @@
 
 package com.falsepattern.zigbrains.common.util.dsl;
 
-import com.falsepattern.zigbrains.common.util.KtUtil;
 import com.intellij.openapi.ui.DialogPanel;
-import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.dsl.builder.Align;
-import com.intellij.ui.dsl.builder.AlignX;
 import com.intellij.ui.dsl.builder.BuilderKt;
 import com.intellij.ui.dsl.builder.Panel;
 import com.intellij.ui.dsl.builder.RightGap;
 import com.intellij.ui.dsl.builder.Row;
-import com.intellij.ui.dsl.builder.RowsRange;
-import lombok.RequiredArgsConstructor;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;

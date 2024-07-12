@@ -19,8 +19,13 @@ Changelog structure reference:
 
 ### Fixed
 
+- Debugger
+  - Added fallback metadata for windows debugger downloading
+  - Automatic exe path discovery for zig build run debugging on windows
+
 - Zig
   - Color settings has more accurate color preview text.
+  - Better builtin indentation
 
 ### Changed
 
