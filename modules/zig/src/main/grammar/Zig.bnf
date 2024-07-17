@@ -168,9 +168,9 @@
 Root ::= CONTAINER_DOC_COMMENT? ContainerMembers?
 
 // *** Top level ***
-private ContainerMembers ::= ContainerDeclarations (ContainerField COMMA)* (ContainerField | ContainerDeclarations)?
+ContainerMembers ::= ContainerDeclarations? (ContainerField COMMA)* (ContainerField | ContainerDeclarations)?
 
-ContainerDeclarations ::= (TestDecl | ComptimeDecl | DOC_COMMENT? KEYWORD_PUB? Decl)*
+ContainerDeclarations ::= (TestDecl | ComptimeDecl | DOC_COMMENT? KEYWORD_PUB? Decl)+
 
 TestDecl ::= DOC_COMMENT? KEYWORD_TEST (STRING_LITERAL_SINGLE | IDENTIFIER)? Block {pin=2}
 

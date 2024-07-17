@@ -21,6 +21,7 @@ Changelog structure reference:
 
 - Zig
   - Color settings has more accurate color preview text.
+  - Better builtin indentation
 
 ### Changed
 
