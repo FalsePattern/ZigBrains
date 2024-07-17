@@ -32,6 +32,9 @@
 
         <lang.formatter language="Zig" implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>
 
+        <formattingService id = "ZigLSPFormattingOnlyServiceProxy" implementation="com.falsepattern.zigbrains.zig.formatter.ZigLSPFormattingOnlyServiceProxy"/>
+        <formattingService id = "ZigLSPFormattingAndRangeBothServiceProxy" implementation="com.falsepattern.zigbrains.zig.formatter.ZigLSPFormattingAndRangeBothServiceProxy"/>
+
         <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
 
         <!-- LSP textDocument/signatureHelp -->
