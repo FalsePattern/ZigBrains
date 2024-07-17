@@ -18,6 +18,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
+/*
+TODO remove once https://github.com/redhat-developer/lsp4ij/issues/424 is resolved
+ */
 public abstract class ZigAbstractLSPFormattingServiceProxy implements FormattingService {
     protected abstract AbstractLSPFormattingService getProxiedService();
     protected abstract boolean canSupportFormatting(@Nullable ServerCapabilities var1);

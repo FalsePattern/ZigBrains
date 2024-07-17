@@ -32,6 +32,10 @@
 
         <lang.formatter language="Zig" implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>
 
+
+        <!--
+        TODO remove these two once https://github.com/redhat-developer/lsp4ij/issues/424 is resolved
+        -->
         <formattingService id = "ZigLSPFormattingOnlyServiceProxy" implementation="com.falsepattern.zigbrains.zig.formatter.ZigLSPFormattingOnlyServiceProxy"/>
         <formattingService id = "ZigLSPFormattingAndRangeBothServiceProxy" implementation="com.falsepattern.zigbrains.zig.formatter.ZigLSPFormattingAndRangeBothServiceProxy"/>
 

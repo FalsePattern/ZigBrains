@@ -3,11 +3,13 @@ package com.falsepattern.zigbrains.zig.formatter;
 import com.intellij.formatting.service.FormattingService;
 import com.redhat.devtools.lsp4ij.LanguageServerItem;
 import com.redhat.devtools.lsp4ij.features.formatting.AbstractLSPFormattingService;
-import com.redhat.devtools.lsp4ij.features.formatting.LSPFormattingAndRangeBothService;
 import com.redhat.devtools.lsp4ij.features.formatting.LSPFormattingOnlyService;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.jetbrains.annotations.Nullable;
 
+/*
+TODO remove once https://github.com/redhat-developer/lsp4ij/issues/424 is resolved
+ */
 public class ZigLSPFormattingOnlyServiceProxy extends ZigAbstractLSPFormattingServiceProxy {
     @Override
     protected AbstractLSPFormattingService getProxiedService() {
