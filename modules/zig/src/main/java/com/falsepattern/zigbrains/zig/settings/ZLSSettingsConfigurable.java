@@ -23,8 +23,6 @@ import com.intellij.openapi.project.Project;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.invoke.MethodHandles;
-
 public class ZLSSettingsConfigurable implements SubConfigurable {
     private ZLSSettingsPanel appSettingsComponent;
 
