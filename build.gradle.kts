@@ -30,8 +30,8 @@ val rootPackage = "com.falsepattern.zigbrains"
 val rootPackagePath = rootPackage.replace('.', '/')
 
 // Keep these in sync with whatever the oldest IDE version we're targeting in gradle.properties needs
-val javaLangVersion: JavaLanguageVersion = JavaLanguageVersion.of(17)
-val javaVersion = JavaVersion.VERSION_17
+val javaLangVersion: JavaLanguageVersion = JavaLanguageVersion.of(21)
+val javaVersion = JavaVersion.VERSION_21
 
 val baseIDE = properties("baseIDE").get()
 val ideaVersion = properties("ideaVersion").get()
