@@ -19,6 +19,9 @@ Changelog structure reference:
 
 ### Fixed
 
+- Debugger
+  - Added fallback metadata for windows debugger downloading
+
 - Zig
   - Color settings has more accurate color preview text.
   - Better builtin indentation

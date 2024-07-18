@@ -1,3 +1,4 @@
+import de.undercouch.gradle.tasks.download.Download
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
@@ -16,6 +17,7 @@ plugins {
     id("org.jetbrains.intellij.platform") version("2.0.0-beta8")
     id("org.jetbrains.changelog") version("2.2.1")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
+    id("de.undercouch.download") version("5.6.0")
 }
 
 val publishVersions = listOf("232", "233", "241", "242")
@@ -229,6 +231,19 @@ project(":debugger") {
             for (p in clionPlugins) {
                 bundledPlugin(p)
             }
+        }
+    }
+
+    val genOutputDir = layout.buildDirectory.dir("generated-resources")
+    sourceSets["main"].resources.srcDir(genOutputDir)
+    tasks {
+        register<Download>("downloadProps") {
+            src("https://falsepattern.com/zigbrains/msvc.properties")
+            dest(genOutputDir.map { it.file("msvc.properties") })
+        }
+
+        processResources {
+            dependsOn("downloadProps")
         }
     }
 }

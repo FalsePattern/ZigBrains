@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -371,11 +372,34 @@ public final class ZigDebuggerToolchainService {
             //TODO logging
             e.printStackTrace();
             Notifications.Bus.notify(new Notification(
-                    "Zig Debugger",
+                    "ZigBrains.Debugger.Error",
                     ZigBundle.message("notification.title.debugger"),
                     ZigBundle.message("notification.content.debugger.metadata.downloading.failed"),
                     NotificationType.ERROR
                                     ));
+            //Try to load fallback file
+            try {
+                @Cleanup val resource = ZigDebuggerToolchainService.class.getResourceAsStream("msvc.properties");
+                if (resource == null) {
+                    Notifications.Bus.notify(new Notification(
+                            "ZigBrains.Debugger.Error",
+                            ZigBundle.message("notification.title.debugger"),
+                            ZigBundle.message("notification.content.debugger.metadata.fallback.fetch.failed"),
+                            NotificationType.ERROR
+                    ));
+                    return prop;
+                }
+                val reader = new InputStreamReader(resource);
+                prop.load(reader);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                Notifications.Bus.notify(new Notification(
+                        "ZigBrains.Debugger.Error",
+                        ZigBundle.message("notification.title.debugger"),
+                        ZigBundle.message("notification.content.debugger.metadata.fallback.parse.failed"),
+                        NotificationType.ERROR
+                ));
+            }
         }
         return prop;
     }
