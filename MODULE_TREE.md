@@ -13,7 +13,6 @@ The suffix after the module name signifies which IDE it depends on.
 
 - IC: IDEA Community
 - CL: CLion
-- EXT: External maven library
 
 IC modules MUST NOT depend on CL modules, as this violates the restrictions set forth above.
 
@@ -21,29 +20,17 @@ IC modules MUST NOT depend on CL modules, as this violates the restrictions set 
 
 ### Common (IC)
 
-### LSP-Common (IC)
-- LSP4J (EXT)
-
-### LSP (IC)
-- Apache Commons Lang 3 (EXT)
-- Common (IC)
-- LSP-Common (IC)
-
 ### Zig (IC)
-- Grammarkit (EXT)
 - Common (IC)
-- LSP (IC)
 
 ### Project (IC)
 - Common (IC)
 - Zig (IC)
 
 ### Zon (IC)
-- Grammarkit (EXT)
 - Common (IC)
 
 ### Debugger (IU/CL)
 - Common (IC)
-- LSP-Common (IC)
 - Zig (IC)
 - Project (IC)
