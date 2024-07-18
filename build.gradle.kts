@@ -148,6 +148,7 @@ allprojects {
     configure<JavaPluginExtension> {
         toolchain {
             languageVersion.set(javaLangVersion)
+            vendor = JvmVendorSpec.JETBRAINS
         }
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
