@@ -232,7 +232,7 @@ public final class ZigDebuggerToolchainService {
                 if (!accepted.get())
                     yield null;
 
-                yield List.of(new DownloadableDebuggerBinary(msvcUrl.url.toString(), MSVC_PROPERTY_NAME, msvcUrl.version, "extension/debugAdapters/vsdbg/bin"));
+                yield List.of(new DownloadableDebuggerBinary(msvcUrl.url, MSVC_PROPERTY_NAME, msvcUrl.version, "extension/debugAdapters/vsdbg/bin"));
             }
         };
 
@@ -420,16 +420,10 @@ public final class ZigDebuggerToolchainService {
         if (url == null || version == null)
             return null;
 
-        try {
-            return new MSVCUrl(new URL(url), version, props.getProperty("dialogTitle"), props.getProperty("dialogBody"), props.getProperty("dialogLink"));
-        } catch (MalformedURLException e) {
-            //TODO logging
-            e.printStackTrace();
-            return null;
-        }
+        return new MSVCUrl(url, version, props.getProperty("dialogTitle"), props.getProperty("dialogBody"), props.getProperty("dialogLink"));
     }
 
-    private record MSVCUrl(URL url, String version, String dialogTitle, String dialogBody, String dialogLink) {}
+    private record MSVCUrl(String url, String version, String dialogTitle, String dialogBody, String dialogLink) {}
 
     private static String fileName(String url) {
         return url.substring(url.lastIndexOf('/') + 1);
