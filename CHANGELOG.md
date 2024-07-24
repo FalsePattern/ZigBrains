@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zon
+  - Comment/uncomment hotkey support
+
 ## [16.0.0]
 
 ### Fixed
