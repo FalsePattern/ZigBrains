@@ -15,6 +15,8 @@ Changelog structure reference:
 
 # ZigBrains
 
+## [Unreleased]
+
 ## [16.0.0]
 
 ### Fixed
