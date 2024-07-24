@@ -14,7 +14,7 @@ plugins {
     java
     `maven-publish`
     `java-library`
-    id("org.jetbrains.intellij.platform") version("2.0.0-beta8")
+    id("org.jetbrains.intellij.platform") version("2.0.0-rc1")
     id("org.jetbrains.changelog") version("2.2.1")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
     id("de.undercouch.download") version("5.6.0")
@@ -100,7 +100,7 @@ allprojects {
         annotationProcessor("org.projectlombok:lombok:1.18.32")
         if (path !in listOf(":", ":plugin", ":debugger")) {
             intellijPlatform {
-                intellijIdeaCommunity(ideaVersion)
+                intellijIdeaCommunity(ideaVersion, useInstaller = false)
             }
         }
     }
@@ -228,7 +228,7 @@ project(":debugger") {
             exclude("com.google.code.gson", "gson")
         }
         intellijPlatform {
-            clion(clionVersion)
+            clion(clionVersion, useInstaller = false)
             for (p in clionPlugins) {
                 bundledPlugin(p)
             }
@@ -278,8 +278,8 @@ project(":plugin") {
             zipSigner()
             pluginVerifier()
             when (baseIDE) {
-                "idea" -> intellijIdeaCommunity(ideaVersion)
-                "clion" -> clion(clionVersion)
+                "idea" -> intellijIdeaCommunity(ideaVersion, useInstaller = false)
+                "clion" -> clion(clionVersion, useInstaller = false)
             }
             plugin(lsp4ijPluginString)
         }
@@ -326,56 +326,16 @@ project(":plugin") {
         }
     }
 
-    // Include the generated files in the source set
-
-    // Collects all jars produced by compilation of project modules and merges them into singe one.
-    // We need to put all plugin manifest files into single jar to make new plugin model work
-    val mergePluginJarTask = task<Jar>("mergePluginJars") {
-        duplicatesStrategy = DuplicatesStrategy.FAIL
-        archiveBaseName.set("ZigBrains")
-
-        exclude("META-INF/MANIFEST.MF")
-        exclude("**/classpath.index")
-
-        val pluginLibDir by lazy {
-            val sandboxTask = tasks.prepareSandbox.get()
-            sandboxTask.destinationDir.resolve("${project.extensionProvider.map { it.projectName }.get()}/lib")
-        }
-
-        val pluginJars by lazy {
-            pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
-        }
-
-        destinationDirectory.set(project.layout.dir(provider { pluginLibDir }))
-
-        doFirst {
-            for (file in pluginJars) {
-                from(zipTree(file))
-            }
-        }
-
-        doLast {
-            delete(pluginJars)
-        }
-    }
-
     tasks {
         runIde {
-            dependsOn(mergePluginJarTask)
             enabled = true
         }
 
         prepareSandbox {
-            finalizedBy(mergePluginJarTask)
             enabled = true
         }
 
-        buildSearchableOptions {
-            dependsOn(mergePluginJarTask)
-        }
-
         verifyPlugin {
-            dependsOn(mergePluginJarTask)
             enabled = true
         }
 
@@ -400,8 +360,8 @@ project(":plugin") {
 dependencies {
     intellijPlatform {
         when (baseIDE) {
-            "idea" -> intellijIdeaCommunity(ideaVersion)
-            "clion" -> clion(clionVersion)
+            "idea" -> intellijIdeaCommunity(ideaVersion, useInstaller = false)
+            "clion" -> clion(clionVersion, useInstaller = false)
         }
     }
 }

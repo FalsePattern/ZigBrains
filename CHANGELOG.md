@@ -15,6 +15,21 @@ Changelog structure reference:
 
 # ZigBrains
 
+## [Unreleased]
+
+## [16.1.0]
+
+### Added
+
+- Zon
+  - Support for .lazy dependency property
+  - Comment/uncomment hotkey support
+
+### Fixed
+
+- Zon
+  - More reliable autocomplete
+
 ## [16.0.0]
 
 ### Fixed

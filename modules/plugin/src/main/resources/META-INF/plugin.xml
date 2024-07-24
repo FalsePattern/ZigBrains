@@ -97,6 +97,8 @@ The <a href="https://github.com/Zigtools/ZLS">Zig Language Server</a>, for ZigBr
         <completion.contributor language="Zon"
                                 implementationClass="com.falsepattern.zigbrains.zon.completion.ZonCompletionContributor"/>
 
+        <lang.commenter language="Zon" implementationClass="com.falsepattern.zigbrains.zon.comments.ZonCommenter"/>
+
         <lang.formatter language="Zon"
                         implementationClass="com.falsepattern.zigbrains.zon.formatter.ZonFormattingModelBuilder"/>
 
