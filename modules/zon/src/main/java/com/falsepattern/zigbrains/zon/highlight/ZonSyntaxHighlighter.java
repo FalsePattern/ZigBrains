@@ -39,6 +39,7 @@ public class ZonSyntaxHighlighter extends SyntaxHighlighterBase {
         BAD_CHAR = createKey("BAD_CHARACTER", HighlighterColors.BAD_CHARACTER                ),
         STRING   = createKey("STRING"       , DefaultLanguageHighlighterColors.STRING        ),
         COMMA    = createKey("COMMA"        , DefaultLanguageHighlighterColors.COMMA         ),
+        BOOLEAN  = createKey("BOOLEAN"      , DefaultLanguageHighlighterColors.KEYWORD       ),
         DOT      = createKey("DOT"          , DefaultLanguageHighlighterColors.DOT           ),
         BRACE    = createKey("BRACE"        , DefaultLanguageHighlighterColors.BRACES        );
     // @formatter:on
@@ -57,6 +58,7 @@ public class ZonSyntaxHighlighter extends SyntaxHighlighterBase {
         addMapping(COMMENT , ZonTypes.COMMENT);
         addMapping(ID      , ZonTypes.ID);
         addMapping(EQ      , ZonTypes.EQ);
+        addMapping(BOOLEAN , ZonTypes.BOOL_FALSE, ZonTypes.BOOL_TRUE);
         // @formatter:on
     }
 

@@ -36,7 +36,9 @@ public class ZonColorSettingsPage implements ColorSettingsPage {
                                        desc("Comment", ZonSyntaxHighlighter.COMMENT),
                                        desc("Bad Value", ZonSyntaxHighlighter.BAD_CHAR),
                                        desc("String", ZonSyntaxHighlighter.STRING),
-                                       desc("Comma", ZonSyntaxHighlighter.COMMA), desc("Dot", ZonSyntaxHighlighter.DOT),
+                                       desc("Comma", ZonSyntaxHighlighter.COMMA),
+                                       desc("Dot", ZonSyntaxHighlighter.DOT),
+                                       desc("Boolean", ZonSyntaxHighlighter.BOOLEAN),
                                        desc("Braces", ZonSyntaxHighlighter.BRACE)};
 
     private static AttributesDescriptor desc(String name, TextAttributesKey key) {
@@ -60,11 +62,12 @@ public class ZonColorSettingsPage implements ColorSettingsPage {
                     //This is an example file with some random data
                     .name = "zls",
                     .version = "0.11.0",
-                               
+                
                     .dependencies = .{
                         .known_folders = .{
                             .url = "https://github.com/ziglibs/known-folders/archive/fa75e1bc672952efa0cf06160bbd942b47f6d59b.tar.gz",
                             .hash = "122048992ca58a78318b6eba4f65c692564be5af3b30fbef50cd4abeda981b2e7fa5",
+                            .lazy = true,
                         },
                         .diffz = .{
                             .url = "https://github.com/ziglibs/diffz/archive/90353d401c59e2ca5ed0abe5444c29ad3d7489aa.tar.gz",
@@ -75,6 +78,7 @@ public class ZonColorSettingsPage implements ColorSettingsPage {
                             .hash = "1220363c7e27b2d3f39de6ff6e90f9537a0634199860fea237a55ddb1e1717f5d6a5",
                         },
                     },
+                    .paths = .{""},
                 }
                 """;
     }

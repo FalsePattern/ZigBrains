@@ -20,6 +20,6 @@ import com.intellij.psi.PsiElement;
 
 import java.util.Set;
 
-public interface ZonStructMixin extends PsiElement {
+public interface ZonEntryMixin extends PsiElement {
     Set<String> getKeys();
 }

@@ -62,6 +62,8 @@ LINE_STRING=("\\\\" [^\n]* [ \n]*)+
 <YYINITIAL>      "}"                      { return RBRACE; }
 <YYINITIAL>      "="                      { return EQ; }
 <YYINITIAL>      ","                      { return COMMA; }
+<YYINITIAL>      "true"                   { return BOOL_TRUE; }
+<YYINITIAL>      "false"                  { return BOOL_FALSE; }
 <YYINITIAL>      {COMMENT}                { return COMMENT; }
 <YYINITIAL>      {LINE_COMMENT}           { return COMMENT; }
 
