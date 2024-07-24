@@ -62,7 +62,7 @@ public class ZonBlock extends AbstractBlock {
             return Indent.getNoneIndent();
 
         val myElementType = myNode.getElementType();
-        if (parent.getElementType() == ZonTypes.STRUCT &&
+        if (parent.getElementType() == ZonTypes.ENTRY &&
             !(myElementType == ZonTypes.DOT ||
               myElementType == ZonTypes.LBRACE ||
               myElementType == ZonTypes.RBRACE)) {
@@ -86,7 +86,7 @@ public class ZonBlock extends AbstractBlock {
 
     @Override
     protected @Nullable Indent getChildIndent() {
-        if (myNode.getElementType() == ZonTypes.STRUCT) {
+        if (myNode.getElementType() == ZonTypes.ENTRY) {
             return Indent.getNormalIndent();
         } else {
             return Indent.getNoneIndent();
