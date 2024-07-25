@@ -36,7 +36,7 @@ public class ZigProjectSettings {
     public String toolchainHomeDirectory;
 
     public ZigProjectSettings(String explicitPathToStd, AbstractZigToolchain toolchain) {
-        this(true, explicitPathToStd, (String)null);
+        this(explicitPathToStd != null, explicitPathToStd, null);
         setToolchain(toolchain);
     }
 

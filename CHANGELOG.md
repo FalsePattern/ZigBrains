@@ -17,6 +17,17 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [16.1.1]
+
+### Fixed
+
+- Zig
+  - Standard library override always auto-enabling
+  - Better toolchain autodetect
+
+- ZLS
+  - Better language server autodetect
+
 ## [16.1.0]
 
 ### Added
