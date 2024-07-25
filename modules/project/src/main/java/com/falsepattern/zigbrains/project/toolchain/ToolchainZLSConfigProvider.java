@@ -30,9 +30,14 @@ public class ToolchainZLSConfigProvider implements ZLSConfigProvider {
     public void getEnvironment(Project project, ZLSConfig.ZLSConfigBuilder builder) {
         val svc = ZigProjectSettingsService.getInstance(project);
         val state = svc.getState();
-        val toolchain = state.getToolchain();
-        if (toolchain == null)
-            return;
+        var toolchain = state.getToolchain();
+        if (toolchain == null) {
+            toolchain = AbstractZigToolchain.suggest();
+            if (toolchain == null) {
+                return;
+            }
+            state.setToolchain(toolchain);
+        }
         val projectDir = ProjectUtil.guessProjectDir(project);
         val env = toolchain.zig().getEnv(projectDir == null ? Path.of(".") : projectDir.toNioPath());
         env.ifPresent(e -> builder.zig_exe_path(e.zigExecutable()).zig_lib_path(state.overrideStdPath ? Path.of(state.explicitPathToStd).getParent().toString() : e.libDirectory()));

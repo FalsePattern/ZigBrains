@@ -89,7 +89,7 @@ public class ZigProjectSettingsPanel implements MyDisposable {
                                 .map(PathUtil::pathFromString)
                                 .map(ZigToolchainProvider::findToolchain)
                                 .orElse(null);
-        return new ZigProjectSettings(StringUtil.blankToNull(pathToStdField.getText()), toolchain);
+        return new ZigProjectSettings(stdFieldOverride.isSelected() ? StringUtil.blankToNull(pathToStdField.getText()) : null, toolchain);
     }
 
     public void setData(ZigProjectSettings value) {
@@ -115,7 +115,6 @@ public class ZigProjectSettingsPanel implements MyDisposable {
                 r.button("Autodetect", $f(this::autodetect));
             });
             p2.cell("Toolchain version", toolchainVersion);
-            p2.cell("Override standard library path", stdFieldOverride);
             p2.row("Standard library location", row -> {
                 row.cell(pathToStdField).resizableColumn().align(AlignX.FILL);
                 row.cell(stdFieldOverride);
