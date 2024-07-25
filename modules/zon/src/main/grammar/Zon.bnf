@@ -38,23 +38,25 @@
     STRING_LITERAL_SINGLE='string'
     LINE_STRING='multiline string'
     BAD_STRING='unterminated string'
+    BOOL_TRUE='true'
+    BOOL_FALSE='false'
   ]
 
   //Mixins
-  mixin("struct")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonStructMixinImpl"
-  implements("struct")="com.falsepattern.zigbrains.zon.psi.mixins.ZonStructMixin"
+  mixin("entry")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonEntryMixinImpl"
+  implements("entry")="com.falsepattern.zigbrains.zon.psi.mixins.ZonEntryMixin"
 
   mixin("identifier")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonIdentifierMixinImpl"
   implements("identifier")="com.falsepattern.zigbrains.zon.psi.mixins.ZonIdentifierMixin"
 }
 
-zonFile ::= struct
+zonFile ::= entry
 
-struct ::= DOT LBRACE (struct_string_list | struct_map | ()) RBRACE
+entry ::= DOT LBRACE (list | struct | ()) RBRACE
 
-struct_map ::= (property | property_placeholder) (COMMA (property_placeholder? property property_placeholder? | property_placeholder))* COMMA?
+struct ::= (property | property_placeholder) (COMMA (property_placeholder? property property_placeholder? | property_placeholder))* COMMA?
 
-struct_string_list ::= STRING_LITERAL (COMMA STRING_LITERAL)* COMMA?
+list ::= value (COMMA value)* COMMA?
 
 property ::= DOT identifier EQ value
 
@@ -62,6 +64,10 @@ identifier ::= ID
 
 property_placeholder ::= DOT? INTELLIJ_COMPLETION_DUMMY
 
-private value ::= struct | STRING_LITERAL
+private value ::= entry | boolean | STRING_LITERAL | value_placeholder
+
+value_placeholder ::= INTELLIJ_COMPLETION_DUMMY
+
+boolean ::= BOOL_TRUE | BOOL_FALSE
 
 STRING_LITERAL ::= STRING_LITERAL_SINGLE | LINE_STRING+

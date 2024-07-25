@@ -20,7 +20,13 @@ Changelog structure reference:
 ### Added
 
 - Zon
+  - Support for .lazy dependency property
   - Comment/uncomment hotkey support
+
+### Fixed
+
+- Zon
+  - More reliable autocomplete
 
 ## [16.0.0]
 
