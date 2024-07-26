@@ -7,9 +7,12 @@ import com.google.gson.Gson;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider;
 import lombok.val;
 
@@ -19,14 +22,27 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class ZLSStreamConnectionProvider extends ProcessStreamConnectionProvider {
     private static final Logger LOG = Logger.getInstance(ZLSStreamConnectionProvider.class);
     public ZLSStreamConnectionProvider(Project project) {
-        super(getCommand(project));
+        val command = getCommand(project);
+        val projectDir = ProjectUtil.guessProjectDir(project);
+        if (projectDir != null) {
+            setWorkingDirectory(projectDir.getPath());
+        }
+        try {
+            setCommands(command.get());
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static List<String> getCommand(Project project) {
+    private static List<String> doGetCommand(Project project) {
         var svc = ZLSProjectSettingsService.getInstance(project);
         val state = svc.getState();
         var zlsPath = state.zlsPath;
@@ -94,6 +110,18 @@ public class ZLSStreamConnectionProvider extends ProcessStreamConnectionProvider
             }
         }
         return cmd;
+    }
+
+    public static Future<List<String>> getCommand(Project project) {
+        val future = new CompletableFuture<List<String>>();
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                future.complete(doGetCommand(project));
+            } catch (Throwable t) {
+                future.completeExceptionally(t);
+            }
+        });
+        return future;
     }
 
     private static boolean validatePath(String name, String pathTxt, boolean dir) {

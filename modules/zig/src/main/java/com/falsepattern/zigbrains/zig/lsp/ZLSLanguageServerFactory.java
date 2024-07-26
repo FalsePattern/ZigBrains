@@ -31,6 +31,6 @@ public class ZLSLanguageServerFactory implements LanguageServerFactory, Language
 
     @Override
     public void setEnabled(boolean enabled, @NotNull Project project) {
-        this.enabled = enabled && ZLSStreamConnectionProvider.getCommand(project) != null;
+        this.enabled = enabled;
     }
 }
