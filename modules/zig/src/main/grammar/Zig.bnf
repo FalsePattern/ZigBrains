@@ -174,7 +174,7 @@ ContainerDeclarations ::= (TestDecl | ComptimeDecl | DOC_COMMENT? KEYWORD_PUB? D
 
 TestDecl ::= DOC_COMMENT? KEYWORD_TEST (STRING_LITERAL_SINGLE | IDENTIFIER)? Block {pin=2}
 
-ComptimeDecl ::= KEYWORD_COMPTIME Block {pin=1}
+ComptimeDecl ::= KEYWORD_COMPTIME Block
 
 Decl
 ::= (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE? | KEYWORD_INLINE | KEYWORD_NOINLINE)? FnProto (SEMICOLON | Block)
@@ -187,7 +187,7 @@ VarDeclProto ::= (KEYWORD_CONST | KEYWORD_VAR) IDENTIFIER (COLON TypeExpr)? Byte
 
 GlobalVarDecl ::= VarDeclProto (EQUAL Expr)? SEMICOLON {pin=1}
 
-ContainerField ::= DOC_COMMENT? KEYWORD_COMPTUME? !KEYWORD_FN (IDENTIFIER COLON)? TypeExpr ByteAlign? (EQUAL Expr)? {pin=5}
+ContainerField ::= DOC_COMMENT? KEYWORD_COMPTIME? !KEYWORD_FN (IDENTIFIER COLON)? TypeExpr ByteAlign? (EQUAL Expr)? {pin=5}
 
 // *** Block Level ***
 Statement
