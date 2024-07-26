@@ -23,6 +23,9 @@ Changelog structure reference:
   - Standard library override always auto-enabling
   - Better toolchain autodetect
 
+- ZLS
+  - Better language server autodetect
+
 ## [16.1.0]
 
 ### Added

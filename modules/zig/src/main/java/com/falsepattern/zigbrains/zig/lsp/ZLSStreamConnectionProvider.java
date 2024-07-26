@@ -23,13 +23,22 @@ import java.util.List;
 public class ZLSStreamConnectionProvider extends ProcessStreamConnectionProvider {
     private static final Logger LOG = Logger.getInstance(ZLSStreamConnectionProvider.class);
     public ZLSStreamConnectionProvider(Project project) {
-        super.setCommands(getCommand(project));
+        super(getCommand(project));
     }
 
     public static List<String> getCommand(Project project) {
         var svc = ZLSProjectSettingsService.getInstance(project);
         val state = svc.getState();
         var zlsPath = state.zlsPath;
+        if (StringUtil.isEmpty(zlsPath)) {
+            zlsPath = com.falsepattern.zigbrains.common.util.FileUtil.findExecutableOnPATH("zls").map(Path::toString).orElse(null);
+            if (zlsPath == null) {
+                Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Could not detect ZLS binary! Please configure it!",
+                                                          NotificationType.ERROR));
+                return null;
+            }
+            state.setZlsPath(zlsPath);
+        }
         if (!validatePath("ZLS Binary", zlsPath, false)) {
             return null;
         }
