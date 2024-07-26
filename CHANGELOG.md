@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [16.1.2]
+
+### Fixed
+
+- Zig
+  - Comptime struct fields not being parsed properly
+
 ## [16.1.1]
 
 ### Fixed
