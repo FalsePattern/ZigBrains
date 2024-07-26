@@ -22,6 +22,7 @@ public class ZigDebuggerSettings extends XDebuggerSettings<ZigDebuggerSettings> 
 
     public boolean downloadAutomatically = false;
     public boolean useClion = true;
+    public MSVCDownloadPermission msvcConsent = MSVCDownloadPermission.AskMe;
 
     protected ZigDebuggerSettings() {
         super("Zig");
