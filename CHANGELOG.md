@@ -21,6 +21,7 @@ Changelog structure reference:
 
 - Zig
   - Standard library override always auto-enabling
+  - Better toolchain autodetect
 
 ## [16.1.0]
 
