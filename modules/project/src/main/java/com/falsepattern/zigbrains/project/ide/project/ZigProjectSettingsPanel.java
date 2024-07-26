@@ -89,7 +89,7 @@ public class ZigProjectSettingsPanel implements MyDisposable {
                                 .map(PathUtil::pathFromString)
                                 .map(ZigToolchainProvider::findToolchain)
                                 .orElse(null);
-        return new ZigProjectSettings(StringUtil.blankToNull(pathToStdField.getText()), toolchain);
+        return new ZigProjectSettings(stdFieldOverride.isSelected() ? StringUtil.blankToNull(pathToStdField.getText()) : null, toolchain);
     }
 
     public void setData(ZigProjectSettings value) {

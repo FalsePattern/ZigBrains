@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Standard library override always auto-enabling
+
 ## [16.1.0]
 
 ### Added
