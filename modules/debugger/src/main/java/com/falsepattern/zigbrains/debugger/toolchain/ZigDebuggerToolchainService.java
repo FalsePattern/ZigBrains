@@ -2,6 +2,8 @@ package com.falsepattern.zigbrains.debugger.toolchain;
 
 import com.falsepattern.zigbrains.ZigBundle;
 import com.falsepattern.zigbrains.common.ZigPathManager;
+import com.falsepattern.zigbrains.debugger.settings.MSVCDownloadPermission;
+import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -15,6 +17,7 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.BrowserHyperlinkListener;
 import com.intellij.ui.HyperlinkLabel;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.download.DownloadableFileService;
 import com.intellij.util.io.Decompressor;
@@ -24,17 +27,13 @@ import com.jetbrains.cidr.execution.debugger.CidrDebuggerPathManager;
 import com.jetbrains.cidr.execution.debugger.backend.bin.UrlProvider;
 import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration;
 import lombok.AccessLevel;
-import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,10 +42,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service(Service.Level.APP)
 public final class ZigDebuggerToolchainService {
+    private MSVCMetadataProvider msvcProvider = new MSVCMetadataProvider();
     public static ZigDebuggerToolchainService getInstance() {
         return ApplicationManager.getApplication().getService(ZigDebuggerToolchainService.class);
     }
@@ -320,7 +323,7 @@ public final class ZigDebuggerToolchainService {
         };
     }
 
-    private static Path downloadPath() {
+    static Path downloadPath() {
         return Paths.get(PathManager.getTempPath());
     }
 
@@ -354,56 +357,6 @@ public final class ZigDebuggerToolchainService {
         return UrlProvider.gdb(OS.CURRENT, CpuArch.CURRENT);
     }
 
-    private Properties msvcProperties() {
-        val service = DownloadableFileService.getInstance();
-        val desc = service.createFileDescription("https://falsepattern.com/zigbrains/msvc.properties", "msvc.properties");
-        val downloader = service.createDownloader(List.of(desc), "Debugger metadata downloading");
-        val downloadDirectory = downloadPath().toFile();
-        val prop = new Properties();
-        try {
-            val downloadResults = downloader.download(downloadDirectory);
-            for (val result : downloadResults) {
-                if (Objects.equals(result.second.getDefaultFileName(), "msvc.properties")) {
-                    @Cleanup val reader = new FileReader(result.first);
-                    prop.load(reader);
-                }
-            }
-        } catch (IOException e) {
-            //TODO logging
-            e.printStackTrace();
-            Notifications.Bus.notify(new Notification(
-                    "ZigBrains.Debugger.Error",
-                    ZigBundle.message("notification.title.debugger"),
-                    ZigBundle.message("notification.content.debugger.metadata.downloading.failed"),
-                    NotificationType.ERROR
-                                    ));
-            //Try to load fallback file
-            try {
-                @Cleanup val resource = ZigDebuggerToolchainService.class.getResourceAsStream("msvc.properties");
-                if (resource == null) {
-                    Notifications.Bus.notify(new Notification(
-                            "ZigBrains.Debugger.Error",
-                            ZigBundle.message("notification.title.debugger"),
-                            ZigBundle.message("notification.content.debugger.metadata.fallback.fetch.failed"),
-                            NotificationType.ERROR
-                    ));
-                    return prop;
-                }
-                val reader = new InputStreamReader(resource);
-                prop.load(reader);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                Notifications.Bus.notify(new Notification(
-                        "ZigBrains.Debugger.Error",
-                        ZigBundle.message("notification.title.debugger"),
-                        ZigBundle.message("notification.content.debugger.metadata.fallback.parse.failed"),
-                        NotificationType.ERROR
-                ));
-            }
-        }
-        return prop;
-    }
-
     private MSVCUrl msvcUrl() {
         String dlKey = switch (CpuArch.CURRENT) {
             case X86 -> "downloadX86";
@@ -414,7 +367,7 @@ public final class ZigDebuggerToolchainService {
         if (dlKey == null)
             return null;
 
-        val props = msvcProperties();
+        val props = msvcProvider.msvcProperties();
         val version = props.getProperty("version");
         val url = props.getProperty(dlKey);
         if (url == null || version == null)
