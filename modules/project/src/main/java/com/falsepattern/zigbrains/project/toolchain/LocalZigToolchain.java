@@ -29,7 +29,7 @@ public class LocalZigToolchain extends AbstractZigToolchain{
 
     @Override
     public int executionTimeoutInMilliseconds() {
-        return 1000;
+        return 10000;
     }
 
     @Override
