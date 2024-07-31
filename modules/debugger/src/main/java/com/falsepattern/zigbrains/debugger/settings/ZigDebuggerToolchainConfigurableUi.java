@@ -10,6 +10,7 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.observable.util.ListenerUiUtil;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.ui.components.JBCheckBox;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
@@ -79,7 +80,7 @@ public class ZigDebuggerToolchainConfigurableUi extends ZigDebuggerUiComponent {
         panel.row(r -> {
             r.cell(downloadAutomaticallyCheckBox);
         });
-        if (PluginManager.isPluginInstalled(PluginId.getId("com.intellij.modules.clion"))) {
+        if (PluginManager.isPluginInstalled(PluginId.getId("com.intellij.modules.clion")) && !SystemInfo.isWindows) {
             panel.row(r -> {
                 r.cell(useClion);
             });
