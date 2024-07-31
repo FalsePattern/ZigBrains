@@ -19,11 +19,21 @@ package com.falsepattern.zigbrains.project.util;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.openapi.project.Project;
+import lombok.val;
 import org.jetbrains.annotations.Nullable;
+
+import java.nio.file.Path;
 
 public class ProjectUtil {
     public static @Nullable AbstractZigToolchain getToolchain(Project project) {
         return ZigProjectSettingsService.getInstance(project).getState().getToolchain();
+    }
+    
+    public static @Nullable Path guessProjectDir(Project project) {
+        val dir = com.intellij.openapi.project.ProjectUtil.guessProjectDir(project);
+        if (dir == null)
+            return null;
+        return dir.toNioPath();
     }
 
 }

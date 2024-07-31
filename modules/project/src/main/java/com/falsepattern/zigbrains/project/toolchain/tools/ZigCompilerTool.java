@@ -37,7 +37,7 @@ public class ZigCompilerTool extends AbstractZigTool{
     public ZigCompilerTool(AbstractZigToolchain toolchain) {
         super(toolchain, TOOL_NAME);
         val app = ApplicationManager.getApplication();
-        val baseFuture = app.executeOnPooledThread(() -> getEnv(null));
+        val baseFuture = app.executeOnPooledThread(() -> getEnv(toolchain.getLocation()));
         version = new Lazy<>(() -> {
             try {
                 return baseFuture.get().map(ZigToolchainEnvironmentSerializable::version);

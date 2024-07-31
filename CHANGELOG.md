@@ -17,6 +17,25 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [17.0.0]
+
+### Added
+
+- Project
+  - Zig Build integrated into an IDE tool window. Currently only supports running single steps, for more complex steps,
+create a custom build configuration as before.
+
+### Changed
+
+- Project
+  - Increased internal zig tool timeout to 10 seconds. Note that tasks don't have timeout, this is only used for
+ZigBrains getting metadata about the compiler and the buildscript.
+
+### Fixed
+
+- Project
+  - Toolchain working directory was not set when requesting compiler metadata
+
 ## [16.1.3]
 
 ### Changed

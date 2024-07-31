@@ -16,16 +16,15 @@
 
 package com.falsepattern.zigbrains.project.execution.base;
 
+import com.falsepattern.zigbrains.project.util.ProjectUtil;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.LocatableConfigurationBase;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.NlsActions;
-import com.intellij.openapi.vfs.VirtualFile;
 import lombok.Getter;
 import lombok.val;
 import org.jdom.Element;
@@ -41,9 +40,7 @@ public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends 
     private ZigConfigEditor.CheckboxConfigurable pty = new ZigConfigEditor.CheckboxConfigurable("pty", "Emulate Terminal", false);
     public ZigExecConfigBase(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
         super(project, factory, name);
-        workingDirectory.setPath(getProject().isDefault() ? null : Optional.ofNullable(ProjectUtil.guessProjectDir(getProject()))
-                                                                           .map(VirtualFile::toNioPath)
-                                                                           .orElse(null));
+        workingDirectory.setPath(getProject().isDefault() ? null : ProjectUtil.guessProjectDir(getProject()));
     }
 
     @Override
