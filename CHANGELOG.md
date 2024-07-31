@@ -19,8 +19,10 @@ Changelog structure reference:
 
 ### Changed
 
-- Debugger
+- Debugger (Windows)
   - MSVC debugger metadata download now requires consent from the user
+  - Metadata download is now cached after the first fetch
+  - Metadata download timeout has been set to 3 seconds, after which it reverts to the fallback file
 
 ## [16.1.2]
 
