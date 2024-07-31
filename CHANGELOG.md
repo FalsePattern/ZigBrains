@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [16.1.3]
+
 ### Changed
 
 - Debugger (Windows)
