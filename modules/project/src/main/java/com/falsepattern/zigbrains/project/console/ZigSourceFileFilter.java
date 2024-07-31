@@ -17,10 +17,10 @@
 package com.falsepattern.zigbrains.project.console;
 
 import com.falsepattern.zigbrains.common.util.FileUtil;
+import com.falsepattern.zigbrains.project.util.ProjectUtil;
 import com.intellij.execution.filters.Filter;
 import com.intellij.execution.filters.OpenFileHyperlinkInfo;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import kotlin.Pair;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +63,7 @@ public class ZigSourceFileFilter implements Filter {
     @Override
     public Result applyFilter(@NotNull String line, int entireLength) {
         val lineStart = entireLength - line.length();
-        val projectPath = Optional.ofNullable(ProjectUtil.guessProjectDir(project)).map(VirtualFile::toNioPath).orElse(null);
+        val projectPath = ProjectUtil.guessProjectDir(project);
         val results = new ArrayList<ResultItem>();
         val matcher = LEN_REGEX.matcher(line);
         while (matcher.find()) {
