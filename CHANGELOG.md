@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- Debugger
+  - MSVC debugger metadata download now requires consent from the user
+
 ## [16.1.2]
 
 ### Fixed
