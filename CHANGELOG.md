@@ -17,6 +17,12 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Project
+  - Zig Build integrated into an IDE tool window. Currently only supports running single steps, for more complex steps,
+create a custom build configuration as before.
+
 ## [16.1.3]
 
 ### Changed
