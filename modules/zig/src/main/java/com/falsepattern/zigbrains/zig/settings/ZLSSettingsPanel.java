@@ -42,8 +42,6 @@ public class ZLSSettingsPanel implements Disposable {
     private final TextFieldWithBrowseButton zlsConfigPath = TextFieldUtil.pathToFileTextField(this,
                                                                                               "Path to the Custom ZLS Config File (Optional)",
                                                                                               () -> {});
-    private final JBCheckBox asyncFolding = new JBCheckBox();
-    private final JBCheckBox increaseTimeouts = new JBCheckBox();
 
     private final JBCheckBox buildOnSave = new JBCheckBox();
     private final JBTextField buildOnSaveStep = new ExtendableTextField();
@@ -76,16 +74,12 @@ public class ZLSSettingsPanel implements Disposable {
         Optional.ofNullable(ZLSProjectSettingsService.getInstance(ProjectManager.getInstance().getDefaultProject()))
                 .map(ZLSProjectSettingsService::getState)
                 .ifPresent(this::setData);
-        panel.group("ZLS launch settings", true, p -> {
+        panel.group("ZLS Settings", true, p -> {
             p.row("Executable path", r -> {
                 r.cell(zlsPath).resizableColumn().align(AlignX.FILL);
                 r.button("Autodetect", $f(this::autodetect));
             });
             p.cell("Config path (leave empty to use built-in config)", zlsConfigPath, AlignX.FILL);
-            p.cell("Increase timeouts", increaseTimeouts);
-            p.cell("Asynchronous code folding ranges", asyncFolding);
-        });
-        panel.group("ZLS Configuration", false, p -> {
             p.cell("Build on save", buildOnSave);
             p.row("Build on save step", r -> {
                 r.cell(buildOnSaveStep).resizableColumn().align(AlignX.FILL);
@@ -102,8 +96,6 @@ public class ZLSSettingsPanel implements Disposable {
     public ZLSSettings getData() {
         return new ZLSSettings(zlsPath.getText(),
                                 zlsConfigPath.getText(),
-                                increaseTimeouts.isSelected(),
-                                asyncFolding.isSelected(),
                                 debug.isSelected(),
                                 messageTrace.isSelected(),
                                 buildOnSave.isSelected(),
@@ -115,8 +107,6 @@ public class ZLSSettingsPanel implements Disposable {
     public void setData(ZLSSettings value) {
         zlsPath.setText(value.zlsPath == null ? "" : value.zlsPath);
         zlsConfigPath.setText(value.zlsConfigPath);
-        increaseTimeouts.setSelected(value.increaseTimeouts);
-        asyncFolding.setSelected(value.asyncFolding);
         debug.setSelected(value.debug);
         messageTrace.setSelected(value.messageTrace);
         buildOnSave.setSelected(value.buildOnSave);
