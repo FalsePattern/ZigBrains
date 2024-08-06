@@ -26,8 +26,6 @@ import org.jetbrains.annotations.Nullable;
 public final class ZLSSettings {
     public @Nullable String zlsPath;
     public @NotNull String zlsConfigPath;
-    public boolean increaseTimeouts;
-    public boolean asyncFolding;
     public boolean debug;
     public boolean messageTrace;
     public boolean buildOnSave;
@@ -36,6 +34,6 @@ public final class ZLSSettings {
     public boolean dangerousComptimeExperimentsDoNotEnable;
 
     public ZLSSettings() {
-        this(null, "", false, true, false, false, false, "install", false, false);
+        this(null, "", false, false, false, "install", false, false);
     }
 }

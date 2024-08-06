@@ -39,18 +39,10 @@ public final class ZLSProjectSettingsService extends WrappingStateComponent<ZLSS
 
     public boolean isModified(ZLSSettings otherData) {
         val myData = this.getState();
-        boolean modified = zlsSettingsModified(otherData);
-        modified |= myData.asyncFolding != otherData.asyncFolding;
-        return modified;
-    }
-
-    public boolean zlsSettingsModified(ZLSSettings otherData) {
-        val myData = this.getState();
         boolean modified = !Objects.equals(myData.zlsPath, otherData.zlsPath);
         modified |= !Objects.equals(myData.zlsConfigPath, otherData.zlsConfigPath);
         modified |= myData.debug != otherData.debug;
         modified |= myData.messageTrace != otherData.messageTrace;
-        modified |= myData.increaseTimeouts != otherData.increaseTimeouts;
         modified |= myData.buildOnSave != otherData.buildOnSave;
         modified |= !Objects.equals(myData.buildOnSaveStep, otherData.buildOnSaveStep);
         modified |= myData.highlightGlobalVarDeclarations != otherData.highlightGlobalVarDeclarations;
