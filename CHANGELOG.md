@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - Relative paths in zig toolchain configuration would break the entire IDE
+
 ## [17.0.0]
 
 ### Added
