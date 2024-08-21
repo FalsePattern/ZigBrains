@@ -22,6 +22,11 @@ Changelog structure reference:
 - Project
   - Relative paths in zig toolchain configuration would break the entire IDE
 
+### Removed
+
+- ZLS
+  - Obsolete config options which are no longer used since migrating to LSP4IJ
+
 ## [17.0.0]
 
 ### Added

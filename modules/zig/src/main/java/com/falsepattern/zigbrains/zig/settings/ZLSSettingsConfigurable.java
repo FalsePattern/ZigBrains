@@ -49,7 +49,7 @@ public class ZLSSettingsConfigurable implements SubConfigurable {
     public void apply() {
         var settings = ZLSProjectSettingsService.getInstance(project);
         val data = appSettingsComponent.getData();
-        boolean reloadZLS = settings.zlsSettingsModified(data);
+        boolean reloadZLS = settings.isModified(data);
         settings.loadState(data);
         if (reloadZLS) {
             ZLSStartupActivity.startLSP(project, true);
