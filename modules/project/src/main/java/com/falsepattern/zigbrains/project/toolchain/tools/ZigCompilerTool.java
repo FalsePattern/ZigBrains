@@ -25,6 +25,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -32,7 +33,7 @@ import java.util.concurrent.ExecutionException;
 public class ZigCompilerTool extends AbstractZigTool{
     public static final String TOOL_NAME = "zig";
     private final Lazy<Optional<String>> version;
-    private final Lazy<Optional<String>> stdPath;
+    private final Lazy<Optional<Path>> stdPath;
 
     public ZigCompilerTool(AbstractZigToolchain toolchain) {
         super(toolchain, TOOL_NAME);
@@ -47,7 +48,22 @@ public class ZigCompilerTool extends AbstractZigTool{
         });
         stdPath = new Lazy<>(() -> {
             try {
-                return baseFuture.get().map(ZigToolchainEnvironmentSerializable::stdDirectory);
+                return baseFuture.get().map(ZigToolchainEnvironmentSerializable::stdDirectory)
+                        .map(pathStr -> {
+                            try {
+                                val path = Path.of(pathStr);
+                                if (path.isAbsolute()) {
+                                    return path;
+                                }
+                                val resolvedPath = toolchain.getLocation().resolve(path);
+                                if (resolvedPath.isAbsolute()) {
+                                    return resolvedPath;
+                                }
+                                return null;
+                            } catch (InvalidPathException e) {
+                                return null;
+                            }
+                        });
             } catch (InterruptedException | ExecutionException e) {
                 return Optional.empty();
             }
@@ -61,7 +77,7 @@ public class ZigCompilerTool extends AbstractZigTool{
 
     }
 
-    public Optional<String> getStdPath() {
+    public Optional<Path> getStdPath() {
         return stdPath.get();
     }
 

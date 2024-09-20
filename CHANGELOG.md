@@ -17,6 +17,17 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [17.2.0]
+
+### Added
+
+- IDEA 2024.3 support
+
+### Fixed
+
+- Project
+  - Safer standard library path resolution
+
 ## [17.1.0]
 
 ### Fixed
