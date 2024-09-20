@@ -20,7 +20,7 @@ plugins {
     id("de.undercouch.download") version("5.6.0")
 }
 
-val publishVersions = listOf("232", "233", "241", "242")
+val publishVersions = listOf("232", "233", "241", "242", "243")
 
 val gitVersion: groovy.lang.Closure<String> by extra
 
