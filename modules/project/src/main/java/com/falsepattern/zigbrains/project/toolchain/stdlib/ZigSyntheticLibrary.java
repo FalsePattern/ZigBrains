@@ -33,6 +33,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.Icon;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,11 +51,30 @@ public class ZigSyntheticLibrary extends SyntheticLibrary implements ItemPresent
         val service = ZigProjectSettingsService.getInstance(project);
         val state = service.getState();
         this.roots = ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            var roots = pathToVFS(state.getExplicitPathToStd());
-            if (roots != null) {
-                return roots;
-            }
             val toolchain = state.getToolchain();
+            blk: try {
+                val ePathStr = state.getExplicitPathToStd();
+                if (ePathStr == null) {
+                    break blk;
+                }
+                val ePath = Path.of(ePathStr);
+                if (ePath.isAbsolute()) {
+                    var roots = pathToVFS(ePath);
+                    if (roots != null) {
+                        return roots;
+                    }
+                } else if (toolchain != null) {
+                    val stdPath = toolchain.getLocation().resolve(ePath);
+                    if (stdPath.isAbsolute()) {
+                        var roots = pathToVFS(stdPath);
+                        if (roots != null) {
+                            return roots;
+                        }
+                    }
+                }
+            } catch (InvalidPathException ignored) {
+
+            }
             if (toolchain != null) {
                 val stdPath =
                         toolchain.zig().getStdPath().orElse(null);
@@ -69,16 +90,13 @@ public class ZigSyntheticLibrary extends SyntheticLibrary implements ItemPresent
                                                                            .orElse("Zig"));
     }
 
-    private static @Nullable Collection<VirtualFile> pathToVFS(String path) {
-        if (path != null && !path.isEmpty()) {
-            val thePath = PathUtil.pathFromString(path);
-            if (thePath != null) {
-                val file = VfsUtil.findFile(thePath, true);
-                if (file != null) {
-                    val children = file.getChildren();
-                    if (children != null && children.length > 0)
-                        return Arrays.asList(children);
-                }
+    private static @Nullable Collection<VirtualFile> pathToVFS(Path path) {
+        if (path != null) {
+            val file = VfsUtil.findFile(path, true);
+            if (file != null) {
+                val children = file.getChildren();
+                if (children != null && children.length > 0)
+                    return Arrays.asList(children);
             }
         }
         return null;
@@ -86,7 +104,8 @@ public class ZigSyntheticLibrary extends SyntheticLibrary implements ItemPresent
     @Override
     public @NotNull Collection<VirtualFile> getSourceRoots() {
         try {
-            return roots.get();
+            val rootsRaw = roots.get();
+            return rootsRaw == null ? Collections.emptySet() : rootsRaw;
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             return Collections.emptySet();
