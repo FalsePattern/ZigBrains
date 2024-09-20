@@ -7,8 +7,8 @@ import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
-fun properties(key: String) = providers.gradleProperty(key)
-fun environment(key: String) = providers.environmentVariable(key)
+fun properties(key: String) = providers.gradleProperty(key) as Provider<String>
+fun environment(key: String) = providers.environmentVariable(key) as Provider<String>
 
 plugins {
     java
@@ -40,7 +40,7 @@ val clionVersion = properties("clionVersion").get()
 val clionPlugins = listOf("com.intellij.clion", "com.intellij.cidr.lang", "com.intellij.cidr.base", "com.intellij.nativeDebug")
 
 val lsp4jVersion = "0.21.1"
-val lsp4ijVersion = "0.3.0"
+val lsp4ijVersion = "0.5.0"
 
 val lsp4ijNightly = lsp4ijVersion.contains("-")
 val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
@@ -173,7 +173,7 @@ allprojects {
 
         withType<PatchPluginXmlTask> {
             sinceBuild = properties("pluginSinceBuild")
-            untilBuild = properties("pluginUntilBuild").map { it.ifBlank { null } }
+            untilBuild = properties("pluginUntilBuild").flatMap {provider { it.ifBlank { null } }}
         }
     }
     intellijPlatform {
@@ -317,7 +317,7 @@ project(":plugin") {
             privateKeyFile = rootProject.file("secrets/private.pem")
             password = environment("PRIVATE_KEY_PASSWORD")
         }
-        verifyPlugin {
+        pluginVerification {
             ides {
                 ide(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion)
                 ide(IntelliJPlatformType.IntellijIdeaUltimate, ideaVersion)
