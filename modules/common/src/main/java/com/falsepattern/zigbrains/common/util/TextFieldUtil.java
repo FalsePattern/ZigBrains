@@ -35,27 +35,24 @@ public class TextFieldUtil {
     public static TextFieldWithBrowseButton pathToDirectoryTextField(Disposable disposable,
                                                                      @NlsContexts.DialogTitle String dialogTitle,
                                                                      Runnable onTextChanged) {
-        return pathTextField(FileChooserDescriptorFactory.createSingleFolderDescriptor(),
+        return pathTextField(FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(dialogTitle),
                              disposable,
-                             dialogTitle,
                              onTextChanged);
     }
 
     public static TextFieldWithBrowseButton pathToFileTextField(Disposable disposable,
                                                                 @NlsContexts.DialogTitle String dialogTitle,
                                                                 Runnable onTextChanged) {
-        return pathTextField(FileChooserDescriptorFactory.createSingleFileDescriptor(),
+        return pathTextField(FileChooserDescriptorFactory.createSingleFileDescriptor().withTitle(dialogTitle),
                              disposable,
-                             dialogTitle,
                              onTextChanged);
     }
 
     public static TextFieldWithBrowseButton pathTextField(FileChooserDescriptor fileChooserDescriptor,
                                                           Disposable disposable,
-                                                          @NlsContexts.DialogTitle String dialogTitle,
                                                           Runnable onTextChanged) {
         val component = new TextFieldWithBrowseButton(new ExtendableTextField(), null, disposable);
-        component.addBrowseFolderListener(dialogTitle, null, null, fileChooserDescriptor, TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
+        component.addBrowseFolderListener(null, fileChooserDescriptor, TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT);
         addTextChangeListener(component.getChildComponent(), ignored -> onTextChanged.run());
 
         return component;

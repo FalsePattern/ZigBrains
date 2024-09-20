@@ -28,7 +28,7 @@ public class WorkingDirectoryComponent extends LabeledComponent<TextFieldWithBro
         field = new TextFieldWithBrowseButton(null, parent);
         var fileChooser = FileChooserDescriptorFactory.createSingleFolderDescriptor();
         fileChooser.setTitle(ExecutionBundle.message("select.working.directory.message"));
-        field.addBrowseFolderListener(null, null, null, fileChooser);
+        field.addBrowseFolderListener(null, fileChooser);
         setComponent(field);
         setText(ExecutionBundle.message("run.configuration.working.directory.label"));
     }
