@@ -14,7 +14,7 @@ plugins {
     java
     `maven-publish`
     `java-library`
-    id("org.jetbrains.intellij.platform") version("2.0.1")
+    id("org.jetbrains.intellij.platform") version("2.1.0")
     id("org.jetbrains.changelog") version("2.2.1")
     id("org.jetbrains.grammarkit") version("2022.3.2.2")
     id("de.undercouch.download") version("5.6.0")
@@ -40,7 +40,7 @@ val clionVersion = properties("clionVersion").get()
 val clionPlugins = listOf("com.intellij.cidr.base", "com.intellij.clion")
 
 val lsp4jVersion = "0.21.1"
-val lsp4ijVersion = "0.5.0"
+val lsp4ijVersion = "0.6.0"
 
 val lsp4ijNightly = lsp4ijVersion.contains("-")
 val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
@@ -105,7 +105,7 @@ allprojects {
     dependencies {
         compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")
-        if (path !in listOf(":", ":plugin", ":debugger")) {
+        if (path !in listOf(":", ":plugin", ":debugger", ":cidr")) {
             intellijPlatform {
                 intellijIdeaCommunity(ideaVersion, useInstaller = false)
             }
@@ -224,6 +224,19 @@ project(":project") {
     }
 }
 
+project(":cidr") {
+    dependencies {
+        implementation(project(":common"))
+        implementation(project(":project"))
+        intellijPlatform {
+            clion(clionVersion, useInstaller = false)
+            for (p in clionPlugins) {
+                bundledPlugin(p)
+            }
+        }
+    }
+}
+
 project(":debugger") {
     dependencies {
         implementation(project(":zig"))
@@ -280,6 +293,7 @@ project(":plugin") {
         implementation(project(":zig"))
         implementation(project(":project"))
         implementation(project(":zon"))
+        implementation(project(":cidr"))
         implementation(project(":debugger"))
         intellijPlatform {
             zipSigner()
