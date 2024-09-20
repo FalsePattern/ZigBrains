@@ -17,6 +17,10 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- IDEA 2024.3 support
+
 ### Fixed
 
 - Project
