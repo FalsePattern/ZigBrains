@@ -49,6 +49,10 @@
         <lang.foldingBuilder language="Zig"
                              implementationClass="com.redhat.devtools.lsp4ij.features.foldingRange.LSPFoldingRangeBuilder"
                              order="first"/>
+        <!-- LSP textDocument/documentSymbol -->
+        <lang.psiStructureViewFactory
+                language="Zig"
+                implementationClass="com.redhat.devtools.lsp4ij.features.documentSymbol.LSPDocumentSymbolStructureViewFactory"/>
 
         <notificationGroup displayType="BALLOON"
                            bundle="zigbrains.Bundle"
@@ -65,7 +69,7 @@
                 name="Zig ZLS"
                 factoryClass="com.falsepattern.zigbrains.zig.lsp.ZLSLanguageServerFactory">
             <description><![CDATA[
-The <a href="https://github.com/Zigtools/ZLS">Zig Language Server</a>, for ZigBrains
+The <a href="https://github.com/Zigtools/ZLS">Zig Language Server</a>, via ZigBrains
 ]]>
             </description>
         </server>
@@ -181,6 +185,7 @@ The <a href="https://github.com/Zigtools/ZLS">Zig Language Server</a>, for ZigBr
     </actions>
     <!-- endregion Project -->
 
+    <depends optional="true" config-file="zigbrains-zig-cidr-workspace.xml">com.intellij.cidr.base</depends>
     <depends optional="true" config-file="zigbrains-zig-debugger.xml">com.intellij.modules.cidr.debugger</depends>
     <depends optional="true" config-file="zigbrains-zig-clion.xml">com.intellij.modules.clion</depends>
 
