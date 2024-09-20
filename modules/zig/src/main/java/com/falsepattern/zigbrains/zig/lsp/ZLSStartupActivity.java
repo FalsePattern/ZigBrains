@@ -19,9 +19,9 @@ package com.falsepattern.zigbrains.zig.lsp;
 import com.falsepattern.zigbrains.ZigBundle;
 import com.falsepattern.zigbrains.common.util.ApplicationUtil;
 import com.falsepattern.zigbrains.zig.settings.ZLSProjectSettingsService;
+import com.falsepattern.zigbrains.zig.util.JBInternalPluginManagerConfigurable;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.plugins.PluginManager;
-import com.intellij.ide.plugins.PluginManagerConfigurable;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationAction;
 import com.intellij.notification.NotificationType;
@@ -69,17 +69,17 @@ public class ZLSStartupActivity implements ProjectActivity {
                         ZigBundle.message("notification.nativedebug.text"),
                         NotificationType.INFORMATION
                 );
-                notif.addAction(new NotificationAction(ZigBundle.message("notification.nativedebug.market")) {
-                    @Override
-                    public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
-                        val configurable = new PluginManagerConfigurable();
-                        ShowSettingsUtil.getInstance().editConfigurable((Project)null,
-                                                                        configurable,
-                                                                        () -> {
-                                                                            configurable.openMarketplaceTab("/vendor:\"JetBrains s.r.o.\" /tag:Debugging \"Native Debugging Support\"");
-                                                                        });
-                    }
-                });
+                if (JBInternalPluginManagerConfigurable.successful) {
+                    notif.addAction(new NotificationAction(ZigBundle.message("notification.nativedebug.market")) {
+                        @Override
+                        public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
+                            val configurable = new JBInternalPluginManagerConfigurable();
+                            ShowSettingsUtil.getInstance().editConfigurable((Project) null, configurable.instance, () -> {
+                                configurable.openMarketplaceTab("/vendor:\"JetBrains s.r.o.\" /tag:Debugging \"Native Debugging Support\"");
+                            });
+                        }
+                    });
+                }
                 notif.addAction(new NotificationAction(ZigBundle.message("notification.nativedebug.browser")) {
                     @Override
                     public void actionPerformed(@NotNull AnActionEvent e, @NotNull Notification notification) {
