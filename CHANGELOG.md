@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - Safer standard library path resolution
+
 ## [17.1.0]
 
 ### Fixed

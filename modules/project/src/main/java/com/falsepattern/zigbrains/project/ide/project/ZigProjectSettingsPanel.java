@@ -147,7 +147,7 @@ public class ZigProjectSettingsPanel implements MyDisposable {
                     toolchainVersion.setForeground(JBColor.foreground());
 
                     if (!stdFieldOverride.isSelected())
-                        pathToStdField.setText(StringUtil.orEmpty(stdPath));
+                        pathToStdField.setText(StringUtil.orEmpty(stdPath.toString()));
                 });
     }
 }
