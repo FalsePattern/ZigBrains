@@ -17,6 +17,23 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [17.3.0]
+
+### Added
+
+- Zig
+  - Structure view
+
+### Changed
+
+- LSP
+  - Updated to LSP4IJ 0.6.0
+
+### Fixed
+
+- Project
+  - CLion will no longer prompt you to import zig projects as CMake
+
 ## [17.2.0]
 
 ### Added
