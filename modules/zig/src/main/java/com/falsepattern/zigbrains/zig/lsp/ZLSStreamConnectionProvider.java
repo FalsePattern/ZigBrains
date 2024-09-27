@@ -4,6 +4,7 @@ import com.falsepattern.zigbrains.common.util.StringUtil;
 import com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider;
 import com.falsepattern.zigbrains.zig.settings.ZLSProjectSettingsService;
 import com.google.gson.Gson;
+import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -13,6 +14,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
 import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider;
 import lombok.val;
 
@@ -27,19 +29,22 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-public class ZLSStreamConnectionProvider extends ProcessStreamConnectionProvider {
+public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvider {
     private static final Logger LOG = Logger.getInstance(ZLSStreamConnectionProvider.class);
     public ZLSStreamConnectionProvider(Project project) {
         val command = getCommand(project);
         val projectDir = ProjectUtil.guessProjectDir(project);
-        if (projectDir != null) {
-            setWorkingDirectory(projectDir.getPath());
-        }
+        GeneralCommandLine commandLine;
         try {
-            setCommands(command.get());
+            commandLine = new GeneralCommandLine(command.get());
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+
+        if (projectDir != null) {
+            commandLine.setWorkDirectory(projectDir.getPath());
+        }
+        setCommandLine(commandLine);
     }
 
     private static List<String> doGetCommand(Project project) {
