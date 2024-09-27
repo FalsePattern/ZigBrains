@@ -319,9 +319,9 @@ project(":plugin") {
         }
         pluginVerification {
             ides {
-                ide(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion)
-                ide(IntelliJPlatformType.IntellijIdeaUltimate, ideaVersion)
-                ide(IntelliJPlatformType.CLion, clionVersion)
+                ide(IntelliJPlatformType.IntellijIdeaCommunity, ideaVersion, useInstaller = false)
+                ide(IntelliJPlatformType.IntellijIdeaUltimate, ideaVersion, useInstaller = false)
+                ide(IntelliJPlatformType.CLion, clionVersion, useInstaller = false)
             }
         }
     }
