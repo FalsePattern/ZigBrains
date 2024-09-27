@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - CLion will no longer prompt you to import zig projects as CMake
+
 ## [17.2.0]
 
 ### Added

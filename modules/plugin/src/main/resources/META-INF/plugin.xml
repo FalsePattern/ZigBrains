@@ -181,6 +181,7 @@ The <a href="https://github.com/Zigtools/ZLS">Zig Language Server</a>, for ZigBr
     </actions>
     <!-- endregion Project -->
 
+    <depends optional="true" config-file="zigbrains-zig-cidr-workspace.xml">com.intellij.cidr.base</depends>
     <depends optional="true" config-file="zigbrains-zig-debugger.xml">com.intellij.modules.cidr.debugger</depends>
     <depends optional="true" config-file="zigbrains-zig-clion.xml">com.intellij.modules.clion</depends>
 

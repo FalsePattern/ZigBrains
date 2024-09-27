@@ -98,7 +98,7 @@ allprojects {
     dependencies {
         compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")
-        if (path !in listOf(":", ":plugin", ":debugger")) {
+        if (path !in listOf(":", ":plugin", ":debugger", ":cidr")) {
             intellijPlatform {
                 intellijIdeaCommunity(ideaVersion, useInstaller = false)
             }
@@ -217,6 +217,19 @@ project(":project") {
     }
 }
 
+project(":cidr") {
+    dependencies {
+        implementation(project(":common"))
+        implementation(project(":project"))
+        intellijPlatform {
+            clion(clionVersion, useInstaller = false)
+            for (p in clionPlugins) {
+                bundledPlugin(p)
+            }
+        }
+    }
+}
+
 project(":debugger") {
     dependencies {
         implementation(project(":zig"))
@@ -273,6 +286,7 @@ project(":plugin") {
         implementation(project(":zig"))
         implementation(project(":project"))
         implementation(project(":zon"))
+        implementation(project(":cidr"))
         implementation(project(":debugger"))
         intellijPlatform {
             zipSigner()
