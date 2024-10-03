@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- LSP
+  - Updated to LSP4IJ 0.6.1-20241003-152535
+
 ## [17.3.0]
 
 ### Added
