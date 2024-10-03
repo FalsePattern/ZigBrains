@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - Structure view
+
 ### Changed
 
 - LSP
