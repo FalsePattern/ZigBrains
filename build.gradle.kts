@@ -56,9 +56,6 @@ tasks {
     wrapper {
         gradleVersion = properties("gradleVersion").get()
     }
-    prepareJarSearchableOptions {
-        enabled = false
-    }
 }
 
 fun pluginVersion(): Provider<String> {
@@ -181,6 +178,7 @@ allprojects {
     }
     intellijPlatform {
         instrumentCode = false
+        buildSearchableOptions = false
     }
 }
 
