@@ -202,6 +202,7 @@ project(":zig") {
         lsp4ijDep()
         intellijPlatform {
             plugin(lsp4ijPluginString)
+            bundledPlugin("org.intellij.intelliLang")
         }
     }
     tasks {
