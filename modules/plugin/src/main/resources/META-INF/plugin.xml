@@ -51,6 +51,9 @@
                            bundle="zigbrains.Bundle"
                            key="notif-zls-error"
                            id="ZigBrains.ZLS"/>
+
+        <lang.elementManipulator forClass="com.falsepattern.zigbrains.zig.psi.ZigStringLiteral"
+                                 implementationClass="com.falsepattern.zigbrains.zig.psi.ZigStringElementManipulator"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
@@ -181,6 +184,7 @@ The <a href="https://github.com/Zigtools/ZLS">Zig Language Server</a>, via ZigBr
     <depends optional="true" config-file="zigbrains-zig-cidr-workspace.xml">com.intellij.cidr.base</depends>
     <depends optional="true" config-file="zigbrains-zig-debugger.xml">com.intellij.modules.cidr.debugger</depends>
     <depends optional="true" config-file="zigbrains-zig-clion.xml">com.intellij.modules.clion</depends>
+    <depends optional="true" config-file="zigbrains-zig-intellilang.xml">org.intellij.intelliLang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <notificationGroup displayType="BALLOON"

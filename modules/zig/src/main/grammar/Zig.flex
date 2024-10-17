@@ -96,7 +96,6 @@ string_char= {char_escape}
 CONTAINER_DOC_COMMENT=("//!" [^\n]* [ \n]*)+
 DOC_COMMENT=("///" [^\n]* [ \n]*)+
 LINE_COMMENT="//" [^\n]* | "////" [^\n]*
-line_string=("\\\\" [^\n]* [ \n]*)+
 
 FLOAT= "0x" {hex_int} "." {hex_int} ([pP] [-+]? {dec_int})?
      |      {dec_int} "." {dec_int} ([eE] [-+]? {dec_int})?
@@ -112,6 +111,7 @@ IDENTIFIER_PLAIN=[A-Za-z_][A-Za-z0-9_]*
 BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 %state STR_LIT
+%state STR_MULT_LINE
 %state CHAR_LIT
 
 %state ID_QUOT
@@ -261,7 +261,9 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <YYINITIAL>      "\""                     { yybegin(STR_LIT); }
 <STR_LIT>        {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
 <STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_QUOT); }
-<YYINITIAL>      {line_string}+           { return STRING_LITERAL_MULTI; }
+<YYINITIAL>      "\\\\"                   { yypushback(2); yybegin(STR_MULT_LINE); }
+<STR_MULT_LINE>  [^\n]* [ \n]* "\\\\"     { }
+<STR_MULT_LINE>  [^\n]* \n                { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
 
 <YYINITIAL>      {IDENTIFIER_PLAIN}       { return IDENTIFIER; }
 <YYINITIAL>      "@\""                    { yybegin(ID_QUOT); }

@@ -34,40 +34,48 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
     public ZLSStreamConnectionProvider(Project project) {
         val command = getCommand(project);
         val projectDir = ProjectUtil.guessProjectDir(project);
-        GeneralCommandLine commandLine;
+        GeneralCommandLine commandLine = null;
         try {
-            commandLine = new GeneralCommandLine(command.get());
+            val cmd = command.get();
+            if (cmd != null) {
+                commandLine = new GeneralCommandLine(command.get());
+            }
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
 
-        if (projectDir != null) {
+        if (commandLine != null && projectDir != null) {
             commandLine.setWorkDirectory(projectDir.getPath());
         }
         setCommandLine(commandLine);
     }
 
-    private static List<String> doGetCommand(Project project) {
+    public static List<String> doGetCommand(Project project, boolean warn) {
         var svc = ZLSProjectSettingsService.getInstance(project);
         val state = svc.getState();
         var zlsPath = state.zlsPath;
         if (StringUtil.isEmpty(zlsPath)) {
             zlsPath = com.falsepattern.zigbrains.common.util.FileUtil.findExecutableOnPATH("zls").map(Path::toString).orElse(null);
             if (zlsPath == null) {
-                Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Could not detect ZLS binary! Please configure it!",
-                                                          NotificationType.ERROR));
+                if (warn) {
+                    Notifications.Bus.notify(
+                            new Notification("ZigBrains.ZLS", "Could not detect ZLS binary! Please configure it!",
+                                             NotificationType.ERROR));
+                }
                 return null;
             }
             state.setZlsPath(zlsPath);
         }
-        if (!validatePath("ZLS Binary", zlsPath, false)) {
+        if (!validatePath("ZLS Binary", zlsPath, false, warn)) {
             return null;
         }
         var configPath = state.zlsConfigPath;
         boolean configOK = true;
-        if (!configPath.isBlank() && !validatePath("ZLS Config", configPath, false)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Using default config path.",
-                                                      NotificationType.INFORMATION));
+        if (!configPath.isBlank() && !validatePath("ZLS Config", configPath, false, warn)) {
+            if (warn) {
+                Notifications.Bus.notify(
+                        new Notification("ZigBrains.ZLS", "Using default config path.", NotificationType.INFORMATION));
+            }
             configPath = null;
         }
         if (configPath == null || configPath.isBlank()) {
@@ -87,8 +95,11 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
                 }
                 configPath = tmpFile.toAbsolutePath().toString();
             } catch (IOException e) {
-                Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "Failed to create automatic zls config file",
-                                                          NotificationType.WARNING));
+                if (warn) {
+                    Notifications.Bus.notify(
+                            new Notification("ZigBrains.ZLS", "Failed to create automatic zls config file",
+                                             NotificationType.WARNING));
+                }
                 LOG.warn(e);
                 configOK = false;
             }
@@ -121,7 +132,7 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
         val future = new CompletableFuture<List<String>>();
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
-                future.complete(doGetCommand(project));
+                future.complete(doGetCommand(project, true));
             } catch (Throwable t) {
                 future.completeExceptionally(t);
             }
@@ -129,7 +140,7 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
         return future;
     }
 
-    private static boolean validatePath(String name, String pathTxt, boolean dir) {
+    private static boolean validatePath(String name, String pathTxt, boolean dir, boolean warn) {
         if (pathTxt == null || pathTxt.isBlank()) {
             return false;
         }
@@ -137,23 +148,29 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
         try {
             path = Path.of(pathTxt);
         } catch (InvalidPathException e) {
-            Notifications.Bus.notify(
-                    new Notification("ZigBrains.ZLS", "No " + name, "Invalid " + name + " at path \"" + pathTxt + "\"",
-                                     NotificationType.ERROR));
+            if (warn) {
+                Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
+                                                          "Invalid " + name + " at path \"" + pathTxt + "\"",
+                                                          NotificationType.ERROR));
+            }
             return false;
         }
         if (!Files.exists(path)) {
-            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
-                                                      "The " + name + " at \"" + pathTxt + "\" doesn't exist!",
-                                                      NotificationType.ERROR));
+            if (warn) {
+                Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
+                                                          "The " + name + " at \"" + pathTxt + "\" doesn't exist!",
+                                                          NotificationType.ERROR));
+            }
             return false;
         }
         if (Files.isDirectory(path) != dir) {
-            Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
-                                                      "The " + name + " at \"" + pathTxt + "\" is a " +
-                                                      (Files.isDirectory(path) ? "directory" : "file") +
-                                                      ", expected a " + (dir ? "directory" : "file"),
-                                                      NotificationType.ERROR));
+            if (warn) {
+                Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
+                                                          "The " + name + " at \"" + pathTxt + "\" is a " +
+                                                          (Files.isDirectory(path) ? "directory" : "file") +
+                                                          ", expected a " + (dir ? "directory" : "file"),
+                                                          NotificationType.ERROR));
+            }
             return false;
         }
         return true;
