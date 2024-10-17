@@ -17,6 +17,18 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [18.1.0]
+
+### Added
+
+- Zig
+  - Basic language injections in strings
+
+### Fixed
+
+- LSP
+  - No more error spam when zig or zls binary is missing.
+
 ## [18.0.0]
 
 ### Added
