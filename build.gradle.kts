@@ -40,7 +40,7 @@ val clionVersion = properties("clionVersion").get()
 val clionPlugins = listOf("com.intellij.cidr.base", "com.intellij.clion")
 
 val lsp4jVersion = "0.21.1"
-val lsp4ijVersion = "0.6.1-20241003-152535"
+val lsp4ijVersion = "0.7.0"
 
 val lsp4ijNightly = lsp4ijVersion.contains("-")
 val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
