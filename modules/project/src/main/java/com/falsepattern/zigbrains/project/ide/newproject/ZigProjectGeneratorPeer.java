@@ -16,20 +16,33 @@
 
 package com.falsepattern.zigbrains.project.ide.newproject;
 
+import com.intellij.ide.util.projectWizard.SettingsStep;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
+import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.platform.GeneratorPeerImpl;
+import com.intellij.platform.ProjectGeneratorPeer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JComponent;
 
 import static com.falsepattern.zigbrains.common.util.dsl.JavaPanel.newPanel;
 
-public class ZigProjectGeneratorPeer extends GeneratorPeerImpl<ZigProjectConfigurationData> {
+public class ZigProjectGeneratorPeer implements ProjectGeneratorPeer<ZigProjectConfigurationData> {
     private final ZigNewProjectPanel newProjectPanel;
+    private volatile JComponent myComponent;
 
     public ZigProjectGeneratorPeer(boolean handleGit) {
         newProjectPanel = new ZigNewProjectPanel(handleGit);
+    }
+
+    @Override
+    public @NotNull JComponent getComponent(@NotNull TextFieldWithBrowseButton myLocationField, @NotNull Runnable checkValid) {
+        return createComponent();
+    }
+
+    @Override
+    public void buildUI(@NotNull SettingsStep settingsStep) {
     }
 
     @Override
@@ -38,12 +51,24 @@ public class ZigProjectGeneratorPeer extends GeneratorPeerImpl<ZigProjectConfigu
     }
 
     @Override
-    public @NotNull JComponent getComponent(@NotNull TextFieldWithBrowseButton myLocationField, @NotNull Runnable checkValid) {
-        return createComponent();
+    public @Nullable ValidationInfo validate() {
+        return null;
+    }
+
+    @Override
+    public boolean isBackgroundJobRunning() {
+        return false;
     }
 
     public @NotNull JComponent createComponent() {
-        return newPanel(newProjectPanel::attachPanelTo);
+        if (myComponent == null) {
+            synchronized (this) {
+                if (myComponent == null) {
+                    return myComponent = newPanel(newProjectPanel::attachPanelTo);
+                }
+            }
+        }
+        return myComponent;
     }
 
     public void dispose() {
