@@ -197,7 +197,6 @@ Statement
   | KEYWORD_ERRDEFER Payload? BlockExprStatement
   | IfStatement
   | LabeledStatement
-  | SwitchExpr
   | VarDeclExprStatement
 
 ComptimeStatement
@@ -211,7 +210,7 @@ private ZB_IfStatement_Body
 ::= BlockExpr ( KEYWORD_ELSE Payload? Statement )?
   | AssignExpr ( SEMICOLON | KEYWORD_ELSE Payload? Statement )
 
-LabeledStatement ::= BlockLabel? (Block | LoopStatement)
+LabeledStatement ::= BlockLabel? (Block | LoopStatement | SwitchExpr)
 
 LoopStatement ::= KEYWORD_INLINE? (ForStatement | WhileStatement)
 
@@ -273,7 +272,7 @@ PrimaryExpr
   | KEYWORD_BREAK BreakLabel? Expr?
   | KEYWORD_COMPTIME Expr
   | KEYWORD_NOSUSPEND Expr
-  | KEYWORD_CONTINUE BreakLabel?
+  | KEYWORD_CONTINUE BreakLabel? Expr?
   | KEYWORD_RESUME Expr
   | KEYWORD_RETURN Expr?
   | BlockLabel? LoopExpr
@@ -336,7 +335,6 @@ PrimaryTypeExpr
   | KEYWORD_ANYFRAME
   | KEYWORD_UNREACHABLE
   | StringLiteral
-  | SwitchExpr
 
 ContainerDecl ::= (KEYWORD_EXTERN | KEYWORD_PACKED)? ContainerDeclAuto
 
@@ -349,6 +347,7 @@ IfTypeExpr ::= IfPrefix TypeExpr (KEYWORD_ELSE Payload? TypeExpr)?
 LabeledTypeExpr
 ::= BlockLabel Block
   | BlockLabel? LoopTypeExpr
+  | BlockLabel? SwitchExpr
 
 LoopTypeExpr ::= KEYWORD_INLINE? (ForTypeExpr | WhileTypeExpr)
 

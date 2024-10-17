@@ -17,10 +17,17 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [18.0.0]
+
+### Added
+
+- Zig
+  - Labeled switch statements
+
 ### Changed
 
 - LSP
-  - Updated to LSP4IJ 0.6.1-20241003-152535
+  - Updated to LSP4IJ 0.7.0
 
 ## [17.3.0]
 
