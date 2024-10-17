@@ -74,7 +74,7 @@ public class ZigModuleBuilder extends ModuleBuilder {
 
         @Override
         public JComponent getComponent() {
-            return withBorderIfNeeded(peer.getComponent());
+            return withBorderIfNeeded(peer.createComponent());
         }
 
         @Override
