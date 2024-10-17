@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.project.ide.newproject;
 
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.platform.GeneratorPeerImpl;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,11 @@ public class ZigProjectGeneratorPeer extends GeneratorPeerImpl<ZigProjectConfigu
     }
 
     @Override
-    public @NotNull JComponent getComponent() {
+    public @NotNull JComponent getComponent(@NotNull TextFieldWithBrowseButton myLocationField, @NotNull Runnable checkValid) {
+        return createComponent();
+    }
+
+    public @NotNull JComponent createComponent() {
         return newPanel(newProjectPanel::attachPanelTo);
     }
 
