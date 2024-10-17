@@ -57,7 +57,7 @@ public class ZigNewProjectWizard implements LanguageNewProjectWizard {
         @Override
         public void setupUI(@NotNull Panel builder) {
             builder.row((JLabel) null, (r) -> {
-                r.cell(peer.getComponent())
+                r.cell(peer.createComponent())
                  .align(AlignX.FILL);
                 return null;
             });
