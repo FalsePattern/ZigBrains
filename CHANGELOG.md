@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- LSP
+  - No more error spam when zig or zls binary is missing.
+
 ## [18.0.0]
 
 ### Added
