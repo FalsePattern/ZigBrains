@@ -93,9 +93,9 @@ char_char= {mb_utf8_literal}
 string_char= {char_escape}
            | [^\\\"\n]
 
-CONTAINER_DOC_COMMENT=("//!" [^\n]* [ \n]*)+
-DOC_COMMENT=("///" [^\n]* [ \n]*)+
-LINE_COMMENT="//" [^\n]* | "////" [^\n]*
+all_nl_wrap=[^\n]* [ \n]*
+all_nl_nowrap=[^\n]* \n
+
 
 FLOAT= "0x" {hex_int} "." {hex_int} ([pP] [-+]? {dec_int})?
      |      {dec_int} "." {dec_int} ([eE] [-+]? {dec_int})?
@@ -124,14 +124,17 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 //Comments
 
-<YYINITIAL>      "//!"                    { yypushback(3); yybegin(CDOC_CMT); }
-<CDOC_CMT>       {CONTAINER_DOC_COMMENT}  { yybegin(YYINITIAL); return CONTAINER_DOC_COMMENT; }
+<YYINITIAL>      "//!"                    { yybegin(CDOC_CMT); }
+<CDOC_CMT>       {all_nl_wrap} "//!"      { }
+<CDOC_CMT>       {all_nl_nowrap}          { yybegin(YYINITIAL); return CONTAINER_DOC_COMMENT; }
 
-<YYINITIAL>      "///"                    { yypushback(3); yybegin(DOC_CMT); }
-<DOC_CMT>        {DOC_COMMENT}            { yybegin(YYINITIAL); return DOC_COMMENT; }
+<YYINITIAL>      "///"                    { yybegin(DOC_CMT); }
+<DOC_CMT>        {all_nl_wrap} "///"      { }
+<DOC_CMT>        {all_nl_nowrap}          { yybegin(YYINITIAL); return DOC_COMMENT; }
 
-<YYINITIAL>      "//"                     { yypushback(2); yybegin(LINE_CMT); }
-<LINE_CMT>       {LINE_COMMENT}           { yybegin(YYINITIAL); return LINE_COMMENT; }
+<YYINITIAL>      "//"                     { yybegin(LINE_CMT); }
+<LINE_CMT>       {all_nl_wrap} "//"       { }
+<LINE_CMT>       {all_nl_nowrap}          { yybegin(YYINITIAL); return LINE_COMMENT; }
 
 //Symbols
 <YYINITIAL>      "&"                      { return AMPERSAND; }
@@ -261,9 +264,9 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <YYINITIAL>      "\""                     { yybegin(STR_LIT); }
 <STR_LIT>        {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
 <STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_QUOT); }
-<YYINITIAL>      "\\\\"                   { yypushback(2); yybegin(STR_MULT_LINE); }
-<STR_MULT_LINE>  [^\n]* [ \n]* "\\\\"     { }
-<STR_MULT_LINE>  [^\n]* \n                { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
+<YYINITIAL>      "\\\\"                   { yybegin(STR_MULT_LINE); }
+<STR_MULT_LINE>  {all_nl_wrap} "\\\\"     { }
+<STR_MULT_LINE>  {all_nl_nowrap}          { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
 
 <YYINITIAL>      {IDENTIFIER_PLAIN}       { return IDENTIFIER; }
 <YYINITIAL>      "@\""                    { yybegin(ID_QUOT); }
