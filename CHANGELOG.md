@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Runner
+  - The process execution pipeline is now fully asynchronous
+- Debugger
+  - Zig compilation will no longer cause random IDE freezes
+
 ## [18.1.0]
 
 ### Added
