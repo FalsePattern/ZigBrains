@@ -1,6 +1,6 @@
 package com.falsepattern.zigbrains.zig.psi;
 
-import com.falsepattern.zigbrains.zig.util.MultiLineUtil;
+import com.falsepattern.zigbrains.zig.util.PsiTextUtil;
 import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.lang.injection.general.Injection;
@@ -12,7 +12,6 @@ import com.intellij.psi.PsiLanguageInjectionHost;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ZigLanguageInjectionPerformer implements LanguageInjectionPerformer {
@@ -34,11 +33,11 @@ public class ZigLanguageInjectionPerformer implements LanguageInjectionPerformer
         } else if (host instanceof PsiComment comment) {
             val tt = comment.getTokenType();
             if (tt == ZigTypes.LINE_COMMENT) {
-                ranges = MultiLineUtil.getMultiLineContent(comment.getText(), "//");
+                ranges = PsiTextUtil.getMultiLineContent(comment.getText(), "//");
             } else if (tt == ZigTypes.DOC_COMMENT) {
-                ranges = MultiLineUtil.getMultiLineContent(comment.getText(), "///");
+                ranges = PsiTextUtil.getMultiLineContent(comment.getText(), "///");
             } else if (tt == ZigTypes.CONTAINER_DOC_COMMENT) {
-                ranges = MultiLineUtil.getMultiLineContent(comment.getText(), "//!");
+                ranges = PsiTextUtil.getMultiLineContent(comment.getText(), "//!");
             } else {
                 return false;
             }

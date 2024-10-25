@@ -8,12 +8,13 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.LiteralTextEscaper;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.impl.source.tree.LeafElement;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public interface ZigStringLiteralMixin extends PsiLanguageInjectionHost {
     boolean isMultiLine();
-    List<TextRange> getContentRanges();
-    List<Pair<TextRange, String>> getDecodeReplacements(@NotNull CharSequence input);
+    @NotNull List<TextRange> getContentRanges();
+    @NotNull List<Pair<TextRange, String>> getDecodeReplacements(@NotNull CharSequence input);
 }

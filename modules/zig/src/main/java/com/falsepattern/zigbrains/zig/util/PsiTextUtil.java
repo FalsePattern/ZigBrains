@@ -2,12 +2,19 @@ package com.falsepattern.zigbrains.zig.util;
 
 import com.intellij.openapi.util.TextRange;
 import lombok.val;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiLineUtil {
-    public static List<TextRange> getMultiLineContent(String text, String startMark) {
+public class PsiTextUtil {
+    public static @NotNull TextRange getTextRangeBounds(@NotNull List<TextRange> contentRanges) {
+        if (contentRanges.isEmpty()) {
+            return TextRange.EMPTY_RANGE;
+        }
+        return TextRange.create(contentRanges.getFirst().getStartOffset(), contentRanges.getLast().getEndOffset());
+    }
+    public static @NotNull List<TextRange> getMultiLineContent(@NotNull String text, @NotNull String startMark) {
         val result = new ArrayList<TextRange>();
         int stringStart = 0;
         boolean inBody = false;

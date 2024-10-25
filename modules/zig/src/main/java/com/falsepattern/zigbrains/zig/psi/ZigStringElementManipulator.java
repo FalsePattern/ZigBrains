@@ -1,7 +1,7 @@
 package com.falsepattern.zigbrains.zig.psi;
 
 import com.falsepattern.zigbrains.zig.ZigFileType;
-import com.falsepattern.zigbrains.zig.util.PsiUtil;
+import com.falsepattern.zigbrains.zig.util.PsiTextUtil;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.AbstractElementManipulator;
@@ -12,21 +12,16 @@ import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class ZigStringElementManipulator extends AbstractElementManipulator<ZigStringLiteral> {
-
-
     @Override
     public @Nullable ZigStringLiteral handleContentChange(@NotNull ZigStringLiteral element, @NotNull TextRange range, String newContent)
             throws IncorrectOperationException {
         assert (new TextRange(0, element.getTextLength())).contains(range);
         val originalContext = element.getText();
-        val isMulti = element.getStringLiteralMulti() != null;
+        val isMulti = element.isMultiLine();
         val elementRange = getRangeInElement(element);
         var replacement = originalContext.substring(elementRange.getStartOffset(),
                                                     range.getStartOffset()) +
@@ -36,12 +31,7 @@ public class ZigStringElementManipulator extends AbstractElementManipulator<ZigS
         val psiFileFactory = PsiFileFactory.getInstance(element.getProject());
         if (isMulti) {
             val column = StringUtil.offsetToLineColumn(element.getContainingFile().getText(), element.getTextOffset()).column;
-            val pfxB = new StringBuilder(column + 2);
-            for (int i = 0; i < column; i++) {
-                pfxB.append(' ');
-            }
-            pfxB.append("\\\\");
-            val pfx = pfxB.toString();
+            val pfx = " ".repeat(Math.max(0, column)) + "\\\\";
             replacement = Arrays.stream(replacement.split("(\\r\\n|\\r|\\n)")).map(line -> pfx + line).collect(
                     Collectors.joining("\n"));
         } else {
@@ -55,10 +45,7 @@ public class ZigStringElementManipulator extends AbstractElementManipulator<ZigS
 
     @Override
     public @NotNull TextRange getRangeInElement(@NotNull ZigStringLiteral element) {
-        if (element.getStringLiteralSingle() != null) {
-            return new TextRange(1, element.getTextLength() - 1);
-        }
-        return super.getRangeInElement(element);
+        return PsiTextUtil.getTextRangeBounds(element.getContentRanges());
     }
 
     @SneakyThrows

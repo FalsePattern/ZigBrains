@@ -1,8 +1,7 @@
 package com.falsepattern.zigbrains.zig.psi.impl.mixins;
 
-import com.falsepattern.zigbrains.zig.psi.ZigStringElementManipulator;
 import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral;
-import com.falsepattern.zigbrains.zig.util.MultiLineUtil;
+import com.falsepattern.zigbrains.zig.util.PsiTextUtil;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.Pair;
@@ -36,7 +35,7 @@ public abstract class ZigStringLiteralMixinImpl extends ASTWrapperPsiElement imp
     }
 
     @Override
-    public List<Pair<TextRange, String>> getDecodeReplacements(@NotNull CharSequence input) {
+    public @NotNull List<Pair<TextRange, String>> getDecodeReplacements(@NotNull CharSequence input) {
         if (isMultiLine())
             return List.of();
 
@@ -54,11 +53,11 @@ public abstract class ZigStringLiteralMixinImpl extends ASTWrapperPsiElement imp
     }
 
     @Override
-    public List<TextRange> getContentRanges() {
+    public @NotNull List<TextRange> getContentRanges() {
         if (!isMultiLine()) {
             return List.of(new TextRange(1, getTextLength() - 1));
         } else {
-            return MultiLineUtil.getMultiLineContent(getText(), "\\\\");
+            return PsiTextUtil.getMultiLineContent(getText(), "\\\\");
         }
     }
 
@@ -112,8 +111,7 @@ public abstract class ZigStringLiteralMixinImpl extends ASTWrapperPsiElement imp
                 if (contentRanges == null) {
                     contentRanges = myHost.getContentRanges();
                 }
-                if (contentRanges.isEmpty()) return TextRange.EMPTY_RANGE;
-                return TextRange.create(contentRanges.getFirst().getStartOffset(), contentRanges.getLast().getEndOffset());
+                return PsiTextUtil.getTextRangeBounds(contentRanges);
             }
 
             @Override
