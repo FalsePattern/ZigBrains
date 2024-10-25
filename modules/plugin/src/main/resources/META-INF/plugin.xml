@@ -54,6 +54,8 @@
 
         <lang.elementManipulator forClass="com.falsepattern.zigbrains.zig.psi.ZigStringLiteral"
                                  implementationClass="com.falsepattern.zigbrains.zig.psi.ZigStringElementManipulator"/>
+        <languageInjectionPerformer language="Zig"
+                                    implementationClass="com.falsepattern.zigbrains.zig.psi.ZigLanguageInjectionPerformer"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">

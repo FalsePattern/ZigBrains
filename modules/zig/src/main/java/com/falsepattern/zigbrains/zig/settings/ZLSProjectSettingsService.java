@@ -47,6 +47,8 @@ public final class ZLSProjectSettingsService extends WrappingStateComponent<ZLSS
         modified |= !Objects.equals(myData.buildOnSaveStep, otherData.buildOnSaveStep);
         modified |= myData.highlightGlobalVarDeclarations != otherData.highlightGlobalVarDeclarations;
         modified |= myData.dangerousComptimeExperimentsDoNotEnable != otherData.dangerousComptimeExperimentsDoNotEnable;
+        modified |= myData.inlayHints != otherData.inlayHints;
+        modified |= myData.inlayHintsCompact != otherData.inlayHintsCompact;
         return modified;
     }
 }
