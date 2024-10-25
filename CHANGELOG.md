@@ -22,6 +22,10 @@ Changelog structure reference:
 - Zig
   - Syntax highlighting for escape sequences in strings
 
+- LSP
+  - Option to toggle inlay hints on/off
+  - Compacted error{...} blocks in inlay hints
+
 ### Fixed
 
 - Zig
