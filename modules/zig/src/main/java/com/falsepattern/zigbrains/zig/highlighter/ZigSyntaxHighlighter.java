@@ -83,7 +83,8 @@ public class ZigSyntaxHighlighter extends SyntaxHighlighterBase {
 
     static {
         // @formatter:off
-        addMapping(COMMENT, ZigTypes.LINE_COMMENT, ZigTypes.DOC_COMMENT, ZigTypes.CONTAINER_DOC_COMMENT);
+        addMapping(COMMENT, ZigTypes.LINE_COMMENT);
+        addMapping(COMMENT_DOC, ZigTypes.DOC_COMMENT, ZigTypes.CONTAINER_DOC_COMMENT);
 
         //Keywords
         {
