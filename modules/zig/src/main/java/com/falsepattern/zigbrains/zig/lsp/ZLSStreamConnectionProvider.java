@@ -17,21 +17,29 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider;
 import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider;
 import lombok.val;
+import org.eclipse.lsp4j.InlayHint;
+import org.eclipse.lsp4j.jsonrpc.messages.Message;
+import org.eclipse.lsp4j.jsonrpc.messages.ResponseMessage;
+import org.eclipse.lsp4j.services.LanguageServer;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvider {
     private static final Logger LOG = Logger.getInstance(ZLSStreamConnectionProvider.class);
+    private final Project project;
     public ZLSStreamConnectionProvider(Project project) {
+        this.project = project;
         val command = getCommand(project);
         val projectDir = ProjectUtil.guessProjectDir(project);
         GeneralCommandLine commandLine = null;
@@ -48,6 +56,36 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
             commandLine.setWorkDirectory(projectDir.getPath());
         }
         setCommandLine(commandLine);
+    }
+
+    @Override
+    public void handleMessage(Message message, LanguageServer languageServer, VirtualFile rootUri) {
+        if (ZLSProjectSettingsService.getInstance(project).getState().inlayHintsCompact) {
+            if (message instanceof ResponseMessage resp) {
+                val res = resp.getResult();
+                if (res instanceof Collection<?> c) {
+                    c.forEach(e -> {
+                        if (e instanceof InlayHint ih) {
+                            tryMutateInlayHint(ih);
+                        }
+                    });
+                } else if (res instanceof InlayHint ih) {
+                    tryMutateInlayHint(ih);
+                }
+            }
+        }
+        super.handleMessage(message, languageServer, rootUri);
+    }
+
+    private static final Pattern ERROR_BLOCK = Pattern.compile("error\\{.*?}", Pattern.DOTALL);
+
+
+    private void tryMutateInlayHint(InlayHint inlayHint) {
+        if (inlayHint.getLabel().isLeft()) {
+            val str = inlayHint.getLabel().getLeft();
+            val shortened = ERROR_BLOCK.matcher(str).replaceAll("error{...}");
+            inlayHint.setLabel(shortened);
+        }
     }
 
     public static List<String> doGetCommand(Project project, boolean safe) {

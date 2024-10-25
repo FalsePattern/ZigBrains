@@ -32,8 +32,10 @@ public final class ZLSSettings {
     public @NotNull String buildOnSaveStep;
     public boolean highlightGlobalVarDeclarations;
     public boolean dangerousComptimeExperimentsDoNotEnable;
+    public boolean inlayHints;
+    public boolean inlayHintsCompact;
 
     public ZLSSettings() {
-        this(null, "", false, false, false, "install", false, false);
+        this(null, "", false, false, false, "install", false, false, true, true);
     }
 }
