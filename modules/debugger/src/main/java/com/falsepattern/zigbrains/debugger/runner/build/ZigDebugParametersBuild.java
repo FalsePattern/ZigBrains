@@ -16,8 +16,8 @@
 
 package com.falsepattern.zigbrains.debugger.runner.build;
 
-import com.falsepattern.zigbrains.debugger.Utils;
 import com.falsepattern.zigbrains.debugger.runner.base.PreLaunchAware;
+import com.falsepattern.zigbrains.debugger.runner.base.PreLaunchProcessListener;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstaller;
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase;
 import com.falsepattern.zigbrains.project.execution.build.ProfileStateBuild;
@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.stream.Stream;
 
 public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileStateBuild> implements PreLaunchAware {
@@ -46,9 +45,10 @@ public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileState
 
     }
 
-    private File compileExe() throws ExecutionException, Utils.ProcessException {
+    private File compileExe(PreLaunchProcessListener listener) throws ExecutionException {
         val commandLine = profileState.getCommandLine(toolchain, true);
-        Utils.executeCommandLineWithErrorChecks(commandLine);
+        if (listener.executeCommandLineWithHook(commandLine))
+            return null;
         val cfg = profileState.configuration();
         val workingDir = cfg.getWorkingDirectory().getPath().orElse(null);
         val exePath = profileState.configuration().getExePath().getPath();
@@ -96,8 +96,8 @@ public class ZigDebugParametersBuild extends ZigDebugParametersBase<ProfileState
     }
 
     @Override
-    public void preLaunch() throws Exception {
-        this.executableFile = compileExe();
+    public void preLaunch(PreLaunchProcessListener listener) throws ExecutionException {
+        this.executableFile = compileExe(listener);
     }
 
     @Override
