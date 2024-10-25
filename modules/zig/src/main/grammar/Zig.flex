@@ -90,8 +90,8 @@ char_char= {mb_utf8_literal}
          | {char_escape}
          | {ascii_char_not_nl_slash_squote}
 
-string_char= {char_escape}
-           | [^\\\"\n]
+string_char= \\ .
+           | [^\"\n]
 
 all_nl_wrap=[^\n]* [ \n]*
 all_nl_nowrap=[^\n]* \n

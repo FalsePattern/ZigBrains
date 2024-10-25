@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - Syntax highlighting for escape sequences in strings
+
 ### Fixed
 
 - Zig
