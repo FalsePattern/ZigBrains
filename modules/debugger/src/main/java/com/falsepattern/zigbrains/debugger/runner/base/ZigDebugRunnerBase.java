@@ -33,6 +33,7 @@ import com.intellij.execution.runners.RunContentBuilder;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.xdebugger.XDebugProcess;
 import com.intellij.xdebugger.XDebugProcessStarter;
 import com.intellij.xdebugger.XDebugSession;
@@ -44,65 +45,96 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.concurrency.AsyncPromise;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 public abstract class ZigDebugRunnerBase<ProfileState extends ProfileStateBase<?>> extends ZigProgramRunnerBase<ProfileState> {
     public ZigDebugRunnerBase() {
         super(DefaultDebugExecutor.EXECUTOR_ID);
+    }
+
+    private boolean doExecuteAsyncWithDriver(ProfileState state,
+                                             AbstractZigToolchain toolchain,
+                                             ExecutionEnvironment environment,
+                                             AsyncPromise<@Nullable RunContentDescriptor> runContentDescriptorPromise,
+                                             DebuggerDriverConfiguration debuggerDriver) throws ExecutionException {
+        ZigDebugParametersBase<ProfileState> runParameters = getDebugParameters(state, environment, debuggerDriver, toolchain);
+        if (runParameters == null) {
+            return false;
+        }
+        val console = state.getConsoleBuilder().getConsole();
+        if (runParameters instanceof PreLaunchAware pla) {
+            val listener = new PreLaunchProcessListener(console);
+            pla.preLaunch(listener);
+            if (listener.isBuildFailed()) {
+                val executionResult = new DefaultExecutionResult(console, listener.getProcessHandler());
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    val runContentBuilder = new RunContentBuilder(executionResult, environment);
+                    val runContentDescriptor = runContentBuilder.showRunContent(null);
+                    runContentDescriptorPromise.setResult(runContentDescriptor);
+                });
+                return true;
+            }
+        }
+        ApplicationManager.getApplication().invokeLater(() -> {
+            val debuggerManager = XDebuggerManager.getInstance(environment.getProject());
+            try {
+                val xDebugSession = debuggerManager.startSession(environment, new XDebugProcessStarter() {
+                    @Override
+                    public @NotNull XDebugProcess start(@NotNull XDebugSession session)
+                            throws ExecutionException {
+                        val project = session.getProject();
+                        val textConsoleBuilder = new SharedConsoleBuilder(console);
+                        val debugProcess = new ZigLocalDebugProcess(runParameters, session, textConsoleBuilder);
+                        ProcessTerminatedListener.attach(debugProcess.getProcessHandler(), project);
+                        debugProcess.start();
+                        return debugProcess;
+                    }
+                });
+                runContentDescriptorPromise.setResult(xDebugSession.getRunContentDescriptor());
+            } catch (ExecutionException e) {
+                runContentDescriptorPromise.setError(e);
+            }
+        });
+        return true;
+    }
+
+    private void doExecuteAsyncFetchNextDriver(ProfileState state,
+                                               AbstractZigToolchain toolchain,
+                                               ExecutionEnvironment environment,
+                                               AsyncPromise<@Nullable RunContentDescriptor> runContentDescriptorPromise,
+                                               List<Supplier<DebuggerDriverConfiguration>> drivers) {
+        if (drivers.isEmpty()) {
+            runContentDescriptorPromise.setResult(null);
+            return;
+        }
+
+        val driverSupplier = drivers.removeFirst();
+        val driver = driverSupplier.get();
+        AppExecutorUtil.getAppExecutorService().execute(() -> {
+            try {
+                if (!doExecuteAsyncWithDriver(state, toolchain, environment, runContentDescriptorPromise, driver)) {
+                    ApplicationManager.getApplication().invokeLater(() -> doExecuteAsyncFetchNextDriver(state, toolchain, environment, runContentDescriptorPromise, drivers));
+                }
+            } catch (ExecutionException e) {
+                runContentDescriptorPromise.setError(e);
+            }
+        });
     }
 
     @Override
     protected void doExecuteAsync(ProfileState state,
                                   AbstractZigToolchain toolchain,
                                   ExecutionEnvironment environment,
-                                  AsyncPromise<@Nullable RunContentDescriptor> runContentDescriptorPromise)
-            throws ExecutionException {
+                                  AsyncPromise<@Nullable RunContentDescriptor> runContentDescriptorPromise) {
         val project = environment.getProject();
         val drivers = ZigDebuggerDriverConfigurationProvider.findDebuggerConfigurations(project, false, false)
-                                                              .toList();
+                                                            .collect(Collectors.toCollection(ArrayList::new));
 
-        for (val debuggerDriver: drivers) {
-            if (debuggerDriver == null)
-                continue;
-            ZigDebugParametersBase<ProfileState> runParameters = getDebugParameters(state, environment, debuggerDriver, toolchain);
-            if (runParameters == null) {
-                continue;
-            }
-            val console = state.getConsoleBuilder().getConsole();
-            if (runParameters instanceof PreLaunchAware pla) {
-                val listener = new PreLaunchProcessListener(console);
-                pla.preLaunch(listener);
-                if (listener.isBuildFailed()) {
-                    val executionResult = new DefaultExecutionResult(console, listener.getProcessHandler());
-                    ApplicationManager.getApplication().invokeLater(() -> {
-                        val runContentBuilder = new RunContentBuilder(executionResult, environment);
-                        val runContentDescriptor = runContentBuilder.showRunContent(null);
-                        runContentDescriptorPromise.setResult(runContentDescriptor);
-                    });
-                    return;
-                }
-            }
-            ApplicationManager.getApplication().invokeLater(() -> {
-                val debuggerManager = XDebuggerManager.getInstance(environment.getProject());
-                try {
-                    val xDebugSession = debuggerManager.startSession(environment, new XDebugProcessStarter() {
-                        @Override
-                        public @NotNull XDebugProcess start(@NotNull XDebugSession session)
-                                throws ExecutionException {
-                            val project = session.getProject();
-                            val textConsoleBuilder = new SharedConsoleBuilder(console);
-                            val debugProcess = new ZigLocalDebugProcess(runParameters, session, textConsoleBuilder);
-                            ProcessTerminatedListener.attach(debugProcess.getProcessHandler(), project);
-                            debugProcess.start();
-                            return debugProcess;
-                        }
-                    });
-                    runContentDescriptorPromise.setResult(xDebugSession.getRunContentDescriptor());
-                } catch (ExecutionException e) {
-                    runContentDescriptorPromise.setError(e);
-                }
-            });
-            return;
-        }
-        runContentDescriptorPromise.setResult(null);
+        ApplicationManager.getApplication()
+                          .invokeLater(() -> doExecuteAsyncFetchNextDriver(state, toolchain, environment, runContentDescriptorPromise, drivers));
     }
 
     @Override

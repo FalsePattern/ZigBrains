@@ -28,6 +28,7 @@ Changelog structure reference:
   - The process execution pipeline is now fully asynchronous
 - Debugger
   - Zig compilation will no longer cause random IDE freezes
+  - Debugging with GDB no longer causes random internal IDE warnings
 - LSP
   - Rare error when checking LSP presence
 
