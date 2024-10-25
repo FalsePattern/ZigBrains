@@ -17,12 +17,17 @@ Changelog structure reference:
 
 ## [Unreleased]
 
-## [19.0.0]
+## [19.1.0]
 
 ### Added
 
 - Zig
-  - Basic language injections in strings
+  - Language injections in strings
+  - Syntax highlighting for escape sequences in strings
+
+- LSP
+  - Option to toggle inlay hints on/off
+  - Compacted error{...} blocks in inlay hints
 
 ### Changed
 

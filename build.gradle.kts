@@ -2,6 +2,7 @@ import de.undercouch.gradle.tasks.download.Download
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
@@ -211,10 +212,20 @@ project(":zig") {
             targetOutputDir = file("${grammarKitGenDir}/lexer/${rootPackagePath}/zig/lexer")
         }
 
+        register<GenerateLexerTask>("generateStringLexer") {
+            sourceFile = file("src/main/grammar/ZigString.flex")
+            targetOutputDir = file("${grammarKitGenDir}/lexer/${rootPackagePath}/zig/stringlexer")
+            purgeOldFiles = true
+        }
+
         generateParser {
             sourceFile = file("src/main/grammar/Zig.bnf")
             pathToParser = "${rootPackagePath}/zig/psi/ZigParser.java"
             pathToPsiRoot = "${rootPackagePath}/zig/psi"
+        }
+
+        named("generateGrammars") {
+            dependsOn("generateStringLexer")
         }
     }
 }

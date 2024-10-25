@@ -1,13 +1,17 @@
 package com.falsepattern.zigbrains.zig.psi.impl.mixins;
 
-import com.falsepattern.zigbrains.zig.psi.ZigStringElementManipulator;
 import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral;
+import com.falsepattern.zigbrains.zig.util.PsiTextUtil;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.LiteralTextEscaper;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.impl.source.tree.LeafElement;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import lombok.experimental.UtilityClass;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,6 +29,37 @@ public abstract class ZigStringLiteralMixinImpl extends ASTWrapperPsiElement imp
     }
 
 
+    @Override
+    public boolean isMultiLine() {
+        return getStringLiteralMulti() != null;
+    }
+
+    @Override
+    public @NotNull List<Pair<TextRange, String>> getDecodeReplacements(@NotNull CharSequence input) {
+        if (isMultiLine())
+            return List.of();
+
+        val result = new ArrayList<Pair<TextRange, String>>();
+        for (int i = 0; i + 1 < input.length(); i++) {
+            if (input.charAt(i) == '\\') {
+                val length = Escaper.findEscapementLength(input, i);
+                val charCode = Escaper.toUnicodeChar(input, i, length);
+                val range = TextRange.create(i, Math.min(i + length + 1, input.length()));
+                result.add(Pair.create(range, Character.toString(charCode)));
+                i += range.getLength() - 1;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public @NotNull List<TextRange> getContentRanges() {
+        if (!isMultiLine()) {
+            return List.of(new TextRange(1, getTextLength() - 1));
+        } else {
+            return PsiTextUtil.getMultiLineContent(getText(), "\\\\");
+        }
+    }
 
     @Override
     public PsiLanguageInjectionHost updateText(@NotNull String text) {
@@ -36,121 +71,142 @@ public abstract class ZigStringLiteralMixinImpl extends ASTWrapperPsiElement imp
         return this;
     }
 
+    private static @NotNull String processReplacements(@NotNull CharSequence input,
+                                                       @NotNull List<? extends Pair<TextRange, String>> replacements) throws IndexOutOfBoundsException {
+        StringBuilder result = new StringBuilder();
+        int currentOffset = 0;
+        for (val replacement: replacements) {
+            result.append(input.subSequence(currentOffset, replacement.getFirst().getStartOffset()));
+            result.append(replacement.getSecond());
+            currentOffset = replacement.getFirst().getEndOffset();
+        }
+        result.append(input.subSequence(currentOffset, input.length()));
+        return result.toString();
+    }
+
     @Override
     public @NotNull LiteralTextEscaper<ZigStringLiteral> createLiteralTextEscaper() {
-        if (this.getStringLiteralSingle() != null) {
-            return new LiteralTextEscaper<>(this) {
-                private final List<Integer> inputOffsets = new ArrayList<>();
-                @Override
-                public boolean decode(@NotNull TextRange rangeInsideHost, @NotNull StringBuilder outChars) {
-                    boolean[] noErrors = new boolean[] {true};
-                    outChars.append(ZigStringElementManipulator.unescapeWithLengthMappings(rangeInsideHost.substring(myHost.getText()), inputOffsets, noErrors));
-                    return noErrors[0];
-                }
 
-                @Override
-                public int getOffsetInHost(int offsetInDecoded, @NotNull TextRange rangeInsideHost) {
-                    int size = inputOffsets.size();
-                    int realOffset = 0;
-                    if (size == 0) {
-                        realOffset = rangeInsideHost.getStartOffset() + offsetInDecoded;
-                    } else if (offsetInDecoded >= size) {
-                        realOffset = rangeInsideHost.getStartOffset() + inputOffsets.get(size - 1) +
-                                     (offsetInDecoded - (size - 1));
-                    } else {
-                        realOffset = rangeInsideHost.getStartOffset() + inputOffsets.get(offsetInDecoded);
+        return new LiteralTextEscaper<>(this) {
+            private String text;
+            private List<TextRange> contentRanges;
+            @Override
+            public boolean decode(@NotNull TextRange rangeInsideHost, @NotNull StringBuilder outChars) {
+                text = myHost.getText();
+                val isMultiline = myHost.isMultiLine();
+                contentRanges = myHost.getContentRanges();
+                boolean decoded = false;
+                for (val range: contentRanges) {
+                    val intersection = range.intersection(rangeInsideHost);
+                    if (intersection == null) continue;
+                    decoded = true;
+                    val substring = intersection.subSequence(text);
+                    outChars.append(isMultiline ? substring : processReplacements(substring, myHost.getDecodeReplacements(substring)));
+                }
+                return decoded;
+            }
+
+            @Override
+            public @NotNull TextRange getRelevantTextRange() {
+                if (contentRanges == null) {
+                    contentRanges = myHost.getContentRanges();
+                }
+                return PsiTextUtil.getTextRangeBounds(contentRanges);
+            }
+
+            @Override
+            public int getOffsetInHost(int offsetInDecoded, @NotNull TextRange rangeInsideHost) {
+                int currentOffsetInDecoded = 0;
+
+                TextRange last = null;
+                for (int i = 0; i < contentRanges.size(); i++) {
+                    final TextRange range = rangeInsideHost.intersection(contentRanges.get(i));
+                    if (range == null) continue;
+                    last = range;
+
+                    String curString = range.subSequence(text).toString();
+
+                    final List<Pair<TextRange, String>> replacementsForThisLine = myHost.getDecodeReplacements(curString);
+                    int encodedOffsetInCurrentLine = 0;
+                    for (Pair<TextRange, String> replacement : replacementsForThisLine) {
+                        final int deltaLength = replacement.getFirst().getStartOffset() - encodedOffsetInCurrentLine;
+                        int currentOffsetBeforeReplacement = currentOffsetInDecoded + deltaLength;
+                        if (currentOffsetBeforeReplacement > offsetInDecoded) {
+                            return range.getStartOffset() + encodedOffsetInCurrentLine + (offsetInDecoded - currentOffsetInDecoded);
+                        }
+                        else if (currentOffsetBeforeReplacement == offsetInDecoded && !replacement.getSecond().isEmpty()) {
+                            return range.getStartOffset() + encodedOffsetInCurrentLine + (offsetInDecoded - currentOffsetInDecoded);
+                        }
+                        currentOffsetInDecoded += deltaLength + replacement.getSecond().length();
+                        encodedOffsetInCurrentLine += deltaLength + replacement.getFirst().getLength();
                     }
-                    return realOffset;
-                }
 
-                @Override
-                public @NotNull TextRange getRelevantTextRange() {
-                    return new TextRange(1, myHost.getTextLength() - 1);
-                }
-
-                @Override
-                public boolean isOneLine() {
-                    return true;
-                }
-            };
-        } else if (this.getStringLiteralMulti() != null) {
-            return new LiteralTextEscaper<>(this) {
-                @Override
-                public boolean decode(@NotNull TextRange rangeInsideHost, @NotNull StringBuilder outChars) {
-                    val str = myHost.getText();
-                    boolean inMultiLineString = false;
-                    for (int i = 0; i < str.length(); i++) {
-                        val cI = str.charAt(i);
-                        if (!inMultiLineString) {
-                            if (cI == '\\' &&
-                                i + 1 < str.length() &&
-                                str.charAt(i + 1) == '\\') {
-                                i++;
-                                inMultiLineString = true;
-                            }
-                            continue;
-                        }
-                        if (cI == '\r') {
-                            outChars.append('\n');
-                            if (i + 1 < str.length() && str.charAt(i + 1) == '\n') {
-                                i++;
-                            }
-                            inMultiLineString = false;
-                            continue;
-                        }
-                        if (cI == '\n') {
-                            outChars.append('\n');
-                            inMultiLineString = false;
-                            continue;
-                        }
-                        outChars.append(cI);
+                    final int deltaLength = curString.length() - encodedOffsetInCurrentLine;
+                    if (currentOffsetInDecoded + deltaLength > offsetInDecoded) {
+                        return range.getStartOffset() + encodedOffsetInCurrentLine + (offsetInDecoded - currentOffsetInDecoded);
                     }
-                    return true;
+                    currentOffsetInDecoded += deltaLength;
                 }
 
-                @Override
-                public int getOffsetInHost(int offsetInDecoded, @NotNull TextRange rangeInsideHost) {
-                    val str = myHost.getText();
-                    boolean inMultiLineString = false;
-                    int i = rangeInsideHost.getStartOffset();
-                    for (; i < rangeInsideHost.getEndOffset() && offsetInDecoded > 0; i++) {
-                        val cI = str.charAt(i);
-                        if (!inMultiLineString) {
-                            if (cI == '\\' &&
-                                i + 1 < str.length() &&
-                                str.charAt(i + 1) == '\\') {
-                                i++;
-                                inMultiLineString = true;
-                            }
-                            continue;
+                return last != null ? last.getEndOffset() : -1;
+            }
+
+            @Override
+            public boolean isOneLine() {
+                return !myHost.isMultiLine();
+            }
+        };
+    }
+
+    @UtilityClass
+    private static class Escaper {
+        private static final Int2IntMap ESC_TO_CODE = new Int2IntOpenHashMap();
+        static {
+            ESC_TO_CODE.put('n', '\n');
+            ESC_TO_CODE.put('r', '\r');
+            ESC_TO_CODE.put('t', '\t');
+            ESC_TO_CODE.put('\\', '\\');
+            ESC_TO_CODE.put('"', '"');
+            ESC_TO_CODE.put('\'', '\'');
+        }
+        static int findEscapementLength(@NotNull CharSequence text, int pos) {
+            if (pos + 1 < text.length() && text.charAt(pos) == '\\') {
+                char c = text.charAt(pos + 1);
+                return switch (c) {
+                    case 'x' -> 3;
+                    case 'u' -> {
+                        if (pos + 3 >= text.length() || text.charAt(pos + 2) != '{') {
+                            throw new IllegalArgumentException("Invalid unicode escape sequence");
                         }
-                        if (cI == '\r') {
-                            offsetInDecoded--;
-                            if (i + 1 < str.length() && str.charAt(i + 1) == '\n') {
-                                i++;
-                            }
-                            inMultiLineString = false;
-                            continue;
+                        int digits = 0;
+                        while (pos + 3 + digits < text.length() && text.charAt(pos + 3 + digits) != '}') {
+                            digits++;
                         }
-                        if (cI == '\n') {
-                            offsetInDecoded--;
-                            inMultiLineString = false;
-                            continue;
-                        }
-                        offsetInDecoded--;
+                        yield 3 + digits;
                     }
-                    if (offsetInDecoded != 0)
-                        return -1;
-                    return i;
-                }
+                    default -> 1;
+                };
+            } else {
+                throw new IllegalArgumentException("This is not an escapement start");
+            }
+        }
 
-                @Override
-                public boolean isOneLine() {
-                    return false;
+        static int toUnicodeChar(@NotNull CharSequence text, int pos, int length) {
+            if (length > 1) {
+                val s = switch (text.charAt(pos + 1)) {
+                    case 'x' -> text.subSequence(pos + 2, Math.min(text.length(), pos + length + 1));
+                    case 'u' -> text.subSequence(pos + 3, Math.min(text.length(), pos + length));
+                    default -> throw new AssertionError();
+                };
+                try {
+                    return Integer.parseInt(s.toString(), 16);
+                } catch (NumberFormatException e) {
+                    return 63;
                 }
-            };
-        } else {
-            throw new AssertionError();
+            } else {
+                val c = text.charAt(pos + 1);
+                return ESC_TO_CODE.getOrDefault(c, c);
+            }
         }
     }
 }

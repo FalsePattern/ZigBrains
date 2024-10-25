@@ -109,9 +109,8 @@ public class ZLSSemanticTokensColorsProvider extends DefaultSemanticTokensColors
     @Override
     public @Nullable TextAttributesKey getTextAttributesKey(@NotNull String tokenType, @NotNull List<String> tokenModifiers, @NotNull PsiFile file) {
         val tok = new TokenHelper(tokenModifiers);
-        val res = switch (tokenType) {
+        return switch (tokenType) {
             case Builtin -> BUILTIN;
-            case Comment -> tok.has(Documentation) ? COMMENT_DOC : COMMENT;
             case Enum -> tok.isDecl() ? ENUM_DECL : ENUM_REF;
             case EnumMember -> tok.isDecl() ? ENUM_MEMBER_DECL : ENUM_MEMBER_REF;
             case ErrorTag -> tok.isDecl() ? ERROR_TAG_DECL : ERROR_TAG_REF;
@@ -126,15 +125,14 @@ public class ZLSSemanticTokensColorsProvider extends DefaultSemanticTokensColors
             case Number -> NUMBER;
             case Operator -> OPERATOR;
             case Parameter -> PARAMETER;
-            case String -> STRING;
             case Struct -> tok.isDecl() ? STRUCT_DECL : STRUCT_REF;
             case Type -> tok.isDecl() ? (tok.has(Generic) ? TYPE_DECL_GEN : TYPE_DECL)
                                       : (tok.has(Generic) ? TYPE_REF_GEN : TYPE_REF);
             case TypeParameter -> tok.isDecl() ? TYPE_PARAM_DECL : TYPE_PARAM;
             case Variable -> tok.isDecl() ? (tok.has(Deprecated) ? VARIABLE_DECL_DEPR : VARIABLE_DECL)
                                           : (tok.has(Deprecated) ? VARIABLE_REF_DEPR : VARIABLE_REF);
-            default -> null;
+            case Comment, String -> null;
+            default -> super.getTextAttributesKey(tokenType, tokenModifiers, file);
         };
-        return res != null ? res : super.getTextAttributesKey(tokenType, tokenModifiers, file);
     }
 }
