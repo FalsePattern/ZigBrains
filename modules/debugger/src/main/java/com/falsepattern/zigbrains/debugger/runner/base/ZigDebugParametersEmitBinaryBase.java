@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.debugger.runner.base;
 
-import com.falsepattern.zigbrains.debugger.Utils;
 import com.falsepattern.zigbrains.project.execution.base.ProfileStateBase;
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.execution.ExecutionException;
@@ -37,8 +36,8 @@ public abstract class ZigDebugParametersEmitBinaryBase<ProfileState extends Prof
         this.kind = kind;
     }
 
-    private File compileExe()
-            throws ExecutionException, Utils.ProcessException {
+    private File compileExe(PreLaunchProcessListener listener)
+            throws ExecutionException {
         final File executableFile;
         val commandLine = profileState.getCommandLine(toolchain, true);
         final Path tmpDir;
@@ -49,7 +48,10 @@ public abstract class ZigDebugParametersEmitBinaryBase<ProfileState extends Prof
         }
         val exe = tmpDir.resolve("executable").toFile();
         commandLine.addParameters("-femit-bin=" + exe.getAbsolutePath());
-        Utils.executeCommandLineWithErrorChecks(commandLine);
+
+        if (listener.executeCommandLineWithHook(commandLine))
+            return null;
+
         //Find our binary
         try (val stream = Files.list(tmpDir)){
             executableFile = stream.filter(file -> !file.getFileName().toString().endsWith(".o"))
@@ -65,8 +67,8 @@ public abstract class ZigDebugParametersEmitBinaryBase<ProfileState extends Prof
     }
 
     @Override
-    public void preLaunch() throws Exception {
-        this.executableFile = compileExe();
+    public void preLaunch(PreLaunchProcessListener listener) throws ExecutionException {
+        this.executableFile = compileExe(listener);
     }
 
 }

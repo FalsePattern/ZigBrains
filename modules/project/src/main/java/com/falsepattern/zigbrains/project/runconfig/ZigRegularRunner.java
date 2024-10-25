@@ -25,9 +25,11 @@ import com.intellij.execution.executors.DefaultRunExecutor;
 import com.intellij.execution.runners.DefaultProgramRunnerKt;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
+import com.intellij.openapi.application.ApplicationManager;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.concurrency.AsyncPromise;
 
 public class ZigRegularRunner extends ZigProgramRunnerBase<ProfileStateBase<?>> {
     public ZigRegularRunner() {
@@ -50,8 +52,17 @@ public class ZigRegularRunner extends ZigProgramRunnerBase<ProfileStateBase<?>> 
     }
 
     @Override
-    protected @Nullable RunContentDescriptor doExecute(ProfileStateBase<?> state, AbstractZigToolchain toolchain, ExecutionEnvironment environment)
+    protected void doExecuteAsync(ProfileStateBase<?> state,
+                                            AbstractZigToolchain toolchain,
+                                            ExecutionEnvironment environment,
+                                            AsyncPromise<RunContentDescriptor> runContentDescriptorPromise)
             throws ExecutionException {
-        return DefaultProgramRunnerKt.showRunContent(state.executeCommandLine(state.getCommandLine(toolchain, false), environment), environment);
+        ApplicationManager.getApplication().invokeLater(() -> {
+            try {
+                runContentDescriptorPromise.setResult(DefaultProgramRunnerKt.showRunContent(state.executeCommandLine(state.getCommandLine(toolchain, false), environment), environment));
+            } catch (ExecutionException e) {
+                runContentDescriptorPromise.setError(e);
+            }
+        });
     }
 }

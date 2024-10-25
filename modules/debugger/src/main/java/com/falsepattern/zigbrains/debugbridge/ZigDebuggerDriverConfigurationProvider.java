@@ -31,12 +31,11 @@ public interface ZigDebuggerDriverConfigurationProvider {
     ExtensionPointName<ZigDebuggerDriverConfigurationProvider> EXTENSION_POINT_NAME = ExtensionPointName.create("com.falsepattern.zigbrains.debuggerDriverProvider");
 
     @SuppressWarnings("unchecked")
-    static @NotNull Stream<DebuggerDriverConfiguration> findDebuggerConfigurations(Project project, boolean isElevated, boolean emulateTerminal) {
-        return (Stream<DebuggerDriverConfiguration>) EXTENSION_POINT_NAME.getExtensionList()
-                                                                        .stream()
-                                                                        .map(it -> it.getDebuggerConfiguration(project, isElevated, emulateTerminal))
-                                                                        .filter(Objects::nonNull)
-                                                                        .map((Function<? super Supplier<DebuggerDriverConfiguration>, ?>) Supplier::get);
+    static @NotNull Stream<Supplier<DebuggerDriverConfiguration>> findDebuggerConfigurations(Project project, boolean isElevated, boolean emulateTerminal) {
+        return EXTENSION_POINT_NAME.getExtensionList()
+                                   .stream()
+                                   .map(it -> it.getDebuggerConfiguration(project, isElevated, emulateTerminal))
+                                   .filter(Objects::nonNull);
     }
 
     @Nullable Supplier<DebuggerDriverConfiguration> getDebuggerConfiguration(Project project, boolean isElevated, boolean emulateTerminal);

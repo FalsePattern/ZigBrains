@@ -22,15 +22,20 @@ import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.configurations.RunnerSettings;
+import com.intellij.execution.runners.AsyncProgramRunner;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.execution.runners.GenericProgramRunner;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.concurrency.AsyncPromise;
+import org.jetbrains.concurrency.Promise;
+import org.jetbrains.concurrency.Promises;
 
-public abstract class ZigProgramRunnerBase<ProfileState extends ProfileStateBase<?>> extends GenericProgramRunner<RunnerSettings> {
+public abstract class ZigProgramRunnerBase<ProfileState extends ProfileStateBase<?>> extends
+        AsyncProgramRunner<RunnerSettings> {
     protected final String executorId;
 
     public ZigProgramRunnerBase(String executorId) {
@@ -38,33 +43,36 @@ public abstract class ZigProgramRunnerBase<ProfileState extends ProfileStateBase
     }
 
     @Override
-    protected void execute(@NotNull ExecutionEnvironment environment, @NotNull RunProfileState state) {
-        super.execute(environment, state);
-    }
-
-    @Override
-    protected @Nullable RunContentDescriptor doExecute(@NotNull RunProfileState state$, @NotNull ExecutionEnvironment environment)
-            throws ExecutionException {
+    protected Promise<RunContentDescriptor> execute(@NotNull ExecutionEnvironment environment, @NotNull RunProfileState state$) {
         if (!(state$ instanceof ProfileStateBase<?> state$$)) {
-            return null;
+            return Promises.resolvedPromise();
         }
         val state = castProfileState(state$$);
         if (state == null)
-            return null;
+            return Promises.resolvedPromise();
 
         val toolchain = ZigProjectSettingsService.getInstance(environment.getProject()).getState().getToolchain();
         if (toolchain == null) {
-            return null;
+            return Promises.resolvedPromise();
         }
 
         FileDocumentManager.getInstance().saveAllDocuments();
 
-        return doExecute(state, toolchain, environment);
+        val runContentDescriptorPromise = new AsyncPromise<RunContentDescriptor>();
+        AppExecutorUtil.getAppExecutorService().execute(() -> {
+            try {
+                doExecuteAsync(state, toolchain, environment, runContentDescriptorPromise);
+            } catch (ExecutionException e) {
+                runContentDescriptorPromise.setError(e);
+            }
+        });
+        return runContentDescriptorPromise;
     }
 
     protected abstract @Nullable ProfileState castProfileState(ProfileStateBase<?> state);
 
-    protected abstract @Nullable RunContentDescriptor doExecute(ProfileState state,
-                                                      AbstractZigToolchain toolchain,
-                                                      ExecutionEnvironment environment) throws ExecutionException;
+    protected abstract void doExecuteAsync(ProfileState state,
+                                           AbstractZigToolchain toolchain,
+                                           ExecutionEnvironment environment,
+                                           AsyncPromise<RunContentDescriptor> runContentDescriptorPromise) throws ExecutionException;
 }

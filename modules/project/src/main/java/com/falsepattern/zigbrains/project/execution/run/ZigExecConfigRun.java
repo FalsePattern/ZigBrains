@@ -52,7 +52,7 @@ public class ZigExecConfigRun extends ZigExecConfigBase<ZigExecConfigRun> {
     @Override
     public List<String> buildCommandLineArgs(boolean debug) {
         val result = new ArrayList<String>();
-        result.add("run");
+        result.add(debug ? "build-exe" : "run");
         result.addAll(CLIUtil.colored(colored.value, debug));
         result.add(filePath.getPathOrThrow().toString());
         if (!debug || optimization.forced) {

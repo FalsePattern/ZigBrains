@@ -16,6 +16,8 @@
 
 package com.falsepattern.zigbrains.debugger.runner.base;
 
+import com.intellij.execution.ExecutionException;
+
 public interface PreLaunchAware {
-    void preLaunch() throws Exception;
+    void preLaunch(PreLaunchProcessListener listener) throws ExecutionException;
 }
