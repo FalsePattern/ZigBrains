@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [18.1.0]
+
 ### Added
 
 - Zig
