@@ -47,6 +47,8 @@ public class ZLSSettingsPanel implements Disposable {
     private final JBTextField buildOnSaveStep = new ExtendableTextField();
     private final JBCheckBox highlightGlobalVarDeclarations = new JBCheckBox();
     private final JBCheckBox dangerousComptimeExperimentsDoNotEnable = new JBCheckBox();
+    private final JBCheckBox inlayHints = new JBCheckBox();
+    private final JBCheckBox inlayHintsCompact = new JBCheckBox();
 
     private final JBCheckBox messageTrace = new JBCheckBox();
     private final JBCheckBox debug = new JBCheckBox();
@@ -56,6 +58,8 @@ public class ZLSSettingsPanel implements Disposable {
         buildOnSaveStep.setToolTipText("Select which step should be executed on build-on-save");
         highlightGlobalVarDeclarations.setToolTipText("Whether to highlight global var declarations");
         dangerousComptimeExperimentsDoNotEnable.setToolTipText("Whether to use the comptime interpreter");
+        inlayHints.setToolTipText("Enable inlay hints");
+        inlayHintsCompact.setToolTipText("Replace extremely long error{...} snippets in inlay hints with a placeholder");
     }
 
     private void autodetect(ActionEvent e) {
@@ -80,6 +84,8 @@ public class ZLSSettingsPanel implements Disposable {
                 r.button("Autodetect", $f(this::autodetect));
             });
             p.cell("Config path (leave empty to use built-in config)", zlsConfigPath, AlignX.FILL);
+            p.cell("Inlay hints", inlayHints);
+            p.cell("Compact errors in inlay hint", inlayHintsCompact);
             p.cell("Build on save", buildOnSave);
             p.row("Build on save step", r -> {
                 r.cell(buildOnSaveStep).resizableColumn().align(AlignX.FILL);
@@ -95,13 +101,15 @@ public class ZLSSettingsPanel implements Disposable {
 
     public ZLSSettings getData() {
         return new ZLSSettings(zlsPath.getText(),
-                                zlsConfigPath.getText(),
-                                debug.isSelected(),
-                                messageTrace.isSelected(),
-                                buildOnSave.isSelected(),
-                                buildOnSaveStep.getText(),
-                                highlightGlobalVarDeclarations.isSelected(),
-                                dangerousComptimeExperimentsDoNotEnable.isSelected());
+                               zlsConfigPath.getText(),
+                               debug.isSelected(),
+                               messageTrace.isSelected(),
+                               buildOnSave.isSelected(),
+                               buildOnSaveStep.getText(),
+                               highlightGlobalVarDeclarations.isSelected(),
+                               dangerousComptimeExperimentsDoNotEnable.isSelected(),
+                               inlayHints.isSelected(),
+                               inlayHintsCompact.isSelected());
     }
 
     public void setData(ZLSSettings value) {
@@ -113,6 +121,8 @@ public class ZLSSettingsPanel implements Disposable {
         buildOnSaveStep.setText(value.buildOnSaveStep);
         highlightGlobalVarDeclarations.setSelected(value.highlightGlobalVarDeclarations);
         dangerousComptimeExperimentsDoNotEnable.setSelected(value.dangerousComptimeExperimentsDoNotEnable);
+        inlayHints.setSelected(value.inlayHints);
+        inlayHintsCompact.setSelected(value.inlayHintsCompact);
     }
 
     @Override
