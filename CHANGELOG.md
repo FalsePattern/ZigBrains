@@ -17,12 +17,19 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- Runner
+  - Error output is no longer redirected to standard output
+
 ### Fixed
 
 - Runner
   - The process execution pipeline is now fully asynchronous
 - Debugger
   - Zig compilation will no longer cause random IDE freezes
+- LSP
+  - Rare error when checking LSP presence
 
 ## [18.1.0]
 
@@ -35,7 +42,6 @@ Changelog structure reference:
 
 - LSP
   - No more error spam when zig or zls binary is missing
-  - Rare error when checking LSP presence
 
 ## [18.0.0]
 

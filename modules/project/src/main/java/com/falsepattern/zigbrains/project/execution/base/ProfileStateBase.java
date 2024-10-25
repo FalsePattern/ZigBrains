@@ -61,7 +61,6 @@ public abstract class ProfileStateBase<T extends ZigExecConfigBase<T>> extends C
         cli.setExePath(zigExecutablePath.toString());
         workingDirectory.getPath().ifPresent(x -> cli.setWorkDirectory(x.toFile()));
         cli.setCharset(StandardCharsets.UTF_8);
-        cli.setRedirectErrorStream(true);
         cli.addParameters(configuration.buildCommandLineArgs(debug));
         return cli;
     }
