@@ -17,31 +17,27 @@ Changelog structure reference:
 
 ## [Unreleased]
 
-### Changed
-
-- Runner
-  - Error output is no longer redirected to standard output
-
-### Fixed
-
-- Runner
-  - The process execution pipeline is now fully asynchronous
-- Debugger
-  - Zig compilation will no longer cause random IDE freezes
-  - Debugging with GDB no longer causes random internal IDE warnings
-- LSP
-  - Rare error when checking LSP presence
-
-## [18.1.0]
+## [19.0.0]
 
 ### Added
 
 - Zig
   - Basic language injections in strings
 
+### Changed
+
+- Runner
+  - The process execution pipeline is now fully asynchronous
+  - Error output is no longer redirected to standard output
+
 ### Fixed
 
+- Debugger
+  - Zig compilation will no longer cause IDE freezes
+  - Debugging with GDB no longer causes internal IDE warnings
+  - Debugging `zig run` configurations is now possible
 - LSP
+  - Rare error when checking LSP presence
   - No more error spam when zig or zls binary is missing
 
 ## [18.0.0]
