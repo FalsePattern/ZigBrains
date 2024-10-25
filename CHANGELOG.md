@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Injected language color in strings and comments was being overwritten by LSP
+
 ## [19.0.0]
 
 ### Added
