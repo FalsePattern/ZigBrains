@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - Basic language injections in strings
+
 ### Fixed
 
 - LSP
