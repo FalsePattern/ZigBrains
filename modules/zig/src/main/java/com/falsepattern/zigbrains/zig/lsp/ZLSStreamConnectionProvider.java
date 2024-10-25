@@ -50,14 +50,14 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
         setCommandLine(commandLine);
     }
 
-    public static List<String> doGetCommand(Project project, boolean warn) {
+    public static List<String> doGetCommand(Project project, boolean safe) {
         var svc = ZLSProjectSettingsService.getInstance(project);
         val state = svc.getState();
         var zlsPath = state.zlsPath;
         if (StringUtil.isEmpty(zlsPath)) {
             zlsPath = com.falsepattern.zigbrains.common.util.FileUtil.findExecutableOnPATH("zls").map(Path::toString).orElse(null);
             if (zlsPath == null) {
-                if (warn) {
+                if (safe) {
                     Notifications.Bus.notify(
                             new Notification("ZigBrains.ZLS", "Could not detect ZLS binary! Please configure it!",
                                              NotificationType.ERROR));
@@ -66,19 +66,19 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
             }
             state.setZlsPath(zlsPath);
         }
-        if (!validatePath("ZLS Binary", zlsPath, false, warn)) {
+        if (!validatePath("ZLS Binary", zlsPath, false, safe)) {
             return null;
         }
         var configPath = state.zlsConfigPath;
         boolean configOK = true;
-        if (!configPath.isBlank() && !validatePath("ZLS Config", configPath, false, warn)) {
-            if (warn) {
+        if (!configPath.isBlank() && !validatePath("ZLS Config", configPath, false, safe)) {
+            if (safe) {
                 Notifications.Bus.notify(
                         new Notification("ZigBrains.ZLS", "Using default config path.", NotificationType.INFORMATION));
             }
             configPath = null;
         }
-        if (configPath == null || configPath.isBlank()) {
+        if ((configPath == null || configPath.isBlank()) && safe) {
             blk:
             try {
                 val tmpFile = FileUtil.createTempFile("zigbrains-zls-autoconf", ".json", true).toPath();
@@ -95,7 +95,7 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
                 }
                 configPath = tmpFile.toAbsolutePath().toString();
             } catch (IOException e) {
-                if (warn) {
+                if (safe) {
                     Notifications.Bus.notify(
                             new Notification("ZigBrains.ZLS", "Failed to create automatic zls config file",
                                              NotificationType.WARNING));
@@ -140,7 +140,7 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
         return future;
     }
 
-    private static boolean validatePath(String name, String pathTxt, boolean dir, boolean warn) {
+    private static boolean validatePath(String name, String pathTxt, boolean dir, boolean safe) {
         if (pathTxt == null || pathTxt.isBlank()) {
             return false;
         }
@@ -148,7 +148,7 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
         try {
             path = Path.of(pathTxt);
         } catch (InvalidPathException e) {
-            if (warn) {
+            if (safe) {
                 Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
                                                           "Invalid " + name + " at path \"" + pathTxt + "\"",
                                                           NotificationType.ERROR));
@@ -156,7 +156,7 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
             return false;
         }
         if (!Files.exists(path)) {
-            if (warn) {
+            if (safe) {
                 Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
                                                           "The " + name + " at \"" + pathTxt + "\" doesn't exist!",
                                                           NotificationType.ERROR));
@@ -164,7 +164,7 @@ public class ZLSStreamConnectionProvider extends OSProcessStreamConnectionProvid
             return false;
         }
         if (Files.isDirectory(path) != dir) {
-            if (warn) {
+            if (safe) {
                 Notifications.Bus.notify(new Notification("ZigBrains.ZLS", "No " + name,
                                                           "The " + name + " at \"" + pathTxt + "\" is a " +
                                                           (Files.isDirectory(path) ? "directory" : "file") +
