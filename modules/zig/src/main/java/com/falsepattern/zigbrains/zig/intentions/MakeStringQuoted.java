@@ -54,28 +54,35 @@ public class MakeStringQuoted extends PsiElementBaseIntentionAction implements I
         val stringRange = document.createRangeMarker(fullRange.getStartOffset(), fullRange.getEndOffset());
         stringRange.setGreedyToRight(true);
         document.deleteString(stringRange.getStartOffset(), stringRange.getEndOffset());
-        document.insertString(stringRange.getEndOffset(), "\"");
-        document.insertString(stringRange.getEndOffset(), prefixStr);
-        caretOffset = stringRange.getEndOffset();
-        document.insertString(stringRange.getEndOffset(), suffixStr);
-        document.insertString(stringRange.getEndOffset(), "\"");
         val documentText = document.getCharsSequence();
+        boolean addSpace = true;
         int scanStart = stringRange.getEndOffset();
-        stringRange.dispose();
         int scanEnd = scanStart;
         loop:
         while (scanEnd < documentText.length()) {
             switch (documentText.charAt(scanEnd)) {
-                case ' ', '\t':
+                case ' ', '\t', '\r', '\n':
                     break;
+                case ',', ';':
+                    addSpace = false;
                 default:
                     break loop;
             }
             scanEnd++;
         }
         if (scanEnd > scanStart) {
-            document.deleteString(scanStart, scanEnd);
+            if (addSpace) {
+                document.replaceString(scanStart, scanEnd, " ");
+            } else {
+                document.deleteString(scanStart, scanEnd);
+            }
         }
+        document.insertString(stringRange.getEndOffset(), "\"");
+        document.insertString(stringRange.getEndOffset(), prefixStr);
+        caretOffset = stringRange.getEndOffset();
+        document.insertString(stringRange.getEndOffset(), suffixStr);
+        document.insertString(stringRange.getEndOffset(), "\"");
+        stringRange.dispose();
         editor.getCaretModel().moveToOffset(caretOffset);
     }
 

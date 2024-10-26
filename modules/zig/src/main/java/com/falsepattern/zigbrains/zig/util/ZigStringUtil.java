@@ -87,6 +87,7 @@ public class ZigStringUtil {
         val parts = Arrays.asList(NL_MATCHER.split(content, -1));
         val result = new StringBuilder(content.length() + marker.length() * parts.size() + indentStr.length() * parts.size());
         if (indentFirst) {
+            result.append('\n');
             result.append(indentStr);
         }
         if (prefixFirst) {

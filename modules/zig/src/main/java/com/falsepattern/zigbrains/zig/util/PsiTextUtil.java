@@ -83,35 +83,48 @@ public class PsiTextUtil {
                                    boolean insertNewlineAtCaret) {
         val document = editor.getDocument();
         ASTNode token = psiAtOffset.getNode();
-        val text = document.getText();
+        val text = document.getCharsSequence();
 
         TextRange range = token.getTextRange();
         val lexer = new FlexAdapter(new ZigStringLexer());
         lexer.start(text, range.getStartOffset(), range.getEndOffset());
         caretOffset = skipStringLiteralEscapes(caretOffset, lexer);
         caretOffset = MathUtil.clamp(caretOffset, range.getStartOffset() + 1, range.getEndOffset() - 1);
-        val unescapedPrefix = ZigStringUtil.unescape(text.substring(range.getStartOffset() + 1, caretOffset), false);
-        val unescapedSuffix = ZigStringUtil.unescape(text.substring(caretOffset, range.getEndOffset() - 1), false);
+        val unescapedPrefix = ZigStringUtil.unescape(text.subSequence(range.getStartOffset() + 1, caretOffset), false);
+        val unescapedSuffix = ZigStringUtil.unescape(text.subSequence(caretOffset, range.getEndOffset() - 1), false);
         val stringRange = document.createRangeMarker(range.getStartOffset(), range.getEndOffset());
         stringRange.setGreedyToRight(true);
         val lineNumber = document.getLineNumber(caretOffset);
         val lineOffset = document.getLineStartOffset(lineNumber);
         val indent = stringRange.getStartOffset() - lineOffset;
+        val lineIndent = StringUtil.skipWhitespaceForward(document.getText(new TextRange(lineOffset, stringRange.getStartOffset())), 0);
+        boolean newLine = indent != lineIndent;
         document.deleteString(stringRange.getStartOffset(), stringRange.getEndOffset());
         document.insertString(stringRange.getStartOffset(),
-                              ZigStringUtil.prefixWithTextBlockEscape(indent,
+                              ZigStringUtil.prefixWithTextBlockEscape(newLine ? lineIndent + 4 : lineIndent,
                                                                       "\\\\",
                                                                       insertNewlineAtCaret ? unescapedPrefix + "\n" : unescapedPrefix,
-                                                                      false,
+                                                                      newLine,
                                                                       true));
         caretOffset = stringRange.getEndOffset();
         document.insertString(caretOffset,
-                              ZigStringUtil.prefixWithTextBlockEscape(indent,
+                              ZigStringUtil.prefixWithTextBlockEscape(newLine ? lineIndent + 4 : lineIndent,
                                                                       "\\\\",
                                                                       unescapedSuffix,
                                                                       false,
                                                                       false));
-        document.insertString(stringRange.getEndOffset(), "\n" + " ".repeat(indent));
+        int end = stringRange.getEndOffset();
+        loop:
+        while (end < document.getTextLength()) {
+            switch (text.charAt(end)) {
+                case ' ', '\t':
+                    break;
+                default:
+                    break loop;
+            }
+            end++;
+        }
+        document.replaceString(stringRange.getEndOffset(), end, "\n" + " ".repeat(newLine ? lineIndent : Math.max(lineIndent - 4, 0)));
         stringRange.dispose();
         editor.getCaretModel().moveToOffset(caretOffset);
     }
