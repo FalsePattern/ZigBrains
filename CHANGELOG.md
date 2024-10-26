@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Multiline string language injections broke when editing the injected text
+
 ## [19.1.0]
 
 ### Added

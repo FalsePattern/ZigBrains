@@ -1,6 +1,8 @@
 package com.falsepattern.zigbrains.zig.util;
 
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.PsiElement;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +23,7 @@ public class PsiTextUtil {
         val textLength = text.length();
         val firstChar = startMark.charAt(0);
         val extraChars = startMark.substring(1);
+        loop:
         for (int i = 0; i < textLength; i++) {
             val cI = text.charAt(i);
             if (!inBody) {
@@ -28,7 +31,7 @@ public class PsiTextUtil {
                     i + extraChars.length() < textLength) {
                     for (int j = 0; j < extraChars.length(); j++) {
                         if (text.charAt(i + j + 1) != startMark.charAt(j)) {
-                            continue;
+                            continue loop;
                         }
                     }
                     i += extraChars.length();
@@ -42,14 +45,23 @@ public class PsiTextUtil {
                     i++;
                 }
                 inBody = false;
-                result.add(new TextRange(stringStart, i + 1));
+                result.add(new TextRange(stringStart, Math.min(textLength - 1, i + 1)));
                 continue;
             }
             if (cI == '\n') {
                 inBody = false;
-                result.add(new TextRange(stringStart, i + 1));
+                result.add(new TextRange(stringStart, Math.min(textLength - 1, i + 1)));
             }
         }
         return result;
+    }
+
+    public static int getIndentSize(PsiElement element) {
+        return StringUtil.offsetToLineColumn(element.getContainingFile().getText(), element.getTextOffset()).column;
+    }
+
+    public static String getIndentString(PsiElement element) {
+        val indent = getIndentSize(element);
+        return " ".repeat(Math.max(0, indent));
     }
 }
