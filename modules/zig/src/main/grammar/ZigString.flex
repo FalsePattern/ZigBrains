@@ -30,6 +30,11 @@ import static com.intellij.psi.StringEscapesTokenTypes.*;
 %implements FlexLexer
 %function advance
 %type IElementType
+%{
+    public ZigStringLexer() {
+
+    }
+%}
 
 hex=[0-9a-fA-F]
 
