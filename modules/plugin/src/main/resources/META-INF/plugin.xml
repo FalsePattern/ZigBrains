@@ -32,6 +32,13 @@
 
         <lang.formatter language="Zig" implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>
 
+        <enterHandlerDelegate
+                id="ZigEnterInTextBlockHandler"
+                implementation="com.falsepattern.zigbrains.zig.editing.ZigEnterInTextBlockHandler" />
+        <enterHandlerDelegate
+                id="ZigEnterInQuotedStringHandler"
+                implementation="com.falsepattern.zigbrains.zig.editing.ZigEnterInQuotedStringHandler" />
+
         <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
 
         <!-- LSP textDocument/signatureHelp -->

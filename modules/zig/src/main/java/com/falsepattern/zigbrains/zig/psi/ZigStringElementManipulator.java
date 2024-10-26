@@ -25,7 +25,7 @@ public class ZigStringElementManipulator extends AbstractElementManipulator<ZigS
             throws IncorrectOperationException {
         val originalContext = element.getText();
         val isMulti = element.isMultiLine();
-        final String replacement;
+        final CharSequence replacement;
         if (isMulti) {
             val contentRanges = element.getContentRanges();
             val contentBuilder = new StringBuilder();
@@ -51,9 +51,7 @@ public class ZigStringElementManipulator extends AbstractElementManipulator<ZigS
                 }
             }
             val content = contentBuilder.toString();
-            val pfx = PsiTextUtil.getIndentString(element) + "\\\\";
-            replacement = Arrays.stream(content.split("(\\r\\n|\\r|\\n)")).map(line -> pfx + line).collect(
-                    Collectors.joining("\n"));
+            replacement = ZigStringUtil.prefixWithTextBlockEscape(PsiTextUtil.getIndentSize(element), "\\\\", content, false, true);
         } else {
             val elementRange = getRangeInElement(element);
             replacement = "\"" +

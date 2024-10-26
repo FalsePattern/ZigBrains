@@ -9,7 +9,9 @@ import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ZigStringUtil {
@@ -66,6 +68,35 @@ public class ZigStringUtil {
         }
         result.append(input.subSequence(currentOffset, input.length()));
         return result.toString();
+    }
+
+    private static final Pattern NL_MATCHER = Pattern.compile("(\\r\\n|\\r|\\n)");
+    private static final String[] COMMON_INDENTS;
+    static {
+        val count = 32;
+        val sb = new StringBuilder(count);
+        COMMON_INDENTS = new String[count];
+        for (int i = 0; i < count; i++) {
+            COMMON_INDENTS[i] = sb.toString();
+            sb.append(" ");
+        }
+    }
+
+    public static CharSequence prefixWithTextBlockEscape(int indent, CharSequence marker, CharSequence content, boolean indentFirst, boolean prefixFirst) {
+        val indentStr = indent >= 0 ? indent < COMMON_INDENTS.length ? COMMON_INDENTS[indent] : " ".repeat(indent) : "";
+        val parts = Arrays.asList(NL_MATCHER.split(content, -1));
+        val result = new StringBuilder(content.length() + marker.length() * parts.size() + indentStr.length() * parts.size());
+        if (indentFirst) {
+            result.append(indentStr);
+        }
+        if (prefixFirst) {
+            result.append(marker);
+        }
+        result.append(parts.getFirst());
+        for (val part: parts.subList(1, parts.size())) {
+            result.append("\n").append(indentStr).append(marker).append(part);
+        }
+        return result;
     }
 
     @UtilityClass

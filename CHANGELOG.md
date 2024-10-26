@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - Enter key handling in strings and multi line strings
+
 ### Fixed
 
 - Zig

@@ -1,11 +1,23 @@
 package com.falsepattern.zigbrains.zig.util;
 
+import com.falsepattern.zigbrains.zig.stringlexer.ZigStringLexer;
+import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegate;
+import com.intellij.lang.ASTNode;
+import com.intellij.lexer.FlexAdapter;
+import com.intellij.lexer.FlexLexer;
+import com.intellij.lexer.Lexer;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.StringEscapesTokenTypes;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.util.MathUtil;
+import lombok.SneakyThrows;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,5 +75,57 @@ public class PsiTextUtil {
     public static String getIndentString(PsiElement element) {
         val indent = getIndentSize(element);
         return " ".repeat(Math.max(0, indent));
+    }
+
+    public static void splitString(@NotNull Editor editor,
+                                   @NotNull PsiElement psiAtOffset,
+                                   int caretOffset,
+                                   boolean insertNewlineAtCaret) {
+        val document = editor.getDocument();
+        ASTNode token = psiAtOffset.getNode();
+        val text = document.getText();
+
+        TextRange range = token.getTextRange();
+        val lexer = new FlexAdapter(new ZigStringLexer());
+        lexer.start(text, range.getStartOffset(), range.getEndOffset());
+        caretOffset = skipStringLiteralEscapes(caretOffset, lexer);
+        caretOffset = MathUtil.clamp(caretOffset, range.getStartOffset() + 1, range.getEndOffset() - 1);
+        val unescapedPrefix = ZigStringUtil.unescape(text.substring(range.getStartOffset() + 1, caretOffset), false);
+        val unescapedSuffix = ZigStringUtil.unescape(text.substring(caretOffset, range.getEndOffset() - 1), false);
+        val stringRange = document.createRangeMarker(range.getStartOffset(), range.getEndOffset());
+        stringRange.setGreedyToRight(true);
+        val lineNumber = document.getLineNumber(caretOffset);
+        val lineOffset = document.getLineStartOffset(lineNumber);
+        val indent = stringRange.getStartOffset() - lineOffset;
+        document.deleteString(stringRange.getStartOffset(), stringRange.getEndOffset());
+        document.insertString(stringRange.getStartOffset(),
+                              ZigStringUtil.prefixWithTextBlockEscape(indent,
+                                                                      "\\\\",
+                                                                      insertNewlineAtCaret ? unescapedPrefix + "\n" : unescapedPrefix,
+                                                                      false,
+                                                                      true));
+        caretOffset = stringRange.getEndOffset();
+        document.insertString(caretOffset,
+                              ZigStringUtil.prefixWithTextBlockEscape(indent,
+                                                                      "\\\\",
+                                                                      unescapedSuffix,
+                                                                      false,
+                                                                      false));
+        document.insertString(stringRange.getEndOffset(), "\n" + " ".repeat(indent));
+        stringRange.dispose();
+        editor.getCaretModel().moveToOffset(caretOffset);
+    }
+    @SneakyThrows
+    protected static int skipStringLiteralEscapes(int caretOffset, Lexer lexer) {
+        while (lexer.getTokenType() != null) {
+            if (lexer.getTokenStart() < caretOffset && caretOffset < lexer.getTokenEnd()) {
+                if (StringEscapesTokenTypes.STRING_LITERAL_ESCAPES.contains(lexer.getTokenType())) {
+                    caretOffset = lexer.getTokenEnd();
+                }
+                break;
+            }
+            lexer.advance();
+        }
+        return caretOffset;
     }
 }
