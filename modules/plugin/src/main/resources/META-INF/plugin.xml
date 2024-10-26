@@ -39,6 +39,17 @@
                 id="ZigEnterInQuotedStringHandler"
                 implementation="com.falsepattern.zigbrains.zig.editing.ZigEnterInQuotedStringHandler" />
 
+        <intentionAction>
+            <language>Zig</language>
+            <className>com.falsepattern.zigbrains.zig.intentions.MakeStringMultiline</className>
+            <category>Zig intentions</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Zig</language>
+            <className>com.falsepattern.zigbrains.zig.intentions.MakeStringQuoted</className>
+            <category>Zig intentions</category>
+        </intentionAction>
+
         <postStartupActivity implementation="com.falsepattern.zigbrains.zig.lsp.ZLSStartupActivity"/>
 
         <!-- LSP textDocument/signatureHelp -->

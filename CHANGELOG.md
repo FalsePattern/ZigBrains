@@ -21,6 +21,7 @@ Changelog structure reference:
 
 - Zig
   - Enter key handling in strings and multi line strings
+  - Intentions for converting between multi line and quoted strings
 
 ### Fixed
 
