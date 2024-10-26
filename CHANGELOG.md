@@ -17,6 +17,19 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [19.2.0]
+
+### Added
+
+- Zig
+  - Enter key handling in strings and multi line strings
+  - Intentions for converting between multi line and quoted strings
+
+### Fixed
+
+- Zig
+  - Multiline string language injections broke when editing the injected text
+
 ## [19.1.0]
 
 ### Added
