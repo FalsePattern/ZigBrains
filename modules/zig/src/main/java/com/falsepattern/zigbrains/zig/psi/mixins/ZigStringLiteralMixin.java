@@ -16,5 +16,4 @@ import java.util.List;
 public interface ZigStringLiteralMixin extends PsiLanguageInjectionHost {
     boolean isMultiLine();
     @NotNull List<TextRange> getContentRanges();
-    @NotNull List<Pair<TextRange, String>> getDecodeReplacements(@NotNull CharSequence input);
 }
