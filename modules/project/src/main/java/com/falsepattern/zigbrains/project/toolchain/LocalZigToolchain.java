@@ -16,15 +16,22 @@
 
 package com.falsepattern.zigbrains.project.toolchain;
 
+import com.falsepattern.zigbrains.common.direnv.DirenvCmd;
 import com.falsepattern.zigbrains.common.util.PathUtil;
+import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.UserDataHolder;
+import lombok.val;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
 public class LocalZigToolchain extends AbstractZigToolchain{
-    public LocalZigToolchain(Path location) {
-        super(location);
+    public LocalZigToolchain(Path location, @Nullable Project project) {
+        super(location, project);
     }
 
     @Override
@@ -33,13 +40,28 @@ public class LocalZigToolchain extends AbstractZigToolchain{
     }
 
     @Override
-    public GeneralCommandLine patchCommandLine(GeneralCommandLine commandLine) {
+    public @NotNull GeneralCommandLine patchCommandLine(@NotNull GeneralCommandLine commandLine, @NotNull UserDataHolder data) {
+        val project = getProject();
+        val direnv = data.getUserData(DirenvCmd.DIRENV_KEY);
+        if (direnv != null && direnv) {
+            commandLine.withEnvironment(DirenvCmd.tryGetProjectEnvSync(project));
+        }
         return commandLine;
     }
 
     @Override
     public Path pathToExecutable(String toolName) {
         return PathUtil.pathToExecutable(getLocation(), toolName);
+    }
+
+    @Override
+    public @NotNull UserDataHolder getDataForSelfRuns() {
+        val data = super.getDataForSelfRuns();
+        val project = getProject();
+        if (project != null) {
+            data.putUserData(DirenvCmd.DIRENV_KEY, ZigProjectSettingsService.getInstance(project).getState().direnv);
+        }
+        return data;
     }
 
     public static LocalZigToolchain ensureLocal(AbstractZigToolchain toolchain) throws ExecutionException {

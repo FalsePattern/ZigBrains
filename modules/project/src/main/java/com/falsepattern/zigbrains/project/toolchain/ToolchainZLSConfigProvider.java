@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.project.toolchain;
 
+import com.falsepattern.zigbrains.common.direnv.DirenvCmd;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.zig.environment.ZLSConfig;
 import com.falsepattern.zigbrains.zig.environment.ZLSConfigProvider;
@@ -24,6 +25,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.util.UserDataHolderBase;
 import lombok.val;
 
 import java.nio.file.Files;
@@ -35,16 +37,20 @@ public class ToolchainZLSConfigProvider implements ZLSConfigProvider {
     public void getEnvironment(Project project, ZLSConfig.ZLSConfigBuilder builder) {
         val svc = ZigProjectSettingsService.getInstance(project);
         val state = svc.getState();
-        var toolchain = state.getToolchain();
+        var toolchain = state.getToolchain(project);
         if (toolchain == null) {
-            toolchain = AbstractZigToolchain.suggest();
+            val data = new UserDataHolderBase();
+
+            data.putUserData(AbstractZigToolchain.PROJECT_KEY, project);
+            data.putUserData(DirenvCmd.DIRENV_KEY, svc.getState().direnv);
+            toolchain = AbstractZigToolchain.suggest(data).join();
             if (toolchain == null) {
                 return;
             }
             state.setToolchain(toolchain);
         }
         val projectDir = ProjectUtil.guessProjectDir(project);
-        val oEnv = toolchain.zig().getEnv(projectDir == null ? null : projectDir.toNioPath());
+        val oEnv = toolchain.zig().getEnv();
         if (oEnv.isEmpty()) {
             return;
         }

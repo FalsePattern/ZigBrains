@@ -62,7 +62,7 @@ public abstract class ProfileStateBase<T extends ZigExecConfigBase<T>> extends C
         workingDirectory.getPath().ifPresent(x -> cli.setWorkDirectory(x.toFile()));
         cli.setCharset(StandardCharsets.UTF_8);
         cli.addParameters(configuration.buildCommandLineArgs(debug));
-        return cli;
+        return configuration.patchCommandLine(cli, toolchain);
     }
 
     public T configuration() {

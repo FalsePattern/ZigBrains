@@ -54,7 +54,7 @@ public class ZLSLanguageServerFactory implements LanguageServerFactory, Language
 
     @Override
     public boolean isEnabled(@NotNull Project project) {
-        return enabled && ZLSStreamConnectionProvider.doGetCommand(project, false) != null;
+        return enabled && ZLSStreamConnectionProvider.getCommandSync(project, false) != null;
     }
 
     @Override

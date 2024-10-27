@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Toolchains, Run Configurations
+  - [Direnv](https://github.com/direnv/direnv) support
+
 ## [19.2.0]
 
 ### Added

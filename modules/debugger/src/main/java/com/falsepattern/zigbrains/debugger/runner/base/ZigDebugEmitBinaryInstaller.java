@@ -43,7 +43,7 @@ public class ZigDebugEmitBinaryInstaller<ProfileState extends ProfileStateBase<?
         cli.addParameters(exeArgs);
         cli.withCharset(StandardCharsets.UTF_8);
         cli.withRedirectErrorStream(true);
-        return cli;
+        return profileState.configuration().patchCommandLine(cli, toolchain);
     }
 
     @Override

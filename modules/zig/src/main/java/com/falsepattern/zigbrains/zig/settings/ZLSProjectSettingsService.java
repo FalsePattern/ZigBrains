@@ -49,6 +49,7 @@ public final class ZLSProjectSettingsService extends WrappingStateComponent<ZLSS
         modified |= myData.dangerousComptimeExperimentsDoNotEnable != otherData.dangerousComptimeExperimentsDoNotEnable;
         modified |= myData.inlayHints != otherData.inlayHints;
         modified |= myData.inlayHintsCompact != otherData.inlayHintsCompact;
+        modified |= myData.direnv != otherData.direnv;
         return modified;
     }
 }

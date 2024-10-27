@@ -20,6 +20,8 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import lombok.val;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -27,6 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 
 public class FileUtil {
@@ -132,10 +135,10 @@ public class FileUtil {
         return path != null ? sanitizeURI(path.toUri().toString()) : null;
     }
 
-    public static Optional<Path> findExecutableOnPATH(String exe) {
-        var exeName = SystemInfo.isWindows ? exe + ".exe" : exe;
-        var PATH = System.getenv("PATH").split(File.pathSeparator);
-        for (var dir: PATH) {
+    public static @NotNull Optional<Path> findExecutableOnPATH(@NotNull Map<String, String> extraEnv, @NotNull String exe) {
+        val exeName = SystemInfo.isWindows ? exe + ".exe" : exe;
+        val PATH = extraEnv.getOrDefault("PATH", System.getenv("PATH")).split(File.pathSeparator);
+        for (val dir: PATH) {
             var path = Path.of(dir);
             try {
                 path = path.toAbsolutePath();
@@ -145,7 +148,7 @@ public class FileUtil {
             if (!Files.exists(path) || !Files.isDirectory(path)) {
                 continue;
             }
-            var exePath = path.resolve(exeName).toAbsolutePath();
+            val exePath = path.resolve(exeName).toAbsolutePath();
             if (!Files.isRegularFile(exePath) || !Files.isExecutable(exePath)) {
                 continue;
             }

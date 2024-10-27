@@ -18,34 +18,38 @@ package com.falsepattern.zigbrains.project.openapi.components;
 
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider;
+import com.intellij.openapi.project.Project;
 import com.intellij.util.io.PathKt;
 import com.intellij.util.xmlb.annotations.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class ZigProjectSettings {
+    public boolean direnv;
     public boolean overrideStdPath;
     public String explicitPathToStd;
     public String toolchainHomeDirectory;
 
-    public ZigProjectSettings(String explicitPathToStd, AbstractZigToolchain toolchain) {
-        this(explicitPathToStd != null, explicitPathToStd, null);
+    public ZigProjectSettings(boolean direnv, String explicitPathToStd, AbstractZigToolchain toolchain) {
+        this(direnv, explicitPathToStd != null, explicitPathToStd, null);
         setToolchain(toolchain);
     }
 
+    public ZigProjectSettings() {
+        this(true, false, null, null);
+    }
+
     @Transient
-    public @Nullable AbstractZigToolchain getToolchain() {
+    public AbstractZigToolchain getToolchain(Project project) {
         if (toolchainHomeDirectory == null) {
             return null;
         }
-        return ZigToolchainProvider.findToolchain(Path.of(toolchainHomeDirectory));
+        return ZigToolchainProvider.findToolchain(Path.of(toolchainHomeDirectory), project);
     }
 
     @Transient

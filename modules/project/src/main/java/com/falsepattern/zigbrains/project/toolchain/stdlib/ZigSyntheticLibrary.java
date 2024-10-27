@@ -16,7 +16,6 @@
 
 package com.falsepattern.zigbrains.project.toolchain.stdlib;
 
-import com.falsepattern.zigbrains.common.util.PathUtil;
 import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.zig.Icons;
 import com.intellij.navigation.ItemPresentation;
@@ -51,7 +50,7 @@ public class ZigSyntheticLibrary extends SyntheticLibrary implements ItemPresent
         val service = ZigProjectSettingsService.getInstance(project);
         val state = service.getState();
         this.roots = ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            val toolchain = state.getToolchain();
+            val toolchain = state.getToolchain(project);
             blk: try {
                 val ePathStr = state.getExplicitPathToStd();
                 if (ePathStr == null) {
@@ -84,7 +83,7 @@ public class ZigSyntheticLibrary extends SyntheticLibrary implements ItemPresent
         });
 
         this.name = ApplicationManager.getApplication()
-                                      .executeOnPooledThread(() -> Optional.ofNullable(state.getToolchain())
+                                      .executeOnPooledThread(() -> Optional.ofNullable(state.getToolchain(project))
                                                                            .flatMap(tc -> tc.zig().queryVersion())
                                                                            .map(version -> "Zig " + version)
                                                                            .orElse("Zig"));

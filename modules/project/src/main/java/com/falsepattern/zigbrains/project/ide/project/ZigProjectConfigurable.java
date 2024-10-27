@@ -37,7 +37,7 @@ public class ZigProjectConfigurable implements SubConfigurable {
 
     @Override
     public void createComponent(JavaPanel panel) {
-        settingsPanel = new ZigProjectSettingsPanel();
+        settingsPanel = new ZigProjectSettingsPanel(project);
         settingsPanel.attachPanelTo(panel);
     }
 
