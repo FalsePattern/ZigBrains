@@ -1,23 +1,19 @@
 package com.falsepattern.zigbrains.zig.util;
 
 import com.falsepattern.zigbrains.zig.stringlexer.ZigStringLexer;
-import com.intellij.codeInsight.editorActions.enter.EnterHandlerDelegate;
 import com.intellij.lang.ASTNode;
 import com.intellij.lexer.FlexAdapter;
-import com.intellij.lexer.FlexLexer;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.StringEscapesTokenTypes;
-import com.intellij.psi.tree.IElementType;
 import com.intellij.util.MathUtil;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 

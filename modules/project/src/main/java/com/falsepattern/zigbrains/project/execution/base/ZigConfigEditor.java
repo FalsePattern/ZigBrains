@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.project.execution.base;
 
+import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsService;
 import com.falsepattern.zigbrains.project.ui.WorkingDirectoryComponent;
 import com.falsepattern.zigbrains.project.ui.ZigFilePathPanel;
 import com.falsepattern.zigbrains.project.util.CLIUtil;
@@ -23,6 +24,7 @@ import com.falsepattern.zigbrains.project.util.ElementUtil;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SettingsEditor;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBTextField;
@@ -356,6 +358,10 @@ public class ZigConfigEditor<T extends ZigExecConfigBase<T>> extends SettingsEdi
 
     public static CheckboxConfigurable coloredConfigurable(String serializedName) {
         return new CheckboxConfigurable(serializedName, "Colored terminal", true);
+    }
+
+    public static CheckboxConfigurable direnvConfigurable(String serializedName, Project project) {
+        return new CheckboxConfigurable(serializedName, "Use direnv", ZigProjectSettingsService.getInstance(project).getState().direnv);
     }
 
     @RequiredArgsConstructor

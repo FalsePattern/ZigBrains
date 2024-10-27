@@ -10,8 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.BUILTIN;
-import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.COMMENT;
-import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.COMMENT_DOC;
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.ENUM_DECL;
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.ENUM_MEMBER_DECL;
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.ENUM_MEMBER_REF;
@@ -36,7 +34,6 @@ import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.OP
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.PARAMETER;
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.PROPERTY_DECL;
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.PROPERTY_REF;
-import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.STRING;
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.STRUCT_DECL;
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.STRUCT_REF;
 import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.TYPE_DECL;
@@ -52,7 +49,6 @@ import static com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.VA
 import static com.falsepattern.zigbrains.zig.lsp.ZLSSemanticTokenModifiers.Declaration;
 import static com.falsepattern.zigbrains.zig.lsp.ZLSSemanticTokenModifiers.Definition;
 import static com.falsepattern.zigbrains.zig.lsp.ZLSSemanticTokenModifiers.Deprecated;
-import static com.falsepattern.zigbrains.zig.lsp.ZLSSemanticTokenModifiers.Documentation;
 import static com.falsepattern.zigbrains.zig.lsp.ZLSSemanticTokenModifiers.Generic;
 import static com.falsepattern.zigbrains.zig.lsp.ZLSSemanticTokenTypes.Builtin;
 import static com.falsepattern.zigbrains.zig.lsp.ZLSSemanticTokenTypes.Comment;

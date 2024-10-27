@@ -11,9 +11,6 @@ import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 public class ZigStringElementManipulator extends AbstractElementManipulator<ZigStringLiteral> {
     private enum InjectTriState {
         NotYet,

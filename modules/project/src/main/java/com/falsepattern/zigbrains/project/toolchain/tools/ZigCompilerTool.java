@@ -23,7 +23,6 @@ import com.google.gson.Gson;
 import com.intellij.execution.process.ProcessOutput;
 import com.intellij.openapi.application.ApplicationManager;
 import lombok.val;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -38,7 +37,7 @@ public class ZigCompilerTool extends AbstractZigTool{
     public ZigCompilerTool(AbstractZigToolchain toolchain) {
         super(toolchain, TOOL_NAME);
         val app = ApplicationManager.getApplication();
-        val baseFuture = app.executeOnPooledThread(() -> getEnv(toolchain.getLocation()));
+        val baseFuture = app.executeOnPooledThread(() -> getEnv());
         version = new Lazy<>(() -> {
             try {
                 return baseFuture.get().map(ZigToolchainEnvironmentSerializable::version);
@@ -70,8 +69,8 @@ public class ZigCompilerTool extends AbstractZigTool{
         });
     }
 
-    public Optional<ZigToolchainEnvironmentSerializable> getEnv(@Nullable Path workingDirectory) {
-        return callWithArgs(workingDirectory, toolchain.executionTimeoutInMilliseconds(), "env")
+    public Optional<ZigToolchainEnvironmentSerializable> getEnv() {
+        return callWithArgs(toolchain.getLocation(), toolchain.executionTimeoutInMilliseconds(), toolchain.getDataForSelfRuns(), "env")
                 .map(ProcessOutput::getStdoutLines)
                 .map(lines -> new Gson().fromJson(String.join(" ", lines), ZigToolchainEnvironmentSerializable.class));
 

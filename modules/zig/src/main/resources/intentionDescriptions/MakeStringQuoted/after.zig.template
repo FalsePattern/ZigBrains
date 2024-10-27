@@ -1,0 +1,1 @@
+const myText = "Hello\nWorld!\u{1f4af}";

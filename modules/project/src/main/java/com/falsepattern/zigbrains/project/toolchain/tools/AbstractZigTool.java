@@ -20,6 +20,7 @@ import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.util.CLIUtil;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.ProcessOutput;
+import com.intellij.openapi.util.UserDataHolder;
 import kotlin.text.Charsets;
 import lombok.AllArgsConstructor;
 import lombok.val;
@@ -41,35 +42,39 @@ public abstract class AbstractZigTool {
         return toolchain.pathToExecutable(toolName);
     }
 
-    public final Optional<ProcessOutput> callWithArgs(@Nullable Path workingDirectory, int timeoutMillis, String... parameters) {
-        return CLIUtil.execute(createBaseCommandLine(workingDirectory, parameters),
+    public final Optional<ProcessOutput> callWithArgs(@Nullable Path workingDirectory, int timeoutMillis, @NotNull UserDataHolder data, String @NotNull... parameters) {
+        return CLIUtil.execute(createBaseCommandLine(workingDirectory, data, parameters),
                                timeoutMillis);
     }
 
     protected final GeneralCommandLine createBaseCommandLine(@Nullable Path workingDirectory,
+                                                             @NotNull UserDataHolder data,
                                                              String @NotNull... parameters) {
-        return createBaseCommandLine(workingDirectory, Collections.emptyMap(), parameters);
+        return createBaseCommandLine(workingDirectory, Collections.emptyMap(), data, parameters);
     }
 
     protected final GeneralCommandLine createBaseCommandLine(@Nullable Path workingDirectory,
                                                              @NotNull Map<String, String> environment,
+                                                             @NotNull UserDataHolder data,
                                                              String @NotNull... parameters) {
-        return createBaseCommandLine(workingDirectory, environment, List.of(parameters));
+        return createBaseCommandLine(workingDirectory, environment, data, List.of(parameters));
     }
 
     protected final GeneralCommandLine createBaseCommandLine(@Nullable Path workingDirectory,
+                                                             @NotNull UserDataHolder data,
                                                              @NotNull List<String> parameters) {
-        return createBaseCommandLine(workingDirectory, Collections.emptyMap(), parameters);
+        return createBaseCommandLine(workingDirectory, Collections.emptyMap(), data, parameters);
     }
 
     protected GeneralCommandLine createBaseCommandLine(@Nullable Path workingDirectory,
                                                        @NotNull Map<String, String> environment,
+                                                       @NotNull UserDataHolder data,
                                                        @NotNull List<String> parameters) {
         val cli = new GeneralCommandLine(executable().toString())
                 .withWorkDirectory(workingDirectory == null ? null : workingDirectory.toString())
                 .withParameters(parameters)
                 .withEnvironment(environment)
                 .withCharset(Charsets.UTF_8);
-        return toolchain.patchCommandLine(cli);
+        return toolchain.patchCommandLine(cli, data);
     }
 }
