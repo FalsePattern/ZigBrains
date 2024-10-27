@@ -45,6 +45,7 @@ public final class ZigStepDiscoveryService {
             val zig = toolchain.zig();
             val result = zig.callWithArgs(
                     ProjectUtil.guessProjectDir(project), CURRENT_TIMEOUT_SEC * 1000,
+                    toolchain.getDataForSelfRuns(),
                     "build", "-l");
             if (result.isPresent()) {
                 val res = result.get();

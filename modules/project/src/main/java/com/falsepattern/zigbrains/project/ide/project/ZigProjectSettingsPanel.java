@@ -16,6 +16,7 @@
 
 package com.falsepattern.zigbrains.project.ide.project;
 
+import com.falsepattern.zigbrains.common.direnv.DirenvCmd;
 import com.falsepattern.zigbrains.common.util.PathUtil;
 import com.falsepattern.zigbrains.common.util.StringUtil;
 import com.falsepattern.zigbrains.common.util.TextFieldUtil;
@@ -27,15 +28,18 @@ import com.falsepattern.zigbrains.project.openapi.components.ZigProjectSettingsS
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider;
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.dsl.builder.AlignX;
 import lombok.Getter;
 import lombok.val;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.JLabel;
 import java.awt.event.ActionEvent;
@@ -44,10 +48,13 @@ import java.util.Optional;
 import static com.falsepattern.zigbrains.common.util.KtUtil.$f;
 
 public class ZigProjectSettingsPanel implements MyDisposable {
+    private final @Nullable Project project;
     @Getter
     private boolean disposed = false;
 
     private final UIDebouncer versionUpdateDebouncer = new UIDebouncer(this);
+
+    private final JBCheckBox direnv = new JBCheckBox("Use direnv");
 
     private final TextFieldWithBrowseButton pathToToolchain = TextFieldUtil.pathToDirectoryTextField(this,
                                                                                                      "Path to the Zig Toolchain",
@@ -72,27 +79,44 @@ public class ZigProjectSettingsPanel implements MyDisposable {
         });
     }
 
+    public ZigProjectSettingsPanel(@Nullable Project project) {
+        this.project = project;
+    }
+
     private void autodetect(ActionEvent e) {
         autodetect();
     }
 
     public void autodetect() {
-        val tc = AbstractZigToolchain.suggest();
-        if (tc != null) {
-            pathToToolchain.setText(PathUtil.stringFromPath(tc.getLocation()));
-            updateUI();
+        val data = new UserDataHolderBase();
+        data.putUserData(DirenvCmd.DIRENV_KEY, direnv.isSelected());
+        if (project != null) {
+            data.putUserData(AbstractZigToolchain.PROJECT_KEY, project);
         }
+        val tc = AbstractZigToolchain.suggest(data);
+        tc.thenAccept(it -> {
+            if (it != null) {
+                if (!disposed) {
+                    pathToToolchain.setText(PathUtil.stringFromPath(it.getLocation()));
+                    updateUI();
+                }
+            }
+        });
     }
 
     public ZigProjectSettings getData() {
         val toolchain = Optional.of(pathToToolchain.getText())
                                 .map(PathUtil::pathFromString)
-                                .map(ZigToolchainProvider::findToolchain)
+                                .map(path -> ZigToolchainProvider.findToolchain(path, project))
                                 .orElse(null);
-        return new ZigProjectSettings(stdFieldOverride.isSelected() ? StringUtil.blankToNull(pathToStdField.getText()) : null, toolchain);
+        return new ZigProjectSettings(direnv.isSelected(),
+                                      stdFieldOverride.isSelected() ? StringUtil.blankToNull(pathToStdField.getText()) : null,
+                                      toolchain);
     }
 
     public void setData(ZigProjectSettings value) {
+        direnv.setSelected(value.direnv);
+
         pathToToolchain.setText(Optional.ofNullable(value.getToolchainHomeDirectory())
                                         .orElse(""));
 
@@ -112,6 +136,9 @@ public class ZigProjectSettingsPanel implements MyDisposable {
         p.group("Zig Settings", true, p2 -> {
             p2.row("Toolchain location", r -> {
                 r.cell(pathToToolchain).resizableColumn().align(AlignX.FILL);
+                if (DirenvCmd.direnvInstalled() && project != null) {
+                    r.cell(direnv);
+                }
                 r.button("Autodetect", $f(this::autodetect));
             });
             p2.cell("Toolchain version", toolchainVersion);
@@ -133,7 +160,7 @@ public class ZigProjectSettingsPanel implements MyDisposable {
 
         versionUpdateDebouncer.run(
                 () -> {
-                    val toolchain = Optional.ofNullable(pathToToolchain).map(ZigToolchainProvider::findToolchain).orElse(null);
+                    val toolchain = Optional.ofNullable(pathToToolchain).map(path -> ZigToolchainProvider.findToolchain(path, project)).orElse(null);
                     val zig = Optional.ofNullable(toolchain).map(AbstractZigToolchain::zig).orElse(null);
                     val version = Optional.ofNullable(zig).flatMap(ZigCompilerTool::queryVersion).orElse(null);
                     val stdPath = Optional.ofNullable(zig).flatMap(ZigCompilerTool::getStdPath).orElse(null);

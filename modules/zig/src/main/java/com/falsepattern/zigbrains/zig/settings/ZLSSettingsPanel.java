@@ -16,26 +16,37 @@
 
 package com.falsepattern.zigbrains.zig.settings;
 
+import com.falsepattern.zigbrains.common.direnv.DirenvCmd;
 import com.falsepattern.zigbrains.common.util.FileUtil;
 import com.falsepattern.zigbrains.common.util.TextFieldUtil;
 import com.falsepattern.zigbrains.common.util.dsl.JavaPanel;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.ui.TextBrowseFolderListener;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.components.fields.ExtendableTextField;
 import com.intellij.ui.dsl.builder.AlignX;
+import com.intellij.util.concurrency.AppExecutorUtil;
+import lombok.val;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.event.ActionEvent;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static com.falsepattern.zigbrains.common.util.KtUtil.$f;
 
 public class ZLSSettingsPanel implements Disposable {
+    private final @Nullable Project project;
+
     private final TextFieldWithBrowseButton zlsPath = TextFieldUtil.pathToFileTextField(this,
                                                                                         "Path to the ZLS Binary",
                                                                                         () -> {});
@@ -52,6 +63,7 @@ public class ZLSSettingsPanel implements Disposable {
 
     private final JBCheckBox messageTrace = new JBCheckBox();
     private final JBCheckBox debug = new JBCheckBox();
+    private final JBCheckBox direnv = new JBCheckBox("Use direnv");
 
     {
         buildOnSave.setToolTipText("Whether to enable build-on-save diagnostics");
@@ -66,12 +78,36 @@ public class ZLSSettingsPanel implements Disposable {
         autodetect();
     }
 
-    public void autodetect() {
-        FileUtil.findExecutableOnPATH("zls").map(Path::toString).ifPresent(zlsPath::setText);
+    private @Nullable Path tryWorkDirFromProject() {
+        if (project == null)
+            return null;
+        val projectDir = ProjectUtil.guessProjectDir(project);
+        if (projectDir == null) {
+            return null;
+        }
+        return projectDir.toNioPath();
     }
 
-    public ZLSSettingsPanel() {
+    private @NotNull CompletableFuture<Map<String, String>> tryGetDirenv() {
+        if (!DirenvCmd.direnvInstalled() || !direnv.isSelected()) {
+            return CompletableFuture.completedFuture(Map.of());
+        }
+        val workDir = tryWorkDirFromProject();
+        if (workDir == null)
+            return CompletableFuture.completedFuture(Map.of());
+        val direnvCmd = new DirenvCmd(workDir);
+        return direnvCmd.importDirenvAsync();
+    }
+
+    public void autodetect() {
+        tryGetDirenv().thenAcceptAsync((env) -> {
+            FileUtil.findExecutableOnPATH(env, "zls").map(Path::toString).ifPresent(zlsPath::setText);
+        }, AppExecutorUtil.getAppExecutorService());
+    }
+
+    public ZLSSettingsPanel(@Nullable Project project) {
         zlsPath.addBrowseFolderListener(new TextBrowseFolderListener(new FileChooserDescriptor(true, false, false, false, false, false)));
+        this.project = project;
     }
 
     public void attachPanelTo(JavaPanel panel) {
@@ -81,6 +117,9 @@ public class ZLSSettingsPanel implements Disposable {
         panel.group("ZLS Settings", true, p -> {
             p.row("Executable path", r -> {
                 r.cell(zlsPath).resizableColumn().align(AlignX.FILL);
+                if (DirenvCmd.direnvInstalled() && project != null) {
+                    r.cell(direnv);
+                }
                 r.button("Autodetect", $f(this::autodetect));
             });
             p.cell("Config path (leave empty to use built-in config)", zlsConfigPath, AlignX.FILL);
@@ -100,7 +139,8 @@ public class ZLSSettingsPanel implements Disposable {
     }
 
     public ZLSSettings getData() {
-        return new ZLSSettings(zlsPath.getText(),
+        return new ZLSSettings(direnv.isSelected(),
+                               zlsPath.getText(),
                                zlsConfigPath.getText(),
                                debug.isSelected(),
                                messageTrace.isSelected(),
@@ -113,6 +153,7 @@ public class ZLSSettingsPanel implements Disposable {
     }
 
     public void setData(ZLSSettings value) {
+        direnv.setSelected(value.direnv);
         zlsPath.setText(value.zlsPath == null ? "" : value.zlsPath);
         zlsConfigPath.setText(value.zlsConfigPath);
         debug.setSelected(value.debug);

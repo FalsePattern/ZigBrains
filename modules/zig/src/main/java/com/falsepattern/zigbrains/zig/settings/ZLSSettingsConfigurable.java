@@ -34,7 +34,7 @@ public class ZLSSettingsConfigurable implements SubConfigurable {
 
     @Override
     public void createComponent(JavaPanel panel) {
-        appSettingsComponent = new ZLSSettingsPanel();
+        appSettingsComponent = new ZLSSettingsPanel(project);
         appSettingsComponent.attachPanelTo(panel);
     }
 

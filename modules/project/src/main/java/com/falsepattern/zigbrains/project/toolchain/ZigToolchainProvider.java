@@ -17,6 +17,7 @@
 package com.falsepattern.zigbrains.project.toolchain;
 
 import com.intellij.openapi.extensions.ExtensionPointName;
+import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
@@ -26,14 +27,14 @@ public interface ZigToolchainProvider {
     ExtensionPointName<ZigToolchainProvider> EXTENSION_POINT_NAME =
             ExtensionPointName.create("com.falsepattern.zigbrains.toolchainProvider");
 
-    static @Nullable AbstractZigToolchain findToolchain(Path homePath) {
+    static @Nullable AbstractZigToolchain findToolchain(Path homePath, @Nullable Project project) {
         return EXTENSION_POINT_NAME.getExtensionList()
                                    .stream()
-                                   .map(it -> it.getToolchain(homePath))
+                                   .map(it -> it.getToolchain(homePath, project))
                                    .filter(Objects::nonNull)
                                    .findFirst()
                                    .orElse(null);
     }
 
-    @Nullable AbstractZigToolchain getToolchain(Path homePath);
+    @Nullable AbstractZigToolchain getToolchain(Path homePath, @Nullable Project project);
 }
