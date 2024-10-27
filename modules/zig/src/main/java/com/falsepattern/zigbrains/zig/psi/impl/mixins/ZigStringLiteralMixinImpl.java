@@ -13,7 +13,6 @@ import com.intellij.psi.impl.source.tree.LeafElement;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ZigStringLiteralMixinImpl extends ASTWrapperPsiElement implements ZigStringLiteral {
