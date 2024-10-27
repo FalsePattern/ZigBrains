@@ -53,7 +53,7 @@ public record ZigProjectConfigurationData(boolean git, ZigProjectSettings projCo
         svc.loadState(this.projConf());
         ZLSProjectSettingsService.getInstance(project).loadState(this.zlsConf());
 
-        val toolchain = svc.getState().getToolchain();
+        val toolchain = svc.getState().getToolchain(project);
 
         val template = this.selectedTemplate();
 
@@ -65,7 +65,7 @@ public record ZigProjectConfigurationData(boolean git, ZigProjectSettings projCo
                 return;
             }
             val zig = toolchain.zig();
-            val resultOpt = zig.callWithArgs(baseDir.toNioPath(), 10000, "init");
+            val resultOpt = zig.callWithArgs(baseDir.toNioPath(), 10000, toolchain.getDataForSelfRuns(), "init");
             if (resultOpt.isEmpty()) {
                 Notifications.Bus.notify(new Notification("ZigBrains.Project",
                                                           "Failed to invoke \"zig init\"!",

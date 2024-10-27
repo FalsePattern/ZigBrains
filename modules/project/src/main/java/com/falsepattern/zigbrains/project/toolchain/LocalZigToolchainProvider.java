@@ -17,6 +17,7 @@
 package com.falsepattern.zigbrains.project.toolchain;
 
 import com.intellij.execution.wsl.WslPath;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.Nullable;
@@ -27,11 +28,11 @@ import java.util.Map;
 public class LocalZigToolchainProvider implements ZigToolchainProvider {
     private static final Map<Path, LocalZigToolchain> tcCache = ContainerUtil.createWeakKeyWeakValueMap();
     @Override
-    public @Nullable AbstractZigToolchain getToolchain(Path homePath) {
+    public @Nullable AbstractZigToolchain getToolchain(Path homePath, @Nullable Project project) {
         if (SystemInfo.isWindows && WslPath.isWslUncPath(homePath.toString())) {
             return null;
         }
 
-        return tcCache.computeIfAbsent(homePath, LocalZigToolchain::new);
+        return tcCache.computeIfAbsent(homePath, (path) -> new LocalZigToolchain(path, project));
     }
 }

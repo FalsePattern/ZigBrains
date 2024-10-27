@@ -26,7 +26,7 @@ import java.nio.file.Path;
 
 public class ProjectUtil {
     public static @Nullable AbstractZigToolchain getToolchain(Project project) {
-        return ZigProjectSettingsService.getInstance(project).getState().getToolchain();
+        return ZigProjectSettingsService.getInstance(project).getState().getToolchain(project);
     }
     
     public static @Nullable Path guessProjectDir(Project project) {

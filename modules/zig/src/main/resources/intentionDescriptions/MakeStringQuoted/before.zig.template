@@ -1,0 +1,4 @@
+const myText =
+    <spot>\\Hello
+    \\World!💯</spot>
+;

@@ -16,7 +16,10 @@
 
 package com.falsepattern.zigbrains.project.toolchain.flavours;
 
+import com.falsepattern.zigbrains.common.direnv.DirenvCmd;
+import com.intellij.openapi.util.UserDataHolder;
 import lombok.val;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -24,18 +27,33 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import static com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain.WORK_DIR_KEY;
 
 public class ZigSystemPathToolchainFlavour extends AbstractZigToolchainFlavour{
     @Override
-    protected List<Path> getHomePathCandidates() {
-        val PATH = System.getenv("PATH");
-        if (PATH == null) {
-            return Collections.emptyList();
+    protected CompletableFuture<List<Path>> getHomePathCandidates(@NotNull UserDataHolder data) {
+        val workDir = data.getUserData(WORK_DIR_KEY);
+        val direnv = data.getUserData(DirenvCmd.DIRENV_KEY);
+        CompletableFuture<Map<String, String>> direnvFuture;
+        if (direnv == Boolean.TRUE && DirenvCmd.direnvInstalled() && workDir != null) {
+            val cmd = new DirenvCmd(workDir);
+            direnvFuture = cmd.importDirenvAsync();
+        } else {
+            direnvFuture = CompletableFuture.completedFuture(Map.of());
         }
-        return Arrays.stream(PATH.split(File.pathSeparator))
-                     .filter(it -> !it.isEmpty())
-                     .map(Path::of)
-                     .filter(Files::isDirectory)
-                     .toList();
+        return direnvFuture.thenApplyAsync(env -> {
+            val PATH = env.getOrDefault("PATH", System.getenv("PATH"));
+            if (PATH == null) {
+                return Collections.emptyList();
+            }
+            return Arrays.stream(PATH.split(File.pathSeparator))
+                         .filter(it -> !it.isEmpty())
+                         .map(Path::of)
+                         .filter(Files::isDirectory)
+                         .toList();
+        });
     }
 }

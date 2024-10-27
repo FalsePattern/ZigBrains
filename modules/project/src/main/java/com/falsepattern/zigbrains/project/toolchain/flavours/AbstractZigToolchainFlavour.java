@@ -19,12 +19,17 @@ package com.falsepattern.zigbrains.project.toolchain.flavours;
 import com.falsepattern.zigbrains.common.util.PathUtil;
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool;
 import com.intellij.openapi.extensions.ExtensionPointName;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.UserDataHolder;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class AbstractZigToolchainFlavour {
     private static final ExtensionPointName<AbstractZigToolchainFlavour> EXTENSION_POINT_NAME =
@@ -44,13 +49,14 @@ public abstract class AbstractZigToolchainFlavour {
                                       .orElse(null);
     }
 
-    public List<Path> suggestHomePaths() {
-        return getHomePathCandidates().stream()
-                                      .filter(this::isValidToolchainPath)
-                                      .toList();
+    public CompletableFuture<List<Path>> suggestHomePaths(@NotNull UserDataHolder data) {
+        return getHomePathCandidates(data).thenApplyAsync(it -> it.stream()
+                                                                  .filter(this::isValidToolchainPath)
+                                                                  .toList(),
+                                                             AppExecutorUtil.getAppExecutorService());
     }
 
-    protected abstract List<Path> getHomePathCandidates();
+    protected abstract CompletableFuture<List<Path>> getHomePathCandidates(@NotNull UserDataHolder data);
 
     protected boolean isApplicable() {
         return true;
