@@ -1,0 +1,36 @@
+ZigBrains
+Copyright (C) 2023-2024 FalsePattern
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, only version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+--------------------------------
+The following sections are the licenses of code derived from third party projects:
+
+--------------------------------
+The art assets inside src/art/zig, and all copies of them, are derived from the official Zig Programming Language logo,
+which are the property of the Zig Software Foundation.
+(https://github.com/ziglang/logo)
+These art assets are licensed under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+--------------------------------
+Parts of the codebase are based on the intellij-zig plugin,
+developed by HTGAzureX1212 (https://github.com/HTGAzureX1212), licensed under the Apache 2.0 license.
+--------------------------------
+Parts of the codebase are based on the intellij-rust plugin,
+developed by the intellij-rust team (https://github.com/intellij-rust), licensed under the intellij-rust MIT license.
+--------------------------------
+
+All of the licenses listed here are available in the following files, bundled with the plugin:
+- licenses/APACHE_2.0.LICENSE
+- licenses/CC_BY_SA_4.0.LICENSE
+- licenses/GPL3.LICENSE
+- licenses/INTELLIJ-RUST.LICENSE
+- licenses/LGPL3.LICENSE

@@ -1,0 +1,15 @@
+<idea-plugin>
+    <id>com.falsepattern.zigbrains</id>
+    <name>ZigBrains</name>
+    <vendor>FalsePattern</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Zig File"
+                  implementationClass="com.falsepattern.zigbrains.zig.ZigFileType"
+                  fieldName="INSTANCE"
+                  language="Zig"
+                  extensions="zig"/>
+    </extensions>
+</idea-plugin>
