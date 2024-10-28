@@ -4,10 +4,11 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    java
-    kotlin("jvm") version "1.9.24"
+    kotlin("jvm") version "1.9.24" apply false
     id("org.jetbrains.intellij.platform") version "2.1.0"
     id("org.jetbrains.changelog") version "2.2.1"
+    id("org.jetbrains.grammarkit") version "2022.3.2.2" apply false
+    idea
 }
 
 val javaVersion = providers.gradleProperty("javaVersion").get().toInt()
@@ -19,6 +20,11 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.intellij.platform.module")
+    apply(plugin = "idea")
+
+    extensions.configure<KotlinJvmProjectExtension>("kotlin") {
+        jvmToolchain(javaVersion)
+    }
 }
 
 tasks {
@@ -31,13 +37,17 @@ tasks {
 }
 
 allprojects {
-    kotlin {
-        jvmToolchain(javaVersion)
+    idea {
+        module {
+            isDownloadJavadoc = false
+            isDownloadSources = true
+        }
     }
 
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(javaVersion)
+            @Suppress("UnstableApiUsage")
             vendor = JvmVendorSpec.JETBRAINS
         }
         sourceCompatibility = JavaVersion.toVersion(javaVersion)
@@ -66,7 +76,8 @@ dependencies {
         zipSigner()
     }
 
-    implementation(project(":core"))
+    implementation(project(":zig"))
+    implementation(project(":zon"))
 }
 
 intellijPlatform {
@@ -121,6 +132,7 @@ intellijPlatform {
         }
     }
     buildSearchableOptions = false
+    instrumentCode = false
 }
 
 changelog {
@@ -131,5 +143,11 @@ changelog {
 tasks {
     publishPlugin {
         dependsOn(patchChangelog)
+    }
+    compileJava {
+        enabled = false
+    }
+    classes {
+        enabled = false
     }
 }

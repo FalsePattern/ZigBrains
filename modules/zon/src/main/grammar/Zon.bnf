@@ -1,0 +1,73 @@
+/*
+ * Copyright 2023-2024 FalsePattern
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+{
+  parserClass="com.falsepattern.zigbrains.zon.parser.ZonParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Zon"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.falsepattern.zigbrains.zon.psi"
+  psiImplPackage="com.falsepattern.zigbrains.zon.psi.impl"
+
+  elementTypeHolderClass="com.falsepattern.zigbrains.zon.psi.ZonTypes"
+  elementTypeClass="com.falsepattern.zigbrains.zon.parser.ZonElementType"
+  tokenTypeClass="com.falsepattern.zigbrains.zon.parser.ZonTokenType"
+  tokens=[
+    DOT='.'
+    LBRACE='{'
+    RBRACE='}'
+    EQ='='
+    COMMA=','
+    COMMENT='comment'
+    ID='identifier'
+    STRING_LITERAL_SINGLE='string'
+    LINE_STRING='multiline string'
+    BAD_STRING='unterminated string'
+    BOOL_TRUE='true'
+    BOOL_FALSE='false'
+  ]
+
+  //Mixins
+  mixin("entry")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonEntryMixinImpl"
+  implements("entry")="com.falsepattern.zigbrains.zon.psi.mixins.ZonEntryMixin"
+
+  mixin("identifier")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonIdentifierMixinImpl"
+  implements("identifier")="com.falsepattern.zigbrains.zon.psi.mixins.ZonIdentifierMixin"
+}
+
+zonFile ::= entry
+
+entry ::= DOT LBRACE (list | struct | ()) RBRACE
+
+struct ::= (property | property_placeholder) (COMMA (property_placeholder? property property_placeholder? | property_placeholder))* COMMA?
+
+list ::= value (COMMA value)* COMMA?
+
+property ::= DOT identifier EQ value
+
+identifier ::= ID
+
+property_placeholder ::= DOT? INTELLIJ_COMPLETION_DUMMY
+
+private value ::= entry | boolean | STRING_LITERAL | value_placeholder
+
+value_placeholder ::= INTELLIJ_COMPLETION_DUMMY
+
+boolean ::= BOOL_TRUE | BOOL_FALSE
+
+STRING_LITERAL ::= STRING_LITERAL_SINGLE | LINE_STRING+

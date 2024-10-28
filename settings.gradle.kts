@@ -3,5 +3,7 @@ plugins {
 }
 rootProject.name = "ZigBrains"
 
-include("core")
-project(":core").projectDir = file("modules/core")
+include("zig")
+project(":zig").projectDir = file("modules/zig")
+include("zon")
+project(":zon").projectDir = file("modules/zon")

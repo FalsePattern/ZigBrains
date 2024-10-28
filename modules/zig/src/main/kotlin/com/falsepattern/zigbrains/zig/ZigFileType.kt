@@ -1,7 +1,6 @@
 package com.falsepattern.zigbrains.zig
 
 import com.intellij.openapi.fileTypes.LanguageFileType
-import javax.swing.Icon
 
 object ZigFileType : LanguageFileType(ZigLanguage) {
     override fun getName() = "Zig File"
