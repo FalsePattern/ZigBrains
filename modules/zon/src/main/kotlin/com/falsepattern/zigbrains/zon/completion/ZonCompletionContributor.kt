@@ -45,8 +45,23 @@ class ZonCompletionContributor : CompletionContributor() {
                 .withSuperParent(7, psiElement(ZonTypes.PROPERTY))
                 .withSuperParent(10, psiOfType<ZonFile>())
         ) { parameters, _, result ->
+            val placeholder = parameters.position.parentOfType<ZonPropertyPlaceholder>() ?: return@extend
+            val depEntry = placeholder.parentOfType<ZonEntry>() ?: return@extend
+            if (depEntry.isDependency) {
+                doAddCompletions(placeholder.text.startsWith('.'), emptySet(), ZON_DEP_KEYS, result)
+            }
+        }
+        extend(
+            CompletionType.BASIC,
+            psiElement()
+                .withParent(psiElement(ZonTypes.VALUE_PLACEHOLDER))
+                .withSuperParent(2, psiElement(ZonTypes.LIST))
+                .withSuperParent(4, psiElement(ZonTypes.PROPERTY))
+                .withSuperParent(7, psiElement(ZonTypes.PROPERTY))
+                .withSuperParent(10, psiOfType<ZonFile>())
+        ) {parameters, _, result ->
             val placeholder = parameters.position.parentOfType<ZonValuePlaceholder>() ?: return@extend
-            val depEntry = placeholder.parentOfType<ZonProperty>() ?: return@extend
+            val depEntry = placeholder.parentOfType<ZonEntry>() ?: return@extend
             if (depEntry.isDependency) {
                 doAddCompletions(false, emptySet(), ZON_DEP_KEYS, result)
             }
