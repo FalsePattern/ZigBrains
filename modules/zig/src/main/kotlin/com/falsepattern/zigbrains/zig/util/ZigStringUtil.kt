@@ -68,8 +68,9 @@ fun CharSequence.prefixWithTextBlockEscape(
     marker: CharSequence,
     indentFirst: Boolean,
     prefixFirst: Boolean,
-    newLineAfter: Boolean
-): CharSequence {
+    newLineAfter: Boolean,
+    sbFactory: (Int) -> StringBuilder = {StringBuilder(it)},
+): StringBuilder {
     val indentStr = if (indent >= 0) {
         if (indent < COMMON_INDENT_COUNT)
             COMMON_INDENTS[indent]
@@ -79,7 +80,7 @@ fun CharSequence.prefixWithTextBlockEscape(
         ""
     }
     val parts = NL_MATCHER.split(this, -1)
-    val result = StringBuilder(length + (indentStr.length + marker.length) * parts.size + 1)
+    val result = sbFactory(length + (indentStr.length + marker.length) * parts.size + 1)
     if (indentFirst) {
         result.append('\n').append(indentStr)
     }

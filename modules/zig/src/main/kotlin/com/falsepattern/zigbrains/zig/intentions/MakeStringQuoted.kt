@@ -1,8 +1,6 @@
 package com.falsepattern.zigbrains.zig.intentions
 
 import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral
-import com.falsepattern.zigbrains.zig.psi.component1
-import com.falsepattern.zigbrains.zig.psi.component2
 import com.falsepattern.zigbrains.zig.util.escape
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
 import com.intellij.openapi.editor.Editor
@@ -29,8 +27,12 @@ class MakeStringQuoted: PsiElementBaseIntentionAction() {
         if (!str.isMultiline)
             return
         val escaper = str.createLiteralTextEscaper()
-        val (contentStart, contentEnd) = escaper.relevantTextRange
-        val (fullStart, fullEnd) = str.textRange
+        val contentRange = escaper.relevantTextRange
+        val contentStart = contentRange.startOffset
+        val contentEnd = contentRange.endOffset
+        val fullRange = str.textRange
+        val fullStart = fullRange.startOffset
+        val fullEnd = fullRange.endOffset
         var caretOffset = editor.caretModel.offset
         val prefix = TextRange(contentStart, max(contentStart, caretOffset - fullStart))
         val suffix = TextRange(min(contentEnd, caretOffset - fullStart), contentEnd)

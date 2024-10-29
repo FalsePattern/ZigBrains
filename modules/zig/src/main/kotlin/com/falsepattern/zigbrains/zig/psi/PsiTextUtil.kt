@@ -13,48 +13,58 @@ import com.intellij.psi.StringEscapesTokenTypes
 import com.intellij.util.MathUtil
 import kotlin.math.max
 
+
 fun getTextRangeBounds(contentRanges: List<TextRange>): TextRange =
     if (contentRanges.isEmpty())
         TextRange.EMPTY_RANGE
     else
         TextRange.create(contentRanges.first().startOffset, contentRanges.last().endOffset)
 
-fun CharSequence.getMultiLineContent(startMark: String): List<TextRange> {
+fun CharSequence.getMultilineContent(startMark: String): List<TextRange> {
     val result = ArrayList<TextRange>()
-    val textLength = this.length
-    val markLength = startMark.length
-    var offset = 0
-
-    while (offset < textLength) {
-        val markIndex = this.indexOf(startMark, offset)
-        if (markIndex < 0)
-            break
-        val stringStart = markIndex + markLength
-
-        var found: Int? = null
-        findEnd@ for (end in stringStart until textLength) {
-            val cI = this[end]
-            when (cI) {
-                '\r' -> {
-                    if (end + 1 < textLength && this[end + 1] == '\n') {
-                        found = end + 2
-                        break@findEnd
+    var stringStart = 0
+    var inBody = false
+    val textLength = length
+    val firstChar = startMark[0]
+    val extraChars = startMark.substring(1)
+    var i = 0
+    loop@ while (i < textLength) {
+        val cI = this[i]
+        if (!inBody) {
+            if (cI == firstChar &&
+                i + extraChars.length < textLength
+            ) {
+                for (j in extraChars.indices) {
+                    if (this[i + j + 1] != startMark[j]) {
+                        i++
+                        continue@loop
                     }
-                    found = end + 1
-                    break@findEnd
                 }
-
-                '\n' -> {
-                    found = end + 1
-                    break@findEnd
-                }
+                i += extraChars.length
+                inBody = true
+                stringStart = i + 1
             }
+        } else if (cI == '\r') {
+            if (i + 1 < length && this[i + 1] == '\n') {
+                i++
+            }
+            inBody = false
+            result.add(
+                TextRange(
+                    stringStart,
+                    kotlin.math.min((textLength - 1), (i + 1))
+                )
+            )
+        } else if (cI == '\n') {
+            inBody = false
+            result.add(
+                TextRange(
+                    stringStart,
+                    kotlin.math.min((textLength - 1), (i + 1))
+                )
+            )
         }
-        if (found == null)
-            break
-
-        result.add(TextRange(stringStart, kotlin.math.min(textLength - 1, found)))
-        offset = found
+        i++
     }
     return result
 }
@@ -73,7 +83,9 @@ fun splitString(
     val token = psiAtOffset.node
     val text = document.charsSequence
 
-    val (rangeStart, rangeEnd) = token.textRange
+    val range = token.textRange
+    val rangeStart = range.startOffset
+    val rangeEnd = range.endOffset
     val lexer = ZigLexerStringAdapter()
     lexer.start(text, rangeStart, rangeEnd)
     caretOffset = lexer.skipStringLiteralEscapes(caretOffset)
@@ -140,13 +152,4 @@ private fun Lexer.skipStringLiteralEscapes(caretOffset: Int): Int {
         advance()
     }
     return caretOffset
-}
-
-
-operator fun Segment.component1(): Int {
-    return startOffset
-}
-
-operator fun Segment.component2(): Int {
-    return endOffset
 }

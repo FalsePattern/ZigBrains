@@ -8,7 +8,6 @@ import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.LiteralTextEscaper
 import com.intellij.psi.impl.source.tree.LeafElement
-import java.lang.StringBuilder
 
 abstract class ZigStringLiteralMixinImpl(node: ASTNode): ASTWrapperPsiElement(node), ZigStringLiteral {
     override fun isValidHost() = true
@@ -20,7 +19,7 @@ abstract class ZigStringLiteralMixinImpl(node: ASTNode): ASTWrapperPsiElement(no
         get() = if (!isMultiline) {
             listOf(TextRange(1, textLength - 1))
         } else {
-            text.getMultiLineContent("\\\\")
+            text.getMultilineContent("\\\\")
         }
 
     override fun updateText(text: String): ZigStringLiteral {
@@ -60,33 +59,30 @@ abstract class ZigStringLiteralMixinImpl(node: ASTNode): ASTWrapperPsiElement(no
                 var currentOffsetInDecoded = 0
 
                 var last: TextRange? = null
-                val isMultiline = myHost.isMultiline
-                for (range in contentRanges) {
+                for (i in contentRanges.indices) {
+                    val range = rangeInsideHost.intersection(contentRanges[i]) ?: continue
                     last = range
 
-                    val (rangeStart, _) = range
+                    val curString = range.substring(text)
 
-                    val curString = range.subSequence(text)
-
-                    val replacementsForThisLine = curString.decodeReplacements(isMultiline)
+                    val replacementsForThisLine = curString.decodeReplacements(myHost.isMultiline)
                     var encodedOffsetInCurrentLine = 0
-                    for ((thisRange, replacement) in replacementsForThisLine) {
-                        val (thisStart, _) = thisRange
-                        val deltaLength = thisStart - encodedOffsetInCurrentLine
+                    for (replacement in replacementsForThisLine) {
+                        val deltaLength = replacement.first.startOffset - encodedOffsetInCurrentLine
                         val currentOffsetBeforeReplacement = currentOffsetInDecoded + deltaLength
                         if (currentOffsetBeforeReplacement > offsetInDecoded) {
-                            return thisStart + encodedOffsetInCurrentLine + (offsetInDecoded - currentOffsetInDecoded)
+                            return range.startOffset + encodedOffsetInCurrentLine + (offsetInDecoded - currentOffsetInDecoded)
                         }
-                        if (currentOffsetBeforeReplacement == offsetInDecoded && replacement.isNotEmpty()) {
-                            return thisStart + encodedOffsetInCurrentLine + (offsetInDecoded - currentOffsetInDecoded)
+                        if (currentOffsetBeforeReplacement == offsetInDecoded && replacement.second.isNotEmpty()) {
+                            return range.startOffset + encodedOffsetInCurrentLine + (offsetInDecoded - currentOffsetInDecoded)
                         }
-                        currentOffsetInDecoded += deltaLength + replacement.length
-                        encodedOffsetInCurrentLine += deltaLength + range.length
+                        currentOffsetInDecoded += deltaLength + replacement.second.length
+                        encodedOffsetInCurrentLine += deltaLength + replacement.first.length
                     }
 
                     val deltaLength = curString.length - encodedOffsetInCurrentLine
                     if (currentOffsetInDecoded + deltaLength > offsetInDecoded) {
-                        return rangeStart + encodedOffsetInCurrentLine + (offsetInDecoded - currentOffsetInDecoded)
+                        return range.startOffset + encodedOffsetInCurrentLine + (offsetInDecoded - currentOffsetInDecoded)
                     }
                     currentOffsetInDecoded += deltaLength
                 }
