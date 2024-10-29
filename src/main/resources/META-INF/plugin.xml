@@ -48,6 +48,14 @@
             <className>com.falsepattern.zigbrains.zig.intentions.MakeStringQuoted</className>
             <category>Zig intentions</category>
         </intentionAction>
+
+        <!-- Language injection -->
+        <lang.elementManipulator
+                forClass="com.falsepattern.zigbrains.zig.psi.ZigStringLiteral"
+                implementationClass="com.falsepattern.zigbrains.zig.injection.ZigStringElementManipulator"/>
+        <languageInjectionPerformer
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.injection.ZigLanguageInjectionPerformer"/>
     </extensions>
     <!-- endregion Zig -->
 
@@ -87,4 +95,5 @@
                 implementationClass="com.falsepattern.zigbrains.zon.highlighting.ZonSyntaxHighlighterFactory"/>
     </extensions>
     <!-- endregion Zon -->
+
 </idea-plugin>
