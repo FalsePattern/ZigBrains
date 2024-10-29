@@ -107,14 +107,30 @@ private fun getIndentBasedOnParentType(
     if (parentType == ASM_EXPR &&
         childType != KEYWORD_ASM &&
         childType != KEYWORD_VOLATILE &&
-        !childType.isParen)
+        !childType.isParen
+    )
         return normalIndent
 
     //Assembly params
     if (parentType == ASM_INPUT_LIST || parentType == ASM_OUTPUT_LIST)
         return spaceIndent(2)
 
+    //Variable declarations
+    if (parentType == VAR_DECL_EXPR_STATEMENT &&
+        (childType == PLACEHOLDER ||
+         child?.treePrevNonSpace?.elementType == EQUAL)
+    )
+        return normalIndent
+
     return noneIndent
+}
+
+private val ASTNode.treePrevNonSpace: ASTNode? get() {
+    var it = this.treePrev
+    while (it?.elementType == TokenType.WHITE_SPACE) {
+        it = it.treePrev
+    }
+    return it
 }
 
 private val normalIndent: Indent get() = Indent.getNormalIndent()
