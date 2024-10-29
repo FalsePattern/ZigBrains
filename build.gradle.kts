@@ -11,7 +11,10 @@ plugins {
     idea
 }
 
-val javaVersion = providers.gradleProperty("javaVersion").get().toInt()
+val javaVersion = property("javaVersion").toString().toInt()
+val lsp4ijVersion: String by project
+val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
+val lsp4ijPluginString = "com.redhat.devtools.lsp4ij:$lsp4ijVersion${if (lsp4ijNightly) "@nightly" else ""}"
 
 group = "com.falsepattern"
 version = providers.gradleProperty("pluginVersion").get()
@@ -74,10 +77,12 @@ dependencies {
 
         pluginVerifier()
         zipSigner()
+        plugin(lsp4ijPluginString)
     }
 
     implementation(project(":zig"))
     implementation(project(":zon"))
+    implementation(project(":lsp"))
 }
 
 intellijPlatform {
