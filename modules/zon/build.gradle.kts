@@ -1,7 +1,6 @@
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 
 plugins {
-    kotlin("jvm")
     id("org.jetbrains.grammarkit")
 }
 
