@@ -30,6 +30,24 @@
         <lang.syntaxHighlighterFactory
                 language="Zig"
                 implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>
+
+        <!-- String manipulation -->
+        <enterHandlerDelegate
+                id="ZigEnterInTextBlockHandler"
+                implementation="com.falsepattern.zigbrains.zig.editing.ZigEnterInTextBlockHandler"/>
+        <enterHandlerDelegate
+                id="ZigEnterInQuotedStringHandler"
+                implementation="com.falsepattern.zigbrains.zig.editing.ZigEnterInQuotedStringHandler"/>
+        <intentionAction>
+            <language>Zig</language>
+            <className>com.falsepattern.zigbrains.zig.intentions.MakeStringMultiline</className>
+            <category>Zig intentions</category>
+        </intentionAction>
+        <intentionAction>
+            <language>Zig</language>
+            <className>com.falsepattern.zigbrains.zig.intentions.MakeStringQuoted</className>
+            <category>Zig intentions</category>
+        </intentionAction>
     </extensions>
     <!-- endregion Zig -->
 

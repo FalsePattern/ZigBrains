@@ -165,8 +165,8 @@
   ]
 
   //Mixins
-//  mixin("StringLiteral")="com.falsepattern.zigbrains.zig.psi.impl.mixins.ZigStringLiteralMixinImpl"
-//  implements("StringLiteral")="com.falsepattern.zigbrains.zig.psi.mixins.ZigStringLiteralMixin"
+  mixin("StringLiteral")="com.falsepattern.zigbrains.zig.psi.impl.mixins.ZigStringLiteralMixinImpl"
+  implements("StringLiteral")="com.falsepattern.zigbrains.zig.psi.mixins.ZigStringLiteralMixin"
 }
 
 Root ::= CONTAINER_DOC_COMMENT? ContainerMembers?
