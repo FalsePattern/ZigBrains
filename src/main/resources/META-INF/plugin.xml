@@ -7,15 +7,29 @@
 
     <!-- region Zig -->
     <extensions defaultExtensionNs="com.intellij">
+        <colorSettingsPage
+                implementation="com.falsepattern.zigbrains.zig.highlighter.ZigColorSettingsPage"/>
         <fileType
                 name="Zig File"
                 implementationClass="com.falsepattern.zigbrains.zig.ZigFileType"
                 fieldName="INSTANCE"
                 language="Zig"
                 extensions="zig"/>
+        <lang.braceMatcher
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.pairing.ZigBraceMatcher"/>
+        <lang.commenter
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.comments.ZigCommenter"/>
+        <lang.formatter
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>
         <lang.parserDefinition
                 language="Zig"
                 implementationClass="com.falsepattern.zigbrains.zig.parser.ZigParserDefinition"/>
+        <lang.syntaxHighlighterFactory
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>
     </extensions>
     <!-- endregion Zig -->
 

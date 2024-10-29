@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.falsepattern.zigbrains.zig.stringlexer;
+package com.falsepattern.zigbrains.zig.lexerstring;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
@@ -26,15 +26,10 @@ import static com.intellij.psi.StringEscapesTokenTypes.*;
 %%
 
 %public
-%class ZigStringLexer
+%class ZigLexerString
 %implements FlexLexer
 %function advance
 %type IElementType
-%{
-    public ZigStringLexer() {
-
-    }
-%}
 
 hex=[0-9a-fA-F]
 

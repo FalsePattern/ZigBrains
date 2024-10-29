@@ -17,20 +17,22 @@ val rootPackagePath = "com/falsepattern/zigbrains/zig"
 
 val parserDir = layout.buildDirectory.dir("$grammarGenRoot/parser")
 val lexerDir = layout.buildDirectory.dir("$grammarGenRoot/lexer")
+val lexerStringDir = layout.buildDirectory.dir("$grammarGenRoot/lexerstring")
 
 sourceSets {
     main {
         java {
             srcDir(parserDir)
             srcDir(lexerDir)
+            srcDir(lexerStringDir)
         }
     }
 }
 
 idea {
     module {
-        sourceDirs.addAll(listOf(parserDir.get().asFile, lexerDir.get().asFile))
-        generatedSourceDirs.addAll(listOf(parserDir.get().asFile, lexerDir.get().asFile))
+        sourceDirs.addAll(listOf(parserDir.get().asFile, lexerDir.get().asFile, lexerStringDir.get().asFile))
+        generatedSourceDirs.addAll(listOf(parserDir.get().asFile, lexerDir.get().asFile, lexerStringDir.get().asFile))
     }
 }
 
@@ -41,10 +43,10 @@ tasks {
         targetOutputDir = layout.buildDirectory.dir("$grammarGenRoot/lexer/$rootPackagePath/lexer")
     }
 
-    register<GenerateLexerTask>("generateStringLexer") {
+    register<GenerateLexerTask>("generateLexerString") {
         purgeOldFiles = true
         sourceFile = file("src/main/grammar/ZigString.flex")
-        targetOutputDir = layout.buildDirectory.dir("$grammarGenRoot/stringlexer/$rootPackagePath/stringlexer")
+        targetOutputDir = layout.buildDirectory.dir("$grammarGenRoot/lexerstring/$rootPackagePath/lexerstring")
 
     }
 
@@ -59,7 +61,7 @@ tasks {
     register<DefaultTask>("generateGrammars") {
         group = "grammarkit"
         dependsOn("generateLexer")
-        dependsOn("generateStringLexer")
+        dependsOn("generateLexerString")
         dependsOn("generateParser")
     }
 
