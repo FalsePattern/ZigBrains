@@ -80,8 +80,7 @@ dependencies {
         plugin(lsp4ijPluginString)
     }
 
-    implementation(project(":zig"))
-    implementation(project(":zon"))
+    implementation(project(":core"))
     implementation(project(":lsp"))
 }
 

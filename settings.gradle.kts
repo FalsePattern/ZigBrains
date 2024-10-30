@@ -3,7 +3,7 @@ plugins {
 }
 rootProject.name = "ZigBrains"
 
-for (module in arrayOf("zig", "zon", "lsp")) {
+for (module in arrayOf("core", "lsp")) {
     include(module)
     project(":$module").projectDir = file("modules/$module")
 }

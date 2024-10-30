@@ -1,5 +1,6 @@
 package com.falsepattern.zigbrains.zig
 
+import com.falsepattern.zigbrains.Icons
 import com.intellij.openapi.fileTypes.LanguageFileType
 
 object ZigFileType : LanguageFileType(ZigLanguage) {

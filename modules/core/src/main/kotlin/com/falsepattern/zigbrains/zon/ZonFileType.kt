@@ -1,5 +1,6 @@
 package com.falsepattern.zigbrains.zon
 
+import com.falsepattern.zigbrains.Icons
 import com.intellij.openapi.fileTypes.LanguageFileType
 
 object ZonFileType: LanguageFileType(ZonLanguage) {

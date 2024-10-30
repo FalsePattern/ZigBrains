@@ -1,6 +1,6 @@
 package com.falsepattern.zigbrains.zon.highlighting
 
-import com.falsepattern.zigbrains.zon.Icons
+import com.falsepattern.zigbrains.Icons
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage

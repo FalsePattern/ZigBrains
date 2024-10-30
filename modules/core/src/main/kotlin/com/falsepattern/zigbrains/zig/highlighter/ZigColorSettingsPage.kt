@@ -1,6 +1,6 @@
 package com.falsepattern.zigbrains.zig.highlighter
 
-import com.falsepattern.zigbrains.zig.Icons
+import com.falsepattern.zigbrains.Icons
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
