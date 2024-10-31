@@ -22,6 +22,11 @@ Changelog structure reference:
 - Toolchains, Run Configurations
   - [Direnv](https://github.com/direnv/direnv) support
 
+### Fixed 
+
+- Zig
+  - Missing description for string conversion intentions
+
 ## [19.2.0]
 
 ### Added
