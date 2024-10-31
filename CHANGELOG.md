@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [19.3.0]
+
 ### Added
 
 - Toolchains, Run Configurations
