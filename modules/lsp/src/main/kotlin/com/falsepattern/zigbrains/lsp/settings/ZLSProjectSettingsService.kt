@@ -20,18 +20,34 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+package com.falsepattern.zigbrains.lsp.settings
 
-val lsp4ijVersion: String by project
-val lsp4jVersion: String by project
-val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
-val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
+import com.intellij.openapi.components.*
+import com.intellij.openapi.project.Project
 
-dependencies {
-    intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"))
+@Service(Service.Level.PROJECT)
+@State(
+    name = "ZLSSettings",
+    storages = [Storage(value = "zigbrains.xml")]
+)
+class ZLSProjectSettingsService: PersistentStateComponent<ZLSSettings> {
+    @Volatile
+    private var state = ZLSSettings()
+    override fun getState(): ZLSSettings {
+        return state.copy()
     }
-    intellijPlatformPluginDependency(lsp4ijDepString)
-    compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
-    implementation(project(":core"))
+
+    fun setState(value: ZLSSettings) {
+        this.state = value
+    }
+
+    override fun loadState(state: ZLSSettings) {
+        this.state = state
+    }
+
+    fun isModified(otherData: ZLSSettings): Boolean {
+        return state != otherData
+    }
 }
+
+val Project.zlsSettings get() = service<ZLSProjectSettingsService>()

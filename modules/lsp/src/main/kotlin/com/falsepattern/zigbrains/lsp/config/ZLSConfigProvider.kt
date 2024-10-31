@@ -20,18 +20,23 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+package com.falsepattern.zigbrains.lsp.config
 
-val lsp4ijVersion: String by project
-val lsp4jVersion: String by project
-val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
-val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
+import com.intellij.openapi.extensions.ExtensionPointName
+import com.intellij.openapi.project.Project
 
-dependencies {
-    intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"))
+interface ZLSConfigProvider {
+    fun getEnvironment(project: Project): ZLSConfig
+    companion object {
+        private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZLSConfigProvider>("com.falsepattern.zigbrains.zlsConfigProvider")
+
+        fun findEnvironment(project: Project): ZLSConfig {
+            val extensions = EXTENSION_POINT_NAME.extensionList
+            var result = ZLSConfig()
+            for (extension in extensions) {
+                result = result merge extension.getEnvironment(project)
+            }
+            return result
+        }
     }
-    intellijPlatformPluginDependency(lsp4ijDepString)
-    compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
-    implementation(project(":core"))
 }

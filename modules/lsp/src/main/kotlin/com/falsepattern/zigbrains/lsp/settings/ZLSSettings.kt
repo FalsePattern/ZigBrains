@@ -20,18 +20,20 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+package com.falsepattern.zigbrains.lsp.settings
 
-val lsp4ijVersion: String by project
-val lsp4jVersion: String by project
-val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
-val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
+import org.jetbrains.annotations.NonNls
 
-dependencies {
-    intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"))
-    }
-    intellijPlatformPluginDependency(lsp4ijDepString)
-    compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
-    implementation(project(":core"))
-}
+data class ZLSSettings(
+    val direnv: Boolean = true,
+    val zlsPath: @NonNls String = "",
+    val zlsConfigPath: @NonNls String = "",
+    val debug: Boolean = false,
+    val messageTrace: Boolean = false,
+    val buildOnSave: Boolean = false,
+    val buildOnSaveStep: @NonNls String = "install",
+    val globalVarDeclarations: Boolean = false,
+    val comptimeInterpreter: Boolean = false,
+    val inlayHints: Boolean = true,
+    val inlayHintsCompact: Boolean = true
+)

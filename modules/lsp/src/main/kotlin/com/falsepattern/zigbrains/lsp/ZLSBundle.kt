@@ -20,18 +20,31 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+package com.falsepattern.zigbrains.lsp
 
-val lsp4ijVersion: String by project
-val lsp4jVersion: String by project
-val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
-val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
+import com.intellij.DynamicBundle
+import org.jetbrains.annotations.Nls
+import org.jetbrains.annotations.NonNls
+import org.jetbrains.annotations.PropertyKey
+import java.util.function.Supplier
 
-dependencies {
-    intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"))
+@NonNls
+private const val BUNDLE = "zigbrains.lsp.Bundle"
+
+internal object ZLSBundle {
+    private val INSTANCE = DynamicBundle(ZLSBundle::class.java, BUNDLE)
+
+    fun message(
+        key: @PropertyKey(resourceBundle = BUNDLE) String,
+        vararg params: Any
+    ): @Nls String {
+        return INSTANCE.getMessage(key, *params)
     }
-    intellijPlatformPluginDependency(lsp4ijDepString)
-    compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
-    implementation(project(":core"))
+
+    fun lazyMessage(
+        key: @PropertyKey(resourceBundle = BUNDLE) String,
+        vararg params: Any
+    ): Supplier<@Nls String> {
+        return INSTANCE.getLazyMessage(key, *params)
+    }
 }

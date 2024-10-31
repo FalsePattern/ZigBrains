@@ -105,4 +105,10 @@
     </extensions>
     <!-- endregion direnv -->
 
+    <extensionPoints>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.lsp.config.ZLSConfigProvider"
+                dynamic="true"
+                name="zlsConfigProvider"/>
+    </extensionPoints>
 </idea-plugin>
