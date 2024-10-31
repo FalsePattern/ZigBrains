@@ -23,12 +23,13 @@
 package com.falsepattern.zigbrains.zig
 
 import com.falsepattern.zigbrains.Icons
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.intellij.openapi.fileTypes.LanguageFileType
 
 object ZigFileType : LanguageFileType(ZigLanguage) {
     override fun getName() = "Zig File"
 
-    override fun getDescription() = "ZigLang file"
+    override fun getDescription() = ZigBrainsBundle.message("zig.file.description")
 
     override fun getDefaultExtension() = "zig"
 

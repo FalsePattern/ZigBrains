@@ -36,6 +36,7 @@ import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
+import org.jetbrains.annotations.NonNls
 
 class ZonCompletionContributor : CompletionContributor() {
     init {
@@ -118,8 +119,10 @@ private typealias Processor = (
     parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet
 ) -> Unit
 
+@NonNls
 private val ZON_ROOT_KEYS: List<String> =
     listOf("name", "version", "minimum_zig_version", "dependencies", "paths")
+@NonNls
 private val ZON_DEP_KEYS: List<String> = listOf("url", "hash", "path", "lazy")
 
 private fun doAddCompletions(

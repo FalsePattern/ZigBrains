@@ -96,11 +96,10 @@ val PsiElement.indentSize: Int get() = StringUtil.offsetToLineColumn(containingF
 fun splitString(
     editor: Editor,
     psiAtOffset: PsiElement,
-    caretOffset: Int,
+    initialCaretOffset: Int,
     insertNewlineAtCaret: Boolean
 ) {
-    @Suppress("NAME_SHADOWING")
-    var caretOffset = caretOffset
+    var caretOffset = initialCaretOffset
     val document = editor.document
     val token = psiAtOffset.node
     val text = document.charsSequence

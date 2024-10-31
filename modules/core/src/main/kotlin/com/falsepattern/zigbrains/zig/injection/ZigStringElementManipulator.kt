@@ -35,6 +35,7 @@ import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.AbstractElementManipulator
 import com.intellij.psi.PsiFileFactory
+import org.jetbrains.annotations.NonNls
 
 class ZigStringElementManipulator: AbstractElementManipulator<ZigStringLiteral>() {
     override fun handleContentChange(
@@ -44,6 +45,7 @@ class ZigStringElementManipulator: AbstractElementManipulator<ZigStringLiteral>(
     ): ZigStringLiteral {
         val originalContext = element.text!!
         val isMultiline = element.isMultiline
+        @NonNls
         val prefix = "const x = \n";
         val suffix = "\n;"
         val sbFactory: (Int) -> StringBuilder = {
@@ -78,6 +80,7 @@ class ZigStringElementManipulator: AbstractElementManipulator<ZigStringLiteral>(
         getTextRangeBounds(element.contentRanges)
 }
 
+@NonNls
 private val fileName = "dummy." + ZigFileType.defaultExtension
 
 private fun ZigStringElementManipulator.replaceQuotedContent(

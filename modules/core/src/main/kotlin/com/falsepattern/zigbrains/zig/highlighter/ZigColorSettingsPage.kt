@@ -23,11 +23,13 @@
 package com.falsepattern.zigbrains.zig.highlighter
 
 import com.falsepattern.zigbrains.Icons
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
 import kotlinx.collections.immutable.toImmutableMap
+import org.jetbrains.annotations.NonNls
 
 
 class ZigColorSettingsPage: ColorSettingsPage {
@@ -35,7 +37,7 @@ class ZigColorSettingsPage: ColorSettingsPage {
 
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
 
-    override fun getDisplayName() = "Zig"
+    override fun getDisplayName() = ZigBrainsBundle.message("configurable.name.zig-color-settings-page")
 
     override fun getIcon() = Icons.ZIG
 
@@ -92,6 +94,7 @@ class ZigColorSettingsPage: ColorSettingsPage {
         ADD_HIGHLIGHT
 }
 
+@Suppress("HardCodedStringLiteral")
 private val ADD_HIGHLIGHT = HashMap<String, TextAttributesKey>().apply {
     this["enum"] = ZigSyntaxHighlighter.ENUM_REF
     this["enum_decl"] = ZigSyntaxHighlighter.ENUM_DECL
@@ -113,50 +116,51 @@ private val ADD_HIGHLIGHT = HashMap<String, TextAttributesKey>().apply {
     this["variable_decl"] = ZigSyntaxHighlighter.VARIABLE_DECL
 }.toImmutableMap()
 
+
 private val DESCRIPTORS: Array<AttributesDescriptor> = arrayOf(
-    AttributesDescriptor("Bad character", ZigSyntaxHighlighter.BAD_CHAR),
-    AttributesDescriptor("Builtin", ZigSyntaxHighlighter.BUILTIN),
-    AttributesDescriptor("Character literal", ZigSyntaxHighlighter.CHAR),
-    AttributesDescriptor("Comment//Regular", ZigSyntaxHighlighter.COMMENT),
-    AttributesDescriptor("Comment//Documentation", ZigSyntaxHighlighter.COMMENT_DOC),
-    AttributesDescriptor("Enum//Reference", ZigSyntaxHighlighter.ENUM_REF),
-    AttributesDescriptor("Enum//Declaration", ZigSyntaxHighlighter.ENUM_DECL),
-    AttributesDescriptor("Enum//Member//Declaration", ZigSyntaxHighlighter.ENUM_MEMBER_DECL),
-    AttributesDescriptor("Enum//Member//Reference", ZigSyntaxHighlighter.ENUM_MEMBER_REF),
-    AttributesDescriptor("Error tag//Declaration", ZigSyntaxHighlighter.ERROR_TAG_DECL),
-    AttributesDescriptor("Error tag//Reference", ZigSyntaxHighlighter.ERROR_TAG_REF),
-    AttributesDescriptor("Function//Declaration", ZigSyntaxHighlighter.FUNCTION_DECL),
-    AttributesDescriptor("Function//Declaration//Generic", ZigSyntaxHighlighter.FUNCTION_DECL_GEN),
-    AttributesDescriptor("Function//Reference", ZigSyntaxHighlighter.FUNCTION_REF),
-    AttributesDescriptor("Function//Reference//Generic", ZigSyntaxHighlighter.FUNCTION_REF_GEN),
-    AttributesDescriptor("Keyword", ZigSyntaxHighlighter.KEYWORD),
-    AttributesDescriptor("Label//Declaration", ZigSyntaxHighlighter.LABEL_REF),
-    AttributesDescriptor("Label//Reference", ZigSyntaxHighlighter.LABEL_REF),
-    AttributesDescriptor("Method//Declaration", ZigSyntaxHighlighter.METHOD_DECL),
-    AttributesDescriptor("Method//Declaration//Generic", ZigSyntaxHighlighter.METHOD_DECL_GEN),
-    AttributesDescriptor("Method//Reference", ZigSyntaxHighlighter.METHOD_REF),
-    AttributesDescriptor("Method//Reference//Generic", ZigSyntaxHighlighter.METHOD_REF_GEN),
-    AttributesDescriptor("Namespace//Declaration", ZigSyntaxHighlighter.NAMESPACE_DECL),
-    AttributesDescriptor("Namespace//Reference", ZigSyntaxHighlighter.NAMESPACE_REF),
-    AttributesDescriptor("Number", ZigSyntaxHighlighter.NUMBER),
-    AttributesDescriptor("Operator", ZigSyntaxHighlighter.OPERATOR),
-    AttributesDescriptor("Parameter", ZigSyntaxHighlighter.PARAMETER),
-    AttributesDescriptor("Property//Declaration", ZigSyntaxHighlighter.PROPERTY_DECL),
-    AttributesDescriptor("Property//Reference", ZigSyntaxHighlighter.PROPERTY_REF),
-    AttributesDescriptor("String", ZigSyntaxHighlighter.STRING),
-    AttributesDescriptor("String//Escape", ZigSyntaxHighlighter.STRING_ESC_V),
-    AttributesDescriptor("String//Escape//Invalid char", ZigSyntaxHighlighter.STRING_ESC_I_C),
-    AttributesDescriptor("String//Escape//Invalid unicode", ZigSyntaxHighlighter.STRING_ESC_I_U),
-    AttributesDescriptor("Struct//Declaration", ZigSyntaxHighlighter.STRUCT_DECL),
-    AttributesDescriptor("Struct//Reference", ZigSyntaxHighlighter.STRUCT_REF),
-    AttributesDescriptor("Type//Declaration", ZigSyntaxHighlighter.TYPE_DECL),
-    AttributesDescriptor("Type//Declaration//Generic", ZigSyntaxHighlighter.TYPE_DECL_GEN),
-    AttributesDescriptor("Type//Reference", ZigSyntaxHighlighter.TYPE_REF),
-    AttributesDescriptor("Type//Reference//Generic", ZigSyntaxHighlighter.TYPE_REF_GEN),
-    AttributesDescriptor("Type parameter//Reference", ZigSyntaxHighlighter.TYPE_PARAM),
-    AttributesDescriptor("Type parameter//Declaration", ZigSyntaxHighlighter.TYPE_PARAM_DECL),
-    AttributesDescriptor("Variable//Declaration", ZigSyntaxHighlighter.VARIABLE_DECL),
-    AttributesDescriptor("Variable//Declaration//Deprecated", ZigSyntaxHighlighter.VARIABLE_DECL_DEPR),
-    AttributesDescriptor("Variable//Reference", ZigSyntaxHighlighter.VARIABLE_REF),
-    AttributesDescriptor("Variable//Reference//Deprecated", ZigSyntaxHighlighter.VARIABLE_REF_DEPR),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.builtin"), ZigSyntaxHighlighter.BUILTIN),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.char"), ZigSyntaxHighlighter.CHAR),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.comment"), ZigSyntaxHighlighter.COMMENT),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.comment-doc"), ZigSyntaxHighlighter.COMMENT_DOC),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.enum-ref"), ZigSyntaxHighlighter.ENUM_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.enum-decl"), ZigSyntaxHighlighter.ENUM_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.enum-member-decl"), ZigSyntaxHighlighter.ENUM_MEMBER_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.enum-member-ref"), ZigSyntaxHighlighter.ENUM_MEMBER_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.error-tag-decl"), ZigSyntaxHighlighter.ERROR_TAG_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.error-tag-ref"), ZigSyntaxHighlighter.ERROR_TAG_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.function-decl"), ZigSyntaxHighlighter.FUNCTION_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.function-decl-gen"), ZigSyntaxHighlighter.FUNCTION_DECL_GEN),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.function-ref"), ZigSyntaxHighlighter.FUNCTION_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.function-ref-gen"), ZigSyntaxHighlighter.FUNCTION_REF_GEN),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.keyword"), ZigSyntaxHighlighter.KEYWORD),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.label-decl"), ZigSyntaxHighlighter.LABEL_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.label-ref"), ZigSyntaxHighlighter.LABEL_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.method-decl"), ZigSyntaxHighlighter.METHOD_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.method-decl-gen"), ZigSyntaxHighlighter.METHOD_DECL_GEN),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.method-ref"), ZigSyntaxHighlighter.METHOD_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.method-ref-gen"), ZigSyntaxHighlighter.METHOD_REF_GEN),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.namespace-decl"), ZigSyntaxHighlighter.NAMESPACE_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.namespace-ref"), ZigSyntaxHighlighter.NAMESPACE_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.number"), ZigSyntaxHighlighter.NUMBER),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.operator"), ZigSyntaxHighlighter.OPERATOR),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.parameter"), ZigSyntaxHighlighter.PARAMETER),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.property-decl"), ZigSyntaxHighlighter.PROPERTY_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.property-ref"), ZigSyntaxHighlighter.PROPERTY_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.string"), ZigSyntaxHighlighter.STRING),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.string-esc-v"), ZigSyntaxHighlighter.STRING_ESC_V),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.string-esc-i-c"), ZigSyntaxHighlighter.STRING_ESC_I_C),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.string-esc-i-u"), ZigSyntaxHighlighter.STRING_ESC_I_U),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.struct-decl"), ZigSyntaxHighlighter.STRUCT_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.struct-ref"), ZigSyntaxHighlighter.STRUCT_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.type-decl"), ZigSyntaxHighlighter.TYPE_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.type-decl-gen"), ZigSyntaxHighlighter.TYPE_DECL_GEN),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.type-ref"), ZigSyntaxHighlighter.TYPE_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.type-ref-gen"), ZigSyntaxHighlighter.TYPE_REF_GEN),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.type-param"), ZigSyntaxHighlighter.TYPE_PARAM),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.type-param-decl"), ZigSyntaxHighlighter.TYPE_PARAM_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.variable-decl"), ZigSyntaxHighlighter.VARIABLE_DECL),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.variable-decl-depr"), ZigSyntaxHighlighter.VARIABLE_DECL_DEPR),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.variable-ref"), ZigSyntaxHighlighter.VARIABLE_REF),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.variable-ref-depr"), ZigSyntaxHighlighter.VARIABLE_REF_DEPR),
+    AttributesDescriptor(ZigBrainsBundle.message("zig.color-settings.bad-char"), ZigSyntaxHighlighter.BAD_CHAR),
 )

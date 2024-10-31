@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.zon.highlighting
 
 import com.falsepattern.zigbrains.Icons
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
@@ -32,7 +33,7 @@ class ZonColorSettingsPage: ColorSettingsPage {
 
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
 
-    override fun getDisplayName() = "Zon"
+    override fun getDisplayName() = ZigBrainsBundle.message("configurable.name.zon-color-settings-page")
 
     override fun getIcon() = Icons.ZON
 
@@ -67,13 +68,13 @@ class ZonColorSettingsPage: ColorSettingsPage {
 }
 
 val DESCRIPTORS = arrayOf(
-    AttributesDescriptor("Equals", ZonSyntaxHighlighter.EQ),
-    AttributesDescriptor("Identifier", ZonSyntaxHighlighter.ID),
-    AttributesDescriptor("Comment", ZonSyntaxHighlighter.COMMENT),
-    AttributesDescriptor("Bad value", ZonSyntaxHighlighter.BAD_CHAR),
-    AttributesDescriptor("String", ZonSyntaxHighlighter.STRING),
-    AttributesDescriptor("Comma", ZonSyntaxHighlighter.COMMA),
-    AttributesDescriptor("Dot", ZonSyntaxHighlighter.DOT),
-    AttributesDescriptor("Boolean", ZonSyntaxHighlighter.BOOLEAN),
-    AttributesDescriptor("Braces", ZonSyntaxHighlighter.BRACE)
+    AttributesDescriptor(ZigBrainsBundle.message("zon.color-settings.eq"), ZonSyntaxHighlighter.EQ),
+    AttributesDescriptor(ZigBrainsBundle.message("zon.color-settings.id"), ZonSyntaxHighlighter.ID),
+    AttributesDescriptor(ZigBrainsBundle.message("zon.color-settings.comment"), ZonSyntaxHighlighter.COMMENT),
+    AttributesDescriptor(ZigBrainsBundle.message("zon.color-settings.bad_char"), ZonSyntaxHighlighter.BAD_CHAR),
+    AttributesDescriptor(ZigBrainsBundle.message("zon.color-settings.string"), ZonSyntaxHighlighter.STRING),
+    AttributesDescriptor(ZigBrainsBundle.message("zon.color-settings.comma"), ZonSyntaxHighlighter.COMMA),
+    AttributesDescriptor(ZigBrainsBundle.message("zon.color-settings.dot"), ZonSyntaxHighlighter.DOT),
+    AttributesDescriptor(ZigBrainsBundle.message("zon.color-settings.boolean"), ZonSyntaxHighlighter.BOOLEAN),
+    AttributesDescriptor(ZigBrainsBundle.message("zon.color-settings.brace"), ZonSyntaxHighlighter.BRACE)
 )

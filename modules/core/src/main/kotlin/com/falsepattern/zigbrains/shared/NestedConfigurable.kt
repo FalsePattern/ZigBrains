@@ -20,13 +20,17 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains
+package com.falsepattern.zigbrains.shared
 
-import com.intellij.openapi.util.IconLoader
-import org.jetbrains.annotations.NonNls
+import com.intellij.openapi.options.Configurable
+import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.dsl.builder.panel
+import javax.swing.JComponent
 
-@NonNls
-object Icons {
-    val ZIG = IconLoader.getIcon("/icons/zig.svg", Icons::class.java)
-    val ZON = IconLoader.getIcon("/icons/zon.svg", Icons::class.java)
+interface NestedConfigurable: Configurable {
+    override fun createComponent() = panel {
+        createComponent(this)
+    }
+
+    fun createComponent(panel: Panel)
 }

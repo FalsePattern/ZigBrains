@@ -22,20 +22,53 @@
 
 package com.falsepattern.zigbrains.direnv
 
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
+import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.util.io.awaitExit
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.apache.commons.io.IOUtils
-import java.nio.charset.StandardCharsets
+import kotlinx.serialization.json.Json
+import org.jetbrains.annotations.NonNls
 import java.nio.file.Path
 
-class DirenvCmd(val workingDirectory: Path) {
-    fun direnvInstalled() =
-        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS("direnv") != null
+class DirenvCmd(private val workingDirectory: Path) {
 
+    suspend fun importDirenv(): Env {
+        if (!direnvInstalled())
+            return emptyEnv
+
+        val runOutput = run("export", "json")
+        if (runOutput.error) {
+            if (runOutput.output.contains("is blocked")) {
+                Notifications.Bus.notify(Notification(
+                    GROUP_DISPLAY_ID,
+                    ZigBrainsBundle.message("notification.title.direnv-blocked"),
+                    ZigBrainsBundle.message("notification.content.direnv-blocked"),
+                    NotificationType.ERROR
+                    ))
+                return emptyEnv
+            } else {
+                Notifications.Bus.notify(Notification(
+                    GROUP_DISPLAY_ID,
+                    ZigBrainsBundle.message("notification.title.direnv-error"),
+                    ZigBrainsBundle.message("notification.content.direnv-error", runOutput.output),
+                    NotificationType.ERROR
+                ))
+                return emptyEnv
+            }
+        }
+        return Env(Json.decodeFromString<Map<String, String>>(runOutput.output))
+    }
+
+
+    @NonNls
     private suspend fun run(vararg args: String): DirenvOutput {
+        @NonNls
         val cli = GeneralCommandLine("direnv", *args)
             .withWorkingDirectory(workingDirectory)
 
@@ -48,4 +81,18 @@ class DirenvCmd(val workingDirectory: Path) {
         val stdOut = process.errorStream.bufferedReader().use { it.readText() }
         return DirenvOutput(stdOut, false)
     }
+
+    companion object {
+        @NonNls
+        private const val GROUP_DISPLAY_ID = "zigbrains-direnv"
+        private val LOG = logger<DirenvCmd>()
+        fun direnvInstalled() =
+            // Using the builtin stuff here instead of Env because it should only scan for direnv on the process path
+            PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS("direnv") != null
+    }
+}
+
+suspend fun Project?.getDirenv(): Env {
+    val dir = this?.guessProjectDir() ?: return emptyEnv
+    return DirenvCmd(dir.toNioPath()).importDirenv()
 }

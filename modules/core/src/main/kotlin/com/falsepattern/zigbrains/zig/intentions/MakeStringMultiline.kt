@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.zig.intentions
 
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral
 import com.falsepattern.zigbrains.zig.psi.splitString
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
@@ -34,7 +35,7 @@ class MakeStringMultiline: PsiElementBaseIntentionAction() {
     init {
         text = familyName
     }
-    override fun getFamilyName() = "Convert to multiline"
+    override fun getFamilyName() = ZigBrainsBundle.message("intention.family.name.make-string-multiline")
 
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement) =
         editor != null && element.parentOfType<ZigStringLiteral>()?.isMultiline?.not() ?: false

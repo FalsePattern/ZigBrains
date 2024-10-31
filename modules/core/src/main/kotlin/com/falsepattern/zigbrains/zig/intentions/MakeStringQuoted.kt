@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.zig.intentions
 
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral
 import com.falsepattern.zigbrains.zig.util.escape
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
@@ -37,7 +38,7 @@ class MakeStringQuoted: PsiElementBaseIntentionAction() {
     init {
         text = familyName
     }
-    override fun getFamilyName() = "Convert to quoted"
+    override fun getFamilyName() = ZigBrainsBundle.message("intention.family.name.make-string-quoted")
 
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement) =
         editor != null && element.parentOfType<ZigStringLiteral>()?.isMultiline ?: false

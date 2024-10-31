@@ -23,7 +23,8 @@
 package com.falsepattern.zigbrains.zon.psi.mixins
 
 import com.intellij.psi.PsiElement
+import org.jetbrains.annotations.NonNls
 
 interface ZonIdentifierMixin: PsiElement {
-    val value: String
+    val value: @NonNls String
 }

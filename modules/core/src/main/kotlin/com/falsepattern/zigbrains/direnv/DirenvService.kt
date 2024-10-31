@@ -20,13 +20,16 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains
+package com.falsepattern.zigbrains.direnv
 
-import com.intellij.openapi.util.IconLoader
-import org.jetbrains.annotations.NonNls
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
+import com.intellij.util.application
+import kotlinx.coroutines.CoroutineScope
 
-@NonNls
-object Icons {
-    val ZIG = IconLoader.getIcon("/icons/zig.svg", Icons::class.java)
-    val ZON = IconLoader.getIcon("/icons/zon.svg", Icons::class.java)
+@Service
+class DirenvService(val cs: CoroutineScope) {
+
 }
+
+val direnvScope get() = application.service<DirenvService>().cs

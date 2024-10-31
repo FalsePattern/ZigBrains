@@ -31,6 +31,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.StringEscapesTokenTypes
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
+import org.jetbrains.annotations.NonNls
 
 class ZigSyntaxHighlighter: SyntaxHighlighterBase() {
     override fun getHighlightingLexer() = ZigHighlightingLexer()
@@ -38,6 +39,7 @@ class ZigSyntaxHighlighter: SyntaxHighlighterBase() {
     override fun getTokenHighlights(tokenType: IElementType?) =
         KEYMAP.getOrDefault(tokenType, EMPTY_KEYS)
 
+    @NonNls
     companion object {
 
         // @formatter:off
@@ -99,7 +101,10 @@ class ZigSyntaxHighlighter: SyntaxHighlighterBase() {
                 KEYWORD,
                 *ZigTypes::class.java
                     .fields
-                    .filter { it.name.startsWith("KEYWORD_") }
+                    .filter {
+                        @Suppress("HardCodedStringLiteral")
+                        it.name.startsWith("KEYWORD_")
+                    }
                     .map { it.get(null) as IElementType }
                     .toTypedArray()
             )

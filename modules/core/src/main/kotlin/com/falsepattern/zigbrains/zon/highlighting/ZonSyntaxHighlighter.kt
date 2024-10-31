@@ -29,6 +29,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
+import org.jetbrains.annotations.NonNls
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as DefaultColors
 
 class ZonSyntaxHighlighter : SyntaxHighlighterBase() {
@@ -52,7 +53,7 @@ class ZonSyntaxHighlighter : SyntaxHighlighterBase() {
         private val EMPTY_KEYS = emptyArray<TextAttributesKey>()
         private val KEYMAP = HashMap<IElementType, Array<TextAttributesKey>>()
 
-        private fun createKey(name: String, fallback: TextAttributesKey) =
+        private fun createKey(name: @NonNls String, fallback: TextAttributesKey) =
             TextAttributesKey.createTextAttributesKey("ZON_$name", fallback)
 
         private fun addMapping(key: TextAttributesKey, vararg types: IElementType) = types.forEach { KEYMAP[it] = arrayOf(key) }

@@ -157,7 +157,7 @@ private val ASTNode.treePrevNonSpace: ASTNode? get() {
 
 private val normalIndent: Indent get() = Indent.getNormalIndent()
 
-private fun spaceIndent(spaces: Int) = Indent.getSpaceIndent(2)
+private fun spaceIndent(spaces: Int) = Indent.getSpaceIndent(spaces)
 
 private val noneIndent: Indent get() = Indent.getNoneIndent()
 

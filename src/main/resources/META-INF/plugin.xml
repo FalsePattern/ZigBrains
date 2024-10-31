@@ -96,4 +96,13 @@
     </extensions>
     <!-- endregion Zon -->
 
+    <!-- region direnv -->
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup displayType="BALLOON"
+                           id="zigbrains-direnv"
+                           bundle="zigbrains.Bundle"
+                           key="notification.group.zigbrains-direnv"/>
+    </extensions>
+    <!-- endregion direnv -->
+
 </idea-plugin>

@@ -20,13 +20,17 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("HardCodedStringLiteral")
+
 package com.falsepattern.zigbrains.zig.util
 
 import com.intellij.openapi.util.TextRange
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
+import org.jetbrains.annotations.NonNls
 import java.util.regex.Pattern
 import java.util.stream.Collectors
 import kotlin.math.min
+
 
 fun CharSequence.escape(): CharSequence {
     val sb = StringBuilder(length)
