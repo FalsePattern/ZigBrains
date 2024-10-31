@@ -47,8 +47,8 @@ public class ZigNewProjectPanel implements Disposable {
 
     public ZigNewProjectPanel(boolean handleGit) {
         this.handleGit = handleGit;
-        projConf = new ZigProjectSettingsPanel();
-        zlsConf = new ZLSSettingsPanel();
+        projConf = new ZigProjectSettingsPanel(null);
+        zlsConf = new ZLSSettingsPanel(null);
     }
 
     public ZigProjectConfigurationData getData() {

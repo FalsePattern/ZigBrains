@@ -17,7 +17,6 @@
 package com.falsepattern.zigbrains.zig.highlighter;
 
 import com.falsepattern.zigbrains.zig.lexer.ZigHighlightingLexer;
-import com.falsepattern.zigbrains.zig.lexer.ZigLexerAdapter;
 import com.falsepattern.zigbrains.zig.psi.ZigTypes;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;

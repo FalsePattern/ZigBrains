@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 @Data
 @AllArgsConstructor
 public final class ZLSSettings {
+    public boolean direnv;
     public @Nullable String zlsPath;
     public @NotNull String zlsConfigPath;
     public boolean debug;
@@ -36,6 +37,6 @@ public final class ZLSSettings {
     public boolean inlayHintsCompact;
 
     public ZLSSettings() {
-        this(null, "", false, false, false, "install", false, false, true, true);
+        this(true, null, "", false, false, false, "install", false, false, true, true);
     }
 }

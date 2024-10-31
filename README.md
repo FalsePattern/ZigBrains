@@ -85,6 +85,14 @@ Adds support for the Zig Language, utilizing the ZLS language server for advance
 2. Download and compile the ZLS language server, available at https://github.com/zigtools/zls
 3. Go to `Settings` -> `Languages & Frameworks` -> `Zig`, and point the `Toolchain Location` and `ZLS path` to the correct places
 
+## Features
+
+- Integration with the Zig Language Server (ZLS)
+- Basic syntax highlighting if ZLS is not available
+- Run and debug configurations for Zig projects (Debugging has some IDE limitations, and on Windows you need to do some extra setup, see below)
+- Direnv support for loading environment variables from `.envrc` files (requires the direnv executable to be installed system-wide)
+- Language injection support in Zig strings
+
 ## Debugging
 
 Debugger settings are available in the `Settings | Build, Execution, Deployment | Debugger` menu, under the `Zig` section. 

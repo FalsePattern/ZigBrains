@@ -51,7 +51,7 @@ public abstract class ZigProgramRunnerBase<ProfileState extends ProfileStateBase
         if (state == null)
             return Promises.resolvedPromise();
 
-        val toolchain = ZigProjectSettingsService.getInstance(environment.getProject()).getState().getToolchain();
+        val toolchain = ZigProjectSettingsService.getInstance(environment.getProject()).getState().getToolchain(environment.getProject());
         if (toolchain == null) {
             return Promises.resolvedPromise();
         }

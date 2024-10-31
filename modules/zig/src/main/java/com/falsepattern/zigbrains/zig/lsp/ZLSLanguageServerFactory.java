@@ -1,8 +1,6 @@
 package com.falsepattern.zigbrains.zig.lsp;
 
 import com.falsepattern.zigbrains.zig.settings.ZLSProjectSettingsService;
-import com.falsepattern.zigbrains.zig.settings.ZLSSettings;
-import com.falsepattern.zigbrains.zig.settings.ZLSSettingsConfigProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.redhat.devtools.lsp4ij.LanguageServerEnablementSupport;
@@ -12,7 +10,6 @@ import com.redhat.devtools.lsp4ij.client.features.LSPClientFeatures;
 import com.redhat.devtools.lsp4ij.client.features.LSPFormattingFeature;
 import com.redhat.devtools.lsp4ij.client.features.LSPInlayHintFeature;
 import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider;
-import com.redhat.devtools.lsp4ij.server.capabilities.InlayHintCapabilityRegistry;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,7 +51,7 @@ public class ZLSLanguageServerFactory implements LanguageServerFactory, Language
 
     @Override
     public boolean isEnabled(@NotNull Project project) {
-        return enabled && ZLSStreamConnectionProvider.doGetCommand(project, false) != null;
+        return enabled && ZLSStreamConnectionProvider.getCommandSync(project, false) != null;
     }
 
     @Override

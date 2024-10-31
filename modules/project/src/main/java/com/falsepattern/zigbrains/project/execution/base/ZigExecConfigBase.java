@@ -16,10 +16,13 @@
 
 package com.falsepattern.zigbrains.project.execution.base;
 
+import com.falsepattern.zigbrains.common.direnv.DirenvCmd;
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain;
 import com.falsepattern.zigbrains.project.util.ProjectUtil;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationFactory;
+import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.configurations.LocatableConfigurationBase;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.project.Project;
@@ -34,13 +37,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
+import static com.falsepattern.zigbrains.project.execution.base.ZigConfigEditor.direnvConfigurable;
+
 @Getter
 public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends LocatableConfigurationBase<ProfileStateBase<T>> {
     private ZigConfigEditor.WorkDirectoryConfigurable workingDirectory = new ZigConfigEditor.WorkDirectoryConfigurable("workingDirectory");
     private ZigConfigEditor.CheckboxConfigurable pty = new ZigConfigEditor.CheckboxConfigurable("pty", "Emulate Terminal", false);
+    private ZigConfigEditor.CheckboxConfigurable direnv;
     public ZigExecConfigBase(@NotNull Project project, @NotNull ConfigurationFactory factory, @Nullable String name) {
         super(project, factory, name);
         workingDirectory.setPath(getProject().isDefault() ? null : ProjectUtil.guessProjectDir(getProject()));
+        direnv = direnvConfigurable("direnv", project);
     }
 
     @Override
@@ -62,6 +69,13 @@ public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends 
 
     public abstract List<String> buildCommandLineArgs(boolean debug) throws ExecutionException;
 
+    public @NotNull GeneralCommandLine patchCommandLine(@NotNull GeneralCommandLine commandLine, @NotNull AbstractZigToolchain toolchain) {
+        if (direnv.value) {
+            commandLine.withEnvironment(DirenvCmd.tryGetProjectEnvSync(toolchain.getProject()));
+        }
+        return commandLine;
+    }
+
     public boolean emulateTerminal() {
         return pty.value;
     }
@@ -71,6 +85,7 @@ public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends 
         val myClone = (ZigExecConfigBase<?>) super.clone();
         myClone.workingDirectory = workingDirectory.clone();
         myClone.pty = pty.clone();
+        myClone.direnv = direnv.clone();
         return (T) myClone;
     }
 
@@ -82,6 +97,6 @@ public abstract class ZigExecConfigBase<T extends ZigExecConfigBase<T>> extends 
             throws ExecutionException;
 
     public @NotNull List<ZigConfigEditor.ZigConfigurable<?>> getConfigurables() {
-        return List.of(workingDirectory, pty);
+        return List.of(workingDirectory, pty, direnv);
     }
 }

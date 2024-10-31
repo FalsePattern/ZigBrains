@@ -2,8 +2,6 @@ package com.falsepattern.zigbrains.debugger.toolchain;
 
 import com.falsepattern.zigbrains.ZigBundle;
 import com.falsepattern.zigbrains.common.ZigPathManager;
-import com.falsepattern.zigbrains.debugger.settings.MSVCDownloadPermission;
-import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -17,7 +15,6 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.ui.BrowserHyperlinkListener;
 import com.intellij.ui.HyperlinkLabel;
-import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.download.DownloadableFileService;
 import com.intellij.util.io.Decompressor;
@@ -42,9 +39,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service(Service.Level.APP)

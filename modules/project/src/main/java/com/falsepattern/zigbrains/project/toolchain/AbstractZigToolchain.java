@@ -20,32 +20,57 @@ import com.falsepattern.zigbrains.common.util.Lazy;
 import com.falsepattern.zigbrains.project.toolchain.flavours.AbstractZigToolchainFlavour;
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool;
 import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.UserDataHolder;
+import com.intellij.openapi.util.UserDataHolderBase;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @Getter
 public abstract class AbstractZigToolchain {
     private final Path location;
+    private final @Nullable Project project;
 
     private final Lazy<ZigCompilerTool> zig = new Lazy<>(() -> new ZigCompilerTool(this));
+    public static final Key<Path> WORK_DIR_KEY = Key.create("ZIG_TOOLCHAIN_WORK_DIR");
+    public static final Key<Project> PROJECT_KEY = Key.create("ZIG_TOOLCHAIN_PROJECT");
 
-    public static @Nullable AbstractZigToolchain suggest() {
-        return suggest(null);
-    }
-
-    public static @Nullable AbstractZigToolchain suggest(@Nullable Path projectDir) {
-        return AbstractZigToolchainFlavour.getApplicableFlavours()
-                                          .stream()
-                                          .flatMap(it -> it.suggestHomePaths().stream())
-                                          .filter(Objects::nonNull)
-                                          .map(it -> ZigToolchainProvider.findToolchain(it.toAbsolutePath()))
-                                          .filter(Objects::nonNull)
-                                          .findFirst().orElse(null);
+    public static @NotNull CompletableFuture<AbstractZigToolchain> suggest(@NotNull UserDataHolder workDir) {
+        val project = workDir.getUserData(PROJECT_KEY);
+        if (workDir.getUserData(WORK_DIR_KEY) == null) {
+            if (project != null) {
+                val projectDir = ProjectUtil.guessProjectDir(project);
+                if (projectDir != null) {
+                    workDir.putUserData(WORK_DIR_KEY, projectDir.toNioPath());
+                }
+            }
+        }
+        val exec = AppExecutorUtil.getAppExecutorService();
+        val homePathFutures = AbstractZigToolchainFlavour.getApplicableFlavours()
+                                                         .stream()
+                                                         .map(it -> it.suggestHomePaths(workDir))
+                                                         .toList();
+        return CompletableFuture.allOf(homePathFutures.toArray(CompletableFuture[]::new))
+                                .thenApplyAsync(it -> homePathFutures.stream()
+                                                                     .map(CompletableFuture::join)
+                                                                     .flatMap(Collection::stream)
+                                                                     .filter(Objects::nonNull)
+                                                                     .map((dir) -> ZigToolchainProvider.findToolchain(dir, project))
+                                                                     .filter(Objects::nonNull)
+                                                                     .findFirst()
+                                                                     .orElse(null), exec);
     }
 
     public ZigCompilerTool zig() {
@@ -54,9 +79,13 @@ public abstract class AbstractZigToolchain {
 
     public abstract int executionTimeoutInMilliseconds();
 
-    public abstract GeneralCommandLine patchCommandLine(GeneralCommandLine commandLine);
+    public abstract @NotNull GeneralCommandLine patchCommandLine(@NotNull GeneralCommandLine commandLine, @NotNull UserDataHolder data);
 
     public abstract Path pathToExecutable(String toolName);
+
+    public @NotNull UserDataHolder getDataForSelfRuns() {
+        return new UserDataHolderBase();
+    }
 
     @Override
     public boolean equals(Object obj) {

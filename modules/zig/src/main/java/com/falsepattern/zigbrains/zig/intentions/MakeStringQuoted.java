@@ -1,24 +1,17 @@
 package com.falsepattern.zigbrains.zig.intentions;
 
 import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral;
-import com.falsepattern.zigbrains.zig.util.PsiTextUtil;
 import com.falsepattern.zigbrains.zig.util.ZigStringUtil;
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
 import com.intellij.codeInspection.util.IntentionFamilyName;
 import com.intellij.codeInspection.util.IntentionName;
-import com.intellij.formatting.CoreFormatterUtil;
-import com.intellij.formatting.FormatterEx;
-import com.intellij.formatting.FormattingModel;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
-import com.intellij.util.MathUtil;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 
