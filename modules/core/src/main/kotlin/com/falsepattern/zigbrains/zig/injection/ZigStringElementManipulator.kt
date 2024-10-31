@@ -123,7 +123,6 @@ private fun replaceMultilineContent(
     val contentRanges = element.contentRanges
     val contentBuilder = StringBuilder(contentRanges.sumOf { it.length } + (newContent?.length ?: 0))
     var injectState = NotYet
-    var i = 0
     val contentIter = contentRanges.iterator()
     while (injectState === NotYet && contentIter.hasNext()) {
         val contentRange = contentIter.next()

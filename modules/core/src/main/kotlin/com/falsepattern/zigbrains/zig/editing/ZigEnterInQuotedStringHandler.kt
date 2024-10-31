@@ -39,7 +39,7 @@ class ZigEnterInQuotedStringHandler: EnterHandlerDelegateAdapter() {
     override fun preprocessEnter(
         file: PsiFile,
         editor: Editor,
-        caretOffset: Ref<Int>,
+        caretOffsetRef: Ref<Int>,
         caretAdvance: Ref<Int>,
         dataContext: DataContext,
         originalHandler: EditorActionHandler?
@@ -47,7 +47,7 @@ class ZigEnterInQuotedStringHandler: EnterHandlerDelegateAdapter() {
         if (file !is ZigFile)
             return Result.Continue
 
-        val caretOffset = caretOffset.get()!!
+        val caretOffset = caretOffsetRef.get()!!
         var psiAtOffset = file.findElementAt(caretOffset) ?: return Result.Continue
         if (psiAtOffset is LeafPsiElement) {
             if (psiAtOffset.elementType == ZigTypes.STRING_LITERAL_SINGLE) {
