@@ -20,23 +20,17 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+package com.falsepattern.zigbrains.lsp
 
-val lsp4ijVersion: String by project
-val lsp4jVersion: String by project
-val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
-val lsp4ijDepString = "${if (lsp4ijNightly) "nightly." else ""}com.jetbrains.plugins:com.redhat.devtools.lsp4ij:$lsp4ijVersion"
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs += "-Xcontext-receivers"
-    }
-}
-dependencies {
-    intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"))
-    }
-    intellijPlatformPluginDependency(lsp4ijDepString)
-    compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
-    implementation(project(":core"))
-}
+import com.intellij.openapi.components.Service
+import kotlinx.coroutines.CoroutineScope
+
+@Service(Service.Level.PROJECT)
+class ZigLSPProjectService(
+    val cs: CoroutineScope
+)
+
+@Service
+class ZigLSPApplicationService(
+    val cs: CoroutineScope
+)

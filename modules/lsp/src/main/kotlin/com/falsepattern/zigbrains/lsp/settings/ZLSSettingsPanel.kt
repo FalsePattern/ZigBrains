@@ -24,7 +24,10 @@ package com.falsepattern.zigbrains.lsp.settings
 
 import com.falsepattern.zigbrains.direnv.*
 import com.falsepattern.zigbrains.lsp.ZLSBundle
+import com.falsepattern.zigbrains.lsp.ZigLSPApplicationService
+import com.falsepattern.zigbrains.lsp.ZigLSPProjectService
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBCheckBox
@@ -32,6 +35,7 @@ import com.intellij.ui.components.fields.ExtendableTextField
 import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
+import com.intellij.util.application
 import kotlinx.coroutines.launch
 import kotlin.io.path.pathString
 
@@ -110,7 +114,7 @@ class ZLSSettingsPanel(private val project: Project?) : Disposable {
         }
 
     fun autodetect() {
-        direnvScope.launch {
+        (project?.service<ZigLSPProjectService>()?.cs ?: application.service<ZigLSPApplicationService>().cs).launch {
             getDirenv().findExecutableOnPATH("zls")?.let { zlsPath.text = it.pathString }
         }
     }

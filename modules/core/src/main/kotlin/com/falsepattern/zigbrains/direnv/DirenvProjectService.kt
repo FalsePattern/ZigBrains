@@ -24,12 +24,12 @@ package com.falsepattern.zigbrains.direnv
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
-import com.intellij.util.application
-import kotlinx.coroutines.CoroutineScope
+import com.intellij.openapi.project.Project
+import kotlinx.coroutines.sync.Mutex
 
-@Service
-class DirenvService(val cs: CoroutineScope) {
-
+@Service(Service.Level.PROJECT)
+class DirenvProjectService {
+    val mutex = Mutex()
 }
 
-val direnvScope get() = application.service<DirenvService>().cs
+val Project.direnvService get() = service<DirenvProjectService>()

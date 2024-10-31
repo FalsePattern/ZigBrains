@@ -20,23 +20,20 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp
+package com.falsepattern.zigbrains.lsp.settings
 
-import com.intellij.openapi.diagnostic.Logger
+import com.falsepattern.zigbrains.lsp.config.ZLSConfig
+import com.falsepattern.zigbrains.lsp.config.ZLSConfigProvider
 import com.intellij.openapi.project.Project
-import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider
 
-class ZigStreamConnectionProvider(private val project: Project): OSProcessStreamConnectionProvider() {
-    init {
-
-    }
-
-    companion object {
-        private val LOG = Logger.getInstance(ZigStreamConnectionProvider::class.java)
-
-        suspend fun getCommand(project: Project, full: Boolean) {
-
-        }
+class ZLSSettingsConfigProvider: ZLSConfigProvider {
+    override fun getEnvironment(project: Project, previous: ZLSConfig): ZLSConfig {
+        val state = project.zlsSettings.state
+        return previous.copy(
+            buildOnSave = state.buildOnSave,
+            buildOnSaveStep = state.buildOnSaveStep,
+            globalVarDeclarations = state.globalVarDeclarations,
+            comptimeInterpreter = state.comptimeInterpreter
+        )
     }
 }
-

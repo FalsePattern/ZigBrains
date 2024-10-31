@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.lsp.settings
 
 import com.falsepattern.zigbrains.lsp.ZLSBundle
+import com.falsepattern.zigbrains.lsp.startLSP
 import com.falsepattern.zigbrains.shared.NestedConfigurable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -47,7 +48,7 @@ class ZLSSettingsConfigurable(private val project: Project): NestedConfigurable 
         val reloadZLS = settings.isModified(data)
         settings.state = data
         if (reloadZLS) {
-            TODO("Not yet implemented")
+            startLSP(project, true)
         }
     }
 

@@ -34,15 +34,4 @@ data class ZLSConfig(
     @SerialName("build_on_save_step") val buildOnSaveStep: @NonNls String? = null,
     @SerialName("dangerous_comptime_experiments_do_not_enable") val comptimeInterpreter: Boolean? = null,
     @SerialName("highlight_global_var_declarations") val globalVarDeclarations: Boolean? = null
-) {
-    infix fun merge(other: ZLSConfig): ZLSConfig {
-        return ZLSConfig(
-            zigExePath ?: other.zigExePath,
-            zigLibPath ?: other.zigLibPath,
-            buildOnSave ?: other.buildOnSave,
-            buildOnSaveStep ?: other.buildOnSaveStep,
-            comptimeInterpreter ?: other.comptimeInterpreter,
-            globalVarDeclarations ?: other.globalVarDeclarations
-        )
-    }
-}
+)

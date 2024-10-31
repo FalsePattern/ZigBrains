@@ -20,23 +20,19 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.config
+package com.falsepattern.zigbrains.lsp
 
-import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
+import com.intellij.util.messages.Topic
 
-interface ZLSConfigProvider {
-    fun getEnvironment(project: Project): ZLSConfig
-    companion object {
-        private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZLSConfigProvider>("com.falsepattern.zigbrains.zlsConfigProvider")
-
-        fun findEnvironment(project: Project): ZLSConfig {
-            val extensions = EXTENSION_POINT_NAME.extensionList
-            var result = ZLSConfig()
-            for (extension in extensions) {
-                result = result merge extension.getEnvironment(project)
-            }
-            return result
-        }
-    }
+interface LanguageServerStarter {
+    fun startLSP(project: Project, restart: Boolean)
 }
+
+fun startLSP(project: Project, restart: Boolean) {
+    val publisher = project.messageBus.syncPublisher(LANGUAGE_SERVER_START_TOPIC)
+    publisher.startLSP(project, restart)
+}
+
+@Topic.ProjectLevel
+val LANGUAGE_SERVER_START_TOPIC = Topic.create("LanguageServerStarter", LanguageServerStarter::class.java)

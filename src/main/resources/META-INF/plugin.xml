@@ -3,111 +3,14 @@
     <name>ZigBrains</name>
     <vendor>FalsePattern</vendor>
 
-    <depends>com.intellij.modules.platform</depends>
+    <depends config-file="zigbrains-core.xml">com.intellij.modules.platform</depends>
+    <depends config-file="zigbrains-lsp.xml">com.redhat.devtools.lsp4ij</depends>
 
-    <!-- region Zig -->
-    <extensions defaultExtensionNs="com.intellij">
-        <colorSettingsPage
-                implementation="com.falsepattern.zigbrains.zig.highlighter.ZigColorSettingsPage"/>
-        <fileType
-                name="Zig File"
-                implementationClass="com.falsepattern.zigbrains.zig.ZigFileType"
-                fieldName="INSTANCE"
-                language="Zig"
-                extensions="zig"/>
-        <lang.braceMatcher
-                language="Zig"
-                implementationClass="com.falsepattern.zigbrains.zig.pairing.ZigBraceMatcher"/>
-        <lang.commenter
-                language="Zig"
-                implementationClass="com.falsepattern.zigbrains.zig.comments.ZigCommenter"/>
-        <lang.formatter
-                language="Zig"
-                implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>
-        <lang.parserDefinition
-                language="Zig"
-                implementationClass="com.falsepattern.zigbrains.zig.parser.ZigParserDefinition"/>
-        <lang.syntaxHighlighterFactory
-                language="Zig"
-                implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>
-
-        <!-- String manipulation -->
-        <enterHandlerDelegate
-                id="ZigEnterInTextBlockHandler"
-                implementation="com.falsepattern.zigbrains.zig.editing.ZigEnterInTextBlockHandler"/>
-        <enterHandlerDelegate
-                id="ZigEnterInQuotedStringHandler"
-                implementation="com.falsepattern.zigbrains.zig.editing.ZigEnterInQuotedStringHandler"/>
-        <intentionAction>
-            <language>Zig</language>
-            <className>com.falsepattern.zigbrains.zig.intentions.MakeStringMultiline</className>
-            <category>Zig</category>
-        </intentionAction>
-        <intentionAction>
-            <language>Zig</language>
-            <className>com.falsepattern.zigbrains.zig.intentions.MakeStringQuoted</className>
-            <category>Zig</category>
-        </intentionAction>
-
-        <!-- Language injection -->
-        <lang.elementManipulator
-                forClass="com.falsepattern.zigbrains.zig.psi.ZigStringLiteral"
-                implementationClass="com.falsepattern.zigbrains.zig.injection.ZigStringElementManipulator"/>
-        <languageInjectionPerformer
-                language="Zig"
-                implementationClass="com.falsepattern.zigbrains.zig.injection.ZigLanguageInjectionPerformer"/>
-    </extensions>
-    <!-- endregion Zig -->
-
-    <!-- region Zon -->
-    <extensions defaultExtensionNs="com.intellij">
-        <colorSettingsPage
-                implementation="com.falsepattern.zigbrains.zon.highlighting.ZonColorSettingsPage"/>
-        <completion.contributor
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.completion.ZonCompletionContributor"/>
-        <fileType
-                name="Zon File"
-                implementationClass="com.falsepattern.zigbrains.zon.ZonFileType"
-                fieldName="INSTANCE"
-                language="Zon"
-                extensions="zon"/>
-        <lang.braceMatcher
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.pairing.ZonBraceMatcher"/>
-        <lang.commenter
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.comments.ZonCommenter"/>
-        <lang.foldingBuilder
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.folding.ZonFoldingBuilder"/>
-        <lang.formatter
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.formatter.ZonFormattingModelBuilder"/>
-        <lang.parserDefinition
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.parser.ZonParserDefinition"/>
-        <lang.quoteHandler
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.pairing.ZonQuoteHandler"/>
-        <lang.syntaxHighlighterFactory
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.highlighting.ZonSyntaxHighlighterFactory"/>
-    </extensions>
-    <!-- endregion Zon -->
-
-    <!-- region direnv -->
-    <extensions defaultExtensionNs="com.intellij">
-        <notificationGroup displayType="BALLOON"
-                           id="zigbrains-direnv"
-                           bundle="zigbrains.Bundle"
-                           key="notification.group.zigbrains-direnv"/>
-    </extensions>
-    <!-- endregion direnv -->
+    <resource-bundle>zigbrains.Bundle</resource-bundle>
 
     <extensionPoints>
         <extensionPoint
-                interface="com.falsepattern.zigbrains.lsp.config.ZLSConfigProvider"
+                interface="com.falsepattern.zigbrains.lsp.config.ZLSConfigProviderBase"
                 dynamic="true"
                 name="zlsConfigProvider"/>
     </extensionPoints>

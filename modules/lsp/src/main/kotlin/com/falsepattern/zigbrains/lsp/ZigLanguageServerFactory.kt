@@ -22,5 +22,61 @@
 
 package com.falsepattern.zigbrains.lsp
 
-class ZigLanguageServerFactory {
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
+import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.platform.ide.progress.runWithModalProgressBlocking
+import com.intellij.util.application
+import com.redhat.devtools.lsp4ij.LanguageServerEnablementSupport
+import com.redhat.devtools.lsp4ij.LanguageServerFactory
+import com.redhat.devtools.lsp4ij.LanguageServerManager
+import com.redhat.devtools.lsp4ij.ServerStatus
+import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementSupport {
+    override fun createConnectionProvider(project: Project): StreamConnectionProvider {
+        return if (application.isDispatchThread) {
+            runWithModalProgressBlocking(ModalTaskOwner.project(project), ZLSBundle.message("progress.title.create-connection-provider")) {
+                ZLSStreamConnectionProvider.create(project)
+            }
+        } else {
+            runBlocking {
+                ZLSStreamConnectionProvider.create(project)
+            }
+        }
+    }
+
+    override fun isEnabled(project: Project): Boolean {
+        return (project.getUserData(ENABLED_KEY) ?: true) && if (application.isDispatchThread) {
+            runWithModalProgressBlocking(ModalTaskOwner.project(project), ZLSBundle.message("progress.title.validate")) {
+                ZLSStreamConnectionProvider.validate(project)
+            }
+        } else {
+            runBlocking {
+                ZLSStreamConnectionProvider.validate(project)
+            }
+        }
+    }
+
+    override fun setEnabled(enabled: Boolean, project: Project) {
+        project.putUserData(ENABLED_KEY, true)
+    }
 }
+
+class ZLSStarter: LanguageServerStarter {
+    override fun startLSP(project: Project, restart: Boolean) {
+        project.service<ZigLSPProjectService>().cs.launch {
+            val manager = project.service<LanguageServerManager>()
+            val status = manager.getServerStatus("ZigBrains")
+            if ((status == ServerStatus.started || status == ServerStatus.starting) && !restart)
+                return@launch
+            manager.start("ZigBrains")
+        }
+    }
+
+}
+
+private val ENABLED_KEY = Key.create<Boolean>("ZLS_ENABLED")

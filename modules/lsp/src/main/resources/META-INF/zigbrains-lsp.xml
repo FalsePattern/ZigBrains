@@ -1,0 +1,59 @@
+<idea-plugin>
+    <resource-bundle>zigbrains.lsp.Bundle</resource-bundle>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- LSP textDocument/signatureHelp -->
+        <codeInsight.parameterInfo
+                language="Zig"
+                implementationClass="com.redhat.devtools.lsp4ij.features.signatureHelp.LSPParameterInfoHandler"
+        />
+        <!-- LSP textDocument/folding -->
+        <lang.foldingBuilder
+                language="Zig"
+                implementationClass="com.redhat.devtools.lsp4ij.features.foldingRange.LSPFoldingRangeBuilder"
+        />
+        <!-- LSP textDocument/documentSymbol -->
+        <lang.psiStructureViewFactory
+                language="Zig"
+                implementationClass="com.redhat.devtools.lsp4ij.features.documentSymbol.LSPDocumentSymbolStructureViewFactory"
+        />
+        <notificationGroup
+                id="zigbrains-lsp"
+                displayType="BALLOON"
+                bundle="zigbrains.lsp.Bundle"
+                key="notification.group.zigbrains-lsp"
+        />
+    </extensions>
+
+    <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <zlsConfigProvider
+                implementation="com.falsepattern.zigbrains.lsp.settings.ZLSSettingsConfigProvider"
+        />
+    </extensions>
+
+    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
+        <!--suppress PluginXmlCapitalization -->
+        <server
+                id="ZigBrains"
+                bundle="zigbrains.lsp.Bundle"
+                nameKey="lsp.zls.name"
+                descriptionKey="lsp.zls.description"
+                factoryClass="com.falsepattern.zigbrains.lsp.ZigLanguageServerFactory"
+        />
+        <languageMapping
+                language="Zig"
+                serverId="ZigBrains"
+                languageId="zig"
+        />
+        <semanticTokensColorsProvider
+                serverId="ZigBrains"
+                class="com.falsepattern.zigbrains.lsp.highlighting.ZLSSemanticTokenColorsProvider"
+        />
+    </extensions>
+
+    <applicationListeners>
+        <listener
+                class="com.falsepattern.zigbrains.lsp.ZLSStarter"
+                topic="com.falsepattern.zigbrains.lsp.LanguageServerStarter"
+        />
+    </applicationListeners>
+</idea-plugin>
