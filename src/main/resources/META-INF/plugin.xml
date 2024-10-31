@@ -41,12 +41,12 @@
         <intentionAction>
             <language>Zig</language>
             <className>com.falsepattern.zigbrains.zig.intentions.MakeStringMultiline</className>
-            <category>Zig intentions</category>
+            <category>Zig</category>
         </intentionAction>
         <intentionAction>
             <language>Zig</language>
             <className>com.falsepattern.zigbrains.zig.intentions.MakeStringQuoted</className>
-            <category>Zig intentions</category>
+            <category>Zig</category>
         </intentionAction>
 
         <!-- Language injection -->
