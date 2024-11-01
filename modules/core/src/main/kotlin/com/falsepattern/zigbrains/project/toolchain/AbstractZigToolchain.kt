@@ -20,21 +20,14 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.settings
+package com.falsepattern.zigbrains.project.toolchain
 
-import org.jetbrains.annotations.NonNls
+import com.intellij.openapi.project.Project
+import java.nio.file.Path
 
-@JvmRecord
-data class ZLSSettings(
-    val direnv: Boolean = true,
-    val zlsPath: @NonNls String = "",
-    val zlsConfigPath: @NonNls String = "",
-    val debug: Boolean = false,
-    val messageTrace: Boolean = false,
-    val buildOnSave: Boolean = false,
-    val buildOnSaveStep: @NonNls String = "install",
-    val globalVarDeclarations: Boolean = false,
-    val comptimeInterpreter: Boolean = false,
-    val inlayHints: Boolean = true,
-    val inlayHintsCompact: Boolean = true
-)
+abstract class AbstractZigToolchain(
+    val location: Path,
+    val project: Project?
+) {
+    abstract fun pathToExecutable(toolName: String): Path
+}

@@ -14,4 +14,11 @@
                 dynamic="true"
                 name="zlsConfigProvider"/>
     </extensionPoints>
+    <extensionPoints>
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider"
+                dynamic="true"
+                name="toolchainProvider"
+        />
+    </extensionPoints>
 </idea-plugin>

@@ -20,21 +20,35 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.settings
+package com.falsepattern.zigbrains.project.settings
 
-import org.jetbrains.annotations.NonNls
+import com.intellij.openapi.components.*
+import com.intellij.openapi.project.Project
 
-@JvmRecord
-data class ZLSSettings(
-    val direnv: Boolean = true,
-    val zlsPath: @NonNls String = "",
-    val zlsConfigPath: @NonNls String = "",
-    val debug: Boolean = false,
-    val messageTrace: Boolean = false,
-    val buildOnSave: Boolean = false,
-    val buildOnSaveStep: @NonNls String = "install",
-    val globalVarDeclarations: Boolean = false,
-    val comptimeInterpreter: Boolean = false,
-    val inlayHints: Boolean = true,
-    val inlayHintsCompact: Boolean = true
+@Service(Service.Level.PROJECT)
+@State(
+    name = "ZigProjectSettings",
+    storages = [Storage("zigbrains.xml")]
 )
+class ZigProjectSettingsService: PersistentStateComponent<ZigProjectSettings> {
+    @Volatile
+    private var state = ZigProjectSettings()
+
+    override fun getState(): ZigProjectSettings {
+        return state.copy()
+    }
+
+    fun setState(value: ZigProjectSettings) {
+        this.state = value
+    }
+
+    override fun loadState(state: ZigProjectSettings) {
+        this.state = state
+    }
+
+    fun isModified(otherData: ZigProjectSettings): Boolean {
+        return state != otherData
+    }
+}
+
+val Project.zigProjectSettings get() = service<ZigProjectSettingsService>()

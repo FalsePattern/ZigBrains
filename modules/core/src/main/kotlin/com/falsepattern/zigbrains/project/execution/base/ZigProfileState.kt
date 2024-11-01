@@ -20,21 +20,14 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.settings
+package com.falsepattern.zigbrains.project.execution.base
 
-import org.jetbrains.annotations.NonNls
+import com.intellij.execution.configurations.CommandLineState
+import com.intellij.execution.runners.ExecutionEnvironment
 
-@JvmRecord
-data class ZLSSettings(
-    val direnv: Boolean = true,
-    val zlsPath: @NonNls String = "",
-    val zlsConfigPath: @NonNls String = "",
-    val debug: Boolean = false,
-    val messageTrace: Boolean = false,
-    val buildOnSave: Boolean = false,
-    val buildOnSaveStep: @NonNls String = "install",
-    val globalVarDeclarations: Boolean = false,
-    val comptimeInterpreter: Boolean = false,
-    val inlayHints: Boolean = true,
-    val inlayHintsCompact: Boolean = true
-)
+abstract class ZigProfileState<T: ZigExecConfig<T>>(
+    environment: ExecutionEnvironment,
+    protected val configuration: T
+): CommandLineState(environment) {
+
+}

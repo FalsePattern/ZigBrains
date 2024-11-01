@@ -20,21 +20,16 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.settings
+package com.falsepattern.zigbrains.project.settings
 
-import org.jetbrains.annotations.NonNls
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainConverter
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.intellij.util.xmlb.annotations.OptionTag
 
 @JvmRecord
-data class ZLSSettings(
+data class ZigProjectSettings(
     val direnv: Boolean = true,
-    val zlsPath: @NonNls String = "",
-    val zlsConfigPath: @NonNls String = "",
-    val debug: Boolean = false,
-    val messageTrace: Boolean = false,
-    val buildOnSave: Boolean = false,
-    val buildOnSaveStep: @NonNls String = "install",
-    val globalVarDeclarations: Boolean = false,
-    val comptimeInterpreter: Boolean = false,
-    val inlayHints: Boolean = true,
-    val inlayHintsCompact: Boolean = true
+    val overrideStdPath: Boolean = false,
+    val explicitPathToStd: String? = null,
+    @OptionTag(converter = ZigToolchainConverter::class) val toolchain: ZigToolchain? = null
 )

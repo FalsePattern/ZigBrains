@@ -20,21 +20,17 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.settings
+package com.falsepattern.zigbrains.project.toolchain.tools
 
-import org.jetbrains.annotations.NonNls
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainEnvironmentSerializable
+import kotlinx.serialization.json.Json
 
-@JvmRecord
-data class ZLSSettings(
-    val direnv: Boolean = true,
-    val zlsPath: @NonNls String = "",
-    val zlsConfigPath: @NonNls String = "",
-    val debug: Boolean = false,
-    val messageTrace: Boolean = false,
-    val buildOnSave: Boolean = false,
-    val buildOnSaveStep: @NonNls String = "install",
-    val globalVarDeclarations: Boolean = false,
-    val comptimeInterpreter: Boolean = false,
-    val inlayHints: Boolean = true,
-    val inlayHintsCompact: Boolean = true
-)
+class ZigCompilerTool(toolchain: AbstractZigToolchain): ZigTool(toolchain) {
+    override val toolName: String
+        get() = "zig"
+
+    suspend fun getEnv(): ZigToolchainEnvironmentSerializable {
+        return Json.decodeFromString<ZigToolchainEnvironmentSerializable>(callWithArgs(toolchain.location, "env").stdout)
+    }
+}
