@@ -24,13 +24,23 @@ package com.falsepattern.zigbrains.project.toolchain.tools
 
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainEnvironmentSerializable
+import com.intellij.openapi.project.Project
 import kotlinx.serialization.json.Json
+import java.nio.file.Path
 
-class ZigCompilerTool(toolchain: AbstractZigToolchain): ZigTool(toolchain) {
+class ZigCompilerTool(toolchain: AbstractZigToolchain) : ZigTool(toolchain) {
     override val toolName: String
         get() = "zig"
 
-    suspend fun getEnv(): ZigToolchainEnvironmentSerializable {
-        return Json.decodeFromString<ZigToolchainEnvironmentSerializable>(callWithArgs(toolchain.location, "env").stdout)
+    fun path(): Path {
+        return toolchain.pathToExecutable(toolName)
     }
+
+    suspend fun getEnv(project: Project?): ZigToolchainEnvironmentSerializable {
+        return envJson.decodeFromString<ZigToolchainEnvironmentSerializable>(callWithArgs(toolchain.workingDirectory(project), "env").stdout)
+    }
+}
+
+private val envJson = Json {
+    ignoreUnknownKeys = true
 }

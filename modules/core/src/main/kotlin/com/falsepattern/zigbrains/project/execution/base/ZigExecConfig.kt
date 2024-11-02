@@ -22,7 +22,68 @@
 
 package com.falsepattern.zigbrains.project.execution.base
 
+import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.direnv.DirenvCmd
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.intellij.execution.Executor
+import com.intellij.execution.configurations.ConfigurationFactory
+import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.LocatableConfigurationBase
+import com.intellij.execution.configurations.RunConfiguration
+import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.openapi.options.SettingsEditor
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
+import com.intellij.openapi.util.NlsActions.ActionText
+import com.intellij.openapi.vfs.toNioPathOrNull
+import org.jdom.Element
 
-abstract class ZigExecConfig<T: ZigExecConfig<T>>: LocatableConfigurationBase {
+abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: ConfigurationFactory, name: String): LocatableConfigurationBase<ZigProfileState<T>>(project, factory, name) {
+    var workingDirectory = WorkDirectoryConfigurable("workingDirectory").apply { path = project.guessProjectDir()?.toNioPathOrNull() }
+        private set
+    var pty = CheckboxConfigurable("pty", ZigBrainsBundle.message("exec.option.label.emulate-terminal"), false)
+        private set
+    var direnv = DirenvConfigurable("direnv", project)
+        private set
+
+    abstract val suggestedName: @ActionText String
+    abstract suspend fun buildCommandLineArgs(debug: Boolean): List<String>
+    abstract override fun getState(executor: Executor, environment: ExecutionEnvironment): ZigProfileState<T>
+
+    override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> {
+        return ZigConfigEditor(this)
+    }
+
+    override fun readExternal(element: Element) {
+        super.readExternal(element)
+        getConfigurables().forEach { it.readExternal(element) }
+    }
+
+    override fun writeExternal(element: Element) {
+        super.writeExternal(element)
+        getConfigurables().forEach { it.writeExternal(element) }
+    }
+
+
+    suspend fun patchCommandLine(commandLine: GeneralCommandLine, toolchain: AbstractZigToolchain): GeneralCommandLine {
+        if (direnv.value) {
+            commandLine.withEnvironment(DirenvCmd.importDirenv(project).env)
+        }
+        return commandLine
+    }
+
+    fun emulateTerminal(): Boolean {
+        return pty.value
+    }
+
+    override fun clone(): T {
+        val myClone = super.clone() as ZigExecConfig<*>
+        myClone.workingDirectory = workingDirectory.clone()
+        myClone.pty = pty.clone()
+        myClone.direnv = direnv.clone()
+        @Suppress("UNCHECKED_CAST")
+        return myClone as T
+    }
+
+    open fun getConfigurables(): List<ZigConfigurable<*>> = listOf(workingDirectory, pty, direnv)
 }

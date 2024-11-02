@@ -60,3 +60,4 @@ gradle-app.setting
 .intellijPlatform
 jbr
 secrets
+!modules/**/src/**/build/

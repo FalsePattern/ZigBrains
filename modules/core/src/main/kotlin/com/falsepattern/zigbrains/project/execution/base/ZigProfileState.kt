@@ -22,12 +22,68 @@
 
 package com.falsepattern.zigbrains.project.execution.base
 
+import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.run.ZigProcessHandler
+import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
+import com.intellij.build.BuildTextConsoleView
+import com.intellij.execution.DefaultExecutionResult
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.CommandLineState
+import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.configurations.PtyCommandLine
+import com.intellij.execution.process.ProcessHandler
+import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.platform.ide.progress.ModalTaskOwner
+import kotlin.io.path.pathString
 
-abstract class ZigProfileState<T: ZigExecConfig<T>>(
+abstract class ZigProfileState<T: ZigExecConfig<T>> (
     environment: ExecutionEnvironment,
-    protected val configuration: T
+    val configuration: T
 ): CommandLineState(environment) {
 
+    @Throws(ExecutionException::class)
+    override fun startProcess(): ProcessHandler {
+        return runModalOrBlocking({ModalTaskOwner.project(environment.project)}, {"ZigProfileState.startProcess"}) {
+            startProcessSuspend()
+        }
+    }
+
+    @Throws(ExecutionException::class)
+    suspend fun startProcessSuspend(): ProcessHandler {
+        val toolchain = environment.project.zigProjectSettings.state.toolchain ?: throw ExecutionException(ZigBrainsBundle.message("exception.zig-profile-state.start-process.no-toolchain"))
+        return ZigProcessHandler(getCommandLine(toolchain, false))
+    }
+
+    @Throws(ExecutionException::class)
+    suspend fun getCommandLine(toolchain: AbstractZigToolchain, debug: Boolean): GeneralCommandLine {
+        val workingDir = configuration.workingDirectory
+        val zigExePath = toolchain.zig.path()
+
+        // TODO remove this check once JetBrains implements colored terminal in the debugger
+        // https://youtrack.jetbrains.com/issue/CPP-11622/ANSI-color-codes-not-honored-in-Debug-Run-Configuration-output-window
+        val cli = if (configuration.emulateTerminal() && !debug) PtyCommandLine() else GeneralCommandLine()
+        cli.exePath = zigExePath.pathString
+        workingDir.path?.let { cli.withWorkingDirectory(it) }
+        cli.charset = Charsets.UTF_8
+        cli.addParameters(configuration.buildCommandLineArgs(debug))
+        return configuration.patchCommandLine(cli, toolchain)
+    }
+}
+
+@Throws(ExecutionException::class)
+fun executeCommandLine(commandLine: GeneralCommandLine, environment: ExecutionEnvironment): DefaultExecutionResult {
+    val handler = startProcess(commandLine)
+    val console = BuildTextConsoleView(environment.project, false, emptyList())
+    console.attachToProcess(handler)
+    return DefaultExecutionResult(console, handler)
+}
+
+@Throws(ExecutionException::class)
+fun startProcess(commandLine: GeneralCommandLine): ProcessHandler {
+    val handler = ZigProcessHandler(commandLine)
+    ProcessTerminatedListener.attach(handler)
+    return handler
 }

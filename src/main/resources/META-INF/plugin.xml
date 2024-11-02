@@ -12,13 +12,17 @@
         <extensionPoint
                 interface="com.falsepattern.zigbrains.lsp.config.ZLSConfigProviderBase"
                 dynamic="true"
-                name="zlsConfigProvider"/>
-    </extensionPoints>
-    <extensionPoints>
+                name="zlsConfigProvider"
+        />
         <extensionPoint
                 interface="com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider"
                 dynamic="true"
                 name="toolchainProvider"
+        />
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.shared.ZBFeatures"
+                dynamic="true"
+                name="featureProvider"
         />
     </extensionPoints>
 </idea-plugin>

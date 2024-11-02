@@ -22,14 +22,22 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.project.toolchain.ZigToolchainConverter
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
-import com.intellij.util.xmlb.annotations.OptionTag
+import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
+import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.util.xmlb.annotations.Transient
+import kotlin.io.path.pathString
 
-@JvmRecord
 data class ZigProjectSettings(
-    val direnv: Boolean = true,
-    val overrideStdPath: Boolean = false,
-    val explicitPathToStd: String? = null,
-    @OptionTag(converter = ZigToolchainConverter::class) val toolchain: ZigToolchain? = null
-)
+    var direnv: Boolean = true,
+    var overrideStdPath: Boolean = false,
+    var explicitPathToStd: String? = null,
+    var toolchainPath: String? = null
+) {
+    @get:Transient
+    @set:Transient
+    var toolchain: LocalZigToolchain?
+        get() = toolchainPath?.toNioPathOrNull()?.let { LocalZigToolchain(it) }
+        set(value) {
+            toolchainPath = value?.location?.pathString
+        }
+}

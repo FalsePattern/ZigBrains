@@ -1,0 +1,60 @@
+/*
+ * This file is part of ZigBrains.
+ *
+ * Copyright (C) 2023-2024 FalsePattern
+ * All Rights Reserved
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * ZigBrains is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, only version 3 of the License.
+ *
+ * ZigBrains is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.falsepattern.zigbrains.project.run
+
+import com.falsepattern.zigbrains.project.execution.base.ZigExecConfig
+import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
+import com.falsepattern.zigbrains.project.execution.base.executeCommandLine
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.execution.configurations.RunProfile
+import com.intellij.execution.executors.DefaultRunExecutor
+import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.execution.runners.showRunContent
+import com.intellij.execution.ui.RunContentDescriptor
+import com.intellij.openapi.application.EDT
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class ZigRegularRunner: ZigProgramRunner<ZigProfileState<*>>(DefaultRunExecutor.EXECUTOR_ID) {
+    override suspend fun execute(state: ZigProfileState<*>, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor? {
+        val cli = state.getCommandLine(toolchain, false)
+        val exec = executeCommandLine(cli, environment)
+        return withContext(Dispatchers.EDT) {
+            showRunContent(exec, environment)
+        }
+    }
+
+    override fun castProfileState(state: ZigProfileState<*>): ZigProfileState<*>? {
+        return state
+    }
+
+    override fun canRun(executorId: String, profile: RunProfile): Boolean {
+        return this.executorId == executorId && profile is ZigExecConfig<*>
+    }
+
+    override fun getRunnerId(): String {
+        return "ZigRegularRunner"
+    }
+}

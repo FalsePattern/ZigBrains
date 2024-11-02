@@ -26,9 +26,7 @@ package com.falsepattern.zigbrains.zig.util
 
 import com.intellij.openapi.util.TextRange
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
-import org.jetbrains.annotations.NonNls
 import java.util.regex.Pattern
-import java.util.stream.Collectors
 import kotlin.math.min
 
 

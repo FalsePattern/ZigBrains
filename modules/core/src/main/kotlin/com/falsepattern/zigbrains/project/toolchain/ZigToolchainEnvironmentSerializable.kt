@@ -23,10 +23,12 @@ package com.falsepattern.zigbrains.project.toolchain
 
 import com.intellij.openapi.util.io.toNioPathOrNull
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import java.nio.file.Path
 
 
 @JvmRecord
+@Serializable
 data class ZigToolchainEnvironmentSerializable(
     @SerialName("zig_exe") val zigExecutable: String,
     @SerialName("std_dir") val stdDirectory: String,
@@ -35,7 +37,7 @@ data class ZigToolchainEnvironmentSerializable(
     @SerialName("version") val version: String,
     @SerialName("target") val target: String
 ) {
-    fun stdPath(toolchain: AbstractZigToolchain): Path? {
+    fun stdPath(toolchain: LocalZigToolchain): Path? {
         val path = stdDirectory.toNioPathOrNull() ?: return null
         if (path.isAbsolute)
             return path

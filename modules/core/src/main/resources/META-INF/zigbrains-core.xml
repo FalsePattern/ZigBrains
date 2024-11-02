@@ -1,4 +1,5 @@
 <idea-plugin>
+    <resource-bundle>zigbrains.Bundle</resource-bundle>
     <!-- region Zig -->
     <extensions defaultExtensionNs="com.intellij">
         <colorSettingsPage
@@ -89,6 +90,111 @@
                 implementationClass="com.falsepattern.zigbrains.zon.highlighting.ZonSyntaxHighlighterFactory"/>
     </extensions>
     <!-- endregion Zon -->
+
+    <!-- region Project -->
+    <extensions defaultExtensionNs="com.intellij">
+        <configurationType
+                implementation="com.falsepattern.zigbrains.project.execution.run.ZigConfigTypeRun"
+        />
+        <runConfigurationProducer
+                implementation="com.falsepattern.zigbrains.project.execution.run.ZigConfigProducerRun"
+        />
+        <runLineMarkerContributor
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.project.execution.run.ZigLineMarkerRun"
+        />
+
+
+        <configurationType
+                implementation="com.falsepattern.zigbrains.project.execution.test.ZigConfigTypeTest"
+        />
+        <runConfigurationProducer
+                implementation="com.falsepattern.zigbrains.project.execution.test.ZigConfigProducerTest"
+        />
+        <runLineMarkerContributor
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.project.execution.test.ZigLineMarkerTest"
+        />
+
+
+        <configurationType
+                implementation="com.falsepattern.zigbrains.project.execution.build.ZigConfigTypeBuild"
+        />
+        <runConfigurationProducer
+                implementation="com.falsepattern.zigbrains.project.execution.build.ZigConfigProducerBuild"
+        />
+        <runLineMarkerContributor
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.project.execution.build.ZigLineMarkerBuild"
+        />
+
+        <directoryProjectGenerator
+                implementation="com.falsepattern.zigbrains.project.newproject.ZigDirectoryProjectGenerator"
+        />
+        <newProjectWizard.languageGenerator
+                implementation="com.falsepattern.zigbrains.project.newproject.ZigNewProjectWizard"
+        />
+
+        <moduleBuilder
+                builderClass="com.falsepattern.zigbrains.project.module.ZigModuleBuilder"
+        />
+        <projectConfigurable
+                parentId="language"
+                instance="com.falsepattern.zigbrains.project.settings.ZigConfigurable"
+                id="ZigConfigurable"
+                displayName="Zig"
+        />
+
+        <programRunner
+                implementation="com.falsepattern.zigbrains.project.run.ZigRegularRunner"
+                id="ZigRegularRunner"
+        />
+
+        <consoleFilterProvider
+                implementation="com.falsepattern.zigbrains.project.console.ZigConsoleFilterProvider"
+        />
+        <analyzeStacktraceFilter
+                implementation="com.falsepattern.zigbrains.project.console.ZigSourceFileFilter"
+        />
+
+        <additionalLibraryRootsProvider
+                implementation="com.falsepattern.zigbrains.project.toolchain.stdlib.ZigLibraryRootProvider"
+        />
+
+        <toolWindow
+                factoryClass="com.falsepattern.zigbrains.project.steps.ui.BuildToolWindowFactory"
+                anchor="right"
+                icon="/icons/zig_build_tool.svg"
+                id="zigbrains.build"
+        />
+    </extensions>
+
+    <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <zlsConfigProvider
+                implementation="com.falsepattern.zigbrains.project.toolchain.ToolchainZLSConfigProvider"
+        />
+        <toolchainProvider
+                implementation="com.falsepattern.zigbrains.project.toolchain.LocalZigToolchainProvider"
+        />
+    </extensions>
+
+    <actions>
+        <action
+                id="zigbrains.discover.steps"
+                class="com.falsepattern.zigbrains.project.steps.discovery.ZigDiscoverStepsAction"
+                text="Reload Zig Build Steps"
+                description="Scan the project and detect build.zig steps using the current toolchain"
+                icon="AllIcons.Actions.Refresh"
+        />
+        <action
+                id="zigbrains.file.new"
+                class="com.falsepattern.zigbrains.project.actions.ZigNewFileAction"
+                text="New Zig File"
+        >
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+        </action>
+    </actions>
+    <!-- endregion Project -->
 
     <!-- region direnv -->
     <extensions defaultExtensionNs="com.intellij">

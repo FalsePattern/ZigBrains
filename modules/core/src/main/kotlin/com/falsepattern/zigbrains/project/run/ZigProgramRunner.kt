@@ -23,22 +23,27 @@
 package com.falsepattern.zigbrains.project.run
 
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
-import com.falsepattern.zigbrains.project.zigService
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.configurations.RunnerSettings
 import com.intellij.execution.runners.AsyncProgramRunner
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.ui.RunContentDescriptor
+import com.intellij.openapi.application.EDT
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.rd.util.toPromise
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import org.jetbrains.concurrency.Promise
 
 abstract class ZigProgramRunner<ProfileState: ZigProfileState<*>>(protected val executorId: String): AsyncProgramRunner<RunnerSettings>() {
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun execute(environment: ExecutionEnvironment, state: RunProfileState): Promise<RunContentDescriptor?> {
-        return environment.project.zigService.cs.async {
+        return environment.project.zigCoroutineScope.async {
             executeAsync(environment, state)
         }.toPromise()
     }
@@ -49,10 +54,16 @@ abstract class ZigProgramRunner<ProfileState: ZigProfileState<*>>(protected val 
 
         val state = castProfileState(state) ?: return null
 
-        execute(state, null, environment)
+        val toolchain = environment.project.zigProjectSettings.state.toolchain ?: return null
+
+        withContext(Dispatchers.EDT) {
+            FileDocumentManager.getInstance().saveAllDocuments()
+        }
+
+        return execute(state, toolchain, environment)
     }
 
     protected abstract fun castProfileState(state: ZigProfileState<*>): ProfileState?
 
-    abstract suspend fun execute(state: ProfileState, toolchain: ZigToolchain, environment: ExecutionEnvironment)
+    abstract suspend fun execute(state: ProfileState, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor?
 }

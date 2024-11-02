@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
     kotlin("jvm") version "1.9.24" apply false
+    kotlin("plugin.serialization") version "1.9.24" apply false
     id("org.jetbrains.intellij.platform") version "2.1.0"
     id("org.jetbrains.changelog") version "2.2.1"
     id("org.jetbrains.grammarkit") version "2022.3.2.2" apply false
@@ -81,7 +82,6 @@ dependencies {
     }
 
     implementation(project(":core"))
-    implementation(project(":lsp"))
 }
 
 intellijPlatform {

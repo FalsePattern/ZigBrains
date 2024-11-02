@@ -23,31 +23,34 @@
 package com.falsepattern.zigbrains.project.toolchain
 
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider.Companion.EXTENSION_POINT_NAME
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.UserDataHolder
 import com.intellij.util.xmlb.Converter
 import kotlinx.serialization.json.*
 
-sealed interface ZigToolchainProvider {
-    suspend fun getToolchain(project: Project?): ZigToolchain?
+sealed interface ZigToolchainProvider<in T: AbstractZigToolchain> {
+    suspend fun suggestToolchain(project: Project?, extraData: UserDataHolder): AbstractZigToolchain?
 
     val serialMarker: String
-    fun deserialize(data: JsonElement): ZigToolchain?
-    fun canSerialize(toolchain: ZigToolchain): Boolean
-    fun serialize(toolchain: ZigToolchain): JsonElement
+    fun deserialize(data: JsonElement): AbstractZigToolchain?
+    fun canSerialize(toolchain: AbstractZigToolchain): Boolean
+    fun serialize(toolchain: T): JsonElement
 
     companion object {
-        val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainProvider>("com.falsepattern.zigbrains.toolchainProvider")
+        val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainProvider<*>>("com.falsepattern.zigbrains.toolchainProvider")
 
-        suspend fun findToolchains(project: Project?): ZigToolchain? {
-            return EXTENSION_POINT_NAME.extensionList.firstNotNullOfOrNull { it.getToolchain(project) }
+        suspend fun suggestToolchain(project: Project?, extraData: UserDataHolder): AbstractZigToolchain? {
+            return EXTENSION_POINT_NAME.extensionList.firstNotNullOfOrNull { it.suggestToolchain(project, extraData) }
         }
     }
 }
 
-class ZigToolchainConverter: Converter<ZigToolchain>() {
-    override fun fromString(value: String): ZigToolchain? {
+@Suppress("UNCHECKED_CAST")
+private fun <T: AbstractZigToolchain> ZigToolchainProvider<T>.serialize(toolchain: AbstractZigToolchain) = serialize(toolchain as T)
+
+class ZigToolchainConverter: Converter<AbstractZigToolchain>() {
+    override fun fromString(value: String): AbstractZigToolchain? {
         val json = Json.parseToJsonElement(value) as? JsonObject ?: return null
         val marker = (json["marker"] as? JsonPrimitive)?.contentOrNull ?: return null
         val data = json["data"] ?: return null
@@ -55,7 +58,7 @@ class ZigToolchainConverter: Converter<ZigToolchain>() {
         return provider.deserialize(data)
     }
 
-    override fun toString(value: ZigToolchain): String? {
+    override fun toString(value: AbstractZigToolchain): String? {
         val provider = EXTENSION_POINT_NAME.extensionList.find { it.canSerialize(value) } ?: return null
         return buildJsonObject {
             put("marker", provider.serialMarker)

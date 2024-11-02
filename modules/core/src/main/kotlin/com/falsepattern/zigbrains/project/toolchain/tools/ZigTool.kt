@@ -26,35 +26,37 @@ import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.util.io.awaitExit
-import com.intellij.util.io.readLineAsync
 import kotlinx.coroutines.runInterruptible
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import java.nio.file.Path
-import java.time.Duration
 
 abstract class ZigTool(val toolchain: AbstractZigToolchain) {
     abstract val toolName: String
 
-    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String): ProcessOutput {
+    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE): ProcessOutput {
         val process = createBaseCommandLine(workingDirectory, *parameters).createProcess()
-        val exitCode = process.awaitExit()
+
+        val exitCode = withTimeoutOrNull(timeoutMillis) {
+            process.awaitExit()
+        }
         return runInterruptible {
             ProcessOutput(
                 process.inputStream.bufferedReader().use { it.readText() },
                 process.errorStream.bufferedReader().use { it.readText() },
-                exitCode,
-                false,
+                exitCode ?: -1,
+                exitCode == null,
                 false
             )
         }
     }
 
-    protected suspend fun createBaseCommandLine(workingDirectory: Path?,
-                                                vararg parameters: String): GeneralCommandLine {
-        return GeneralCommandLine()
+    private suspend fun createBaseCommandLine(workingDirectory: Path?,
+                                              vararg parameters: String): GeneralCommandLine {
+        val cli = GeneralCommandLine()
             .withExePath(toolchain.pathToExecutable(toolName).toString())
             .withWorkDirectory(workingDirectory?.toString())
             .withParameters(*parameters)
             .withCharset(Charsets.UTF_8)
+        return toolchain.patchCommandLine(cli)
     }
 }
