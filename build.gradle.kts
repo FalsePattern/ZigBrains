@@ -14,7 +14,8 @@ plugins {
     id("org.jetbrains.grammarkit") version "2022.3.2.2" apply false
     idea
 }
-
+val pluginSinceBuild: String by project
+val pluginUntilBuild: String by project
 val javaVersion = property("javaVersion").toString().toInt()
 val lsp4ijVersion: String by project
 val runIdeTarget: String by project
@@ -122,8 +123,10 @@ intellijPlatform {
         }
 
         ideaVersion {
-            sinceBuild = providers.gradleProperty("pluginSinceBuild")
-            untilBuild = providers.gradleProperty("pluginUntilBuild")
+            sinceBuild = pluginSinceBuild
+            if (pluginUntilBuild.isNotBlank()) {
+                untilBuild = pluginUntilBuild
+            }
         }
     }
 
@@ -140,7 +143,13 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            recommended()
+            select {
+                types = listOf(
+                    IntelliJPlatformType.IntellijIdeaCommunity,
+                    IntelliJPlatformType.IntellijIdeaUltimate,
+                    IntelliJPlatformType.CLion
+                )
+            }
         }
     }
     buildSearchableOptions = false

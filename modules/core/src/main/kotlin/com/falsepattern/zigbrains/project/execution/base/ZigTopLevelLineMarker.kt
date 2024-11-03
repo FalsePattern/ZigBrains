@@ -20,7 +20,7 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.execution.base
+package com.falsepattern.zigbrains.project.execution.base
 
 import com.falsepattern.zigbrains.zig.psi.ZigTypes
 import com.intellij.execution.lineMarker.ExecutorAction

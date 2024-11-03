@@ -327,7 +327,7 @@ class ZigDebuggerToolchainService {
 
         private val pluginDir get() = PathManager.getSystemDir().resolve("zigbrains")
 
-        private val tempPluginDir get() = PathManager.getTempPath().toNioPathOrNull()!!.resolve("zigbrains")
+        private val tempPluginDir get(): Path = PathManager.getTempPath().toNioPathOrNull()!!.resolve("zigbrains")
 
         private fun fileNameWithoutExtension(url: String): String {
             return url.substringAfterLast("/").removeSuffix(".zip").removeSuffix(".tar.gz")

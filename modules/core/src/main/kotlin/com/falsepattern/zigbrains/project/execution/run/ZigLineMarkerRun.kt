@@ -22,7 +22,7 @@
 
 package com.falsepattern.zigbrains.project.execution.run
 
-import com.falsepattern.zigbrains.execution.base.ZigTopLevelLineMarker
+import com.falsepattern.zigbrains.project.execution.base.ZigTopLevelLineMarker
 import com.falsepattern.zigbrains.zig.psi.ZigTypes
 import com.intellij.icons.AllIcons.RunConfigurations.TestState
 import com.intellij.psi.PsiElement
