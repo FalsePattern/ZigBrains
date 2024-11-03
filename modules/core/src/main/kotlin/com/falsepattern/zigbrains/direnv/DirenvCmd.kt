@@ -32,6 +32,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
+import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.io.awaitExit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.withLock
@@ -72,12 +73,14 @@ object DirenvCmd {
     private suspend fun run(project: Project, workDir: Path, vararg args: String): DirenvOutput {
         val cli = GeneralCommandLine("direnv", *args).withWorkingDirectory(workDir)
 
-        val process: Process
-        val exitCode: Int
-
-        project.direnvService.mutex.withLock {
-            process = cli.createProcess()
-            exitCode = process.awaitExit()
+        val (process, exitCode) = withProgressText("Running ${cli.commandLineString}") {
+            withContext(Dispatchers.IO) {
+                project.direnvService.mutex.withLock {
+                    val process = cli.createProcess()
+                    val exitCode = process.awaitExit()
+                    process to exitCode
+                }
+            }
         }
 
         if (exitCode != 0) {

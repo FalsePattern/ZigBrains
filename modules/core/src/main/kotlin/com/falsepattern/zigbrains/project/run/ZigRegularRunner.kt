@@ -26,23 +26,23 @@ import com.falsepattern.zigbrains.project.execution.base.ZigExecConfig
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.execution.base.executeCommandLine
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
-import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.runners.ExecutionEnvironment
-import com.intellij.execution.runners.showRunContent
+import com.intellij.execution.runners.RunContentBuilder
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.EDT
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ZigRegularRunner: ZigProgramRunner<ZigProfileState<*>>(DefaultRunExecutor.EXECUTOR_ID) {
     override suspend fun execute(state: ZigProfileState<*>, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor? {
         val cli = state.getCommandLine(toolchain, false)
         val exec = executeCommandLine(cli, environment)
-        return withContext(Dispatchers.EDT) {
-            showRunContent(exec, environment)
+        return withEDTContext {
+            val runContentBuilder = RunContentBuilder(exec, environment)
+            runContentBuilder.showRunContent(null)
         }
     }
 

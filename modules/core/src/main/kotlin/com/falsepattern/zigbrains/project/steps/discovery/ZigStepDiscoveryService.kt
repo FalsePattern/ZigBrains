@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.steps.discovery
 
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.steps.discovery.ZigStepDiscoveryListener.ErrorType
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.EDT
@@ -120,7 +121,7 @@ class ZigStepDiscoveryService(private val project: Project) {
     }
 
     private suspend fun dispatchReload() {
-        withContext(Dispatchers.EDT) {
+        withEDTContext {
             FileDocumentManager.getInstance().saveAllDocuments()
         }
         doReload()

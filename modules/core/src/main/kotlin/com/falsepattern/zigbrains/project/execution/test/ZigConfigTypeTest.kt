@@ -36,10 +36,10 @@ class ZigConfigTypeTest : ConfigurationTypeBase(
     Icons.ZIG
 ) {
     init {
-        addFactory(ConfigFactoryRun())
+        addFactory(ConfigFactoryRun(this))
     }
 
-    inner class ConfigFactoryRun: ConfigurationFactory(this@ZigConfigTypeTest) {
+    class ConfigFactoryRun(type: ZigConfigTypeTest): ConfigurationFactory(type) {
         override fun createTemplateConfiguration(project: Project): RunConfiguration {
             return ZigExecConfigTest(project, this)
         }

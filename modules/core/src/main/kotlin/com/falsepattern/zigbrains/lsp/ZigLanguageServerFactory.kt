@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.lsp
 
+import com.falsepattern.zigbrains.lsp.settings.zlsSettings
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -51,19 +52,11 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
     }
 
     override fun isEnabled(project: Project): Boolean {
-        return (project.getUserData(ENABLED_KEY) ?: true) && if (application.isDispatchThread) {
-            runWithModalProgressBlocking(ModalTaskOwner.project(project), ZLSBundle.message("progress.title.validate")) {
-                ZLSStreamConnectionProvider.validate(project)
-            }
-        } else {
-            runBlocking {
-                ZLSStreamConnectionProvider.validate(project)
-            }
-        }
+        return (project.getUserData(ENABLED_KEY) ?: true) && project.zlsSettings.validate()
     }
 
     override fun setEnabled(enabled: Boolean, project: Project) {
-        project.putUserData(ENABLED_KEY, true)
+        project.putUserData(ENABLED_KEY, enabled)
     }
 }
 

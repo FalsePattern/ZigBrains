@@ -58,7 +58,7 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
     }
 
     @Throws(ExecutionException::class)
-    suspend fun getCommandLine(toolchain: AbstractZigToolchain, debug: Boolean): GeneralCommandLine {
+    open suspend fun getCommandLine(toolchain: AbstractZigToolchain, debug: Boolean): GeneralCommandLine {
         val workingDir = configuration.workingDirectory
         val zigExePath = toolchain.zig.path()
 

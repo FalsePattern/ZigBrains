@@ -25,7 +25,9 @@ package com.falsepattern.zigbrains.project.run
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.configurations.RunnerSettings
 import com.intellij.execution.runners.AsyncProgramRunner
@@ -34,6 +36,13 @@ import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.rd.util.toPromise
+import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.platform.ide.progress.TaskCancellation
+import com.intellij.platform.ide.progress.withModalProgress
+import com.intellij.platform.util.progress.ProgressReporter
+import com.intellij.platform.util.progress.SequentialProgressReporter
+import com.intellij.platform.util.progress.reportProgress
+import com.intellij.platform.util.progress.withProgressText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -44,26 +53,35 @@ abstract class ZigProgramRunner<ProfileState: ZigProfileState<*>>(protected val 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun execute(environment: ExecutionEnvironment, state: RunProfileState): Promise<RunContentDescriptor?> {
         return environment.project.zigCoroutineScope.async {
-            executeAsync(environment, state)
+            withModalProgress(ModalTaskOwner.project(environment.project), "Starting zig program...", TaskCancellation.cancellable()) {
+                executeAsync(environment, state)
+            }
         }.toPromise()
     }
 
-    private suspend inline fun executeAsync(environment: ExecutionEnvironment, state: RunProfileState): RunContentDescriptor? {
-        if (state !is ZigProfileState<*>)
+    private suspend inline fun executeAsync(environment: ExecutionEnvironment, baseState: RunProfileState): RunContentDescriptor? {
+        if (baseState !is ZigProfileState<*>)
             return null
 
-        val state = castProfileState(state) ?: return null
+        val state = castProfileState(baseState) ?: return null
 
         val toolchain = environment.project.zigProjectSettings.state.toolchain ?: return null
 
-        withContext(Dispatchers.EDT) {
-            FileDocumentManager.getInstance().saveAllDocuments()
+        return reportProgress { reporter ->
+            reporter.indeterminateStep("Saving all documents") {
+                withEDTContext {
+                    FileDocumentManager.getInstance().saveAllDocuments()
+                }
+            }
+            return@reportProgress reporter.indeterminateStep {
+                return@indeterminateStep execute(state, toolchain, environment)
+            }
         }
 
-        return execute(state, toolchain, environment)
     }
 
     protected abstract fun castProfileState(state: ZigProfileState<*>): ProfileState?
 
+    @Throws(ExecutionException::class)
     abstract suspend fun execute(state: ProfileState, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor?
 }

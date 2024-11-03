@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.module
 
 import com.falsepattern.zigbrains.project.newproject.ZigProjectConfigurationData
 import com.falsepattern.zigbrains.project.newproject.ZigProjectGeneratorPeer
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.ide.util.projectWizard.ModuleBuilder
 import com.intellij.ide.util.projectWizard.ModuleWizardStep
 import com.intellij.ide.util.projectWizard.WizardContext
@@ -61,7 +62,7 @@ class ZigModuleBuilder: ModuleBuilder() {
         val root = contentEntry.file ?: return
         val config = configurationData ?: return
         config.generateProject(this, rootModel.project, root, forceGitignore)
-        withContext(Dispatchers.EDT) {
+        withEDTContext {
             root.refresh(false, true)
         }
     }

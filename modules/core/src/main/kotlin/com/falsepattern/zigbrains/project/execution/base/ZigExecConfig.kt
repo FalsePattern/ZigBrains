@@ -25,6 +25,7 @@ package com.falsepattern.zigbrains.project.execution.base
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.GeneralCommandLine
@@ -37,8 +38,9 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.NlsActions.ActionText
 import com.intellij.openapi.vfs.toNioPathOrNull
 import org.jdom.Element
+import org.jetbrains.annotations.Nls
 
-abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: ConfigurationFactory, name: String): LocatableConfigurationBase<ZigProfileState<T>>(project, factory, name) {
+abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: ConfigurationFactory, @Nls name: String): LocatableConfigurationBase<ZigProfileState<T>>(project, factory, name) {
     var workingDirectory = WorkDirectoryConfigurable("workingDirectory").apply { path = project.guessProjectDir()?.toNioPathOrNull() }
         private set
     var pty = CheckboxConfigurable("pty", ZigBrainsBundle.message("exec.option.label.emulate-terminal"), false)
@@ -47,6 +49,7 @@ abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: Con
         private set
 
     abstract val suggestedName: @ActionText String
+    @Throws(ExecutionException::class)
     abstract suspend fun buildCommandLineArgs(debug: Boolean): List<String>
     abstract override fun getState(executor: Executor, environment: ExecutionEnvironment): ZigProfileState<T>
 

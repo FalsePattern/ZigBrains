@@ -80,30 +80,6 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
             return ZLSStreamConnectionProvider(project, commandLine)
         }
 
-        suspend fun validate(project: Project): Boolean {
-            val svc = project.zlsSettings
-            val state = svc.state
-            val zlsPath: Path = state.zlsPath.let { zlsPath ->
-                if (zlsPath.isEmpty()) {
-                    val env = if (state.direnv) project.getDirenv() else emptyEnv
-                    env.findExecutableOnPATH("zls") ?: run {
-                        return false
-                    }
-                } else {
-                    zlsPath.toNioPathOrNull() ?: run {
-                        return false
-                    }
-                }
-            }
-            if (zlsPath.notExists()) {
-                return false
-            }
-            if (!zlsPath.isRegularFile() || !zlsPath.isExecutable()) {
-                return false
-            }
-            return true
-        }
-
         @OptIn(ExperimentalSerializationApi::class)
         suspend fun getCommand(project: Project): List<String>? {
             val svc = project.zlsSettings

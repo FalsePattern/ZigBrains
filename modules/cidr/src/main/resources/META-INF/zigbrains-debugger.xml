@@ -1,0 +1,60 @@
+<idea-plugin package="com.falsepattern.zigbrains.debugger">
+    <depends>com.intellij.modules.cidr.debugger</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <configurationType
+                implementation="com.falsepattern.zigbrains.debugger.execution.binary.ZigConfigTypeBinary"
+        />
+        <programRunner
+                id="ZigDebugRunnerRun"
+                implementation="com.falsepattern.zigbrains.debugger.runner.run.ZigDebugRunnerRun"
+        />
+        <programRunner
+                id="ZigDebugRunnerTest"
+                implementation="com.falsepattern.zigbrains.debugger.runner.test.ZigDebugRunnerTest"
+        />
+        <programRunner
+                id="ZigDebugRunnerBuild"
+                implementation="com.falsepattern.zigbrains.debugger.runner.build.ZigDebugRunnerBuild"
+        />
+        <programRunner
+                id="ZigDebugRunnerBinary"
+                implementation="com.falsepattern.zigbrains.debugger.runner.binary.ZigDebugRunnerBinary"
+        />
+
+        <xdebugger.settings
+                implementation="com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings"
+        />
+    </extensions>
+
+    <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <featureProvider
+                implementation="com.falsepattern.zigbrains.debugger.DebuggerFeatures"
+        />
+        <debuggerDriverProvider
+                id="DefaultProvider"
+                implementation="com.falsepattern.zigbrains.debugger.ZigDefaultDebuggerDriverConfigurationProvider"
+                order="last"
+        />
+    </extensions>
+
+    <extensions defaultExtensionNs="cidr.debugger">
+        <languageSupport
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.debugger.ZigDebuggerLanguageSupport"
+        />
+        <editorsExtension
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.debugger.ZigDebuggerEditorsExtension"
+        />
+        <lineBreakpointFileTypesProvider
+                implementation="com.falsepattern.zigbrains.debugger.ZigLineBreakpointFileTypesProvider"
+        />
+        <localVariablesFilterHandler
+                implementation="com.falsepattern.zigbrains.debugger.ZigLocalVariablesFilterHandler"
+        />
+    </extensions>
+
+    <extensionPoints>
+    </extensionPoints>
+</idea-plugin>

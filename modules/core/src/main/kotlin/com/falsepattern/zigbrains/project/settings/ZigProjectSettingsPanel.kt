@@ -26,6 +26,8 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider
+import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.EDT
@@ -35,6 +37,9 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.platform.ide.progress.TaskCancellation
+import com.intellij.platform.ide.progress.withModalProgress
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBCheckBox
@@ -115,8 +120,10 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
                     cell(direnv)
                 }
                 button(ZigBrainsBundle.message("settings.project.label.toolchain-autodetect")) {
-                    this@ZigProjectSettingsPanel.project.zigCoroutineScope.launch {
-                        autodetect()
+                    project.zigCoroutineScope.launchWithEDT {
+                        withModalProgress(ModalTaskOwner.component(pathToToolchain), "Detecting Zig...", TaskCancellation.cancellable()) {
+                            autodetect()
+                        }
                     }
                 }
             }
@@ -146,7 +153,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
         val env = zig?.getEnv(project)
         val version = env?.version
         val stdPath = env?.stdPath(toolchain)
-        withContext(Dispatchers.EDT) {
+        withEDTContext {
             toolchainVersion.text = version ?: ""
             toolchainVersion.foreground = JBColor.foreground()
 

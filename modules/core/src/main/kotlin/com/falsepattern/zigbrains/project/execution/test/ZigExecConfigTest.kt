@@ -25,13 +25,14 @@ package com.falsepattern.zigbrains.project.execution.test
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.base.*
 import com.falsepattern.zigbrains.shared.cli.coloredCliFlags
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.project.Project
 import kotlin.io.path.pathString
 
-class ZigExecConfigTest(project: Project, factory: ConfigurationFactory): ZigExecConfig<ZigExecConfigTest>(project, factory, "Zig Run") {
+class ZigExecConfigTest(project: Project, factory: ConfigurationFactory): ZigExecConfig<ZigExecConfigTest>(project, factory, ZigBrainsBundle.message("exec.type.test.label")) {
     var filePath = FilePathConfigurable("filePath", ZigBrainsBundle.message("exec.option.label.file-path"))
         private set
     var colored = ColoredConfigurable("colored")
@@ -41,11 +42,12 @@ class ZigExecConfigTest(project: Project, factory: ConfigurationFactory): ZigExe
     var compilerArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.compiler-args"))
         private set
 
+    @Throws(ExecutionException::class)
     override suspend fun buildCommandLineArgs(debug: Boolean): List<String> {
         val result = ArrayList<String>()
         result.add(if (debug) "build-exe" else "run")
         result.addAll(coloredCliFlags(colored.value, debug))
-        result.add(filePath.path?.pathString ?: throw IllegalArgumentException("Empty file path!"))
+        result.add(filePath.path?.pathString ?: throw ExecutionException(ZigBrainsBundle.message("exception.zig.empty-file-path")))
         if (!debug || optimization.forced) {
             result.addAll(listOf("-O", optimization.level.name))
         }

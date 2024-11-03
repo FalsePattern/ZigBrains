@@ -26,7 +26,9 @@ import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.util.io.awaitExit
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.nio.file.Path
 
@@ -34,10 +36,14 @@ abstract class ZigTool(val toolchain: AbstractZigToolchain) {
     abstract val toolName: String
 
     suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE): ProcessOutput {
-        val process = createBaseCommandLine(workingDirectory, *parameters).createProcess()
+        val cli = createBaseCommandLine(workingDirectory, *parameters)
 
-        val exitCode = withTimeoutOrNull(timeoutMillis) {
-            process.awaitExit()
+        val (process, exitCode) = withContext(Dispatchers.IO) {
+            val process = cli.createProcess()
+            val exit = withTimeoutOrNull(timeoutMillis) {
+                process.awaitExit()
+            }
+            process to exit
         }
         return runInterruptible {
             ProcessOutput(
@@ -50,8 +56,10 @@ abstract class ZigTool(val toolchain: AbstractZigToolchain) {
         }
     }
 
-    private suspend fun createBaseCommandLine(workingDirectory: Path?,
-                                              vararg parameters: String): GeneralCommandLine {
+    private suspend fun createBaseCommandLine(
+        workingDirectory: Path?,
+        vararg parameters: String
+    ): GeneralCommandLine {
         val cli = GeneralCommandLine()
             .withExePath(toolchain.pathToExecutable(toolName).toString())
             .withWorkDirectory(workingDirectory?.toString())

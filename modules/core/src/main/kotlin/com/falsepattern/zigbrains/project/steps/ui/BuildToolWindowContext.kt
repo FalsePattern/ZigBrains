@@ -29,6 +29,7 @@ import com.falsepattern.zigbrains.project.execution.build.ZigExecConfigBuild
 import com.falsepattern.zigbrains.project.execution.firstConfigFactory
 import com.falsepattern.zigbrains.project.steps.discovery.ZigStepDiscoveryListener
 import com.falsepattern.zigbrains.project.steps.discovery.zigStepDiscovery
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.execution.ProgramRunnerUtil
 import com.intellij.execution.RunManager
 import com.intellij.execution.RunnerAndConfigurationSettings
@@ -137,7 +138,7 @@ class BuildToolWindowContext(private val project: Project): Disposable {
 
     companion object {
         suspend fun create(project: Project, window: ToolWindow) {
-            withContext(Dispatchers.EDT) {
+            withEDTContext {
                 val context = BuildToolWindowContext(project)
                 Disposer.register(context, project.zigStepDiscovery.register(context.BuildReloadListener()))
                 Disposer.register(window.disposable, context)
@@ -161,13 +162,13 @@ class BuildToolWindowContext(private val project: Project): Disposable {
                 }
                 buildZig.add(DefaultMutableTreeNode(StepNodeDescriptor(project, task, icon, description)))
             }
-            withContext(Dispatchers.EDT) {
+            withEDTContext {
                 getViewport(project)?.let { setViewportTree(it) }
             }
         }
 
         override suspend fun errorReload(type: ZigStepDiscoveryListener.ErrorType, details: String?) {
-            withContext(Dispatchers.EDT) {
+            withEDTContext {
                 getViewport(project)?.setViewportError(ZigBrainsBundle.message(when(type) {
                     ZigStepDiscoveryListener.ErrorType.MissingToolchain -> "build.tool.window.status.error.missing-toolchain"
                     ZigStepDiscoveryListener.ErrorType.MissingBuildZig -> "build.tool.window.status.error.missing-build-zig"
@@ -177,7 +178,7 @@ class BuildToolWindowContext(private val project: Project): Disposable {
         }
 
         override suspend fun timeoutReload(seconds: Int) {
-            withContext(Dispatchers.EDT) {
+            withEDTContext {
                 getViewport(project)?.setViewportError(ZigBrainsBundle.message("build.tool.window.status.timeout", seconds), null)
             }
         }

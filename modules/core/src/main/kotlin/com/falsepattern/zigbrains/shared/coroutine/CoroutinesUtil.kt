@@ -22,13 +22,17 @@
 
 package com.falsepattern.zigbrains.shared.coroutine
 
+import com.intellij.openapi.application.EDT
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.asContextElement
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
+import com.intellij.platform.ide.progress.withModalProgress
+import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.SuspendingLazy
 import com.intellij.util.application
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 inline fun <T> runModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleFactory: () -> String, cancellationFactory: () -> TaskCancellation = TaskCancellation::cancellable, noinline action: suspend CoroutineScope.() -> T): T {
     return if (application.isDispatchThread) {
@@ -46,4 +50,16 @@ inline fun <T> SuspendingLazy<T>.getOrAwaitModalOrBlocking(taskOwnerFactory: () 
             getValue()
         }
     }
+}
+
+suspend inline fun <T> withEDTContext(state: ModalityState = ModalityState.defaultModalityState(), noinline block: suspend CoroutineScope.() -> T): T {
+    return withContext(Dispatchers.EDT + state.asContextElement(), block = block)
+}
+
+suspend inline fun <T> runInterruptibleEDT(state: ModalityState = ModalityState.defaultModalityState(), noinline targetAction: () -> T): T {
+    return runInterruptible(Dispatchers.EDT + state.asContextElement(), block = targetAction)
+}
+
+fun CoroutineScope.launchWithEDT(state: ModalityState = ModalityState.defaultModalityState(), block: suspend CoroutineScope.() -> Unit) {
+    launch(Dispatchers.EDT + state.asContextElement(), block = block)
 }

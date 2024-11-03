@@ -24,18 +24,26 @@ package com.falsepattern.zigbrains.lsp.settings
 
 import com.falsepattern.zigbrains.direnv.*
 import com.falsepattern.zigbrains.lsp.ZLSBundle
+import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.platform.ide.progress.TaskCancellation
+import com.intellij.platform.ide.progress.runWithModalProgressBlocking
+import com.intellij.platform.ide.progress.withModalProgress
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.fields.ExtendableTextField
 import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.util.application
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.io.path.pathString
 
@@ -66,12 +74,14 @@ class ZLSSettingsPanel(private val project: Project?) : Disposable {
         group(ZLSBundle.message("settings.group.title")) {
             row(ZLSBundle.message("settings.zls-path.label")) {
                 cell(zlsPath).resizableColumn().align(AlignX.FILL)
-                if (DirenvCmd.direnvInstalled() && project != null) {
+                if (DirenvCmd.direnvInstalled() && project != null && !project.isDefault) {
                     cell(direnv)
                 }
                 button(ZLSBundle.message("settings.zls-path.autodetect.label")) {
-                    project.zigCoroutineScope.launch {
-                        autodetect()
+                    project.zigCoroutineScope.launchWithEDT {
+                        withModalProgress(ModalTaskOwner.component(zlsPath), "Detecting ZLS...", TaskCancellation.cancellable()) {
+                            autodetect()
+                        }
                     }
                 }
             }

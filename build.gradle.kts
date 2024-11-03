@@ -1,6 +1,9 @@
+import nl.adaptivity.xmlutil.core.impl.multiplatform.name
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
+import org.jetbrains.intellij.platform.gradle.tasks.InstrumentedJarTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
@@ -14,6 +17,7 @@ plugins {
 
 val javaVersion = property("javaVersion").toString().toInt()
 val lsp4ijVersion: String by project
+val runIdeTarget: String by project
 val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
 val lsp4ijPluginString = "com.redhat.devtools.lsp4ij:$lsp4ijVersion${if (lsp4ijNightly) "@nightly" else ""}"
 
@@ -74,7 +78,10 @@ allprojects {
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"))
+        when(runIdeTarget) {
+            "ideaCommunity" -> create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"))
+            "clion" -> create(IntelliJPlatformType.CLion, providers.gradleProperty("clionVersion"))
+        }
 
         pluginVerifier()
         zipSigner()
@@ -82,6 +89,7 @@ dependencies {
     }
 
     implementation(project(":core"))
+    implementation(project(":cidr"))
 }
 
 intellijPlatform {

@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.toolchain
 
 import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
@@ -52,5 +53,15 @@ class LocalZigToolchain(val location: Path): AbstractZigToolchain() {
 
     companion object {
         val DIRENV_KEY = KeyWithDefaultValue.create<Boolean>("ZIG_LOCAL_DIRENV")
+
+        @Throws(ExecutionException::class)
+        fun ensureLocal(toolchain: AbstractZigToolchain): LocalZigToolchain {
+            if (toolchain is LocalZigToolchain) {
+                return toolchain
+            } else {
+                // TODO
+                throw ExecutionException("The debugger only supports local zig toolchain")
+            }
+        }
     }
 }

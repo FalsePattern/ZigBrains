@@ -28,6 +28,7 @@ import com.falsepattern.zigbrains.project.settings.ZigProjectSettings
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.template.ZigInitTemplate
 import com.falsepattern.zigbrains.project.template.ZigProjectTemplate
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.GitRepositoryInitializer
@@ -36,6 +37,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.toNioPathOrNull
+import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.ResourceUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -48,7 +50,7 @@ data class ZigProjectConfigurationData(
     val selectedTemplate: ZigProjectTemplate
 ) {
     suspend fun generateProject(requestor: Any, project: Project, baseDir: VirtualFile, forceGitignore: Boolean): Boolean {
-        withContext(Dispatchers.EDT) {
+        withEDTContext {
             project.zigProjectSettings.loadState(projConf)
             project.zlsSettings.loadState(zlsConf)
         }
@@ -89,7 +91,7 @@ data class ZigProjectConfigurationData(
                 val (fileName, parentDir) = fileTemplate.key.let {
                     if (it.contains("/")) {
                         val slashIndex = it.indexOf("/")
-                        val parentDir = withContext(Dispatchers.EDT) {
+                        val parentDir = withEDTContext {
                             baseDir.createChildDirectory(requestor, it.substring(0, slashIndex))
                         }
                         Pair(it.substring(slashIndex + 1), parentDir)
@@ -101,7 +103,7 @@ data class ZigProjectConfigurationData(
                 val resourceData = getResourceString("project-gen/$templateDir/$fileName.template")
                     ?.replace("@@PROJECT_NAME@@", projectName)
                     ?: continue
-                withContext(Dispatchers.EDT) {
+                withEDTContext {
                     val targetFile = parentDir.createChildData(requestor, fileName)
                     VfsUtil.saveText(targetFile, resourceData)
                 }

@@ -32,7 +32,7 @@ import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.project.Project
 
-class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigExecConfig<ZigExecConfigBuild>(project, factory, "Zig Run") {
+class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigExecConfig<ZigExecConfigBuild>(project, factory, ZigBrainsBundle.message("exec.type.build.label")) {
     var buildSteps = ArgsConfigurable("buildSteps", ZigBrainsBundle.message("exec.option.label.build.steps"))
         private set
     var extraArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.build.args"))
@@ -44,10 +44,11 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
     var exeArgs = ArgsConfigurable("exeArgs", ZigBrainsBundle.message("exec.option.label.build.exe-args-debug"))
         private set
 
+    @Throws(ExecutionException::class)
     override suspend fun buildCommandLineArgs(debug: Boolean): List<String> {
         val result = ArrayList<String>()
         result.add("build")
-        var steps = buildSteps.args
+        val steps = buildSteps.args
         if (debug) {
             val truncatedSteps = ArrayList<String>()
             for (step in steps) {

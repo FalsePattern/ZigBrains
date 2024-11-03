@@ -1,0 +1,54 @@
+/*
+ * This file is part of ZigBrains.
+ *
+ * Copyright (C) 2023-2024 FalsePattern
+ * All Rights Reserved
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * ZigBrains is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, only version 3 of the License.
+ *
+ * ZigBrains is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.falsepattern.zigbrains.debugger.settings
+
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.options.ConfigurableUi
+import com.intellij.openapi.util.Disposer
+import com.intellij.ui.dsl.builder.panel
+import javax.swing.JComponent
+
+class ZigDebuggerGeneralSettingsConfigurableUi: ConfigurableUi<ZigDebuggerSettings>, Disposable {
+    private val components = listOf<ZigDebuggerUiComponent>(ZigDebuggerToolchainConfigurableUi()).onEach { Disposer.register(this, it) }
+
+    override fun reset(settings: ZigDebuggerSettings) {
+        components.forEach { it.reset(settings) }
+    }
+
+    override fun isModified(settings: ZigDebuggerSettings): Boolean {
+        return components.any { it.isModified(settings) }
+    }
+
+    override fun apply(settings: ZigDebuggerSettings) {
+        components.forEach { it.apply(settings) }
+    }
+
+    override fun getComponent(): JComponent {
+        return panel {
+            components.forEach { it.buildUi(this) }
+        }
+    }
+
+    override fun dispose() {
+    }
+}

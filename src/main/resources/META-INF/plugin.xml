@@ -5,6 +5,7 @@
 
     <depends config-file="zigbrains-core.xml">com.intellij.modules.platform</depends>
     <depends config-file="zigbrains-lsp.xml">com.redhat.devtools.lsp4ij</depends>
+    <depends config-file="zigbrains-debugger.xml">com.intellij.modules.cidr.debugger</depends>
 
     <resource-bundle>zigbrains.Bundle</resource-bundle>
 
@@ -23,6 +24,11 @@
                 interface="com.falsepattern.zigbrains.shared.ZBFeatures"
                 dynamic="true"
                 name="featureProvider"
+        />
+        <extensionPoint
+                interface="com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider"
+                dynamic="true"
+                name="debuggerDriverProvider"
         />
     </extensionPoints>
 </idea-plugin>
