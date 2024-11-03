@@ -1,10 +1,8 @@
-import nl.adaptivity.xmlutil.core.impl.multiplatform.name
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
-import org.jetbrains.intellij.platform.gradle.tasks.InstrumentedJarTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     kotlin("jvm") version "1.9.24" apply false
@@ -33,6 +31,12 @@ subprojects {
 
     extensions.configure<KotlinJvmProjectExtension>("kotlin") {
         jvmToolchain(javaVersion)
+    }
+
+    tasks.withType<KotlinCompilationTask<*>>().configureEach {
+        compilerOptions {
+             freeCompilerArgs.addAll("-Xlambdas=indy")
+        }
     }
 }
 
