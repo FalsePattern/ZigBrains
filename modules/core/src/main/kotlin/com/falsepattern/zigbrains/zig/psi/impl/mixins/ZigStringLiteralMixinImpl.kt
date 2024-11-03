@@ -22,7 +22,9 @@
 
 package com.falsepattern.zigbrains.zig.psi.impl.mixins
 
-import com.falsepattern.zigbrains.zig.psi.*
+import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral
+import com.falsepattern.zigbrains.zig.psi.getMultilineContent
+import com.falsepattern.zigbrains.zig.psi.getTextRangeBounds
 import com.falsepattern.zigbrains.zig.util.decodeReplacements
 import com.falsepattern.zigbrains.zig.util.unescape
 import com.intellij.extapi.psi.ASTWrapperPsiElement

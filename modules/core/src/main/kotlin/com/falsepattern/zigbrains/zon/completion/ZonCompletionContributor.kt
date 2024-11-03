@@ -22,12 +22,7 @@
 
 package com.falsepattern.zigbrains.zon.completion
 
-import com.falsepattern.zigbrains.zon.psi.ZonEntry
-import com.falsepattern.zigbrains.zon.psi.ZonFile
-import com.falsepattern.zigbrains.zon.psi.ZonProperty
-import com.falsepattern.zigbrains.zon.psi.ZonPropertyPlaceholder
-import com.falsepattern.zigbrains.zon.psi.ZonTypes
-import com.falsepattern.zigbrains.zon.psi.ZonValuePlaceholder
+import com.falsepattern.zigbrains.zon.psi.*
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.patterns.ElementPattern
