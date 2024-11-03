@@ -177,7 +177,7 @@ class ZigDebuggerToolchainService {
         }
 
         try {
-            downloadAndUnArchive(project, baseDir, downloadableBinaries)
+            downloadAndUnArchive(baseDir, downloadableBinaries)
             return DownloadResult.Ok(baseDir)
         } catch (e: IOException) {
             //TODO logging
@@ -215,7 +215,7 @@ class ZigDebuggerToolchainService {
 
     @Throws(IOException::class)
     @RequiresEdt
-    private suspend fun downloadAndUnArchive(project: Project?, baseDir: Path, binariesToDownload: List<DownloadableDebuggerBinary>) {
+    private suspend fun downloadAndUnArchive(baseDir: Path, binariesToDownload: List<DownloadableDebuggerBinary>) {
         val service = DownloadableFileService.getInstance()
 
         val downloadDir = baseDir.toFile()
