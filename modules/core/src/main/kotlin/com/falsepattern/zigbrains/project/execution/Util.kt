@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.project.execution
 
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.ConfigurationTypeBase
-import com.intellij.execution.configurations.ConfigurationTypeUtil
 import com.intellij.execution.configurations.runConfigurationType
 
 inline fun <reified T: ConfigurationTypeBase> firstConfigFactory(): ConfigurationFactory {

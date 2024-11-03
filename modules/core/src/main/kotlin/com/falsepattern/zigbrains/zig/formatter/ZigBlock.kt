@@ -22,12 +22,12 @@
 
 package com.falsepattern.zigbrains.zig.formatter
 
+import com.falsepattern.zigbrains.zig.psi.ZigTypes.*
 import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
 import com.intellij.psi.TokenType
 import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.tree.IElementType
-import com.falsepattern.zigbrains.zig.psi.ZigTypes.*
 
 class ZigBlock(
     node: ASTNode,

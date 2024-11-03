@@ -22,8 +22,6 @@
 
 package com.falsepattern.zigbrains.debugger.dap
 
-import com.falsepattern.zigbrains.zig.ZigLanguage
-import com.intellij.lang.Language
 import com.intellij.openapi.util.Expirable
 import com.intellij.openapi.util.Pair
 import com.intellij.openapi.util.UserDataHolderEx

@@ -26,7 +26,6 @@ import com.falsepattern.zigbrains.project.execution.base.ZigConfigProducer
 import com.falsepattern.zigbrains.project.execution.firstConfigFactory
 import com.intellij.execution.actions.ConfigurationFromContext
 import com.intellij.execution.configurations.ConfigurationFactory
-import com.intellij.execution.configurations.ConfigurationTypeUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import java.nio.file.Path

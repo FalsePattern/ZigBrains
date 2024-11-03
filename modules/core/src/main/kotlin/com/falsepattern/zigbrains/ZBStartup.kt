@@ -33,7 +33,6 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
-import com.intellij.util.application
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 

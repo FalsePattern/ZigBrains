@@ -33,20 +33,14 @@ import com.intellij.execution.configurations.RunnerSettings
 import com.intellij.execution.runners.AsyncProgramRunner
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.ui.RunContentDescriptor
-import com.intellij.openapi.application.EDT
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.rd.util.toPromise
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.withModalProgress
-import com.intellij.platform.util.progress.ProgressReporter
-import com.intellij.platform.util.progress.SequentialProgressReporter
 import com.intellij.platform.util.progress.reportProgress
-import com.intellij.platform.util.progress.withProgressText
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
 import org.jetbrains.concurrency.Promise
 
 abstract class ZigProgramRunner<ProfileState: ZigProfileState<*>>(protected val executorId: String): AsyncProgramRunner<RunnerSettings>() {

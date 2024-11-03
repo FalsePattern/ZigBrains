@@ -28,8 +28,6 @@ import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.platform.util.progress.withProgressText
@@ -38,7 +36,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import org.jetbrains.annotations.NonNls
 import java.nio.file.Path
 
 object DirenvCmd {

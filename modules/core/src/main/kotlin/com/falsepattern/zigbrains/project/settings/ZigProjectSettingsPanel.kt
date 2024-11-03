@@ -30,7 +30,6 @@ import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.EDT
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -47,7 +46,10 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 

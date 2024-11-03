@@ -24,10 +24,8 @@ package com.falsepattern.zigbrains.debugger.runner.base
 
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
-import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.jetbrains.cidr.execution.Installer
 import kotlinx.coroutines.async
 import kotlinx.coroutines.future.asCompletableFuture

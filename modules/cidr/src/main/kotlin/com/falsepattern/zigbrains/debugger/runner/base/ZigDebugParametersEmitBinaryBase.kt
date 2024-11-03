@@ -26,7 +26,6 @@ import com.falsepattern.zigbrains.debugger.ZigDebugBundle
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.intellij.execution.ExecutionException
-import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.containers.orNull

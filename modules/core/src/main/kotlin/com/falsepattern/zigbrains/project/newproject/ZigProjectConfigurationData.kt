@@ -32,12 +32,10 @@ import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.GitRepositoryInitializer
-import com.intellij.openapi.application.EDT
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.toNioPathOrNull
-import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.ResourceUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

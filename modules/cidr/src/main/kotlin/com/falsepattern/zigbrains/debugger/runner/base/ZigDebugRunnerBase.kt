@@ -41,13 +41,11 @@ import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.platform.util.progress.reportProgress
-import com.intellij.platform.util.progress.withProgressText
 import com.intellij.xdebugger.XDebugProcess
 import com.intellij.xdebugger.XDebugProcessStarter
 import com.intellij.xdebugger.XDebugSession
 import com.intellij.xdebugger.XDebuggerManager
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
-import com.jetbrains.rd.util.string.printToString
 
 abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgramRunner<ProfileState>(DefaultDebugExecutor.EXECUTOR_ID) {
     @Throws(ExecutionException::class)

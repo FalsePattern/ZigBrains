@@ -27,7 +27,6 @@ import com.falsepattern.zigbrains.zig.util.prefixWithTextBlockEscape
 import com.falsepattern.zigbrains.zig.util.unescape
 import com.intellij.lexer.Lexer
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.util.Segment
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement

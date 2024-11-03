@@ -26,7 +26,6 @@ import com.falsepattern.zigbrains.zig.psi.ZigTypes
 import com.intellij.codeInsight.generation.IndentedCommenter
 import com.intellij.lang.CodeDocumentationAwareCommenter
 import com.intellij.psi.PsiComment
-import com.intellij.psi.tree.IElementType
 
 class ZigCommenter: CodeDocumentationAwareCommenter, IndentedCommenter {
     override fun getLineCommentPrefix() = COMMENT

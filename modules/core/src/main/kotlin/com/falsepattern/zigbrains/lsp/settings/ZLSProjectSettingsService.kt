@@ -25,7 +25,6 @@ package com.falsepattern.zigbrains.lsp.settings
 import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.ZLSBundle
-import com.falsepattern.zigbrains.lsp.ZLSStreamConnectionProvider
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.toNioPathOrNull
@@ -33,7 +32,6 @@ import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.util.application
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
 import java.nio.file.Path
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock

@@ -32,9 +32,6 @@ import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.RunContentBuilder
 import com.intellij.execution.ui.RunContentDescriptor
-import com.intellij.openapi.application.EDT
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class ZigRegularRunner: ZigProgramRunner<ZigProfileState<*>>(DefaultRunExecutor.EXECUTOR_ID) {
     override suspend fun execute(state: ZigProfileState<*>, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor? {

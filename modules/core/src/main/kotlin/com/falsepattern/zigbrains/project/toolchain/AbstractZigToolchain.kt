@@ -25,7 +25,6 @@ package com.falsepattern.zigbrains.project.toolchain
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import java.nio.file.Path
 
 abstract class AbstractZigToolchain {

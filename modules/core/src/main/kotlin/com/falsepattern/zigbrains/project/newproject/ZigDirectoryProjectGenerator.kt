@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.project.newproject
 
 import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
-import com.intellij.execution.runners.ExecutionUtil
 import com.intellij.facet.ui.ValidationResult
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep
 import com.intellij.ide.util.projectWizard.CustomStepProjectGenerator

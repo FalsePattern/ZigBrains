@@ -28,8 +28,6 @@ import com.intellij.openapi.application.asContextElement
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
-import com.intellij.platform.ide.progress.withModalProgress
-import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.SuspendingLazy
 import com.intellij.util.application
 import kotlinx.coroutines.*

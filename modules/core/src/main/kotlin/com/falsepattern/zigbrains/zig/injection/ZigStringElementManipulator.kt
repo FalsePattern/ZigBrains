@@ -31,7 +31,6 @@ import com.falsepattern.zigbrains.zig.psi.getTextRangeBounds
 import com.falsepattern.zigbrains.zig.psi.indentSize
 import com.falsepattern.zigbrains.zig.util.escape
 import com.falsepattern.zigbrains.zig.util.prefixWithTextBlockEscape
-import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.AbstractElementManipulator
 import com.intellij.psi.PsiFileFactory

@@ -26,7 +26,6 @@ import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.project.settings.ZigProjectSettings
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.shared.coroutine.getOrAwaitModalOrBlocking
-import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.navigation.ItemPresentation
 import com.intellij.openapi.project.Project
@@ -36,7 +35,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.refreshAndFindVirtualDirectory
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.util.suspendingLazy
-import kotlinx.coroutines.async
 import java.util.*
 import javax.swing.Icon
 

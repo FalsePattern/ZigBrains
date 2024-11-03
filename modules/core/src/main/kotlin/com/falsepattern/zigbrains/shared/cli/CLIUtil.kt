@@ -25,7 +25,6 @@ package com.falsepattern.zigbrains.shared.cli
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.intellij.openapi.options.ConfigurationException
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 //From Apache Ant

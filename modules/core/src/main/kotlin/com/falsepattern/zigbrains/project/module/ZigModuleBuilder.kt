@@ -29,14 +29,10 @@ import com.intellij.ide.util.projectWizard.ModuleBuilder
 import com.intellij.ide.util.projectWizard.ModuleWizardStep
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.EDT
-import com.intellij.openapi.application.Experiments
 import com.intellij.openapi.module.ModuleType
 import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.openapi.util.Disposer
 import com.intellij.util.ui.JBUI
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.swing.JComponent
 
 class ZigModuleBuilder: ModuleBuilder() {

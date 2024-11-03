@@ -23,12 +23,8 @@
 package com.falsepattern.zigbrains.debugger.toolchain
 
 import com.falsepattern.zigbrains.debugger.ZigDebugBundle
-import com.falsepattern.zigbrains.shared.coroutine.runInterruptibleEDT
-import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
-import com.intellij.execution.ExecutionModes.ModalProgressMode
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.application.EDT
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
@@ -38,9 +34,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
-import com.intellij.platform.ide.progress.ModalTaskOwner
-import com.intellij.platform.ide.progress.TaskCancellation
-import com.intellij.platform.ide.progress.withModalProgress
 import com.intellij.ui.BrowserHyperlinkListener
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.components.JBPanel
@@ -50,9 +43,7 @@ import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.Decompressor
 import com.intellij.util.system.CpuArch
 import com.intellij.util.system.OS
-import com.jetbrains.cidr.execution.debugger.CidrDebuggerPathManager
 import com.jetbrains.cidr.execution.debugger.backend.bin.UrlProvider
-import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
@@ -60,7 +51,7 @@ import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.nio.file.Path
-import java.util.Properties
+import java.util.*
 import kotlin.io.path.name
 import kotlin.io.path.notExists
 

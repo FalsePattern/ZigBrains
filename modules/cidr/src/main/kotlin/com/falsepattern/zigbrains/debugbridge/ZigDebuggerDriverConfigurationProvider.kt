@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.debugbridge
 
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
-import kotlinx.coroutines.CoroutineScope
 
 interface ZigDebuggerDriverConfigurationProvider {
     companion object {

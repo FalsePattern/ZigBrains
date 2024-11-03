@@ -30,15 +30,8 @@ import com.falsepattern.zigbrains.debugger.toolchain.zigDebuggerToolchainService
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
-import com.intellij.ide.plugins.PluginManager
-import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.EDT
-import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.observable.util.whenItemSelected
-import com.intellij.openapi.options.ConfigurableUi
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.openapi.util.SystemInfo
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.withModalProgress
@@ -46,10 +39,6 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.dsl.builder.DEFAULT_COMMENT_WIDTH
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.util.concurrency.annotations.RequiresEdt
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asContextElement
-import kotlinx.coroutines.job
-import kotlinx.coroutines.launch
 import javax.swing.ComboBoxModel
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JEditorPane

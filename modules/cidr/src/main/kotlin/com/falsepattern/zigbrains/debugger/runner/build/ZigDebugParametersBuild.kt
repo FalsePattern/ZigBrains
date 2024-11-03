@@ -30,7 +30,6 @@ import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase
 import com.falsepattern.zigbrains.project.execution.build.ZigProfileStateBuild
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.intellij.execution.ExecutionException
-import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.platform.util.progress.withProgressText
 import com.jetbrains.cidr.execution.Installer
