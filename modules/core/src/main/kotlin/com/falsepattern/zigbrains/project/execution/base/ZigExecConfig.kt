@@ -68,7 +68,7 @@ abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: Con
     }
 
 
-    suspend fun patchCommandLine(commandLine: GeneralCommandLine, toolchain: AbstractZigToolchain): GeneralCommandLine {
+    suspend fun patchCommandLine(commandLine: GeneralCommandLine): GeneralCommandLine {
         if (direnv.value) {
             commandLine.withEnvironment(DirenvCmd.importDirenv(project).env)
         }

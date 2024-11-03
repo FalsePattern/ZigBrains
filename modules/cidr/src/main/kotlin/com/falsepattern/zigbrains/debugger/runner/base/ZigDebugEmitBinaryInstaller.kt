@@ -45,7 +45,7 @@ class ZigDebugEmitBinaryInstaller<ProfileState: ZigProfileState<*>>(
         cli.withCharset(Charsets.UTF_8)
         cli.withRedirectErrorStream(true)
         return profileState.configuration.project.zigCoroutineScope.async{
-            profileState.configuration.patchCommandLine(cli, toolchain)
+            profileState.configuration.patchCommandLine(cli)
         }.asCompletableFuture().join()
     }
 

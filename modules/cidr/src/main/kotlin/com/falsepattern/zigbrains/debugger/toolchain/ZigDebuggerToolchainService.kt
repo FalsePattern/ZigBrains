@@ -133,7 +133,7 @@ class ZigDebuggerToolchainService {
     }
 
     @RequiresEdt
-    private suspend fun doDownloadDebugger(project: Project? = null, debuggerKind: DebuggerKind): DownloadResult {
+    private suspend fun doDownloadDebugger(debuggerKind: DebuggerKind): DownloadResult {
         val baseDir = debuggerKind.basePath()
         val downloadableBinaries = when(debuggerKind) {
             DebuggerKind.LLDB -> {
@@ -179,7 +179,7 @@ class ZigDebuggerToolchainService {
 
     @RequiresEdt
     suspend fun downloadDebugger(project: Project? = null, debuggerKind: DebuggerKind): DownloadResult {
-        val result = doDownloadDebugger(project, debuggerKind)
+        val result = doDownloadDebugger(debuggerKind)
 
         when(result) {
             is DownloadResult.Ok -> {

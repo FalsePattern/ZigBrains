@@ -69,7 +69,7 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
         workingDir.path?.let { cli.withWorkingDirectory(it) }
         cli.charset = Charsets.UTF_8
         cli.addParameters(configuration.buildCommandLineArgs(debug))
-        return configuration.patchCommandLine(cli, toolchain)
+        return configuration.patchCommandLine(cli)
     }
 }
 
