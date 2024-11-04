@@ -7,6 +7,7 @@
     <depends config-file="zigbrains-lsp.xml">com.redhat.devtools.lsp4ij</depends>
     <depends config-file="zigbrains-debugger.xml" optional="true">com.intellij.nativeDebug</depends>
     <depends config-file="zigbrains-cidr.xml" optional="true">com.intellij.cidr.base</depends>
+    <depends config-file="zigbrains-clion.xml" optional="true">com.intellij.clion</depends>
 
     <resource-bundle>zigbrains.Bundle</resource-bundle>
 
@@ -27,7 +28,7 @@
                 name="featureProvider"
         />
         <extensionPoint
-                interface="com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider"
+                interface="com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProviderBase"
                 dynamic="true"
                 name="debuggerDriverProvider"
         />

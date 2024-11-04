@@ -1,0 +1,10 @@
+<idea-plugin package="com.falsepattern.zigbrains.clion">
+    <depends>com.intellij.clion</depends>
+    <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <debuggerDriverProvider
+                id="CLionProvider"
+                implementation="com.falsepattern.zigbrains.clion.ZigClionDebuggerDriverConfigurationProvider"
+                order="before DefaultProvider"
+        />
+    </extensions>
+</idea-plugin>

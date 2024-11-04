@@ -22,7 +22,7 @@
 
 package com.falsepattern.zigbrains.debugger.runner.base
 
-import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider
+import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProviderBase
 import com.falsepattern.zigbrains.debugger.ZigLocalDebugProcess
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.run.ZigProgramRunner
@@ -55,7 +55,7 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
         environment: ExecutionEnvironment
     ): RunContentDescriptor? {
         val project = environment.project
-        val driverProviders = ZigDebuggerDriverConfigurationProvider.EXTENSION_POINT_NAME.extensionList
+        val driverProviders = ZigDebuggerDriverConfigurationProviderBase.EXTENSION_POINT_NAME.extensionList
         for (provider in driverProviders) {
             val driver = provider.getDebuggerConfiguration(project, isElevated = false, emulateTerminal = false, DebuggerDriverConfiguration::class.java) ?: continue
             return executeWithDriver(state, toolchain, environment, driver) ?: continue

@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains.debugger
 
-import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProvider
 import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings
 import com.falsepattern.zigbrains.debugger.toolchain.*
 import com.falsepattern.zigbrains.debugger.win.MSVCDriverConfiguration
@@ -39,15 +38,8 @@ import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguratio
 import java.io.File
 import kotlin.io.path.pathString
 
-class ZigDefaultDebuggerDriverConfigurationProvider: ZigDebuggerDriverConfigurationProvider {
-    override suspend fun <T> getDebuggerConfiguration(project: Project, isElevated: Boolean, emulateTerminal: Boolean, klass: Class<T>): T? {
-        if (klass != DebuggerDriverConfiguration::class.java)
-            return null
-        @Suppress("UNCHECKED_CAST")
-        return getDebuggerConfiguration(project, isElevated, emulateTerminal) as T
-    }
-
-    private suspend fun getDebuggerConfiguration(project: Project, isElevated: Boolean, emulateTerminal: Boolean): DebuggerDriverConfiguration? {
+class ZigDefaultDebuggerDriverConfigurationProvider: ZigDebuggerDriverConfigurationProvider() {
+    override suspend fun getDebuggerConfiguration(project: Project, isElevated: Boolean, emulateTerminal: Boolean): DebuggerDriverConfiguration? {
         val settings = ZigDebuggerSettings.instance
         val service = zigDebuggerToolchainService
         val kind = settings.debuggerKind

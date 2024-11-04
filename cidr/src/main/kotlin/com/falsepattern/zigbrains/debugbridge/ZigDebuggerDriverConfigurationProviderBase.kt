@@ -25,9 +25,9 @@ package com.falsepattern.zigbrains.debugbridge
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
 
-interface ZigDebuggerDriverConfigurationProvider {
+interface ZigDebuggerDriverConfigurationProviderBase {
     companion object {
-        val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigDebuggerDriverConfigurationProvider>("com.falsepattern.zigbrains.debuggerDriverProvider")
+        val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigDebuggerDriverConfigurationProviderBase>("com.falsepattern.zigbrains.debuggerDriverProvider")
     }
     suspend fun <T> getDebuggerConfiguration(project: Project, isElevated: Boolean, emulateTerminal: Boolean, klass: Class<T>): T?
 }

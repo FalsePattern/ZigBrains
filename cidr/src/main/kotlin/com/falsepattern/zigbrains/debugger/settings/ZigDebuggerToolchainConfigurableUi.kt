@@ -30,8 +30,11 @@ import com.falsepattern.zigbrains.debugger.toolchain.zigDebuggerToolchainService
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.ide.plugins.PluginManager
+import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.observable.util.whenItemSelected
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.withModalProgress
@@ -103,11 +106,11 @@ class ZigDebuggerToolchainConfigurableUi : ZigDebuggerUiComponent {
         row {
             cell(downloadAutomaticallyCheckBox)
         }
-//        if (PluginManager.isPluginInstalled(PluginId.getId("com.intellij.modules.clion")) && !SystemInfo.isWindows) {
-//            row {
-//                cell(useClion)
-//            }
-//        }
+        if (PluginManager.isPluginInstalled(PluginId.getId("com.intellij.modules.clion")) && !SystemInfo.isWindows) {
+            row {
+                cell(useClion)
+            }
+        }
         zigCoroutineScope.launchWithEDT {
             update()
         }
