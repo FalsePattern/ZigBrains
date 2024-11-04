@@ -68,6 +68,17 @@ allprojects {
     }
 
     repositories {
+        exclusiveContent {
+            forRepository {
+                maven {
+                    setUrl("https://mvn.falsepattern.com/releases")
+                    name = "mavenpattern"
+                }
+            }
+            filter {
+                includeModule("com.redhat.devtools.intellij", "lsp4ij")
+            }
+        }
         mavenCentral()
 
         intellijPlatform {

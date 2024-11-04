@@ -15,6 +15,7 @@ dependencies {
         exclude("org.eclipse.lsp4j", "org.eclipse.lsp4j.jsonrpc")
         exclude("com.google.code.gson", "gson")
     }
+    compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
 }
 configurations[Constants.Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS].dependencies.configureEach {
     if (this is ExternalModuleDependency) {
