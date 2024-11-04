@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.newproject
 
 import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.facet.ui.ValidationResult
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep
 import com.intellij.ide.util.projectWizard.CustomStepProjectGenerator
@@ -33,7 +34,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.impl.welcomeScreen.AbstractActionWithPanel
 import com.intellij.platform.DirectoryProjectGenerator
 import com.intellij.platform.ProjectGeneratorPeer
-import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.platform.ide.progress.withModalProgress
+import kotlinx.coroutines.launch
 import javax.swing.Icon
 
 class ZigDirectoryProjectGenerator: DirectoryProjectGenerator<ZigProjectConfigurationData>, CustomStepProjectGenerator<ZigProjectConfigurationData> {
@@ -54,8 +56,10 @@ class ZigDirectoryProjectGenerator: DirectoryProjectGenerator<ZigProjectConfigur
     }
 
     override fun generateProject(project: Project, baseDir: VirtualFile, settings: ZigProjectConfigurationData, module: Module) {
-        runModalOrBlocking({ ModalTaskOwner.project(project)}, {"ZigDirectoryProjectGenerator.generateProject"}) {
-            settings.generateProject(this, project, baseDir, false)
+        project.zigCoroutineScope.launch {
+            withModalProgress(project, "Generating Project") {
+                settings.generateProject(this, project, baseDir, false)
+            }
         }
     }
 

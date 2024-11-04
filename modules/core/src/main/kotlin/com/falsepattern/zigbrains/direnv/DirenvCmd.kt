@@ -64,7 +64,11 @@ object DirenvCmd {
                 return emptyEnv
             }
         }
-        return Env(Json.decodeFromString<Map<String, String>>(runOutput.output))
+        if (runOutput.output.isBlank()) {
+            return emptyEnv
+        } else {
+            return Env(Json.decodeFromString<Map<String, String>>(runOutput.output))
+        }
     }
 
     private suspend fun run(project: Project, workDir: Path, vararg args: String): DirenvOutput {
