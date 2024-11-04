@@ -1,5 +1,5 @@
 <idea-plugin package="com.falsepattern.zigbrains.debugger">
-    <depends>com.intellij.modules.cidr.debugger</depends>
+    <depends>com.intellij.nativeDebug</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <configurationType

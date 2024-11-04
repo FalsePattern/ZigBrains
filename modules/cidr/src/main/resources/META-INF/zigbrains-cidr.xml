@@ -1,0 +1,8 @@
+<idea-plugin package="com.falsepattern.zigbrains.cidr">
+    <depends>com.intellij.cidr.base</depends>
+    <extensions defaultExtensionNs="cidr.project">
+        <workspaceProvider
+                implementation="com.falsepattern.zigbrains.cidr.ZigWorkspaceProvider"
+        />
+    </extensions>
+</idea-plugin>
