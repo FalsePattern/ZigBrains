@@ -3,7 +3,5 @@ plugins {
 }
 rootProject.name = "ZigBrains"
 
-for (module in arrayOf("core", "cidr")) {
-    include(module)
-    project(":$module").projectDir = file("modules/$module")
-}
+include("core")
+include("cidr")
