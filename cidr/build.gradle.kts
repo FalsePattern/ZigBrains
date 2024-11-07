@@ -23,7 +23,7 @@ tasks {
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.CLion, providers.gradleProperty("clionVersion"))
+        create(IntelliJPlatformType.CLion, providers.gradleProperty("clionVersion"), useInstaller = false)
         bundledPlugins("com.intellij.clion", "com.intellij.cidr.base", "com.intellij.nativeDebug")
     }
     implementation(project(":core"))

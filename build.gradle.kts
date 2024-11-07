@@ -88,6 +88,7 @@ allprojects {
 
         intellijPlatform {
             defaultRepositories()
+            snapshots()
         }
     }
     dependencies {
@@ -100,8 +101,8 @@ allprojects {
 dependencies {
     intellijPlatform {
         when(runIdeTarget) {
-            "ideaCommunity" -> create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"))
-            "clion" -> create(IntelliJPlatformType.CLion, providers.gradleProperty("clionVersion"))
+            "ideaCommunity" -> create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"), useInstaller = false)
+            "clion" -> create(IntelliJPlatformType.CLion, providers.gradleProperty("clionVersion"), useInstaller = false)
         }
 
         pluginVerifier()

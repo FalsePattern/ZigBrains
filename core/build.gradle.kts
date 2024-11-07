@@ -12,7 +12,7 @@ val lsp4jVersion: String by project
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"))
+        create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"), useInstaller = false)
     }
     compileOnly("com.redhat.devtools.intellij:lsp4ij:$lsp4ijVersion")
     compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
