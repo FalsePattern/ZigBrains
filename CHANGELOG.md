@@ -30,6 +30,18 @@ Changelog structure reference:
 
 - Most of the internals have been rewritten to be fully asynchronous, so freezes should happen way less
 
+## [19.3.0]
+
+### Added
+
+- Toolchains, Run Configurations
+  - [Direnv](https://github.com/direnv/direnv) support
+
+### Fixed
+
+- Zig
+  - Missing description for string conversion intentions
+
 ## [19.2.0]
 
 ### Added
