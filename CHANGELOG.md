@@ -17,6 +17,17 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [20.0.1]
+
+### Fixed
+
+- Project
+  - IDE freezes when opening a zig project / doing zig init
+  - Test tasks don't work and try to run the file as an executable
+
+- Zig
+  - Struct fields being styled as static fields instead of instance fields
+
 ## [20.0.0]
 
 ### Added

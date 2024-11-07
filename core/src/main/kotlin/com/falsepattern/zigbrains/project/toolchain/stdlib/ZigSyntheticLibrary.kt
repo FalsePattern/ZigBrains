@@ -25,25 +25,22 @@ package com.falsepattern.zigbrains.project.toolchain.stdlib
 import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.project.settings.ZigProjectSettings
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
-import com.falsepattern.zigbrains.shared.coroutine.getOrAwaitModalOrBlocking
-import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.navigation.ItemPresentation
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.SyntheticLibrary
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.refreshAndFindVirtualDirectory
-import com.intellij.platform.ide.progress.ModalTaskOwner
-import com.intellij.util.suspendingLazy
+import kotlinx.coroutines.runBlocking
 import java.util.*
 import javax.swing.Icon
 
 class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresentation {
-    private val roots = project.zigCoroutineScope.suspendingLazy {
+    private val roots by lazy {
         getRoots(project.zigProjectSettings.state, project)
     }
 
-    private val name = project.zigCoroutineScope.suspendingLazy {
+    private val name by lazy {
         getName(project.zigProjectSettings.state, project)
     }
 
@@ -59,7 +56,7 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
     }
 
     override fun getPresentableText(): String {
-        return name.getOrAwaitModalOrBlocking({ModalTaskOwner.project(project)}, {"ZigSyntheticLibrary.getPresentableText"})
+        return name
     }
 
     override fun getIcon(unused: Boolean): Icon {
@@ -67,28 +64,28 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
     }
 
     override fun getSourceRoots(): Collection<VirtualFile> {
-        return roots.getOrAwaitModalOrBlocking({ ModalTaskOwner.project(project)}, {"ZigSyntheticLibrary.getSourceRoots"})
+        return roots
     }
 
 }
 
 
 
-private suspend fun getName(
+private fun getName(
     state: ZigProjectSettings,
     project: Project
 ): String {
     val tc = state.toolchain ?: return "Zig"
-    val version = tc.zig.getEnv(project).version
+    val version = runBlocking { tc.zig.getEnv(project).version }
     return "Zig $version"
 }
 
-private suspend fun getRoots(
+private fun getRoots(
     state: ZigProjectSettings,
     project: Project
 ): Set<VirtualFile> {
     val toolchain = state.toolchain
-    run {
+    if (state.overrideStdPath) run {
         val ePathStr = state.explicitPathToStd ?: return@run
         val ePath = ePathStr.toNioPathOrNull() ?: return@run
         if (ePath.isAbsolute) {
@@ -103,7 +100,7 @@ private suspend fun getRoots(
         }
     }
     if (toolchain != null) {
-        val stdPath = toolchain.zig.getEnv(project).stdPath(toolchain, project) ?: return emptySet()
+        val stdPath = runBlocking { toolchain.zig.getEnv(project) }.stdPath(toolchain, project) ?: return emptySet()
         val roots = stdPath.refreshAndFindVirtualDirectory() ?: return emptySet()
         return setOf(roots)
     }

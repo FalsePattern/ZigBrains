@@ -45,7 +45,7 @@ class ZigExecConfigTest(project: Project, factory: ConfigurationFactory): ZigExe
     @Throws(ExecutionException::class)
     override suspend fun buildCommandLineArgs(debug: Boolean): List<String> {
         val result = ArrayList<String>()
-        result.add(if (debug) "build-exe" else "run")
+        result.add("test")
         result.addAll(coloredCliFlags(colored.value, debug))
         result.add(filePath.path?.pathString ?: throw ExecutionException(ZigBrainsBundle.message("exception.zig.empty-file-path")))
         if (!debug || optimization.forced) {

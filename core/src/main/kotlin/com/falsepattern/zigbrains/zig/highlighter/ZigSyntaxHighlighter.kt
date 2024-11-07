@@ -54,7 +54,7 @@ class ZigSyntaxHighlighter: SyntaxHighlighterBase() {
         val ENUM_MEMBER_REF   = createKey("ENUM_MEMBER"        , ENUM_MEMBER_DECL                                       )
         val ERROR_TAG_DECL    = createKey("ERROR_TAG_DECL"     , DefaultLanguageHighlighterColors.STATIC_FIELD          )
         val ERROR_TAG_REF     = createKey("ERROR_TAG"          , ERROR_TAG_DECL                                         )
-        val PROPERTY_DECL     = createKey("PROPERTY_DECL"      , DefaultLanguageHighlighterColors.STATIC_FIELD          )
+        val PROPERTY_DECL     = createKey("PROPERTY_DECL"      , DefaultLanguageHighlighterColors.INSTANCE_FIELD        )
         val PROPERTY_REF      = createKey("PROPERTY"           , PROPERTY_DECL                                          )
         val FUNCTION_DECL     = createKey("FUNCTION_DECL"      , DefaultLanguageHighlighterColors.FUNCTION_DECLARATION  )
         val FUNCTION_DECL_GEN = createKey("FUNCTION_DECL_GEN"  , FUNCTION_DECL                                          )

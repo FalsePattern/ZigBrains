@@ -28,7 +28,6 @@ import com.intellij.openapi.application.asContextElement
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
-import com.intellij.util.SuspendingLazy
 import com.intellij.util.application
 import kotlinx.coroutines.*
 
@@ -37,16 +36,6 @@ inline fun <T> runModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleF
         runWithModalProgressBlocking(taskOwnerFactory(), titleFactory(), cancellationFactory(), action)
     } else {
         runBlocking(block = action)
-    }
-}
-
-inline fun <T> SuspendingLazy<T>.getOrAwaitModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleFactory: () -> String, cancellationFactory: () -> TaskCancellation = TaskCancellation::cancellable): T {
-    if (isInitialized()) {
-        return getInitialized()
-    } else {
-        return runModalOrBlocking(taskOwnerFactory, titleFactory, cancellationFactory) {
-            getValue()
-        }
     }
 }
 
