@@ -46,13 +46,11 @@ import kotlin.io.path.pathString
 class ZLSSettingsPanel(private val project: Project?) : Disposable {
     private val zlsPath = textFieldWithBrowseButton(
         project,
-        ZLSBundle.message("settings.zls-path.browse.title"),
-        FileChooserDescriptorFactory.createSingleFileDescriptor(),
+        FileChooserDescriptorFactory.createSingleFileDescriptor().withTitle(ZLSBundle.message("settings.zls-path.browse.title")),
     ).also { Disposer.register(this, it) }
     private val zlsConfigPath = textFieldWithBrowseButton(
         project,
-        ZLSBundle.message("settings.zls-config-path.browse.title"),
-        FileChooserDescriptorFactory.createSingleFileDescriptor()
+        FileChooserDescriptorFactory.createSingleFileDescriptor().withTitle(ZLSBundle.message("settings.zls-config-path.browse.title"))
     ).also { Disposer.register(this, it) }
 
     private val buildOnSave = JBCheckBox().apply { toolTipText = ZLSBundle.message("settings.build-on-save.tooltip") }

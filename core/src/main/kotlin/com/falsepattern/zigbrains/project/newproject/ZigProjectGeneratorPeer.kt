@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.newproject
 
 import com.intellij.ide.util.projectWizard.SettingsStep
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.util.Disposer
 import com.intellij.platform.ProjectGeneratorPeer
@@ -32,12 +33,13 @@ import javax.swing.JComponent
 
 class ZigProjectGeneratorPeer(var handleGit: Boolean): ProjectGeneratorPeer<ZigProjectConfigurationData>, Disposable {
     private val newProjectPanel: ZigNewProjectPanel = ZigNewProjectPanel(handleGit).also { Disposer.register(this, it) }
-    private val myComponent: JComponent by lazy {
+    val myComponent: JComponent by lazy {
         panel {
             newProjectPanel.attach(this)
         }
     }
-    override fun getComponent(): JComponent {
+
+    override fun getComponent(myLocationField: TextFieldWithBrowseButton, checkValid: Runnable): JComponent {
         return myComponent
     }
 

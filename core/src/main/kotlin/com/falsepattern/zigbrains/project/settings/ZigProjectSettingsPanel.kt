@@ -59,8 +59,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
     private val direnv = JBCheckBox(ZigBrainsBundle.message("settings.project.label.direnv"))
     private val pathToToolchain = textFieldWithBrowseButton(
         project,
-        ZigBrainsBundle.message("dialog.title.zig-toolchain"),
-        FileChooserDescriptorFactory.createSingleFolderDescriptor()
+        FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))
     ).also {
         it.textField.document.addDocumentListener(object : DocumentAdapter() {
             override fun textChanged(e: DocumentEvent) {
@@ -82,8 +81,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
     }
     private val pathToStd = textFieldWithBrowseButton(
         project,
-        ZigBrainsBundle.message("dialog.title.zig-std"),
-        FileChooserDescriptorFactory.createSingleFolderDescriptor()
+        FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.zig-std"))
     ).also { Disposer.register(this, it) }
     private var debounce: Job? = null
 

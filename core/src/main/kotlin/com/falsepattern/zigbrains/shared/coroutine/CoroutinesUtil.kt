@@ -32,7 +32,7 @@ import com.intellij.util.SuspendingLazy
 import com.intellij.util.application
 import kotlinx.coroutines.*
 
-inline fun <T> runModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleFactory: () -> String, cancellationFactory: () -> TaskCancellation = TaskCancellation::cancellable, noinline action: suspend CoroutineScope.() -> T): T {
+inline fun <T> runModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleFactory: () -> String, cancellationFactory: () -> TaskCancellation = {TaskCancellation.cancellable()}, noinline action: suspend CoroutineScope.() -> T): T {
     return if (application.isDispatchThread) {
         runWithModalProgressBlocking(taskOwnerFactory(), titleFactory(), cancellationFactory(), action)
     } else {
@@ -40,7 +40,7 @@ inline fun <T> runModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleF
     }
 }
 
-inline fun <T> SuspendingLazy<T>.getOrAwaitModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleFactory: () -> String, cancellationFactory: () -> TaskCancellation = TaskCancellation::cancellable): T {
+inline fun <T> SuspendingLazy<T>.getOrAwaitModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleFactory: () -> String, cancellationFactory: () -> TaskCancellation = {TaskCancellation.cancellable()}): T {
     if (isInitialized()) {
         return getInitialized()
     } else {

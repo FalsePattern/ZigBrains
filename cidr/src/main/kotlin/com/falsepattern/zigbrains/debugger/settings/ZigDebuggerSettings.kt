@@ -29,6 +29,7 @@ import com.intellij.openapi.options.SimpleConfigurable
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.xdebugger.settings.DebuggerSettingsCategory
 import com.intellij.xdebugger.settings.XDebuggerSettings
+import java.util.function.Supplier
 
 class ZigDebuggerSettings: XDebuggerSettings<ZigDebuggerSettings>("Zig") {
     var debuggerKind = DebuggerKind.default
@@ -58,9 +59,10 @@ class ZigDebuggerSettings: XDebuggerSettings<ZigDebuggerSettings>("Zig") {
             GENERAL_SETTINGS_ID,
             ZigDebugBundle.message("settings.debugger.title"),
             ZigDebuggerGeneralSettingsConfigurableUi::class.java,
-        ) {
-            instance
-        }
+            Supplier {
+                instance
+            }
+        )
     }
 
     companion object {

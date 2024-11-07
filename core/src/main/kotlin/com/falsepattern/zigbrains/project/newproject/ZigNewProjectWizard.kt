@@ -50,7 +50,7 @@ class ZigNewProjectWizard: LanguageGeneratorNewProjectWizard {
 
         override fun setupUI(builder: Panel): Unit = with(builder) {
             row {
-                cell(peer.component).align(AlignX.FILL)
+                cell(peer.myComponent).align(AlignX.FILL)
             }
         }
 

@@ -67,7 +67,7 @@ class ZigModuleBuilder: ModuleBuilder() {
         internal val peer = ZigProjectGeneratorPeer(true)
 
         override fun getComponent(): JComponent {
-            return peer.component.withBorder()
+            return peer.myComponent.withBorder()
         }
 
         override fun disposeUIResources() {
