@@ -1,6 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
@@ -11,7 +12,11 @@ plugins {
     id("org.jetbrains.changelog") version "2.2.1"
     id("org.jetbrains.grammarkit") version "2022.3.2.2" apply false
     idea
+    `maven-publish`
 }
+val publishVersions = listOf("241", "242", "243")
+val pluginVersionFull get() = "$pluginVersion-$pluginSinceBuild"
+val pluginVersion: String by project
 val pluginSinceBuild: String by project
 val pluginUntilBuild: String by project
 val javaVersion = property("javaVersion").toString().toInt()
@@ -21,7 +26,7 @@ val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
 val lsp4ijPluginString = "com.redhat.devtools.lsp4ij:$lsp4ijVersion${if (lsp4ijNightly) "@nightly" else ""}"
 
 group = "com.falsepattern"
-version = providers.gradleProperty("pluginVersion").get()
+version = pluginVersionFull
 
 subprojects {
     apply(plugin = "java")
@@ -185,5 +190,51 @@ tasks {
     }
     classes {
         enabled = false
+    }
+    verifyPluginSignature {
+        certificateChainFile = file("secrets/chain.crt")
+        inputArchiveFile = signPlugin.map { it.signedArchiveFile }.get()
+        dependsOn(signPlugin)
+    }
+}
+
+
+fun distFile(it: String) = layout.buildDirectory.file("dist/ZigBrains-$pluginVersion-$it-signed.zip")
+
+publishVersions.forEach {
+    tasks.register<PublishPluginTask>("jbpublish-$it").configure {
+        archiveFile = distFile(it)
+        token = providers.environmentVariable("IJ_PUBLISH_TOKEN")
+        channels = if (pluginVersion.contains("-")) listOf("nightly") else listOf("default")
+    }
+    tasks.named("publish").configure {
+        dependsOn("jbpublish-$it")
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.falsepattern"
+            artifactId = "zigbrains"
+            version = pluginVersion
+
+            publishVersions.forEach {
+                artifact(distFile(it)) {
+                    classifier = "$it-signed"
+                    extension = "zip"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "mavenpattern"
+            url = uri("https://mvn.falsepattern.com/releases/");
+            credentials {
+                username = System.getenv("MAVEN_DEPLOY_USER")
+                password = System.getenv("MAVEN_DEPLOY_PASSWORD")
+            }
+        }
     }
 }
