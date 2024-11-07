@@ -29,11 +29,15 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
+import com.intellij.psi.PsiFile
 import com.intellij.util.application
 import com.redhat.devtools.lsp4ij.LanguageServerEnablementSupport
 import com.redhat.devtools.lsp4ij.LanguageServerFactory
 import com.redhat.devtools.lsp4ij.LanguageServerManager
 import com.redhat.devtools.lsp4ij.ServerStatus
+import com.redhat.devtools.lsp4ij.client.features.LSPClientFeatures
+import com.redhat.devtools.lsp4ij.client.features.LSPFormattingFeature
+import com.redhat.devtools.lsp4ij.client.features.LSPInlayHintFeature
 import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -49,6 +53,22 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
                 ZLSStreamConnectionProvider.create(project)
             }
         }
+    }
+
+    @Suppress("UnstableApiUsage")
+    override fun createClientFeatures(): LSPClientFeatures {
+        val features = LSPClientFeatures()
+        features.formattingFeature = object: LSPFormattingFeature() {
+            override fun isExistingFormatterOverrideable(file: PsiFile): Boolean {
+                return true
+            }
+        }
+        features.inlayHintFeature = object: LSPInlayHintFeature() {
+            override fun isEnabled(file: PsiFile): Boolean {
+                return features.project.zlsSettings.state.inlayHints
+            }
+        }
+        return features
     }
 
     override fun isEnabled(project: Project): Boolean {
