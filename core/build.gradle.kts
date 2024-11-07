@@ -16,7 +16,7 @@ dependencies {
     }
     compileOnly("com.redhat.devtools.intellij:lsp4ij:$lsp4ijVersion")
     compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3")
 }
 
 //region grammars
