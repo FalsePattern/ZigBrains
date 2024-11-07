@@ -31,12 +31,12 @@ import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.platform.util.progress.withProgressText
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.download.DownloadableFileService
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
@@ -98,7 +98,7 @@ private suspend fun downloadMSVCProps(): Properties {
         val downloader = service.createDownloader(listOf(desc), "Debugger metadata downloading")
         val downloadDirectory = downloadPath().toFile()
         val prop = Properties()
-        val downloadResults = coroutineToIndicator {
+        val downloadResults = runBlocking {
             downloader.download(downloadDirectory)
         }
         for (result in downloadResults) {

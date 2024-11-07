@@ -72,7 +72,7 @@ object DirenvCmd {
     }
 
     private suspend fun run(project: Project, workDir: Path, vararg args: String): DirenvOutput {
-        val cli = GeneralCommandLine("direnv", *args).withWorkingDirectory(workDir)
+        val cli = GeneralCommandLine("direnv", *args).withWorkDirectory(workDir.toFile())
 
         val (process, exitCode) = withProgressText("Running ${cli.commandLineString}") {
             withContext(Dispatchers.IO) {

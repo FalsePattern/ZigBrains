@@ -42,7 +42,7 @@ abstract class MSVCDriverConfiguration: DAPDebuggerDriverConfiguration() {
         val cli = GeneralCommandLine()
         cli.exePath = path.pathString
         cli.addParameters("--interpreter=vscode", "--extconfigdir=%USERPROFILE%\\.cppvsdbg\\extensions")
-        cli.withWorkingDirectory(path.parent)
+        cli.withWorkDirectory(path.parent.toFile())
         return cli
     }
 

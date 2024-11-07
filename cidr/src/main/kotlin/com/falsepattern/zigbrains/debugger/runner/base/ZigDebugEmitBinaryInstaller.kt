@@ -40,7 +40,7 @@ class ZigDebugEmitBinaryInstaller<ProfileState: ZigProfileState<*>>(
     override fun install(): GeneralCommandLine {
         val cfg = profileState.configuration
         val cli = GeneralCommandLine().withExePath(executableFile.absolutePath)
-        cfg.workingDirectory.path?.let { x -> cli.withWorkingDirectory(x) }
+        cfg.workingDirectory.path?.let { x -> cli.withWorkDirectory(x.toFile()) }
         cli.addParameters(exeArgs)
         cli.withCharset(Charsets.UTF_8)
         cli.withRedirectErrorStream(true)

@@ -956,7 +956,7 @@ abstract class DAPDriver<Server : IDebugProtocolServer, Client : IDebugProtocolC
             cli.charset = Charsets.UTF_8
             val cwd = args.cwd?.ifBlank { null }?.toNioPathOrNull()
             if (cwd != null) {
-                cli.withWorkingDirectory(cwd)
+                cli.withWorkDirectory(cwd.toFile())
             }
             val childProcess = ZigProcessHandler(cli)
             this@DAPDriver.childProcess = childProcess

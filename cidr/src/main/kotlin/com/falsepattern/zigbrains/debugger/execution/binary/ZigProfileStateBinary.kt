@@ -34,7 +34,7 @@ class ZigProfileStateBinary(environment: ExecutionEnvironment, configuration: Zi
     override suspend fun getCommandLine(toolchain: AbstractZigToolchain, debug: Boolean): GeneralCommandLine {
         val cli = GeneralCommandLine()
         val cfg = configuration
-        cfg.workingDirectory.path?.let { cli.withWorkingDirectory(it) }
+        cfg.workingDirectory.path?.let { cli.withWorkDirectory(it.toFile()) }
         cli.withExePath(cfg.exePath.path?.pathString ?: throw ExecutionException(ZigDebugBundle.message("exception.missing-exe-path")))
         cli.withCharset(Charsets.UTF_8)
         cli.addParameters(cfg.args.args)

@@ -76,9 +76,13 @@ private fun <T : PsiElement> ZigMultilineAssistant<T>.preprocessEnter(
     val indentPost = parts[1].measureSpaces()
     val newLine = StringBuilder(1 + indentPre + prefix.length + indentPost)
         .append('\n')
-        .repeat(' '.code, indentPre)
-        .append(prefix)
-        .repeat(' '.code, indentPost)
+    for (i in 0..<indentPre) {
+        newLine.append(' ')
+    }
+    newLine.append(prefix)
+    for (i in 0..<indentPost) {
+        newLine.append(' ')
+    }
     document.insertString(offset, newLine)
     PsiDocumentManager.getInstance(project).commitDocument(document)
     editor.caretModel.moveToOffset(offset + newLine.length)

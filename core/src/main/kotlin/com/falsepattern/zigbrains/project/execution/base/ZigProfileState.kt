@@ -66,7 +66,7 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
         // https://youtrack.jetbrains.com/issue/CPP-11622/ANSI-color-codes-not-honored-in-Debug-Run-Configuration-output-window
         val cli = if (configuration.emulateTerminal() && !debug) PtyCommandLine() else GeneralCommandLine()
         cli.exePath = zigExePath.pathString
-        workingDir.path?.let { cli.withWorkingDirectory(it) }
+        workingDir.path?.let { cli.withWorkDirectory(it.toFile()) }
         cli.charset = Charsets.UTF_8
         cli.addParameters(configuration.buildCommandLineArgs(debug))
         return configuration.patchCommandLine(cli)

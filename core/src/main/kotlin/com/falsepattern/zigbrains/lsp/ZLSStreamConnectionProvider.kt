@@ -76,7 +76,7 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
 
         suspend fun create(project: Project): ZLSStreamConnectionProvider {
             val projectDir = project.guessProjectDir()?.toNioPathOrNull()
-            val commandLine = getCommand(project)?.let { GeneralCommandLine(it) }?.withWorkingDirectory(projectDir)
+            val commandLine = getCommand(project)?.let { GeneralCommandLine(it) }?.withWorkDirectory(projectDir?.toFile())
             return ZLSStreamConnectionProvider(project, commandLine)
         }
 

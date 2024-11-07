@@ -29,7 +29,7 @@ import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.progress.coroutineToIndicator
+import com.intellij.openapi.progress.blockingContext
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.SystemInfo
@@ -221,7 +221,7 @@ class ZigDebuggerToolchainService {
         val downloader = service.createDownloader(descriptions, "Debugger downloading")
         val downloadDirectory = downloadPath().toFile()
         val downloadResults = withContext(Dispatchers.IO) {
-            coroutineToIndicator {
+            blockingContext {
                 downloader.download(downloadDirectory)
             }
         }
