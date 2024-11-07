@@ -17,10 +17,18 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Debugging
+  - Progress indicator while zig is compiling the debuggable exe
+
 ### Changed
 
-- ZigBrains
-  - Full reimplementation in Kotlin \[WIP]
+- The entire plugin has been re-implemented in Kotlin
+
+### Fixed
+
+- Most of the internals have been rewritten to be fully asynchronous, so freezes should happen way less
 
 ## [19.2.0]
 
