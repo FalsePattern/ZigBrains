@@ -1,12 +1,10 @@
 # ZigBrains
 
-## WIP Kotlin rewrite
+Zig language support for IntelliJ IDEA, CLion, and other JetBrains IDEs. Now written in Kotlin!
 
-Zig language support for IntelliJ IDEA, CLion, and other JetBrains IDEs.
+# Installing
 
-## Installing
-
-You can either install this plugin from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/22456-zigbrains), or from FalsePattern's [website](https://falsepattern.com/zigbrains).
+You can either install this plugin from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/22456-zigbrains), or from [FalsePattern's website](https://falsepattern.com/zigbrains).
 
 See [the quick setup guide](#quick-setup-guide-for-zig-and-zls) for how to set up language server integration.
 
@@ -20,23 +18,25 @@ through the built-in plugin browser:
    - `2024.3.*`: https://falsepattern.com/zigbrains/updatePlugins-243.xml
    - `2024.2.*`: https://falsepattern.com/zigbrains/updatePlugins-242.xml
    - `2024.1.*`: https://falsepattern.com/zigbrains/updatePlugins-241.xml
-   - `2023.3.*`: https://falsepattern.com/zigbrains/updatePlugins-233.xml
-   - `2023.2.*`: https://falsepattern.com/zigbrains/updatePlugins-232.xml
 4. Click `OK`, and your IDE should now automatically detect the latest version
 (both in the Installed tab and in the Marketplace tab), even if it's not yet verified on the official JetBrains marketplace yet.
 
-## Developer guide
+# Credits
 
-### All platforms
+## Supporters
 
-After importing the gradle project, you need to run the `build setup -> generateSources` tasks.
+- ### [Techatrix](https://github.com/Techatrix)
+- gree7
+- xceno
+- AnErrupTion
 
-### NixOS
+## Contributors
 
-In addition to the generated sources, you also need to run the `build setup -> nixos_jbr` task, otherwise java will
-complain about missing files
+- [gatesn](https://github.com/gatesn)
+- [MarioAriasC](https://github.com/MarioAriasC)
+- [JensvandeWiel](https://github.com/JensvandeWiel)
 
-## Special Thanks
+## Additional Thanks
 
 - The [ZigTools](https://github.com/zigtools/) team for developing the Zig Language Server.
 
@@ -46,21 +46,10 @@ which served as a fantastic reference for deep IDE integration features.
 - The members of the `Zig Programming Language` discord server's `#tooling-dev` channel for providing encouragement,
 feedback, and lots of bug reports. 
 
-- The Ballerina Platform developers for `lsp4intellij`, the language server connector between the IntelliJ platform
-and the Eclipse LSP4J project.
+- The developers of [LSP4IJ](https://github.com/redhat-developer/lsp4ij) for providing a really good LSP backend
 
 - The developers of the [intellij-rust](https://github.com/intellij-rust/intellij-rust/) plugin for providing an
 excellent example on how to write debugger support that doesn't depend on CLion.
-
-- All the people who have generously funded the project
-  - gree7
-  - xceno
-  - AnErrupTion
-
-- Every contributor who helped with bugfixes and extra features
-  - [gatesn](https://github.com/gatesn)
-  - [MarioAriasC](https://github.com/MarioAriasC)
-  - [JensvandeWiel](https://github.com/JensvandeWiel)
 
 - And everyone who actively reported issues and helped ironing out all the remaining problems
 
