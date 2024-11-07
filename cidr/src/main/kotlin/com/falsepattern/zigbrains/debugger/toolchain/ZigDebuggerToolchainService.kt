@@ -43,7 +43,9 @@ import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.Decompressor
 import com.intellij.util.system.CpuArch
 import com.intellij.util.system.OS
+import com.jetbrains.cidr.execution.debugger.CidrDebuggerPathManager
 import com.jetbrains.cidr.execution.debugger.backend.bin.UrlProvider
+import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
@@ -66,12 +68,12 @@ class ZigDebuggerToolchainService {
     }
 
     fun lldbAvailability(): DebuggerAvailability<LLDBBinaries> {
-//        if (LLDBDriverConfiguration.hasBundledLLDB()) return DebuggerAvailability.Bundled
+        if (LLDBDriverConfiguration.hasBundledLLDB()) return DebuggerAvailability.Bundled
 
         val (frameworkPath, frontendPath) = when {
             SystemInfo.isMac -> "LLDB.framework" to "LLDBFrontend"
             SystemInfo.isUnix -> "lib/liblldb.so" to "bin/LLDBFrontend"
-            SystemInfo.isWindows -> "bin/liblldb.dll" to "bin/LLDBFrontend.exe"
+//            SystemInfo.isWindows -> "bin/liblldb.dll" to "bin/LLDBFrontend.exe"
             else -> return DebuggerAvailability.Unavailable
         }
 
@@ -94,11 +96,11 @@ class ZigDebuggerToolchainService {
 
     fun gdbAvailability(): DebuggerAvailability<GDBBinaries> {
         if (SystemInfo.isMac) return DebuggerAvailability.Unavailable
-//        if (CidrDebuggerPathManager.getBundledGDBBinary().exists()) return DebuggerAvailability.Bundled
+        if (CidrDebuggerPathManager.getBundledGDBBinary().exists()) return DebuggerAvailability.Bundled
 
         val gdbBinaryPath = when {
             SystemInfo.isUnix -> "bin/gdb"
-            SystemInfo.isWindows -> "bin/gdb.exe"
+//            SystemInfo.isWindows -> "bin/gdb.exe"
             else -> return DebuggerAvailability.Unavailable
         }
 
@@ -116,7 +118,7 @@ class ZigDebuggerToolchainService {
     }
 
     suspend fun msvcAvailability(): DebuggerAvailability<MSVCBinaries> {
-//        if (!SystemInfo.isWindows) return DebuggerAvailability.Unavailable
+        if (!SystemInfo.isWindows) return DebuggerAvailability.Unavailable
 
         val msvcBinaryPath = "vsdbg.exe"
 
