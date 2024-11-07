@@ -147,6 +147,8 @@ intellijPlatform {
             sinceBuild = pluginSinceBuild
             if (pluginUntilBuild.isNotBlank()) {
                 untilBuild = pluginUntilBuild
+            } else {
+                untilBuild = provider { null }
             }
         }
     }
