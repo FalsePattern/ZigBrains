@@ -116,7 +116,7 @@ dependencies {
 
 intellijPlatform {
     pluginConfiguration {
-        version = providers.gradleProperty("pluginVersion")
+        version = pluginVersionFull
 
         description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
             val start = "<!-- Plugin description -->"
@@ -157,11 +157,6 @@ intellijPlatform {
         password = providers.environmentVariable("PRIVATE_KEY_PASSWORD")
     }
 
-    publishing {
-        token = providers.environmentVariable("PUBLISH_TOKEN")
-        channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
-    }
-
     pluginVerification {
         ides {
             select {
@@ -196,6 +191,9 @@ tasks {
         certificateChainFile = file("secrets/chain.crt")
         inputArchiveFile = signPlugin.map { it.signedArchiveFile }.get()
         dependsOn(signPlugin)
+    }
+    publishPlugin {
+        enabled = false
     }
 }
 
