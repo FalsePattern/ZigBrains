@@ -1,8 +1,25 @@
+import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 
+plugins {
+    id("de.undercouch.download") version("5.6.0")
+}
 val lsp4jVersion: String by project
 val clionVersion: String by project
+
+val genOutputDir = layout.buildDirectory.dir("generated-resources")
+sourceSets["main"].resources.srcDir(genOutputDir)
+
+tasks {
+    register<Download>("downloadProps") {
+        src("https://falsepattern.com/zigbrains/msvc.properties")
+        dest(genOutputDir.map { it.file("msvc.properties") })
+    }
+    processResources {
+        dependsOn("downloadProps")
+    }
+}
 
 dependencies {
     intellijPlatform {

@@ -21,6 +21,7 @@
  */
 package com.falsepattern.zigbrains.project.toolchain
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.toNioPathOrNull
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -37,12 +38,12 @@ data class ZigToolchainEnvironmentSerializable(
     @SerialName("version") val version: String,
     @SerialName("target") val target: String
 ) {
-    fun stdPath(toolchain: LocalZigToolchain): Path? {
+    fun stdPath(toolchain: LocalZigToolchain, project: Project?): Path? {
         val path = stdDirectory.toNioPathOrNull() ?: return null
         if (path.isAbsolute)
             return path
 
-        val resolvedPath = toolchain.location.resolve(path)
+        val resolvedPath = toolchain.workingDirectory(project)?.resolve(path) ?: return null
         if (resolvedPath.isAbsolute)
             return resolvedPath
 

@@ -103,7 +103,7 @@ private suspend fun getRoots(
         }
     }
     if (toolchain != null) {
-        val stdPath = toolchain.zig.getEnv(project).stdPath(toolchain) ?: return emptySet()
+        val stdPath = toolchain.zig.getEnv(project).stdPath(toolchain, project) ?: return emptySet()
         val roots = stdPath.refreshAndFindVirtualDirectory() ?: return emptySet()
         return setOf(roots)
     }

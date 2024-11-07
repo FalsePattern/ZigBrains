@@ -49,7 +49,7 @@ object Util {
         var sourcePath = if (source == null) "" else Objects.requireNonNullElseGet(
             source.path
         ) { Objects.requireNonNullElse(source.origin, "unknown") }
-        sourcePath = toJBPath(sourcePath)!!
+        sourcePath = toJBPath(sourcePath)
         return LLBreakpoint(
             DAPBreakpoint.id,
             sourcePath,
@@ -176,21 +176,20 @@ object Util {
     suspend fun instructionJBFromDAP(
         DAPInstruction: DisassembledInstruction,
         loc: Source?,
-        startLine: Int?,
-        endLine: Int?,
+        startLineIn: Int?,
+        endLineIn: Int?,
         uniq: Boolean,
         symbol: LLSymbolOffset?
     ): LLInstruction {
-        var startLine = startLine
-        var endLine = endLine
+        var startLine = startLineIn
+        var endLine = endLineIn
         val address: Address = Address.parseHexString(DAPInstruction.address)
         val byteStrings =
             DAPInstruction.instructionBytes.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         val bytes = ArrayList<Byte>(byteStrings.size)
         for (byteString in byteStrings) {
-            bytes.add(byteString.toInt(16) as Byte)
+            bytes.add(byteString.toInt(16).toByte())
         }
-        val result: ArrayList<LLInstruction> = ArrayList<LLInstruction>()
         var comment: String? = null
         if (loc != null && startLine != null && endLine != null && uniq) run {
             val pathStr = toJBPath(loc.path)
@@ -253,9 +252,5 @@ object Util {
         } catch (e: ExecutionException) {
             throw com.intellij.execution.ExecutionException(e.cause)
         }
-    }
-
-    fun emptyIfNull(str: String?): String {
-        return str ?: ""
     }
 }

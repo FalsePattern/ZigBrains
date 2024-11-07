@@ -54,6 +54,12 @@ suspend inline fun <T> withEDTContext(state: ModalityState = ModalityState.defau
     return withContext(Dispatchers.EDT + state.asContextElement(), block = block)
 }
 
+suspend inline fun <T> withCurrentEDTModalityContext(noinline block: suspend CoroutineScope.() -> T): T {
+    return withContext(Dispatchers.EDT + ModalityState.defaultModalityState().asContextElement()) {
+        withContext(Dispatchers.EDT + ModalityState.current().asContextElement(), block = block)
+    }
+}
+
 suspend inline fun <T> runInterruptibleEDT(state: ModalityState = ModalityState.defaultModalityState(), noinline targetAction: () -> T): T {
     return runInterruptible(Dispatchers.EDT + state.asContextElement(), block = targetAction)
 }

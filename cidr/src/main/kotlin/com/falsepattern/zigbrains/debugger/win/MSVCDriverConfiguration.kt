@@ -34,14 +34,14 @@ abstract class MSVCDriverConfiguration: DAPDebuggerDriverConfiguration() {
     protected abstract val debuggerExecutable: Path
 
     override fun createDriver(handler: DebuggerDriver.Handler, arch: ArchitectureType): DebuggerDriver {
-        TODO("Not yet implemented")
+        return WinDAPDriver(handler).also { it.initialize(this) }
     }
 
     override fun createDriverCommandLine(driver: DebuggerDriver, arch: ArchitectureType): GeneralCommandLine {
         val path = debuggerExecutable
         val cli = GeneralCommandLine()
         cli.exePath = path.pathString
-        cli.addParameters("--interpreter=vscode", "--extconfigdir=%USERPROFILE\\.cppvsdbg\\extensions")
+        cli.addParameters("--interpreter=vscode", "--extconfigdir=%USERPROFILE%\\.cppvsdbg\\extensions")
         cli.withWorkingDirectory(path.parent)
         return cli
     }

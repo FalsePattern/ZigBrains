@@ -33,6 +33,8 @@ import com.intellij.execution.configurations.RunnerSettings
 import com.intellij.execution.runners.AsyncProgramRunner
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.ui.RunContentDescriptor
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.rd.util.toPromise
 import com.intellij.platform.ide.progress.ModalTaskOwner
@@ -59,7 +61,14 @@ abstract class ZigProgramRunner<ProfileState: ZigProfileState<*>>(protected val 
 
         val state = castProfileState(baseState) ?: return null
 
-        val toolchain = environment.project.zigProjectSettings.state.toolchain ?: return null
+        val toolchain = environment.project.zigProjectSettings.state.toolchain ?: run {
+            Notification(
+                "zigbrains",
+                "Zig project toolchain not set, cannot execute program!",
+                NotificationType.ERROR
+            ).notify(environment.project)
+            return null
+        }
 
         return reportProgress { reporter ->
             reporter.indeterminateStep("Saving all documents") {

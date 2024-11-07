@@ -51,6 +51,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
+import kotlin.io.path.exists
+import kotlin.io.path.notExists
 import kotlin.io.path.pathString
 
 class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
@@ -100,8 +102,8 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
         get() = ZigProjectSettings(
             direnv.isSelected,
             stdFieldOverride.isSelected,
-            pathToStd.text,
-            pathToToolchain.text
+            pathToStd.text.ifBlank { null },
+            pathToToolchain.text.ifBlank { null }
         )
         set(value) {
             direnv.isSelected = value.direnv
@@ -148,20 +150,26 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
 
 
     private suspend fun updateUI() {
-        val pathToToolchain = this.pathToToolchain.text.toNioPathOrNull()
+        val pathToToolchain = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull()
         delay(200)
         val toolchain = pathToToolchain?.let { LocalZigToolchain(it) }
         val zig = toolchain?.zig
-        val env = zig?.getEnv(project)
-        val version = env?.version
-        val stdPath = env?.stdPath(toolchain)
-        withEDTContext {
-            toolchainVersion.text = version ?: ""
-            toolchainVersion.foreground = JBColor.foreground()
+        if (zig?.path()?.exists() != true) {
+            toolchainVersion.text = ""
 
             if (!stdFieldOverride.isSelected) {
-                pathToStd.text = stdPath?.pathString ?: ""
+                pathToStd.text = ""
             }
+            return
+        }
+        val env = zig.getEnv(project)
+        val version = env.version
+        val stdPath = env.stdPath(toolchain, project)
+        toolchainVersion.text = version
+        toolchainVersion.foreground = JBColor.foreground()
+
+        if (!stdFieldOverride.isSelected) {
+            pathToStd.text = stdPath?.pathString ?: ""
         }
     }
 

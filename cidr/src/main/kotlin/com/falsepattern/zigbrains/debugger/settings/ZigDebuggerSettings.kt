@@ -35,8 +35,9 @@ class ZigDebuggerSettings: XDebuggerSettings<ZigDebuggerSettings>("Zig") {
 
     var downloadAutomatically = false
     var useClion = true
+    var msvcConsent = MSVCDownloadPermission.AskMe
 
-    override fun getState(): ZigDebuggerSettings? {
+    override fun getState(): ZigDebuggerSettings {
         return this
     }
 

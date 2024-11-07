@@ -30,6 +30,7 @@ import java.io.PipedOutputStream
 class BlockingPipedInputStream(src: PipedOutputStream, pipeSize: Int) : PipedInputStream(src, pipeSize) {
     var closed = false
 
+    @Synchronized
     override fun read(): Int {
         if (closed) {
             throw IOException("stream closed")

@@ -157,7 +157,7 @@ class ZigDebuggerToolchainService {
                 val centerPanel = JBPanel<JBPanel<*>>()
                 val hyperlink = HyperlinkLabel()
                 hyperlink.setTextWithHyperlink(msvcUrl.dialogBody)
-                hyperlink.setHyperlinkText(msvcUrl.dialogLink)
+                hyperlink.setHyperlinkTarget(msvcUrl.dialogLink)
                 hyperlink.addHyperlinkListener(BrowserHyperlinkListener())
                 centerPanel.add(hyperlink)
                 dialog.centerPanel(centerPanel)
@@ -229,7 +229,7 @@ class ZigDebuggerToolchainService {
             val binaryToDownload = binariesToDownload.first { it.url == downloadUrl }
             val propertyName = binaryToDownload.propertyName
             val archiveFile = result.first
-            Unarchiver.unarchive(archiveFile, downloadDir)
+            Unarchiver.unarchive(archiveFile, downloadDir, binaryToDownload.prefix)
             archiveFile.delete()
             versions[propertyName] = binaryToDownload.version
         }

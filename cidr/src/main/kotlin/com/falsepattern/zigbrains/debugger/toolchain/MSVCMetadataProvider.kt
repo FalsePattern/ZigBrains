@@ -23,7 +23,10 @@
 package com.falsepattern.zigbrains.debugger.toolchain
 
 import com.falsepattern.zigbrains.debugger.ZigDebugBundle
+import com.falsepattern.zigbrains.debugger.settings.MSVCDownloadPermission
+import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings
 import com.falsepattern.zigbrains.debugger.toolchain.ZigDebuggerToolchainService.Companion.downloadPath
+import com.falsepattern.zigbrains.shared.coroutine.withCurrentEDTModalityContext
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -48,21 +51,27 @@ suspend fun msvcMetadata(): Properties {
     cache?.let { return it }
     mutex.withLock {
         cache?.let { return it }
-        val allowDownload = withEDTContext(ModalityState.current()) {
-            val dialog = DialogBuilder()
-            dialog.setTitle(ZigDebugBundle.message("msvc.consent.title"))
-            dialog.addCancelAction().setText(ZigDebugBundle.message("msvc.consent.deny"))
-            dialog.addOkAction().setText(ZigDebugBundle.message("msvc.consent.allow"))
-            val centerPanel = JBPanel<JBPanel<*>>()
-            centerPanel.setLayout(BoxLayout(centerPanel, BoxLayout.Y_AXIS))
-            val lines = ZigDebugBundle.message("msvc.consent.body").split('\n')
-            for (line in lines) {
-                centerPanel.add(JBLabel(line))
+        val settings = ZigDebuggerSettings.instance
+        var permission = settings.msvcConsent
+        if (permission == MSVCDownloadPermission.AskMe) {
+            val allowDownload = withCurrentEDTModalityContext {
+                val dialog = DialogBuilder()
+                dialog.setTitle(ZigDebugBundle.message("msvc.consent.title"))
+                dialog.addCancelAction().setText(ZigDebugBundle.message("msvc.consent.deny"))
+                dialog.addOkAction().setText(ZigDebugBundle.message("msvc.consent.allow"))
+                val centerPanel = JBPanel<JBPanel<*>>()
+                centerPanel.setLayout(BoxLayout(centerPanel, BoxLayout.Y_AXIS))
+                val lines = ZigDebugBundle.message("msvc.consent.body").split('\n')
+                for (line in lines) {
+                    centerPanel.add(JBLabel(line))
+                }
+                dialog.centerPanel(centerPanel)
+                dialog.showAndGet()
             }
-            dialog.centerPanel(centerPanel)
-            dialog.showAndGet()
+            permission = if (allowDownload) MSVCDownloadPermission.Allow else MSVCDownloadPermission.Deny
+            settings.msvcConsent = permission
         }
-        val data = if (allowDownload) {
+        val data = if (permission == MSVCDownloadPermission.Allow) {
             withTimeoutOrNull(3000L) {
                 downloadMSVCProps()
             } ?: run {
