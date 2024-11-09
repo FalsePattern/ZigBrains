@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - IDE freezes when opening a zig project / doing zig init
+
 ## [20.0.0]
 
 ### Added
