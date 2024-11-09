@@ -21,6 +21,7 @@ Changelog structure reference:
 
 - Project
   - IDE freezes when opening a zig project / doing zig init
+  - Test tasks don't work and try to run the file as an executable
 
 ## [20.0.0]
 
