@@ -64,7 +64,7 @@ abstract class ZigProgramRunner<ProfileState: ZigProfileState<*>>(protected val 
         val toolchain = environment.project.zigProjectSettings.state.toolchain ?: run {
             Notification(
                 "zigbrains",
-                "Zig project toolchain not set, cannot execute program!",
+                "Zig project toolchain not set, cannot execute program! Please configure it in [Settings | Languages & Frameworks | Zig]",
                 NotificationType.ERROR
             ).notify(environment.project)
             return null
