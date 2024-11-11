@@ -17,6 +17,16 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - Escape sequence highlighting in char literals
+
+### Fixed
+
+- Zig
+  - Unicode characters in char literals triggered an error
+
 ## [20.0.1]
 
 ### Fixed

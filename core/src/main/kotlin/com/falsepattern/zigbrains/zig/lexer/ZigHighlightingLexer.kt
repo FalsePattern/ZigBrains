@@ -34,9 +34,9 @@ class ZigHighlightingLexer: LayeredLexer(ZigLexerAdapter()) {
         registerSelfStoppingLayer(
             MergingLexerAdapter(
                 ZigLexerStringAdapter(),
-                TokenSet.create(ZigTypes.STRING_LITERAL_SINGLE)
+                TokenSet.create(ZigTypes.STRING_LITERAL_SINGLE, ZigTypes.CHAR_LITERAL)
             ),
-            arrayOf(ZigTypes.STRING_LITERAL_SINGLE),
+            arrayOf(ZigTypes.STRING_LITERAL_SINGLE, ZigTypes.CHAR_LITERAL),
             IElementType.EMPTY_ARRAY
         )
     }
