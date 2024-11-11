@@ -25,7 +25,7 @@ package com.falsepattern.zigbrains.lsp.settings
 import org.jetbrains.annotations.NonNls
 
 data class ZLSSettings(
-    var direnv: Boolean = true,
+    var direnv: Boolean = false,
     var zlsPath: @NonNls String = "",
     var zlsConfigPath: @NonNls String = "",
     var debug: Boolean = false,

@@ -25,6 +25,7 @@ package com.falsepattern.zigbrains.direnv
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
+import com.intellij.ide.impl.isTrusted
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -40,7 +41,7 @@ import java.nio.file.Path
 
 object DirenvCmd {
     suspend fun importDirenv(project: Project): Env {
-        if (!direnvInstalled())
+        if (!direnvInstalled() || !project.isTrusted())
             return emptyEnv
         val workDir = project.guessProjectDir()?.toNioPath() ?: return emptyEnv
 
@@ -94,9 +95,12 @@ object DirenvCmd {
     }
 
     private const val GROUP_DISPLAY_ID = "zigbrains-direnv"
-    fun direnvInstalled() =
+
+    private val _direnvInstalled by lazy {
         // Using the builtin stuff here instead of Env because it should only scan for direnv on the process path
         PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS("direnv") != null
+    }
+    fun direnvInstalled() = _direnvInstalled
 }
 
 suspend fun Project?.getDirenv(): Env {

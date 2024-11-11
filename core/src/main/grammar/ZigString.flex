@@ -40,17 +40,21 @@ import static com.intellij.psi.StringEscapesTokenTypes.*;
 hex=[0-9a-fA-F]
 
 char_escape_unicode= "\\x" {hex} {hex} | "\\u{" {hex}+ "}"
-char_escape_unicode_invalid= "\\x" | "\\u"
+char_escape_unicode_invalid= "\\x" .? .? | "\\u" ("{" [^}]* "}"?)?
 
 char_escape_single_valid= "\\" [nr\\t'\"]
 char_escape_single_invalid= "\\" [^nr\\t'\"]
 
 %state STR
+%state CHAR
+%state CHAR_END
+%state CHAR_FINISH
 %%
 
 
 <YYINITIAL> {
       "\"" { yybegin(STR); return STRING_LITERAL_SINGLE; }
+      "'"  { yybegin(CHAR); return CHAR_LITERAL; }
       [^]  { return STRING_LITERAL_SINGLE; }
 }
 
@@ -60,4 +64,21 @@ char_escape_single_invalid= "\\" [^nr\\t'\"]
       {char_escape_single_valid} { return VALID_STRING_ESCAPE_TOKEN; }
       {char_escape_single_invalid} { return INVALID_CHARACTER_ESCAPE_TOKEN; }
       [^] { return STRING_LITERAL_SINGLE; }
+}
+
+<CHAR> {
+      {char_escape_unicode} { yybegin(CHAR_END); return VALID_STRING_ESCAPE_TOKEN; }
+      {char_escape_unicode_invalid} { yybegin(CHAR_END); return INVALID_UNICODE_ESCAPE_TOKEN; }
+      {char_escape_single_valid} { yybegin(CHAR_END); return VALID_STRING_ESCAPE_TOKEN; }
+      {char_escape_single_invalid} { yybegin(CHAR_END); return INVALID_CHARACTER_ESCAPE_TOKEN; }
+      [^] { yybegin(CHAR_END); return CHAR_LITERAL; }
+}
+
+<CHAR_END> {
+      "'" { yybegin(CHAR_FINISH); return CHAR_LITERAL; }
+      [^] { return BAD_CHARACTER; }
+}
+
+<CHAR_FINISH> {
+      [^] { return BAD_CHARACTER; }
 }

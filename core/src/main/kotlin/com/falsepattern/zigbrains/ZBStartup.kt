@@ -22,6 +22,13 @@
 
 package com.falsepattern.zigbrains
 
+import com.falsepattern.zigbrains.direnv.DirenvCmd
+import com.falsepattern.zigbrains.direnv.emptyEnv
+import com.falsepattern.zigbrains.direnv.getDirenv
+import com.falsepattern.zigbrains.lsp.settings.zlsSettings
+import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.plugins.PluginManager
 import com.intellij.notification.Notification
@@ -33,8 +40,10 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
+import com.intellij.openapi.util.UserDataHolderBase
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
+import kotlin.io.path.pathString
 
 class ZBStartup: ProjectActivity {
     var firstInit = true
@@ -65,6 +74,30 @@ class ZBStartup: ProjectActivity {
                     }
                 })
                 notif.notify(null)
+            }
+        }
+        //Autodetection
+        val zigProjectState = project.zigProjectSettings.state
+        if (zigProjectState.toolchainPath.isNullOrBlank()) {
+            val data = UserDataHolderBase()
+            data.putUserData(LocalZigToolchain.DIRENV_KEY,
+                DirenvCmd.direnvInstalled() && !project.isDefault && zigProjectState.direnv
+            )
+            val tc = ZigToolchainProvider.suggestToolchain(project, data) ?: return
+            if (tc is LocalZigToolchain) {
+                zigProjectState.toolchainPath = tc.location.pathString
+                project.zigProjectSettings.state = zigProjectState
+            }
+        }
+        val zlsState = project.zlsSettings.state
+        if (zlsState.zlsPath.isBlank()) {
+            val env = if (DirenvCmd.direnvInstalled() && !project.isDefault && zlsState.direnv)
+                project.getDirenv()
+            else
+                emptyEnv
+            env.findExecutableOnPATH("zls")?.let {
+                zlsState.zlsPath = it.pathString
+                project.zlsSettings.state = zlsState
             }
         }
     }

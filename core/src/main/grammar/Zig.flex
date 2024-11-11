@@ -52,49 +52,8 @@ oct_int={oct} {oct_}*
 dec_int={dec} {dec_}*
 hex_int={hex} {hex_}*
 
-ox80_oxBF=[\200-\277]
-oxF4=\364
-ox80_ox8F=[\200-\217]
-oxF1_oxF3=[\361-\363]
-oxF0=\360
-ox90_0xBF=[\220-\277]
-oxEE_oxEF=[\356-\357]
-oxED=\355
-ox80_ox9F=[\200-\237]
-oxE1_oxEC=[\341-\354]
-oxE0=\340
-oxA0_oxBF=[\240-\277]
-oxC2_oxDF=[\302-\337]
-
-// From https://lemire.me/blog/2018/05/09/how-quickly-can-you-check-that-a-string-is-valid-unicode-utf-8/
-// First Byte      Second Byte     Third Byte      Fourth Byte
-// [0x00,0x7F]
-// [0xC2,0xDF]     [0x80,0xBF]
-//    0xE0         [0xA0,0xBF]     [0x80,0xBF]
-// [0xE1,0xEC]     [0x80,0xBF]     [0x80,0xBF]
-//    0xED         [0x80,0x9F]     [0x80,0xBF]
-// [0xEE,0xEF]     [0x80,0xBF]     [0x80,0xBF]
-//    0xF0         [0x90,0xBF]     [0x80,0xBF]     [0x80,0xBF]
-// [0xF1,0xF3]     [0x80,0xBF]     [0x80,0xBF]     [0x80,0xBF]
-//    0xF4         [0x80,0x8F]     [0x80,0xBF]     [0x80,0xBF]
-
-mb_utf8_literal= {oxF4}      {ox80_ox8F} {ox80_oxBF} {ox80_oxBF}
-               | {oxF1_oxF3} {ox80_oxBF} {ox80_oxBF} {ox80_oxBF}
-               | {oxF0}      {ox90_0xBF} {ox80_oxBF} {ox80_oxBF}
-               | {oxEE_oxEF} {ox80_oxBF} {ox80_oxBF}
-               | {oxED}      {ox80_ox9F} {ox80_oxBF}
-               | {oxE1_oxEC} {ox80_oxBF} {ox80_oxBF}
-               | {oxE0}      {oxA0_oxBF} {ox80_oxBF}
-               | {oxC2_oxDF} {ox80_oxBF}
-
-ascii_char_not_nl_slash_squote=[\000-\011\013-\046\050-\133\135-\177]
-
-char_escape= "\\x" {hex} {hex}
-           | "\\u{" {hex}+ "}"
-           | "\\" [nr\\t'\"]
-char_char= {mb_utf8_literal}
-         | {char_escape}
-         | {ascii_char_not_nl_slash_squote}
+char_char= \\ .
+         | [^\'\n]
 
 string_char= \\ .
            | [^\"\n]
@@ -261,7 +220,7 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <YYINITIAL>      "while"                  { return KEYWORD_WHILE; }
 
 <YYINITIAL>      "'"                      { yybegin(CHAR_LIT); }
-<CHAR_LIT>       {char_char}"'"           { yybegin(YYINITIAL); return CHAR_LITERAL; }
+<CHAR_LIT>       {char_char}*"'"          { yybegin(YYINITIAL); return CHAR_LITERAL; }
 <CHAR_LIT>       [^]                      { yypushback(1); yybegin(UNT_QUOT); }
 
 <YYINITIAL>      {FLOAT}                  { return FLOAT; }

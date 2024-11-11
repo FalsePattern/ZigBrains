@@ -17,6 +17,24 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [20.0.2]
+
+### Added
+
+- Zig
+  - Escape sequence highlighting in char literals
+
+### Changed
+
+- Project
+  - Direnv now only runs automatically in trusted projects
+  - Toolchain autodetection is now done in the background on project load
+
+### Fixed
+
+- Zig
+  - Unicode characters in char literals triggered an error
+
 ## [20.0.1]
 
 ### Fixed
