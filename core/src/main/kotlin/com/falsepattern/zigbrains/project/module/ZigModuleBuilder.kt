@@ -48,7 +48,7 @@ class ZigModuleBuilder: ModuleBuilder() {
     }
 
     override fun getCustomOptionsStep(context: WizardContext?, parentDisposable: Disposable?): ModuleWizardStep? {
-        val step = ZigModuleWizardStep()
+        val step = ZigModuleWizardStep(parentDisposable)
         parentDisposable?.let { Disposer.register(it, step.peer) }
         return step
     }
@@ -63,8 +63,8 @@ class ZigModuleBuilder: ModuleBuilder() {
         }
     }
 
-    inner class ZigModuleWizardStep: ModuleWizardStep() {
-        internal val peer = ZigProjectGeneratorPeer(true)
+    inner class ZigModuleWizardStep(parent: Disposable?): ModuleWizardStep() {
+        internal val peer = ZigProjectGeneratorPeer(true).also { Disposer.register(parent ?: return@also, it) }
 
         override fun getComponent(): JComponent {
             return peer.component.withBorder()
@@ -77,7 +77,6 @@ class ZigModuleBuilder: ModuleBuilder() {
         override fun updateDataModel() {
             this@ZigModuleBuilder.configurationData = peer.settings
         }
-
     }
 }
 
