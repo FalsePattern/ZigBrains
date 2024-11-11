@@ -22,6 +22,11 @@ Changelog structure reference:
 - Zig
   - Escape sequence highlighting in char literals
 
+### Changed
+
+- Project
+  - Direnv now only runs automatically in trusted projects
+
 ### Fixed
 
 - Zig
