@@ -32,7 +32,9 @@ import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
 
 class ZigProjectGeneratorPeer(var handleGit: Boolean): ProjectGeneratorPeer<ZigProjectConfigurationData>, Disposable {
-    private val newProjectPanel: ZigNewProjectPanel = ZigNewProjectPanel(handleGit).also { Disposer.register(this, it) }
+    private val newProjectPanel by lazy {
+        ZigNewProjectPanel(handleGit).also { Disposer.register(this, it) }
+    }
     val myComponent: JComponent by lazy {
         panel {
             newProjectPanel.attach(this)
