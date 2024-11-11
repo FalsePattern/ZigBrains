@@ -56,7 +56,9 @@ import kotlin.io.path.notExists
 import kotlin.io.path.pathString
 
 class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
-    private val direnv = JBCheckBox(ZigBrainsBundle.message("settings.project.label.direnv"))
+    private val direnv = JBCheckBox(ZigBrainsBundle.message("settings.project.label.direnv")).apply { addActionListener {
+        dispatchAutodetect(true)
+    } }
     private val pathToToolchain = textFieldWithBrowseButton(
         project,
         FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))
@@ -85,15 +87,27 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
     ).also { Disposer.register(this, it) }
     private var debounce: Job? = null
 
-    suspend fun autodetect() {
+    private fun dispatchAutodetect(force: Boolean) {
+        project.zigCoroutineScope.launchWithEDT {
+            withModalProgress(ModalTaskOwner.component(pathToToolchain), "Detecting Zig...", TaskCancellation.cancellable()) {
+                autodetect(force)
+            }
+        }
+    }
+
+    suspend fun autodetect(force: Boolean) {
+        if (!force && pathToToolchain.text.isNotBlank())
+            return
         val data = UserDataHolderBase()
-        data.putUserData(LocalZigToolchain.DIRENV_KEY, direnv.isSelected)
+        data.putUserData(LocalZigToolchain.DIRENV_KEY, DirenvCmd.direnvInstalled() && project?.isDefault == false && direnv.isSelected)
         val tc = ZigToolchainProvider.suggestToolchain(project, data) ?: return
         if (tc !is LocalZigToolchain) {
             TODO("Implement non-local zig toolchain in config")
         }
-        pathToToolchain.text = tc.location.pathString
-        dispatchUpdateUI()
+        if (force || pathToToolchain.text.isBlank()) {
+            pathToToolchain.text = tc.location.pathString
+            dispatchUpdateUI()
+        }
     }
 
     var data
@@ -121,13 +135,6 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
                 if (DirenvCmd.direnvInstalled() && !project.isDefault) {
                     cell(direnv)
                 }
-                button(ZigBrainsBundle.message("settings.project.label.toolchain-autodetect")) {
-                    project.zigCoroutineScope.launchWithEDT {
-                        withModalProgress(ModalTaskOwner.component(pathToToolchain), "Detecting Zig...", TaskCancellation.cancellable()) {
-                            autodetect()
-                        }
-                    }
-                }
             }
             row(ZigBrainsBundle.message("settings.project.label.toolchain-version")) {
                 cell(toolchainVersion)
@@ -137,6 +144,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
                 cell(stdFieldOverride)
             }
         }
+        dispatchAutodetect(false)
     }
 
     private fun dispatchUpdateUI() {

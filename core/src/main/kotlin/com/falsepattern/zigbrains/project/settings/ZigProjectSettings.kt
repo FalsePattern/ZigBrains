@@ -28,7 +28,7 @@ import com.intellij.util.xmlb.annotations.Transient
 import kotlin.io.path.pathString
 
 data class ZigProjectSettings(
-    var direnv: Boolean = true,
+    var direnv: Boolean = false,
     var overrideStdPath: Boolean = false,
     var explicitPathToStd: String? = null,
     var toolchainPath: String? = null

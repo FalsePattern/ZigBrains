@@ -26,6 +26,7 @@ Changelog structure reference:
 
 - Project
   - Direnv now only runs automatically in trusted projects
+  - Toolchain autodetection is now done in the background on project load
 
 ### Fixed
 

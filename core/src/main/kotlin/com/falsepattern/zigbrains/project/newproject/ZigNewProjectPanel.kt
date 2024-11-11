@@ -89,11 +89,6 @@ class ZigNewProjectPanel(private var handleGit: Boolean): Disposable {
         zlsConf.attach(p)
     }
 
-    suspend fun autodetect() {
-        projConf.autodetect()
-        zlsConf.autodetect()
-    }
-
     override fun dispose() {
     }
 }

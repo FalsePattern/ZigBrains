@@ -62,21 +62,16 @@ class ZLSSettingsPanel(private val project: Project?) : Disposable {
 
     private val messageTrace = JBCheckBox()
     private val debug = JBCheckBox()
-    private val direnv = JBCheckBox(ZLSBundle.message("settings.zls-path.use-direnv.label"))
+    private val direnv = JBCheckBox(ZLSBundle.message("settings.zls-path.use-direnv.label")).apply { addActionListener {
+        dispatchAutodetect(true)
+    } }
 
     fun attach(panel: Panel) = with(panel) {
         group(ZLSBundle.message("settings.group.title")) {
             row(ZLSBundle.message("settings.zls-path.label")) {
                 cell(zlsPath).resizableColumn().align(AlignX.FILL)
-                if (DirenvCmd.direnvInstalled() && project != null && !project.isDefault) {
+                if (DirenvCmd.direnvInstalled() && project?.isDefault == false) {
                     cell(direnv)
-                }
-                button(ZLSBundle.message("settings.zls-path.autodetect.label")) {
-                    project.zigCoroutineScope.launchWithEDT {
-                        withModalProgress(ModalTaskOwner.component(zlsPath), "Detecting ZLS...", TaskCancellation.cancellable()) {
-                            autodetect()
-                        }
-                    }
                 }
             }
             row(ZLSBundle.message("settings.zls-config-path.label")) { cell(zlsConfigPath).align(AlignX.FILL) }
@@ -91,6 +86,7 @@ class ZLSSettingsPanel(private val project: Project?) : Disposable {
             row(ZLSBundle.message("dev-settings.debug.label")) { cell(debug) }
             row(ZLSBundle.message("dev-settings.message-trace.label")) { cell(messageTrace) }
         }
+        dispatchAutodetect(false)
     }
 
     var data
@@ -121,16 +117,30 @@ class ZLSSettingsPanel(private val project: Project?) : Disposable {
             inlayHintsCompact.isSelected = value.inlayHintsCompact
         }
 
-    suspend fun autodetect() {
-        getDirenv().findExecutableOnPATH("zls")?.let { zlsPath.text = it.pathString }
+    private fun dispatchAutodetect(force: Boolean) {
+        project.zigCoroutineScope.launchWithEDT {
+            withModalProgress(ModalTaskOwner.component(zlsPath), "Detecting ZLS...", TaskCancellation.cancellable()) {
+                autodetect(force)
+            }
+        }
+    }
+
+    suspend fun autodetect(force: Boolean) {
+        if (force || zlsPath.text.isBlank()) {
+            getDirenv().findExecutableOnPATH("zls")?.let {
+                if (force || zlsPath.text.isBlank()) {
+                    zlsPath.text = it.pathString
+                }
+            }
+        }
     }
 
     override fun dispose() {
     }
 
     private suspend fun getDirenv(): Env {
-        if (!direnv.isSelected)
-            return emptyEnv
-        return project.getDirenv()
+        if (DirenvCmd.direnvInstalled() && project?.isDefault == false && direnv.isSelected)
+            return project.getDirenv()
+        return emptyEnv
     }
 }
