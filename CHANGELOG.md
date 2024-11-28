@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [20.0.3]
+
 ### Fixed
 
 - Project
