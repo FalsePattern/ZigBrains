@@ -178,18 +178,15 @@
         />
     </extensions>
 
-    <actions>
+    <actions resource-bundle="zigbrains.ActionsBundle">
         <action
                 id="zigbrains.discover.steps"
                 class="com.falsepattern.zigbrains.project.steps.discovery.ZigDiscoverStepsAction"
-                text="Reload Zig Build Steps"
-                description="Scan the project and detect build.zig steps using the current toolchain"
                 icon="AllIcons.Actions.Refresh"
         />
         <action
                 id="zigbrains.file.new"
                 class="com.falsepattern.zigbrains.project.actions.ZigNewFileAction"
-                text="New Zig File"
         >
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
         </action>
