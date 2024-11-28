@@ -7,6 +7,7 @@ plugins {
 }
 val lsp4jVersion: String by project
 val clionVersion: String by project
+val useInstaller = property("useInstaller").toString().toBoolean()
 
 val genOutputDir = layout.buildDirectory.dir("generated-resources")
 sourceSets["main"].resources.srcDir(genOutputDir)
@@ -23,7 +24,7 @@ tasks {
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.CLion, providers.gradleProperty("clionVersion"))
+        create(IntelliJPlatformType.CLion, clionVersion, useInstaller = useInstaller)
         bundledPlugins("com.intellij.clion", "com.intellij.cidr.base", "com.intellij.nativeDebug")
     }
     implementation(project(":core"))

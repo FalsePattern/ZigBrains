@@ -45,9 +45,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import org.jetbrains.concurrency.Promise
 
-abstract class ZigProgramRunner<ProfileState: ZigProfileState<*>>(protected val executorId: String): AsyncProgramRunner<RunnerSettings>() {
+abstract class ZigProgramRunner<ProfileState : ZigProfileState<*>>(protected val executorId: String) : AsyncProgramRunner<RunnerSettings>() {
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun execute(environment: ExecutionEnvironment, state: RunProfileState): Promise<RunContentDescriptor?> {
+        FileDocumentManager.getInstance().saveAllDocuments()
         return environment.project.zigCoroutineScope.async {
             withModalProgress(ModalTaskOwner.project(environment.project), "Starting zig program...", TaskCancellation.cancellable()) {
                 executeAsync(environment, state)
@@ -71,13 +72,8 @@ abstract class ZigProgramRunner<ProfileState: ZigProfileState<*>>(protected val 
         }
 
         return reportProgress { reporter ->
-            reporter.indeterminateStep("Saving all documents") {
-                withEDTContext {
-                    FileDocumentManager.getInstance().saveAllDocuments()
-                }
-            }
-            return@reportProgress reporter.indeterminateStep {
-                return@indeterminateStep execute(state, toolchain, environment)
+            reporter.indeterminateStep {
+                execute(state, toolchain, environment)
             }
         }
 
