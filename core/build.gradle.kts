@@ -9,10 +9,12 @@ plugins {
 
 val lsp4ijVersion: String by project
 val lsp4jVersion: String by project
+val ideaCommunityVersion: String by project
+val useInstaller = property("useInstaller").toString().toBoolean()
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"), useInstaller = false)
+        create(IntelliJPlatformType.IntellijIdeaCommunity, ideaCommunityVersion, useInstaller = useInstaller)
     }
     compileOnly("com.redhat.devtools.intellij:lsp4ij:$lsp4ijVersion")
     compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")

@@ -23,7 +23,10 @@ val javaVersion = property("javaVersion").toString().toInt()
 val lsp4ijVersion: String by project
 val runIdeTarget: String by project
 val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
+val useInstaller = property("useInstaller").toString().toBoolean()
 val lsp4ijPluginString = "com.redhat.devtools.lsp4ij:$lsp4ijVersion${if (lsp4ijNightly) "@nightly" else ""}"
+val ideaCommunityVersion: String by project
+val clionVersion: String by project
 
 group = "com.falsepattern"
 version = pluginVersionFull
@@ -101,8 +104,8 @@ allprojects {
 dependencies {
     intellijPlatform {
         when(runIdeTarget) {
-            "ideaCommunity" -> create(IntelliJPlatformType.IntellijIdeaCommunity, providers.gradleProperty("ideaCommunityVersion"), useInstaller = false)
-            "clion" -> create(IntelliJPlatformType.CLion, providers.gradleProperty("clionVersion"), useInstaller = false)
+            "ideaCommunity" -> create(IntelliJPlatformType.IntellijIdeaCommunity, ideaCommunityVersion, useInstaller = useInstaller)
+            "clion" -> create(IntelliJPlatformType.CLion, clionVersion, useInstaller = useInstaller)
         }
 
         pluginVerifier()
@@ -110,8 +113,8 @@ dependencies {
         plugin(lsp4ijPluginString)
     }
 
-    implementation(project(":core"))
-    implementation(project(":cidr"))
+    runtimeOnly(project(":core"))
+    runtimeOnly(project(":cidr"))
 }
 
 intellijPlatform {
@@ -132,7 +135,7 @@ intellijPlatform {
 
         val changelog = project.changelog
 
-        changeNotes = providers.gradleProperty("pluginVersion").map { pluginVersion ->
+        changeNotes = provider { pluginVersion }.map { pluginVersion ->
             with(changelog) {
                 renderItem(
                     (getOrNull(pluginVersion) ?: getUnreleased())
