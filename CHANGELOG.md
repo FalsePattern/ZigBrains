@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - "Save all documents" hanging when trying to run a zig file
+
 ## [20.0.2]
 
 ### Added
