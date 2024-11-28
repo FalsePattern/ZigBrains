@@ -33,7 +33,7 @@ class ZigConfigTypeBuild : ConfigurationTypeBase(
     IDENTIFIER,
     ZigBrainsBundle.message("configuration.build.name"),
     ZigBrainsBundle.message("configuration.build.description"),
-    Icons.ZIG
+    Icons.Zig
 ) {
     init {
         addFactory(ConfigFactoryRun(this))

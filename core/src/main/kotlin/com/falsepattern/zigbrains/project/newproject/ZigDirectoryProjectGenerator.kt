@@ -23,7 +23,6 @@
 package com.falsepattern.zigbrains.project.newproject
 
 import com.falsepattern.zigbrains.Icons
-import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.facet.ui.ValidationResult
 import com.intellij.ide.util.projectWizard.AbstractNewProjectStep
@@ -44,7 +43,7 @@ class ZigDirectoryProjectGenerator: DirectoryProjectGenerator<ZigProjectConfigur
     }
 
     override fun getLogo(): Icon {
-        return Icons.ZIG
+        return Icons.Zig
     }
 
     override fun createPeer(): ProjectGeneratorPeer<ZigProjectConfigurationData> {

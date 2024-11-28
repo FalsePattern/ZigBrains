@@ -65,7 +65,7 @@ import javax.swing.tree.TreePath
 
 class BuildToolWindowContext(private val project: Project): Disposable {
     val rootNode: DefaultMutableTreeNode = DefaultMutableTreeNode(BaseNodeDescriptor<Any>(project, project.name, AllIcons.Actions.ProjectDirectory))
-    private val buildZig: DefaultMutableTreeNode = DefaultMutableTreeNode(BaseNodeDescriptor<Any>(project, ZigBrainsBundle.message("build.tool.window.tree.steps.label"), Icons.ZIG))
+    private val buildZig: DefaultMutableTreeNode = DefaultMutableTreeNode(BaseNodeDescriptor<Any>(project, ZigBrainsBundle.message("build.tool.window.tree.steps.label"), Icons.Zig))
     init {
         rootNode.add(buildZig)
     }

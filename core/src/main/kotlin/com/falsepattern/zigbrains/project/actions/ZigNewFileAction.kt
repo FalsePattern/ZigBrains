@@ -31,7 +31,7 @@ import com.intellij.psi.PsiDirectory
 class ZigNewFileAction: CreateFileFromTemplateAction() {
     override fun buildDialog(project: Project, directory: PsiDirectory, builder: CreateFileFromTemplateDialog.Builder) {
         builder.setTitle("Zig File")
-            .addKind("Empty file", Icons.ZIG, "blank_zig_file")
+            .addKind("Empty file", Icons.Zig, "blank_zig_file")
     }
 
     override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String {

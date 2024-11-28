@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NonNls
 
 @NonNls
 object Icons {
-    val ZIG = IconLoader.getIcon("/icons/zig.svg", Icons::class.java)
-    val ZON = IconLoader.getIcon("/icons/zon.svg", Icons::class.java)
+    @JvmField
+    val Zig = IconLoader.getIcon("/icons/zig.svg", Icons::class.java)
+    @JvmField
+    val Zon = IconLoader.getIcon("/icons/zon.svg", Icons::class.java)
 }
