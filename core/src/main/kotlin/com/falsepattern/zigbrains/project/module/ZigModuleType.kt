@@ -40,6 +40,6 @@ object ZigModuleType: ModuleType<ZigModuleBuilder>("com.falsepattern.zigbrains.z
     }
 
     override fun getNodeIcon(isOpened: Boolean): Icon {
-        return Icons.ZIG
+        return Icons.Zig
     }
 }

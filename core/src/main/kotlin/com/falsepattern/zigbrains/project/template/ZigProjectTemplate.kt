@@ -29,7 +29,7 @@ import javax.swing.Icon
 sealed class ZigProjectTemplate(
     @ListItem val name: String,
     val isBinary: Boolean,
-    val icon: Icon = Icons.ZIG
+    val icon: Icon = Icons.Zig
 ) {
     abstract fun fileTemplates(): Map<String, String>
 }
