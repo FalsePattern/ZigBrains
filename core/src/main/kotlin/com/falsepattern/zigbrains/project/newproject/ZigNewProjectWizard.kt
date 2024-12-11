@@ -37,7 +37,7 @@ class ZigNewProjectWizard: LanguageGeneratorNewProjectWizard {
     override val name: String
         get() = "Zig"
     override val icon: Icon
-        get() = Icons.ZIG
+        get() = Icons.Zig
     override val ordinal: Int
         get() = 900
 

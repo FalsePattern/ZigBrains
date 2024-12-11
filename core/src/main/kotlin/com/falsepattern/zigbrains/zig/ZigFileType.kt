@@ -33,5 +33,5 @@ object ZigFileType : LanguageFileType(ZigLanguage) {
 
     override fun getDefaultExtension() = "zig"
 
-    override fun getIcon() = Icons.ZIG
+    override fun getIcon() = Icons.Zig
 }

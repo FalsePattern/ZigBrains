@@ -33,5 +33,5 @@ object ZonFileType: LanguageFileType(ZonLanguage) {
 
     override fun getDefaultExtension() = "zon"
 
-    override fun getIcon() = Icons.ZON
+    override fun getIcon() = Icons.Zon
 }

@@ -33,7 +33,7 @@ class ZigConfigTypeBinary: ConfigurationTypeBase(
     IDENTIFIER,
     ZigDebugBundle.message("configuration.binary.name"),
     ZigDebugBundle.message("configuration.binary.description"),
-    Icons.ZIG
+    Icons.Zig
 ) {
     init {
         addFactory(ConfigFactoryBinary(this))

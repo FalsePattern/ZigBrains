@@ -60,7 +60,7 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
     }
 
     override fun getIcon(unused: Boolean): Icon {
-        return Icons.ZIG
+        return Icons.Zig
     }
 
     override fun getSourceRoots(): Collection<VirtualFile> {

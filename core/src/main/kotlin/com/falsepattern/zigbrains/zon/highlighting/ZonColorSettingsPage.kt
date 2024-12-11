@@ -35,7 +35,7 @@ class ZonColorSettingsPage: ColorSettingsPage {
 
     override fun getDisplayName() = ZigBrainsBundle.message("configurable.name.zon-color-settings-page")
 
-    override fun getIcon() = Icons.ZON
+    override fun getIcon() = Icons.Zon
 
     override fun getHighlighter() = ZonSyntaxHighlighter()
 
