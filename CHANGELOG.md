@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [20.0.4]
+
 ### Fixed
 
 - Renamed Zig new file task to "Zig File" and moved to the file creation group
