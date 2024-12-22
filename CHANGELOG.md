@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zon
+  - Broken string quote handling
+
 ## [20.0.4]
 
 ### Fixed
