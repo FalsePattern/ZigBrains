@@ -22,6 +22,9 @@
         <lang.parserDefinition
                 language="Zig"
                 implementationClass="com.falsepattern.zigbrains.zig.parser.ZigParserDefinition"/>
+        <lang.quoteHandler
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.pairing.ZigQuoteHandler"/>
         <lang.syntaxHighlighterFactory
                 language="Zig"
                 implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>

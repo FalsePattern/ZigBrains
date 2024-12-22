@@ -80,7 +80,8 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 %state CHAR_LIT
 
 %state ID_QUOT
-%state UNT_QUOT
+%state UNT_SQUOT
+%state UNT_DQUOT
 
 %state CDOC_CMT
 %state DOC_CMT
@@ -221,14 +222,14 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 <YYINITIAL>      "'"                      { yybegin(CHAR_LIT); }
 <CHAR_LIT>       {char_char}*"'"          { yybegin(YYINITIAL); return CHAR_LITERAL; }
-<CHAR_LIT>       [^]                      { yypushback(1); yybegin(UNT_QUOT); }
+<CHAR_LIT>       [^]                      { yypushback(1); yybegin(UNT_SQUOT); }
 
 <YYINITIAL>      {FLOAT}                  { return FLOAT; }
 <YYINITIAL>      {INTEGER}                { return INTEGER; }
 
 <YYINITIAL>      "\""                     { yybegin(STR_LIT); }
 <STR_LIT>        {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
-<STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_QUOT); }
+<STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
 <YYINITIAL>      "\\\\"                   { yybegin(STR_MULT_LINE); }
 <STR_MULT_LINE>  {all_nl_wrap} "\\\\"     { }
 <STR_MULT_LINE>  {all_nl_nowrap}          { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
@@ -236,11 +237,12 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <YYINITIAL>      {IDENTIFIER_PLAIN}       { return IDENTIFIER; }
 <YYINITIAL>      "@\""                    { yybegin(ID_QUOT); }
 <ID_QUOT>        {string_char}*"\""       { yybegin(YYINITIAL); return IDENTIFIER; }
-<ID_QUOT>        [^]                      { yypushback(1); yybegin(UNT_QUOT); }
+<ID_QUOT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
 
 <YYINITIAL>      {BUILTINIDENTIFIER}      { return BUILTINIDENTIFIER; }
 
-<UNT_QUOT>       [^\n]*{CRLF}             { yybegin(YYINITIAL); return BAD_CHARACTER; }
+<UNT_SQUOT>       [^\n]*{CRLF}             { yybegin(YYINITIAL); return BAD_SQUOT; }
+<UNT_DQUOT>       [^\n]*{CRLF}             { yybegin(YYINITIAL); return BAD_DQUOT; }
 
 <YYINITIAL>      {WHITE_SPACE}            { return WHITE_SPACE; }
 

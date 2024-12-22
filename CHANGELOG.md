@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - String, character literal, and `@"identifier"` quote matching
+
 ### Fixed
 
 - Zon
