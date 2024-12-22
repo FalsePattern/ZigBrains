@@ -20,14 +20,17 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.zon.pairing
+package com.falsepattern.zigbrains.zig.pairing
 
-import com.falsepattern.zigbrains.zon.psi.ZonTypes
+import com.falsepattern.zigbrains.zig.psi.ZigTypes
 import com.intellij.codeInsight.editorActions.MultiCharQuoteHandler
 import com.intellij.codeInsight.editorActions.SimpleTokenSetQuoteHandler
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
 
-class ZonQuoteHandler: SimpleTokenSetQuoteHandler(ZonTypes.STRING_LITERAL_SINGLE, ZonTypes.BAD_STRING), MultiCharQuoteHandler {
-    override fun getClosingQuote(iterator: HighlighterIterator, offset: Int) =
-        "\""
+class ZigQuoteHandler: SimpleTokenSetQuoteHandler(ZigTypes.STRING_LITERAL_SINGLE, ZigTypes.IDENTIFIER, ZigTypes.BAD_DQUOT, ZigTypes.CHAR_LITERAL, ZigTypes.BAD_SQUOT), MultiCharQuoteHandler {
+    override fun getClosingQuote(iterator: HighlighterIterator, offset: Int) = when(iterator.tokenType) {
+        ZigTypes.STRING_LITERAL_SINGLE, ZigTypes.IDENTIFIER, ZigTypes.BAD_DQUOT -> "\""
+        ZigTypes.CHAR_LITERAL, ZigTypes.BAD_SQUOT -> "'"
+        else -> null
+    }
 }

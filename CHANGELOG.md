@@ -17,6 +17,18 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [20.1.0]
+
+### Added
+
+- Zig
+  - String, character literal, and `@"identifier"` quote matching
+
+### Fixed
+
+- Zon
+  - Broken string quote handling
+
 ## [20.0.4]
 
 ### Fixed
