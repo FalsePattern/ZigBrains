@@ -222,6 +222,7 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 <YYINITIAL>      "'"                      { yybegin(CHAR_LIT); }
 <CHAR_LIT>       {char_char}*"'"          { yybegin(YYINITIAL); return CHAR_LITERAL; }
+<CHAR_LIT>       <<EOF>>                  { yybegin(YYINITIAL); return BAD_SQUOT; }
 <CHAR_LIT>       [^]                      { yypushback(1); yybegin(UNT_SQUOT); }
 
 <YYINITIAL>      {FLOAT}                  { return FLOAT; }
@@ -229,6 +230,7 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 <YYINITIAL>      "\""                     { yybegin(STR_LIT); }
 <STR_LIT>        {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
+<STR_LIT>        <<EOF>>                  { yybegin(YYINITIAL); return BAD_DQUOT; }
 <STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
 <YYINITIAL>      "\\\\"                   { yybegin(STR_MULT_LINE); }
 <STR_MULT_LINE>  {all_nl_wrap} "\\\\"     { }
@@ -237,12 +239,17 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <YYINITIAL>      {IDENTIFIER_PLAIN}       { return IDENTIFIER; }
 <YYINITIAL>      "@\""                    { yybegin(ID_QUOT); }
 <ID_QUOT>        {string_char}*"\""       { yybegin(YYINITIAL); return IDENTIFIER; }
+<ID_QUOT>        <<EOF>>                  { yybegin(YYINITIAL); return BAD_DQUOT; }
 <ID_QUOT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
 
 <YYINITIAL>      {BUILTINIDENTIFIER}      { return BUILTINIDENTIFIER; }
 
-<UNT_SQUOT>       [^\n]*{CRLF}             { yybegin(YYINITIAL); return BAD_SQUOT; }
-<UNT_DQUOT>       [^\n]*{CRLF}             { yybegin(YYINITIAL); return BAD_DQUOT; }
+<UNT_SQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_SQUOT; }
+<UNT_SQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_SQUOT; }
+<UNT_SQUOT>       [^\n]*                  { }
+<UNT_DQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_DQUOT; }
+<UNT_DQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_DQUOT; }
+<UNT_DQUOT>       [^\n]*                  { }
 
 <YYINITIAL>      {WHITE_SPACE}            { return WHITE_SPACE; }
 

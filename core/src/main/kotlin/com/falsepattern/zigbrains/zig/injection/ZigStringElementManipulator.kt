@@ -59,10 +59,9 @@ class ZigStringElementManipulator: AbstractElementManipulator<ZigStringLiteral>(
         val stringLiteral = dummy
             .firstChild
             .let {it as ZigContainerMembers}
-            .containerDeclarationsList
+            .containerDeclarationList
             .first()
-            .declList
-            .first()
+            .decl!!
             .globalVarDecl!!
             .expr
             .let { it as ZigPrimaryTypeExpr }

@@ -17,6 +17,14 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [20.1.1]
+
+### Fixed
+
+- Zig
+  - Unterminated string at the end of the file soft-locks the editor
+  - Trailing commas in for loop parameters don't get parsed correctly
+
 ## [20.1.0]
 
 ### Added
