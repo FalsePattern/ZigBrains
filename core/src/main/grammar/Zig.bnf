@@ -416,14 +416,21 @@ WhilePrefix ::= KEYWORD_WHILE ZB_WhilePrefix_Operand PtrPayload? WhileContinueEx
 
 private ZB_WhilePrefix_Operand ::= LPAREN Expr RPAREN {pin=1}
 
-ForRange ::= Expr DOT2 Expr?
-ForOperand ::= ForRange | Expr {recoverWhile="ZB_ForOperand_Recover"}
+ForPrefix ::= KEYWORD_FOR LPAREN ZB_ForParams RPAREN ForPayload {pin=1}
 
-private ZB_ForOperand_Recover ::= !(COMMA | RPAREN)
+private ZB_ForParams ::= ForInput (COMMA ForInput)* COMMA? {recoverWhile="ZB_ForParams_Recover"}
 
-ForPrefix ::= KEYWORD_FOR ZB_ForPrefix_Operands PtrIndexPayload {pin=1}
+private ZB_ForParams_Recover ::= !(RPAREN)
 
-private ZB_ForPrefix_Operands ::= LPAREN (ForOperand COMMA)* ForOperand RPAREN {pin=1}
+ForInput ::= Expr (DOT2 Expr?)? {recoverWhile="ZB_ForInput_Recover"}
+
+private ZB_ForInput_Recover ::= !(COMMA | RPAREN)
+
+ForPayload ::= PIPE ZB_ForPayload_Item (COMMA ZB_ForPayload_Item)* PIPE {pin=1}
+
+private ZB_ForPayload_Item ::= ASTERISK? IDENTIFIER {recoverWhile="ZB_ForPayload_Recover"}
+
+private ZB_ForPayload_Recover ::= !(COMMA | PIPE)
 
 // Payloads
 Payload ::= PIPE IDENTIFIER PIPE
