@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Unterminated string at the end of the file soft-locks the editor
+
 ## [20.1.0]
 
 ### Added
