@@ -36,7 +36,7 @@ abstract class ZigTopLevelLineMarker: RunLineMarkerContributor() {
 
         var nestingLevel = 0;
         while (parent != null && parent !is PsiFile) {
-            if (parent.elementType == ZigTypes.CONTAINER_DECLARATIONS) {
+            if (parent.elementType == ZigTypes.CONTAINER_DECLARATION) {
                 if (nestingLevel != 0)
                     return null
                 nestingLevel++

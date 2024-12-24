@@ -180,11 +180,11 @@
 Root ::= CONTAINER_DOC_COMMENT? ContainerMembers?
 
 // *** Top level ***
-ContainerMembers ::= ContainerDeclarations? (ContainerField COMMA)* (ContainerField | ContainerDeclarations)?
+ContainerMembers ::= ContainerDeclaration* (ContainerField COMMA)* (ContainerField | ContainerDeclaration*)
 
-ContainerDeclarations ::= (TestDecl | ComptimeDecl | DOC_COMMENT? KEYWORD_PUB? Decl)+
+ContainerDeclaration ::= TestDecl | ComptimeDecl | DOC_COMMENT? KEYWORD_PUB? Decl
 
-TestDecl ::= DOC_COMMENT? KEYWORD_TEST (STRING_LITERAL_SINGLE | IDENTIFIER)? Block {pin=2}
+TestDecl ::= KEYWORD_TEST (STRING_LITERAL_SINGLE | IDENTIFIER)? Block {pin=1}
 
 ComptimeDecl ::= KEYWORD_COMPTIME Block
 
@@ -205,6 +205,7 @@ ContainerField ::= DOC_COMMENT? KEYWORD_COMPTIME? !KEYWORD_FN (IDENTIFIER COLON)
 Statement
 ::= KEYWORD_COMPTIME ComptimeStatement
   | KEYWORD_NOSUSPEND BlockExprStatement
+  | KEYWORD_SUSPEND BlockExprStatement
   | KEYWORD_DEFER BlockExprStatement
   | KEYWORD_ERRDEFER Payload? BlockExprStatement
   | IfStatement
