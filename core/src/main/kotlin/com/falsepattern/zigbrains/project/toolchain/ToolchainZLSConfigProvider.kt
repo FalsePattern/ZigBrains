@@ -30,7 +30,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.util.io.toNioPathOrNull
-import kotlin.io.path.notExists
 import kotlin.io.path.pathString
 
 class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
@@ -49,7 +48,7 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
             ).notify(project)
             return previous
         }
-        if (exe.notExists()) {
+        if (!exe.toFile().exists()) {
             Notification(
                 "zigbrains-lsp",
                 "Zig executable does not exiust: $exe",

@@ -55,7 +55,6 @@ import java.net.URL
 import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.name
-import kotlin.io.path.notExists
 
 @Service
 class ZigDebuggerToolchainService {
@@ -80,7 +79,7 @@ class ZigDebuggerToolchainService {
         val lldbPath = lldbPath()
         val frameworkFile = lldbPath.resolve(frameworkPath)
         val frontendFile = lldbPath.resolve(frontendPath)
-        if (frameworkFile.notExists() || frontendFile.notExists()) return DebuggerAvailability.NeedToDownload
+        if (!frameworkFile.toFile().exists() || !frontendFile.toFile().exists()) return DebuggerAvailability.NeedToDownload
 
         val versions = loadDebuggerVersions(DebuggerKind.LLDB)
         val (lldbFrameworkUrl, lldbFrontendUrl) = lldbUrls() ?: return DebuggerAvailability.Unavailable
@@ -105,7 +104,7 @@ class ZigDebuggerToolchainService {
         }
 
         val gdbFile = gdbPath().resolve(gdbBinaryPath)
-        if (gdbFile.notExists()) return DebuggerAvailability.NeedToDownload
+        if (!gdbFile.toFile().exists()) return DebuggerAvailability.NeedToDownload
 
         val versions = loadDebuggerVersions(DebuggerKind.GDB)
         val gdbUrl = gdbUrl() ?: return DebuggerAvailability.Unavailable
@@ -123,7 +122,7 @@ class ZigDebuggerToolchainService {
         val msvcBinaryPath = "vsdbg.exe"
 
         val msvcFile = msvcPath().resolve(msvcBinaryPath)
-        if (msvcFile.notExists()) return DebuggerAvailability.NeedToDownload
+        if (!msvcFile.toFile().exists()) return DebuggerAvailability.NeedToDownload
 
         val msvcUrl = msvcUrl() ?: return DebuggerAvailability.Binaries(MSVCBinaries(msvcFile))
 

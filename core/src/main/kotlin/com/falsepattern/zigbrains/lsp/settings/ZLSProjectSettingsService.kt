@@ -37,7 +37,6 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
-import kotlin.io.path.notExists
 
 @Service(Service.Level.PROJECT)
 @State(
@@ -108,7 +107,7 @@ private suspend fun doValidate(project: Project, state: ZLSSettings): Boolean {
             }
         }
     }
-    if (zlsPath.notExists()) {
+    if (!zlsPath.toFile().exists()) {
         return false
     }
     if (!zlsPath.isRegularFile() || !zlsPath.isExecutable()) {

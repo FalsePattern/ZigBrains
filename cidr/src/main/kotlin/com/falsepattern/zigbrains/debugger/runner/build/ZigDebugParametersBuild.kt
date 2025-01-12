@@ -43,7 +43,6 @@ import java.nio.file.Path
 import java.util.stream.Stream
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
-import kotlin.io.path.notExists
 
 class ZigDebugParametersBuild(
     driverConfiguration: DebuggerDriverConfiguration,
@@ -73,7 +72,7 @@ class ZigDebugParametersBuild(
                         fail("debug.build.compile.failed.no-workdir")
                     }
                     val expectedOutputDir = workingDir.resolve(Path.of("zig-out", "bin"))
-                    if (expectedOutputDir.notExists()) {
+                    if (!expectedOutputDir.toFile().exists()) {
                         fail("debug.build.compile.failed.autodetect")
                     }
 
@@ -82,7 +81,7 @@ class ZigDebugParametersBuild(
                     }
                 }
 
-                if (exe.notExists())
+                if (!exe.toFile().exists())
                     fail("debug.build.compile.failed.no-file", exe)
                 else if (!exe.isExecutable())
                     fail("debug.build.compile.failed.non-exec-file", exe)
