@@ -51,8 +51,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
-import kotlin.io.path.exists
-import kotlin.io.path.notExists
 import kotlin.io.path.pathString
 
 class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
@@ -160,7 +158,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
         delay(200)
         val toolchain = pathToToolchain?.let { LocalZigToolchain(it) }
         val zig = toolchain?.zig
-        if (zig?.path()?.exists() != true) {
+        if (zig?.path()?.toFile()?.exists() != true) {
             toolchainVersion.text = ""
 
             if (!stdFieldOverride.isSelected) {

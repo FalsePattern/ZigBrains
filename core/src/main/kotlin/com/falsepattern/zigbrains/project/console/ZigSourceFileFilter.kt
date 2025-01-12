@@ -33,7 +33,6 @@ import com.intellij.openapi.vfs.toNioPathOrNull
 import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import kotlin.io.path.isRegularFile
-import kotlin.io.path.notExists
 import kotlin.math.max
 
 
@@ -62,9 +61,11 @@ class ZigSourceFileFilter(private val project: Project): Filter {
             try {
                 val pathStr = line.substring(i, end)
                 var path: Path = pathStr.toNioPathOrNull() ?: continue
-                if ((path.notExists() || !path.isRegularFile()) && projectPath != null) {
+                var file = path.toFile()
+                if ((!file.exists() || !path.isRegularFile()) && projectPath != null) {
                     path = projectPath.resolve(pathStr)
-                    if (path.notExists() || !path.isRegularFile())
+                    file = path.toFile()
+                    if (!file.exists() || !path.isRegularFile())
                         continue
                 }
                 longest = path

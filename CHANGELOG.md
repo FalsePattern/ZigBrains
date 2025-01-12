@@ -17,6 +17,10 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig source file path highlighter made the terminal lag with some files
+
 ## [20.1.1]
 
 ### Fixed
