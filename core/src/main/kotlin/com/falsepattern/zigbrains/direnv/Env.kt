@@ -41,7 +41,7 @@ data class Env(val env: Map<String, String>) {
         val paths = path ?: return null
         for (dir in paths) {
             val path = dir.toNioPathOrNull()?.absolute() ?: continue
-            if (path.notExists() || !path.isDirectory())
+            if (!path.toFile().exists() || !path.isDirectory())
                 continue
             val exePath = path.resolve(exeName).absolute()
             if (!exePath.isRegularFile() || !exePath.isExecutable())

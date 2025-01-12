@@ -27,25 +27,23 @@ import com.intellij.execution.filters.Filter.ResultItem
 import com.intellij.execution.filters.OpenFileHyperlinkInfo
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.refreshAndFindVirtualFile
 import com.intellij.openapi.vfs.toNioPathOrNull
+import java.io.File
 import java.nio.file.InvalidPathException
 import java.nio.file.Path
-import kotlin.io.path.isRegularFile
-import kotlin.io.path.notExists
 import kotlin.math.max
 
 
 class ZigSourceFileFilter(private val project: Project): Filter {
+    private val projectPath = runCatching { project.guessProjectDir()?.toNioPathOrNull()?.toFile() }.getOrNull()
     override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
         val lineStart = entireLength - line.length
-        val projectPath = project.guessProjectDir()?.toNioPathOrNull()
         val results = ArrayList<ResultItem>()
         val matcher = LEN_REGEX.findAll(line)
         for (match in matcher) {
             val start = match.range.first
-            val pair = findLongestParsablePathFromOffset(line, start, projectPath)
+            val pair = findLongestParsablePathFromOffset(line, start)
             val path = pair?.first ?: return null
             val file = path.refreshAndFindVirtualFile() ?: return null
             val lineNumber = max(match.groups[1]!!.value.toInt() - 1, 0)
@@ -55,25 +53,29 @@ class ZigSourceFileFilter(private val project: Project): Filter {
         return Filter.Result(results)
     }
 
-    private fun findLongestParsablePathFromOffset(line: String, end: Int, projectPath: Path?): Pair<Path, Int>? {
+    private fun findLongestParsablePathFromOffset(line: String, end: Int): Pair<Path, Int>? {
         var longestStart = -1
-        var longest: Path? = null
+        var longest: File? = null
         for (i in end - 1 downTo 0) {
             try {
                 val pathStr = line.substring(i, end)
-                var path: Path = pathStr.toNioPathOrNull() ?: continue
-                if ((path.notExists() || !path.isRegularFile()) && projectPath != null) {
-                    path = projectPath.resolve(pathStr)
-                    if (path.notExists() || !path.isRegularFile())
+                var file = File(pathStr)
+                if (!file.isFile) {
+                    if (projectPath == null) {
                         continue
+                    }
+                    file = projectPath.resolve(pathStr)
+                    if (!file.isFile) {
+                        continue
+                    }
                 }
-                longest = path
+                longest = file
                 longestStart = i
             } catch (ignored: InvalidPathException) {
             }
         }
         longest ?: return null
-        return Pair(longest, longestStart)
+        return Pair(longest.toPath(), longestStart)
     }
 }
 

@@ -48,7 +48,6 @@ import org.eclipse.lsp4j.services.LanguageServer
 import java.nio.file.Path
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
-import kotlin.io.path.notExists
 import kotlin.io.path.pathString
 
 class ZLSStreamConnectionProvider private constructor(private val project: Project, commandLine: GeneralCommandLine?) : OSProcessStreamConnectionProvider(commandLine) {
@@ -106,7 +105,7 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
                     }
                 }
             }
-            if (zlsPath.notExists()) {
+            if (!zlsPath.toFile().exists()) {
                 Notification(
                     "zigbrains-lsp",
                     ZLSBundle.message("notification.message.zls-exe-not-exists.content", zlsPath),
@@ -125,7 +124,7 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
             val configPath: Path? = state.zlsConfigPath.let { configPath ->
                 if (configPath.isNotBlank()) {
                     configPath.toNioPathOrNull()?.let { nioPath ->
-                        if (nioPath.notExists()) {
+                        if (!nioPath.toFile().exists()) {
                             Notification(
                                 "zigbrains-lsp",
                                 ZLSBundle.message("notification.message.zls-config-not-exists.content", nioPath),
