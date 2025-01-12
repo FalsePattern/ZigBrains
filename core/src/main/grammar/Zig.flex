@@ -246,10 +246,10 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 <UNT_SQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_SQUOT; }
 <UNT_SQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_SQUOT; }
-<UNT_SQUOT>       [^\n]*                  { }
+<UNT_SQUOT>       [^\n]+                  { }
 <UNT_DQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_DQUOT; }
 <UNT_DQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_DQUOT; }
-<UNT_DQUOT>       [^\n]*                  { }
+<UNT_DQUOT>       [^\n]+                  { }
 
 <YYINITIAL>      {WHITE_SPACE}            { return WHITE_SPACE; }
 

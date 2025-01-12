@@ -19,7 +19,9 @@ Changelog structure reference:
 
 ### Fixed
 
-- Zig source file path highlighter made the terminal lag with some files
+- Zig
+  - Source file path highlighter made the terminal lag with some files
+  - Non-terminating rule in lexer could make the editor hang
 
 ## [20.1.1]
 
