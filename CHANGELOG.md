@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - Zig Build tool window crashes when opening remote projects
+
 ## [20.1.2]
 
 ### Fixed

@@ -22,15 +22,15 @@
 
 package com.falsepattern.zigbrains.project.steps.ui
 
-import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
-import com.intellij.platform.ide.progress.ModalTaskOwner
+import kotlinx.coroutines.launch
 
 class BuildToolWindowFactory: ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        runModalOrBlocking({ModalTaskOwner.project(project)}, {"BuildToolWindowFactory.createToolWindowContent"}) {
+        project.zigCoroutineScope.launch {
             BuildToolWindowContext.create(project, toolWindow)
         }
     }
