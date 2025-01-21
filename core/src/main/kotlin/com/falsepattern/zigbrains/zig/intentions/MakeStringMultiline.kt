@@ -38,7 +38,7 @@ class MakeStringMultiline: PsiElementBaseIntentionAction() {
     override fun getFamilyName() = ZigBrainsBundle.message("intention.family.name.make-string-multiline")
 
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement) =
-        editor != null && element.parentOfType<ZigStringLiteral>()?.isMultiline?.not() ?: false
+        editor != null && element.parentOfType<ZigStringLiteral>()?.isMultiline?.not() == true
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
         editor ?: return

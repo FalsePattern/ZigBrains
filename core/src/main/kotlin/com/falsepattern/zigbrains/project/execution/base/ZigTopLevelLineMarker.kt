@@ -34,7 +34,7 @@ abstract class ZigTopLevelLineMarker: RunLineMarkerContributor() {
     private fun getParentIfTopLevel(element: PsiElement): PsiElement? {
         var parent = getDeclaration(element)
 
-        var nestingLevel = 0;
+        var nestingLevel = 0
         while (parent != null && parent !is PsiFile) {
             if (parent.elementType == ZigTypes.CONTAINER_DECLARATION) {
                 if (nestingLevel != 0)
@@ -54,7 +54,7 @@ abstract class ZigTopLevelLineMarker: RunLineMarkerContributor() {
 
     override fun getInfo(element: PsiElement): Info? {
         if (!elementMatches(element))
-            return null;
+            return null
         val actions = ExecutorAction.getActions(0)
         return Info(getIcon(element), actions, null)
     }

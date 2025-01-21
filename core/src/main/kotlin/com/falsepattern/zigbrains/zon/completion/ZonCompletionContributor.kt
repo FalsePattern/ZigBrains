@@ -133,7 +133,7 @@ private fun doAddCompletions(
 
 private val ZonProperty.isDependency: Boolean
     get() {
-        return parentOfType<ZonEntry>()?.isDependency ?: false
+        return parentOfType<ZonEntry>()?.isDependency == true
     }
 
 private val ZonEntry.isDependency: Boolean

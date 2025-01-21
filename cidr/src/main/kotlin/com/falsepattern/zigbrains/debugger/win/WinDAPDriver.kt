@@ -38,6 +38,7 @@ import org.eclipse.lsp4j.jsonrpc.MessageConsumer
 import org.eclipse.lsp4j.jsonrpc.debug.messages.DebugResponseMessage
 import org.eclipse.lsp4j.jsonrpc.messages.Message
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
+import java.io.InputStream
 import java.lang.RuntimeException
 import java.security.MessageDigest
 import java.util.Base64
@@ -73,7 +74,7 @@ class WinDAPDriver(handler: Handler) : DAPDriver<IDebugProtocolServer, WinDAPDri
         handshakeFinished.acquire()
     }
 
-    inner class WinDAPDebuggerClient: DAPDriver<IDebugProtocolServer, WinDAPDriver.WinDAPDebuggerClient>.DAPDebuggerClient() {
+    inner class WinDAPDebuggerClient: DAPDriver<IDebugProtocolServer, WinDAPDebuggerClient>.DAPDebuggerClient() {
         override fun output(args: OutputEventArguments) {
             if ("telemetry" == args.category)
                 return
@@ -92,7 +93,7 @@ class WinDAPDriver(handler: Handler) : DAPDriver<IDebugProtocolServer, WinDAPDri
             val hasher = MessageDigest.getInstance("SHA-256")
             hasher.update(handshake.value.encodeToByteArray())
             val inflater = Inflater(true)
-            val coconut = DAPDebuggerClient::class.java.getResourceAsStream("/coconut.jpg").use { it.readAllBytes() } ?: throw RuntimeException("No coconut")
+            val coconut = DAPDebuggerClient::class.java.getResourceAsStream("/coconut.jpg")?.use(InputStream::readAllBytes) ?: throw RuntimeException("No coconut")
             inflater.setInput(coconut, coconut.size - 80, 77)
             inflater.finished()
             val b = ByteArray(1)

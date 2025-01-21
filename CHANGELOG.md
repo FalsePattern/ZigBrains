@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [20.2.0]
+
+### Added
+
+- Zig
+  - Live template support
+
 ## [20.1.3]
 
 ### Added

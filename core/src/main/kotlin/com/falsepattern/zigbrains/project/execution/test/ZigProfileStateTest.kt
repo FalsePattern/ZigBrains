@@ -25,5 +25,4 @@ package com.falsepattern.zigbrains.project.execution.test
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.intellij.execution.runners.ExecutionEnvironment
 
-class ZigProfileStateTest(environment: ExecutionEnvironment, configuration: ZigExecConfigTest) : ZigProfileState<ZigExecConfigTest>(environment, configuration) {
-}
+class ZigProfileStateTest(environment: ExecutionEnvironment, configuration: ZigExecConfigTest) : ZigProfileState<ZigExecConfigTest>(environment, configuration)

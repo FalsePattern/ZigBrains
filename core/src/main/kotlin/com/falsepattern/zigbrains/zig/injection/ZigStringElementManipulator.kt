@@ -41,7 +41,7 @@ class ZigStringElementManipulator: AbstractElementManipulator<ZigStringLiteral>(
         val originalContext = element.text!!
         val isMultiline = element.isMultiline
         @NonNls
-        val prefix = "const x = \n";
+        val prefix = "const x = \n"
         val suffix = "\n;"
         val sbFactory: (Int) -> StringBuilder = {
             val sb = StringBuilder(prefix.length + suffix.length + it)

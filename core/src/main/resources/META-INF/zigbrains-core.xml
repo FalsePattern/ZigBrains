@@ -170,6 +170,11 @@
                 icon="/icons/zig_build_tool.svg"
                 id="zigbrains.build"
         />
+
+        <liveTemplateContext
+                contextId="ZIG"
+                implementation="com.falsepattern.zigbrains.zig.codeInsight.ZigContext"
+        />
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">

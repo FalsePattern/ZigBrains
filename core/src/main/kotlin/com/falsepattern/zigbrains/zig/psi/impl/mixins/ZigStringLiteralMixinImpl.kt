@@ -67,7 +67,7 @@ abstract class ZigStringLiteralMixinImpl(node: ASTNode): ASTWrapperPsiElement(no
                 val text = myHost.text.also { _text = it }
                 val isMultiline = myHost.isMultiline
                 val contentRanges = myHost.contentRanges.also { _contentRanges = it }
-                var decoded = false;
+                var decoded = false
                 for (range in contentRanges) {
                     val intersection = range.intersection(rangeInsideHost) ?: continue
                     decoded = true
