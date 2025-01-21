@@ -82,10 +82,10 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
 
     override fun getConfigurables(): List<ZigConfigurable<*>> {
         val baseCfg = super.getConfigurables() + listOf(buildSteps, extraArgs, colored)
-        if (ZBFeatures.debug()) {
-            return baseCfg + listOf(exePath, exeArgs)
+        return if (ZBFeatures.debug()) {
+            baseCfg + listOf(exePath, exeArgs)
         } else {
-            return baseCfg
+            baseCfg
         }
     }
 

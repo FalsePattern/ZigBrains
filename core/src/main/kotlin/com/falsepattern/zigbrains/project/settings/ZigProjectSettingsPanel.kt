@@ -27,7 +27,6 @@ import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
-import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory

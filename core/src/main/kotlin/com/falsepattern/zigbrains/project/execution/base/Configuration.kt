@@ -224,7 +224,7 @@ class FilePathConfigurable(
     }
 }
 
-class CheckboxConfigurable(
+open class CheckboxConfigurable(
     @Transient private val serializedName: String,
     @Transient @Nls private val label: String,
     var value: Boolean
@@ -274,10 +274,17 @@ class CheckboxConfigurable(
     }
 }
 
-fun ColoredConfigurable(serializedName: String) = CheckboxConfigurable(serializedName, ZigBrainsBundle.message("exec.option.label.colored-terminal"), true)
+class ColoredConfigurable(serializedName: String): CheckboxConfigurable(serializedName, ZigBrainsBundle.message("exec.option.label.colored-terminal"), true) {
+    override fun clone(): ColoredConfigurable {
+        return super.clone() as ColoredConfigurable
+    }
+}
 
-fun DirenvConfigurable(serializedName: String, project: Project) =
-    CheckboxConfigurable(serializedName, ZigBrainsBundle.message("exec.option.label.direnv"), project.zigProjectSettings.state.direnv)
+class DirenvConfigurable(serializedName: String, project: Project): CheckboxConfigurable(serializedName, ZigBrainsBundle.message("exec.option.label.direnv"), project.zigProjectSettings.state.direnv) {
+    override fun clone(): DirenvConfigurable {
+        return super.clone() as DirenvConfigurable
+    }
+}
 
 class OptimizationConfigurable(
     @Transient private val serializedName: String,

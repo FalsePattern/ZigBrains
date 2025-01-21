@@ -48,17 +48,17 @@ class ZigProcessHandler : KillableColoredProcessHandler, ColoredTextAcceptor {
 
 private val VT100_CHARS = CharArray(256).apply {
     this.fill(' ')
-    this[0x6A] = '┘';
-    this[0x6B] = '┐';
-    this[0x6C] = '┌';
-    this[0x6D] = '└';
-    this[0x6E] = '┼';
-    this[0x71] = '─';
-    this[0x74] = '├';
-    this[0x75] = '┤';
-    this[0x76] = '┴';
-    this[0x77] = '┬';
-    this[0x78] = '│';
+    this[0x6A] = '┘'
+    this[0x6B] = '┐'
+    this[0x6C] = '┌'
+    this[0x6D] = '└'
+    this[0x6E] = '┼'
+    this[0x71] = '─'
+    this[0x74] = '├'
+    this[0x75] = '┤'
+    this[0x76] = '┴'
+    this[0x77] = '┬'
+    this[0x78] = '│'
 }
 
 private const val VT100_BEGIN_SEQ = "\u001B(0"

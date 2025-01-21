@@ -28,9 +28,6 @@ interface ZigStepDiscoveryListener {
     suspend fun errorReload(type: ErrorType, details: String?) {}
     suspend fun timeoutReload(seconds: Int) {}
 
-    companion object {
-    }
-
     enum class ErrorType {
         MissingToolchain,
         MissingBuildZig,

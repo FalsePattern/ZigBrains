@@ -25,5 +25,4 @@ package com.falsepattern.zigbrains.project.execution.build
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.intellij.execution.runners.ExecutionEnvironment
 
-class ZigProfileStateBuild(environment: ExecutionEnvironment, configuration: ZigExecConfigBuild) : ZigProfileState<ZigExecConfigBuild>(environment, configuration) {
-}
+class ZigProfileStateBuild(environment: ExecutionEnvironment, configuration: ZigExecConfigBuild) : ZigProfileState<ZigExecConfigBuild>(environment, configuration)

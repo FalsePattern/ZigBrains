@@ -41,7 +41,7 @@ class MakeStringQuoted: PsiElementBaseIntentionAction() {
     override fun getFamilyName() = ZigBrainsBundle.message("intention.family.name.make-string-quoted")
 
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement) =
-        editor != null && element.parentOfType<ZigStringLiteral>()?.isMultiline ?: false
+        editor != null && element.parentOfType<ZigStringLiteral>()?.isMultiline == true
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
         editor ?: return
