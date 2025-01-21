@@ -25,7 +25,6 @@ package com.falsepattern.zigbrains.project.run
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
-import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.RunProfileState

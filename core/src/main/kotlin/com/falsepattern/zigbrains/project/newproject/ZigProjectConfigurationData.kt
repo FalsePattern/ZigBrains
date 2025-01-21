@@ -28,13 +28,11 @@ import com.falsepattern.zigbrains.project.settings.ZigProjectSettings
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.template.ZigInitTemplate
 import com.falsepattern.zigbrains.project.template.ZigProjectTemplate
-import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.GitRepositoryInitializer
 import com.intellij.openapi.application.writeAction
-import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
@@ -42,11 +40,7 @@ import com.intellij.openapi.vfs.toNioPathOrNull
 import com.intellij.platform.util.progress.reportProgress
 import com.intellij.util.ResourceUtil
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
-import com.intellij.util.concurrency.annotations.RequiresEdt
-import com.intellij.util.concurrency.annotations.RequiresWriteLock
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @JvmRecord
 data class ZigProjectConfigurationData(
@@ -141,7 +135,7 @@ private suspend fun createGitIgnoreFile(project: Project, projectDir: VirtualFil
     writeAction {
         ZigProjectConfigurationData::class.java.getResourceAsStream("/fileTemplates/internal/gitignore")?.use {
             val file = projectDir.createChildData(requestor, ".gitignore")
-            file.setCharset(Charsets.UTF_8)
+            file.charset = Charsets.UTF_8
             file.setBinaryContent(it.readAllBytes())
         }
     }

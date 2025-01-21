@@ -65,10 +65,10 @@ object DirenvCmd {
                 return emptyEnv
             }
         }
-        if (runOutput.output.isBlank()) {
-            return emptyEnv
+        return if (runOutput.output.isBlank()) {
+            emptyEnv
         } else {
-            return Env(Json.decodeFromString<Map<String, String>>(runOutput.output))
+            Env(Json.decodeFromString<Map<String, String>>(runOutput.output))
         }
     }
 

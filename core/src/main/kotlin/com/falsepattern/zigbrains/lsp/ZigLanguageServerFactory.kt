@@ -72,7 +72,7 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
     }
 
     override fun isEnabled(project: Project): Boolean {
-        return (project.getUserData(ENABLED_KEY) ?: true) && project.zlsSettings.validate()
+        return (project.getUserData(ENABLED_KEY) != false) && project.zlsSettings.validate()
     }
 
     override fun setEnabled(enabled: Boolean, project: Project) {

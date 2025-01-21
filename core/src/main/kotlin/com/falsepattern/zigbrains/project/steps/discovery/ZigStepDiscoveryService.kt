@@ -44,7 +44,7 @@ class ZigStepDiscoveryService(private val project: Project) {
     private val reloading = AtomicBoolean(false)
     private val reloadScheduled = AtomicBoolean(false)
     private val reloadMutex = Mutex()
-    private var CURRENT_TIMEOUT_SEC = DEFAULT_TIMEOUT_SEC
+    private var currentTimeoutSec = DEFAULT_TIMEOUT_SEC
     private val listeners = ArrayList<ZigStepDiscoveryListener>()
     private val listenerMutex = Mutex()
 
@@ -83,10 +83,10 @@ class ZigStepDiscoveryService(private val project: Project) {
         val result = zig.callWithArgs(
             project.guessProjectDir()?.toNioPathOrNull(),
             "build", "-l",
-            timeoutMillis = CURRENT_TIMEOUT_SEC * 1000L
+            timeoutMillis = currentTimeoutSec * 1000L
         )
         if (result.checkSuccess(LOG)) {
-            CURRENT_TIMEOUT_SEC = DEFAULT_TIMEOUT_SEC
+            currentTimeoutSec = DEFAULT_TIMEOUT_SEC
             val lines = result.stdoutLines
             val steps = ArrayList<Pair<String, String?>>()
             for (line in lines) {
@@ -99,8 +99,8 @@ class ZigStepDiscoveryService(private val project: Project) {
             }
             postReload(steps)
         } else if (result.isTimeout) {
-            timeoutReload(CURRENT_TIMEOUT_SEC)
-            CURRENT_TIMEOUT_SEC *= 2
+            timeoutReload(currentTimeoutSec)
+            currentTimeoutSec *= 2
         } else if (result.stderrLines.any { it.contains("error: no build.zig file found, in the current directory or any parent directories") }) {
             errorReload(ErrorType.MissingBuildZig, result.stderr)
         } else {
