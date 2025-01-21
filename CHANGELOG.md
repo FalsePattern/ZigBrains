@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [20.2.1]
+
+### Fixed
+
+- Zig
+  - Lexer error when a zig file has a comment or multiline string at the end of file without trailing newline
+
 ## [20.2.0]
 
 ### Added
