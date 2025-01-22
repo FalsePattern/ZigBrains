@@ -48,10 +48,9 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
     override suspend fun buildCommandLineArgs(debug: Boolean): List<String> {
         val result = ArrayList<String>()
         result.add("build")
-        val steps = buildSteps.args
-        if (debug) {
+        val steps = if (debug) {
             val truncatedSteps = ArrayList<String>()
-            for (step in steps) {
+            for (step in buildSteps.args) {
                 if (step == "run")
                     continue
 
@@ -60,7 +59,8 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
 
                 truncatedSteps.add(step)
             }
-        }
+            truncatedSteps
+        } else buildSteps.args
         result.addAll(steps)
         result.addAll(coloredCliFlags(colored.value, debug))
         result.addAll(extraArgs.args)
