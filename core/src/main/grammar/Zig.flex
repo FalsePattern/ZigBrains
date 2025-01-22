@@ -59,7 +59,7 @@ string_char= \\ .
            | [^\"\n]
 
 all_nl_wrap=[^\n]* [ \n]*
-all_nl_nowrap=[^\n]* \n
+all_no_nl=[^\n]+
 
 
 FLOAT= "0x" {hex_int} "." {hex_int} ([pP] [-+]? {dec_int})?
@@ -92,15 +92,21 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 <YYINITIAL>      "//!"                    { yybegin(CDOC_CMT); }
 <CDOC_CMT>       {all_nl_wrap} "//!"      { }
-<CDOC_CMT>       {all_nl_nowrap}          { yybegin(YYINITIAL); return CONTAINER_DOC_COMMENT; }
+<CDOC_CMT>       {all_no_nl}          { }
+<CDOC_CMT>       \n                       { yybegin(YYINITIAL); return CONTAINER_DOC_COMMENT; }
+<CDOC_CMT>       <<EOF>>                  { yybegin(YYINITIAL); return CONTAINER_DOC_COMMENT; }
 
 <YYINITIAL>      "///"                    { yybegin(DOC_CMT); }
 <DOC_CMT>        {all_nl_wrap} "///"      { }
-<DOC_CMT>        {all_nl_nowrap}          { yybegin(YYINITIAL); return DOC_COMMENT; }
+<DOC_CMT>        {all_no_nl}          { }
+<DOC_CMT>        \n                       { yybegin(YYINITIAL); return DOC_COMMENT; }
+<DOC_CMT>        <<EOF>>                  { yybegin(YYINITIAL); return DOC_COMMENT; }
 
 <YYINITIAL>      "//"                     { yybegin(LINE_CMT); }
 <LINE_CMT>       {all_nl_wrap} "//"       { }
-<LINE_CMT>       {all_nl_nowrap}          { yybegin(YYINITIAL); return LINE_COMMENT; }
+<LINE_CMT>       {all_no_nl}          { }
+<LINE_CMT>       \n                       { yybegin(YYINITIAL); return LINE_COMMENT; }
+<LINE_CMT>       <<EOF>>                  { yybegin(YYINITIAL); return LINE_COMMENT; }
 
 //Symbols
 <YYINITIAL>      "&"                      { return AMPERSAND; }
@@ -234,7 +240,9 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
 <YYINITIAL>      "\\\\"                   { yybegin(STR_MULT_LINE); }
 <STR_MULT_LINE>  {all_nl_wrap} "\\\\"     { }
-<STR_MULT_LINE>  {all_nl_nowrap}          { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
+<STR_MULT_LINE>  {all_no_nl}          { }
+<STR_MULT_LINE>  \n                       { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
+<STR_MULT_LINE>  <<EOF>>                  { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
 
 <YYINITIAL>      {IDENTIFIER_PLAIN}       { return IDENTIFIER; }
 <YYINITIAL>      "@\""                    { yybegin(ID_QUOT); }
@@ -246,10 +254,10 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 <UNT_SQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_SQUOT; }
 <UNT_SQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_SQUOT; }
-<UNT_SQUOT>       [^\n]+                  { }
+<UNT_SQUOT>       {all_no_nl}             { }
 <UNT_DQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_DQUOT; }
 <UNT_DQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_DQUOT; }
-<UNT_DQUOT>       [^\n]+                  { }
+<UNT_DQUOT>       {all_no_nl}             { }
 
 <YYINITIAL>      {WHITE_SPACE}            { return WHITE_SPACE; }
 
