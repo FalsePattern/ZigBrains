@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [20.2.2]
+
 ### Fixed
 
 - Debugging
