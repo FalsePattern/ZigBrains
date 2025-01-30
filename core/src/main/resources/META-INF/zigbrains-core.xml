@@ -54,6 +54,11 @@
         <languageInjectionPerformer
                 language="Zig"
                 implementationClass="com.falsepattern.zigbrains.zig.injection.ZigLanguageInjectionPerformer"/>
+
+        <!--suppress PluginXmlValidity -->
+        <additionalTextAttributes
+                scheme="Darcula"
+                file="colors/ZigColorsConfiguration.xml"/>
     </extensions>
     <!-- endregion Zig -->
 
@@ -164,6 +169,7 @@
                 implementation="com.falsepattern.zigbrains.project.toolchain.stdlib.ZigLibraryRootProvider"
         />
 
+        <!--suppress PluginXmlValidity -->
         <toolWindow
                 factoryClass="com.falsepattern.zigbrains.project.steps.ui.BuildToolWindowFactory"
                 anchor="right"
@@ -178,6 +184,7 @@
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
+        <!--suppress PluginXmlValidity -->
         <zlsConfigProvider
                 implementation="com.falsepattern.zigbrains.project.toolchain.ToolchainZLSConfigProvider"
         />
