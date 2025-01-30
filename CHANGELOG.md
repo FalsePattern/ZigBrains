@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Debugging
+  - `zig build run` would run the process twice, one without, one with debugging
+
 ## [20.2.1]
 
 ### Fixed
