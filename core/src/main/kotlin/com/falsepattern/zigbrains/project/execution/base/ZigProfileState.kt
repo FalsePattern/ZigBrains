@@ -65,9 +65,9 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
         // TODO remove this check once JetBrains implements colored terminal in the debugger
         // https://youtrack.jetbrains.com/issue/CPP-11622/ANSI-color-codes-not-honored-in-Debug-Run-Configuration-output-window
         val cli = if (configuration.emulateTerminal() && !debug) PtyCommandLine().withConsoleMode(true).withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE) else GeneralCommandLine()
-        cli.exePath = zigExePath.pathString
+        cli.withExePath(zigExePath.pathString)
         workingDir.path?.let { cli.withWorkDirectory(it.toFile()) }
-        cli.charset = Charsets.UTF_8
+        cli.withCharset(Charsets.UTF_8)
         cli.addParameters(configuration.buildCommandLineArgs(debug))
         return configuration.patchCommandLine(cli)
     }

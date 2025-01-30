@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+<list>
+    <option name="ZIG_TYPE">
+        <value>
+            <option name="FOREGROUND" value="B5B6E3"/>
+        </value>
+    </option>
+    <option name="ZIG_TYPE_DECL">
+        <value>
+            <option name="FOREGROUND" value="B5B6E3"/>
+        </value>
+    </option>
+    <option name="ZIG_VARIABLE">
+        <value>
+            <option name="FOREGROUND" value="FBB4B4"/>
+        </value>
+    </option>
+    <option name="ZIG_FUNCTION">
+        <value>
+            <option name="FOREGROUND" value="97F1FD"/>
+        </value>
+    </option>
+</list>

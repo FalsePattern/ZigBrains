@@ -953,7 +953,7 @@ abstract class DAPDriver<Server : IDebugProtocolServer, Client : IDebugProtocolC
 
         fun runInTerminalAsync(args: RunInTerminalRequestArguments): RunInTerminalResponse {
             val cli = PtyCommandLine(args.args.toList())
-            cli.charset = Charsets.UTF_8
+            cli.withCharset(Charsets.UTF_8)
             val cwd = args.cwd?.ifBlank { null }?.toNioPathOrNull()
             if (cwd != null) {
                 cli.withWorkDirectory(cwd.toFile())

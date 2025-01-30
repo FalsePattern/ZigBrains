@@ -62,7 +62,7 @@ abstract class ZigTool(val toolchain: AbstractZigToolchain) {
     ): GeneralCommandLine {
         val cli = GeneralCommandLine()
             .withExePath(toolchain.pathToExecutable(toolName).toString())
-            .withWorkDirectory(workingDirectory?.toString())
+            .withWorkDirectory(workingDirectory?.toFile())
             .withParameters(*parameters)
             .withCharset(Charsets.UTF_8)
         return toolchain.patchCommandLine(cli)
