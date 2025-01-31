@@ -20,8 +20,6 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("HardCodedStringLiteral")
-
 package com.falsepattern.zigbrains.zig.util
 
 import com.intellij.openapi.util.TextRange

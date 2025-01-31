@@ -230,7 +230,7 @@ class ZigDebuggerToolchainService {
             val binaryToDownload = binariesToDownload.first { it.url == downloadUrl }
             val propertyName = binaryToDownload.propertyName
             val archiveFile = result.first
-            Unarchiver.unarchive(archiveFile, downloadDir, binaryToDownload.prefix)
+            Unarchiver.unarchive(archiveFile.toPath(), baseDir, binaryToDownload.prefix)
             archiveFile.delete()
             versions[propertyName] = binaryToDownload.version
         }
@@ -333,23 +333,23 @@ class ZigDebuggerToolchainService {
     private enum class Unarchiver {
         ZIP {
             override val extension = "zip"
-            override fun createDecompressor(file: File) = Decompressor.Zip(file)
+            override fun createDecompressor(file: Path) = Decompressor.Zip(file)
         },
         TAR {
             override val extension = "tar.gz"
-            override fun createDecompressor(file: File) = Decompressor.Tar(file)
+            override fun createDecompressor(file: Path) = Decompressor.Tar(file)
         },
         VSIX {
             override val extension = "vsix"
-            override fun createDecompressor(file: File) = Decompressor.Zip(file)
+            override fun createDecompressor(file: Path) = Decompressor.Zip(file)
         };
 
         protected abstract val extension: String
-        protected abstract fun createDecompressor(file: File): Decompressor
+        protected abstract fun createDecompressor(file: Path): Decompressor
 
         companion object {
             @Throws(IOException::class)
-            suspend fun unarchive(archivePath: File, dst: File, prefix: String? = null) {
+            suspend fun unarchive(archivePath: Path, dst: Path, prefix: String? = null) {
                 runInterruptible {
                     val unarchiver = entries.find { archivePath.name.endsWith(it.extension) } ?: error("Unexpected archive type: $archivePath")
                     val dec = unarchiver.createDecompressor(archivePath)

@@ -93,7 +93,6 @@ class ZigColorSettingsPage: ColorSettingsPage {
         ADD_HIGHLIGHT
 }
 
-@Suppress("HardCodedStringLiteral")
 private val ADD_HIGHLIGHT = HashMap<String, TextAttributesKey>().apply {
     this["enum"] = ZigSyntaxHighlighter.ENUM_REF
     this["enum_decl"] = ZigSyntaxHighlighter.ENUM_DECL

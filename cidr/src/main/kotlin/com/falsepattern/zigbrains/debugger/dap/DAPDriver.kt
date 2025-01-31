@@ -213,7 +213,7 @@ abstract class DAPDriver<Server : IDebugProtocolServer, Client : IDebugProtocolC
         val cli = installer.install()
         val args = HashMap<String, Any>()
         args["program"] = Util.toWinPath(cli.exePath)
-        args["cmd"] = cli.workDirectory.toString()
+        args["cmd"] = cli.workingDirectory.toString()
         args["name"] = "CPP Debug"
         args["type"] = "cppvsdbg"
         args["request"] = "launch"
@@ -953,7 +953,7 @@ abstract class DAPDriver<Server : IDebugProtocolServer, Client : IDebugProtocolC
 
         fun runInTerminalAsync(args: RunInTerminalRequestArguments): RunInTerminalResponse {
             val cli = PtyCommandLine(args.args.toList())
-            cli.charset = Charsets.UTF_8
+            cli.withCharset(Charsets.UTF_8)
             val cwd = args.cwd?.ifBlank { null }?.toNioPathOrNull()
             if (cwd != null) {
                 cli.withWorkingDirectory(cwd)

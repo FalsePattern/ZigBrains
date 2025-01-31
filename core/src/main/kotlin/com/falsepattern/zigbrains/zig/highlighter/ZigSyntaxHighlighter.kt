@@ -102,7 +102,6 @@ class ZigSyntaxHighlighter: SyntaxHighlighterBase() {
                 *ZigTypes::class.java
                     .fields
                     .filter {
-                        @Suppress("HardCodedStringLiteral")
                         it.name.startsWith("KEYWORD_")
                     }
                     .map { it.get(null) as IElementType }
