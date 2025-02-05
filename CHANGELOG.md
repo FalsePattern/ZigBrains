@@ -17,6 +17,9 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+- Zig
+  - Improved default colors
+
 ## [20.2.2]
 
 ### Fixed

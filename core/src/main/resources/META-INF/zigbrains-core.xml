@@ -54,6 +54,11 @@
         <languageInjectionPerformer
                 language="Zig"
                 implementationClass="com.falsepattern.zigbrains.zig.injection.ZigLanguageInjectionPerformer"/>
+
+        <!--suppress PluginXmlValidity -->
+        <additionalTextAttributes
+                scheme="Darcula"
+                file="colors/ZigColorsConfiguration.xml"/>
     </extensions>
     <!-- endregion Zig -->
 
