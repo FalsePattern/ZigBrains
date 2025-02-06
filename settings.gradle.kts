@@ -4,4 +4,5 @@ plugins {
 rootProject.name = "ZigBrains"
 
 include("core")
+include("lsp")
 include("cidr")

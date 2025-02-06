@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -32,6 +32,7 @@ import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.util.io.toNioPathOrNull
 import kotlin.io.path.pathString
 
+
 class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
     override suspend fun getEnvironment(project: Project, previous: ZLSConfig): ZLSConfig {
         val svc = project.zigProjectSettings
@@ -39,6 +40,15 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
         val toolchain = state.toolchain ?: ZigToolchainProvider.suggestToolchain(project, UserDataHolderBase()) ?: return previous
 
         val env = toolchain.zig.getEnv(project)
+
+        if (env == null) {
+            Notification(
+                "zigbrains-lsp",
+                "Failed to evaluate zig env",
+                NotificationType.ERROR
+            ).notify(project)
+            return previous
+        }
 
         val exe = env.zigExecutable.toNioPathOrNull() ?: run {
             Notification(
@@ -51,7 +61,7 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
         if (!exe.toFile().exists()) {
             Notification(
                 "zigbrains-lsp",
-                "Zig executable does not exiust: $exe",
+                "Zig executable does not exist: $exe",
                 NotificationType.ERROR
             ).notify(project)
             return previous
@@ -80,6 +90,6 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
         if (lib == null)
             return previous
 
-        return previous.copy(zigExePath = exe.pathString, zigLibPath = lib.pathString)
+        return previous.copy(zig_exe_path = exe.pathString, zig_lib_path = lib.pathString)
     }
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -76,7 +76,7 @@ private fun getName(
     project: Project
 ): String {
     val tc = state.toolchain ?: return "Zig"
-    val version = runBlocking { tc.zig.getEnv(project).version }
+    val version = runBlocking { tc.zig.getEnv(project)?.version } ?: return "Zig"
     return "Zig $version"
 }
 
@@ -100,7 +100,7 @@ private fun getRoots(
         }
     }
     if (toolchain != null) {
-        val stdPath = runBlocking { toolchain.zig.getEnv(project) }.stdPath(toolchain, project) ?: return emptySet()
+        val stdPath = runBlocking { toolchain.zig.getEnv(project) }?.stdPath(toolchain, project) ?: return emptySet()
         val roots = stdPath.refreshAndFindVirtualDirectory() ?: return emptySet()
         return setOf(roots)
     }

@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -27,7 +27,7 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
 
-abstract class MultiConfigurable(private vararg val configurables: SubConfigurable): Configurable {
+abstract class MultiConfigurable(private val configurables: List<SubConfigurable>): Configurable {
     override fun createComponent(): JComponent? {
         return panel {
             for (configurable in configurables) {

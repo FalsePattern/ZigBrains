@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -51,28 +51,7 @@ import kotlin.io.path.isRegularFile
 import kotlin.io.path.pathString
 
 class ZLSStreamConnectionProvider private constructor(private val project: Project, commandLine: GeneralCommandLine?) : OSProcessStreamConnectionProvider(commandLine) {
-    override fun handleMessage(message: Message?, languageServer: LanguageServer?, rootUri: VirtualFile?) {
-        if (project.zlsSettings.state.inlayHintsCompact) {
-            if (message is ResponseMessage) {
-                val res = message.result
-                if (res is Collection<*>) {
-                    res.forEach { e ->
-                        if (e is InlayHint) {
-                            tryMutateInlayHint(e)
-                        }
-                    }
-                } else if (res is InlayHint) {
-                    tryMutateInlayHint(res)
-                }
-            }
-        }
-        super.handleMessage(message, languageServer, rootUri)
-    }
-
     companion object {
-        private val LOG = Logger.getInstance(ZLSStreamConnectionProvider::class.java)
-        private val ERROR_BLOCK = Regex("error\\{.*?}", RegexOption.DOT_MATCHES_ALL)
-
         suspend fun create(project: Project): ZLSStreamConnectionProvider {
             val projectDir = project.guessProjectDir()?.toNioPathOrNull()
             val commandLine = getCommand(project)?.let { GeneralCommandLine(it) }?.withWorkDirectory(projectDir?.toFile())
@@ -154,7 +133,7 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
                 }
             } ?: run {
                 val config = ZLSConfigProviderBase.findEnvironment(project)
-                if (config.zigExePath.isNullOrEmpty() || config.zigLibPath.isNullOrEmpty()) {
+                if (config.zig_exe_path.isNullOrEmpty() || config.zig_lib_path.isNullOrEmpty()) {
                     Notification(
                         "zigbrains-lsp",
                         ZLSBundle.message("notification.message.zls-config-autogen-failed.content"),
@@ -174,14 +153,6 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
                 cmd.add(configPath.pathString)
             }
 
-            if (state.debug) {
-                cmd.add("--enable-debug-log")
-            }
-
-            if (state.messageTrace) {
-                cmd.add("--enable-message-tracing")
-            }
-
             if (SystemInfo.isWindows) {
                 val sb: StringBuilder by lazy { StringBuilder() }
                 for (i in 0..<cmd.size) {
@@ -193,12 +164,6 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
                 }
             }
             return cmd
-        }
-
-        private fun tryMutateInlayHint(inlayHint: InlayHint) {
-            val str = inlayHint.label?.left ?: return
-            val shortened = ERROR_BLOCK.replace(str, "error{...}")
-            inlayHint.setLabel(shortened)
         }
     }
 }
