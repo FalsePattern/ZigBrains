@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -22,10 +22,7 @@
 
 package com.falsepattern.zigbrains.project.newproject
 
-import com.falsepattern.zigbrains.lsp.settings.ZLSSettings
-import com.falsepattern.zigbrains.lsp.settings.zlsSettings
-import com.falsepattern.zigbrains.project.settings.ZigProjectSettings
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.template.ZigInitTemplate
 import com.falsepattern.zigbrains.project.template.ZigProjectTemplate
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
@@ -45,21 +42,21 @@ import kotlinx.coroutines.launch
 @JvmRecord
 data class ZigProjectConfigurationData(
     val git: Boolean,
-    val projConf: ZigProjectSettings,
-    val zlsConf: ZLSSettings,
+    val conf: List<ZigProjectConfigurationProvider.Settings>,
     val selectedTemplate: ZigProjectTemplate
 ) {
     @RequiresBackgroundThread
     suspend fun generateProject(requestor: Any, project: Project, baseDir: VirtualFile, forceGitignore: Boolean): Boolean {
         return reportProgress { reporter ->
-            project.zigProjectSettings.loadState(projConf)
-            project.zlsSettings.loadState(zlsConf)
+            conf.forEach { it.apply(project) }
 
             val template = selectedTemplate
 
             if (!reporter.indeterminateStep("Initializing project") {
                 if (template is ZigInitTemplate) {
-                    val toolchain = projConf.toolchain ?: run {
+                    val toolchain = conf
+                        .mapNotNull { it as? ZigProjectConfigurationProvider.ToolchainProvider }
+                        .firstNotNullOfOrNull { it.toolchain } ?: run {
                         Notification(
                             "zigbrains",
                             "Tried to generate project with zig init, but zig toolchain is invalid",
@@ -77,12 +74,20 @@ data class ZigProjectConfigurationData(
                         return@indeterminateStep false
                     }
                     val result = zig.callWithArgs(workDir, "init")
+                    if (result == null) {
+                        Notification(
+                            "zigbrains",
+                            "\"zig init\" could not run because the zig executable was missing!",
+                            NotificationType.ERROR
+                        ).notify(project)
+                        return@indeterminateStep false
+                    }
                     if (result.exitCode != 0) {
                         Notification(
                             "zigbrains",
                             "\"zig init\" failed with exit code ${result.exitCode}! Check the IDE log files!",
                             NotificationType.ERROR
-                        )
+                        ).notify(project)
                         System.err.println(result.stderr)
                         return@indeterminateStep false
                     }

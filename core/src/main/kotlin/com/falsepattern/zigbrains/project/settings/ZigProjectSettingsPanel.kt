@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
-class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
+class ZigProjectSettingsPanel(private val project: Project) : ZigProjectConfigurationProvider.SettingsPanel {
     private val direnv = JBCheckBox(ZigBrainsBundle.message("settings.project.label.direnv")).apply { addActionListener {
         dispatchAutodetect(true)
     } }
@@ -98,7 +98,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
         if (!force && pathToToolchain.text.isNotBlank())
             return
         val data = UserDataHolderBase()
-        data.putUserData(LocalZigToolchain.DIRENV_KEY, DirenvCmd.direnvInstalled() && project?.isDefault == false && direnv.isSelected)
+        data.putUserData(LocalZigToolchain.DIRENV_KEY, !project.isDefault && direnv.isSelected && DirenvCmd.direnvInstalled())
         val tc = ZigToolchainProvider.suggestToolchain(project, data) ?: return
         if (tc !is LocalZigToolchain) {
             TODO("Implement non-local zig toolchain in config")
@@ -109,7 +109,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
         }
     }
 
-    var data
+    override var data
         get() = ZigProjectSettings(
             direnv.isSelected,
             stdFieldOverride.isSelected,
@@ -125,22 +125,30 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
             dispatchUpdateUI()
         }
 
-    fun attach(p: Panel): Unit = with(p) {
-        val project = project ?: ProjectManager.getInstance().defaultProject
+    override fun attach(p: Panel): Unit = with(p) {
         data = project.zigProjectSettings.state
-        group(ZigBrainsBundle.message("settings.project.group.title")) {
+        if (project.isDefault) {
             row(ZigBrainsBundle.message("settings.project.label.toolchain")) {
                 cell(pathToToolchain).resizableColumn().align(AlignX.FILL)
-                if (DirenvCmd.direnvInstalled() && !project.isDefault) {
-                    cell(direnv)
-                }
             }
             row(ZigBrainsBundle.message("settings.project.label.toolchain-version")) {
                 cell(toolchainVersion)
             }
-            row(ZigBrainsBundle.message("settings.project.label.std-location")) {
-                cell(pathToStd).resizableColumn().align(AlignX.FILL)
-                cell(stdFieldOverride)
+        } else {
+            group(ZigBrainsBundle.message("settings.project.group.title")) {
+                row(ZigBrainsBundle.message("settings.project.label.toolchain")) {
+                    cell(pathToToolchain).resizableColumn().align(AlignX.FILL)
+                    if (DirenvCmd.direnvInstalled()) {
+                        cell(direnv)
+                    }
+                }
+                row(ZigBrainsBundle.message("settings.project.label.toolchain-version")) {
+                    cell(toolchainVersion)
+                }
+                row(ZigBrainsBundle.message("settings.project.label.std-location")) {
+                    cell(pathToStd).resizableColumn().align(AlignX.FILL)
+                    cell(stdFieldOverride)
+                }
             }
         }
         dispatchAutodetect(false)
@@ -160,7 +168,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
         val toolchain = pathToToolchain?.let { LocalZigToolchain(it) }
         val zig = toolchain?.zig
         if (zig?.path()?.toFile()?.exists() != true) {
-            toolchainVersion.text = ""
+            toolchainVersion.text = "[zig binary not found]"
 
             if (!stdFieldOverride.isSelected) {
                 pathToStd.text = ""
@@ -168,6 +176,13 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
             return
         }
         val env = zig.getEnv(project)
+        if (env == null) {
+            toolchainVersion.text = "[failed to run zig env]"
+            if (!stdFieldOverride.isSelected) {
+                pathToStd.text = ""
+            }
+            return
+        }
         val version = env.version
         val stdPath = env.stdPath(toolchain, project)
         toolchainVersion.text = version

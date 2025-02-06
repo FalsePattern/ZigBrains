@@ -17,6 +17,26 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [21.0.0]
+
+### Added
+
+- Zig
+  - Changing the zig standard library path in the project settings now properly updates the dependency
+- ZLS
+  - All of the config options are now exposed in the GUI
+
+### Changed
+
+- Project
+  - New project panel is now much more compact
+
+### Fixed
+
+- Zig
+  - `zig env` failure causes an IDE error
+  - A local toolchain disappearing (std directory or zig exe deleted) is now handled properly
+
 ## [20.3.0]
 
 - Zig

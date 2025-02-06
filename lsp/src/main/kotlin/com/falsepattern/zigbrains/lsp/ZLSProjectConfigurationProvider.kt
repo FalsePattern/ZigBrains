@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -22,17 +22,26 @@
 
 package com.falsepattern.zigbrains.lsp
 
+import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsConfigurable
+import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsPanel
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
+import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.project.Project
-import com.intellij.util.messages.Topic
+import com.intellij.openapi.project.ProjectManager
 
-interface LanguageServerStarter {
-    fun startLSP(project: Project, restart: Boolean)
+class ZLSProjectConfigurationProvider: ZigProjectConfigurationProvider {
+    override fun handleMainConfigChanged(project: Project) {
+        startLSP(project, true)
+    }
+
+    override fun createConfigurable(project: Project): SubConfigurable {
+        return ZLSSettingsConfigurable(project)
+    }
+
+    override fun createNewProjectSettingsPanel(): ZigProjectConfigurationProvider.SettingsPanel {
+        return ZLSSettingsPanel(ProjectManager.getInstance().defaultProject)
+    }
+
+    override val priority: Int
+        get() = 1000
 }
-
-fun startLSP(project: Project, restart: Boolean) {
-    val publisher = project.messageBus.syncPublisher(LANGUAGE_SERVER_START_TOPIC)
-    publisher.startLSP(project, restart)
-}
-
-@Topic.ProjectLevel
-val LANGUAGE_SERVER_START_TOPIC = Topic.create("LanguageServerStarter", LanguageServerStarter::class.java)

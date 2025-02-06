@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -166,6 +166,7 @@ class BuildToolWindowContext(private val project: Project): Disposable {
             withEDTContext {
                 getViewport(project)?.setViewportError(ZigBrainsBundle.message(when(type) {
                     ZigStepDiscoveryListener.ErrorType.MissingToolchain -> "build.tool.window.status.error.missing-toolchain"
+                    ZigStepDiscoveryListener.ErrorType.MissingZigExe -> "build.tool.window.status.error.missing-zig-exe"
                     ZigStepDiscoveryListener.ErrorType.MissingBuildZig -> "build.tool.window.status.error.missing-build-zig"
                     ZigStepDiscoveryListener.ErrorType.GeneralError -> "build.tool.window.status.error.general"
                 }), details)

@@ -18,6 +18,11 @@
                 name="zlsConfigProvider"
         />
         <extensionPoint
+                interface="com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider"
+                dynamic="true"
+                name="projectConfigProvider"
+        />
+        <extensionPoint
                 interface="com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider"
                 dynamic="true"
                 name="toolchainProvider"

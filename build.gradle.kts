@@ -109,6 +109,7 @@ dependencies {
 
     runtimeOnly(project(":core"))
     runtimeOnly(project(":cidr"))
+    runtimeOnly(project(":lsp"))
 }
 
 intellijPlatform {

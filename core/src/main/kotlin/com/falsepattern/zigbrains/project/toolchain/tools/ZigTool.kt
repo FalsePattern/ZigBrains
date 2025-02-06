@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -31,12 +31,13 @@ import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.nio.file.Path
+import kotlin.io.path.isRegularFile
 
 abstract class ZigTool(val toolchain: AbstractZigToolchain) {
     abstract val toolName: String
 
-    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE): ProcessOutput {
-        val cli = createBaseCommandLine(workingDirectory, *parameters)
+    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE): ProcessOutput? {
+        val cli = createBaseCommandLine(workingDirectory, *parameters) ?: return null
 
         val (process, exitCode) = withContext(Dispatchers.IO) {
             val process = cli.createProcess()
@@ -59,9 +60,12 @@ abstract class ZigTool(val toolchain: AbstractZigToolchain) {
     private suspend fun createBaseCommandLine(
         workingDirectory: Path?,
         vararg parameters: String
-    ): GeneralCommandLine {
+    ): GeneralCommandLine? {
+        val exe = toolchain.pathToExecutable(toolName)
+        if (!exe.isRegularFile())
+            return null
         val cli = GeneralCommandLine()
-            .withExePath(toolchain.pathToExecutable(toolName).toString())
+            .withExePath(exe.toString())
             .withWorkingDirectory(workingDirectory)
             .withParameters(*parameters)
             .withCharset(Charsets.UTF_8)

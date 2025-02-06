@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -25,7 +25,6 @@ package com.falsepattern.zigbrains
 import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.direnv.getDirenv
-import com.falsepattern.zigbrains.lsp.settings.zlsSettings
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider
@@ -87,17 +86,6 @@ class ZBStartup: ProjectActivity {
             if (tc is LocalZigToolchain) {
                 zigProjectState.toolchainPath = tc.location.pathString
                 project.zigProjectSettings.state = zigProjectState
-            }
-        }
-        val zlsState = project.zlsSettings.state
-        if (zlsState.zlsPath.isBlank()) {
-            val env = if (DirenvCmd.direnvInstalled() && !project.isDefault && zlsState.direnv)
-                project.getDirenv()
-            else
-                emptyEnv
-            env.findExecutableOnPATH("zls")?.let {
-                zlsState.zlsPath = it.pathString
-                project.zlsSettings.state = zlsState
             }
         }
     }

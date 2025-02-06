@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -23,8 +23,10 @@
 package com.falsepattern.zigbrains.project.settings
 
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.util.xmlb.annotations.Transient
+import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString
 
 data class ZigProjectSettings(
@@ -32,11 +34,21 @@ data class ZigProjectSettings(
     var overrideStdPath: Boolean = false,
     var explicitPathToStd: String? = null,
     var toolchainPath: String? = null
-) {
+): ZigProjectConfigurationProvider.Settings, ZigProjectConfigurationProvider.ToolchainProvider {
+    override fun apply(project: Project) {
+        project.zigProjectSettings.loadState(this)
+    }
+
     @get:Transient
     @set:Transient
-    var toolchain: LocalZigToolchain?
-        get() = toolchainPath?.toNioPathOrNull()?.let { LocalZigToolchain(it) }
+    override var toolchain: LocalZigToolchain?
+        get() {
+            val nioPath = toolchainPath?.toNioPathOrNull() ?: return null
+            if (!nioPath.isDirectory()) {
+                return null
+            }
+            return LocalZigToolchain(nioPath)
+        }
         set(value) {
             toolchainPath = value?.location?.pathString
         }

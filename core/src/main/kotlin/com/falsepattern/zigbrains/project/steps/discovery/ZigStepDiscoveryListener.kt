@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -30,6 +30,7 @@ interface ZigStepDiscoveryListener {
 
     enum class ErrorType {
         MissingToolchain,
+        MissingZigExe,
         MissingBuildZig,
         GeneralError
     }

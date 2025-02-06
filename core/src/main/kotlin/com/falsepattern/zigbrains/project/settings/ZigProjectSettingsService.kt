@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -22,15 +22,18 @@
 
 package com.falsepattern.zigbrains.project.settings
 
+import com.falsepattern.zigbrains.project.toolchain.stdlib.ZigSyntheticLibrary
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
+import kotlinx.coroutines.launch
 
 @Service(Service.Level.PROJECT)
 @State(
     name = "ZigProjectSettings",
     storages = [Storage("zigbrains.xml")]
 )
-class ZigProjectSettingsService: PersistentStateComponent<ZigProjectSettings> {
+class ZigProjectSettingsService(val project: Project): PersistentStateComponent<ZigProjectSettings> {
     @Volatile
     private var state = ZigProjectSettings()
 
@@ -40,10 +43,13 @@ class ZigProjectSettingsService: PersistentStateComponent<ZigProjectSettings> {
 
     fun setState(value: ZigProjectSettings) {
         this.state = value
+        zigCoroutineScope.launch {
+            ZigSyntheticLibrary.reload(project, value)
+        }
     }
 
     override fun loadState(state: ZigProjectSettings) {
-        this.state = state
+        setState(state)
     }
 
     fun isModified(otherData: ZigProjectSettings): Boolean {

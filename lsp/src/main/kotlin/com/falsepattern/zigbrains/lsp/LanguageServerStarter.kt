@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -20,18 +20,19 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.config
+package com.falsepattern.zigbrains.lsp
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import org.jetbrains.annotations.NonNls
+import com.intellij.openapi.project.Project
+import com.intellij.util.messages.Topic
 
-@Serializable
-data class ZLSConfig(
-    @SerialName("zig_exe_path") val zigExePath: @NonNls String? = null,
-    @SerialName("zig_lib_path") val zigLibPath: @NonNls String? = null,
-    @SerialName("enable_build_on_save") val buildOnSave: Boolean? = null,
-    @SerialName("build_on_save_step") val buildOnSaveStep: @NonNls String? = null,
-    @SerialName("dangerous_comptime_experiments_do_not_enable") val comptimeInterpreter: Boolean? = null,
-    @SerialName("highlight_global_var_declarations") val globalVarDeclarations: Boolean? = null
-)
+interface LanguageServerStarter {
+    fun startLSP(project: Project, restart: Boolean)
+}
+
+fun startLSP(project: Project, restart: Boolean) {
+    val publisher = project.messageBus.syncPublisher(LANGUAGE_SERVER_START_TOPIC)
+    publisher.startLSP(project, restart)
+}
+
+@Topic.ProjectLevel
+val LANGUAGE_SERVER_START_TOPIC = Topic.create("LanguageServerStarter", LanguageServerStarter::class.java)

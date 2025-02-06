@@ -1,7 +1,7 @@
 /*
  * This file is part of ZigBrains.
  *
- * Copyright (C) 2023-2024 FalsePattern
+ * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
@@ -20,20 +20,24 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.settings
+package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.lsp.config.ZLSConfig
-import com.falsepattern.zigbrains.lsp.config.ZLSConfigProvider
+import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 
-class ZLSSettingsConfigProvider: ZLSConfigProvider {
-    override fun getEnvironment(project: Project, previous: ZLSConfig): ZLSConfig {
-        val state = project.zlsSettings.state
-        return previous.copy(
-            buildOnSave = state.buildOnSave,
-            buildOnSaveStep = state.buildOnSaveStep,
-            globalVarDeclarations = state.globalVarDeclarations,
-            comptimeInterpreter = state.comptimeInterpreter
-        )
+class ZigCoreProjectConfigurationProvider: ZigProjectConfigurationProvider {
+    override fun handleMainConfigChanged(project: Project) {
     }
+
+    override fun createConfigurable(project: Project): SubConfigurable {
+        return ZigProjectConfigurable(project)
+    }
+
+    override fun createNewProjectSettingsPanel(): ZigProjectConfigurationProvider.SettingsPanel {
+        return ZigProjectSettingsPanel(ProjectManager.getInstance().defaultProject)
+    }
+
+    override val priority: Int
+        get() = 0
 }
