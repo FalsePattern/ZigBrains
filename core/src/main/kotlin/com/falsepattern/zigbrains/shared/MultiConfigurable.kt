@@ -27,7 +27,7 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
 
-abstract class MultiConfigurable(private vararg val configurables: SubConfigurable): Configurable {
+abstract class MultiConfigurable(private val configurables: List<SubConfigurable>): Configurable {
     override fun createComponent(): JComponent? {
         return panel {
             for (configurable in configurables) {

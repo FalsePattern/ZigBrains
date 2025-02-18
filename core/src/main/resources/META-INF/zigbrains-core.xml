@@ -184,12 +184,11 @@
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
-        <!--suppress PluginXmlValidity -->
-        <zlsConfigProvider
-                implementation="com.falsepattern.zigbrains.project.toolchain.ToolchainZLSConfigProvider"
-        />
         <toolchainProvider
                 implementation="com.falsepattern.zigbrains.project.toolchain.LocalZigToolchainProvider"
+        />
+        <projectConfigProvider
+                implementation="com.falsepattern.zigbrains.project.settings.ZigCoreProjectConfigurationProvider"
         />
     </extensions>
 

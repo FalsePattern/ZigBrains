@@ -22,11 +22,10 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsConfigurable
 import com.falsepattern.zigbrains.shared.MultiConfigurable
 import com.intellij.openapi.project.Project
 
-class ZigConfigurable(project: Project): MultiConfigurable(ZigProjectConfigurable(project), ZLSSettingsConfigurable(project)) {
+class ZigConfigurable(project: Project): MultiConfigurable(ZigProjectConfigurationProvider.createConfigurables(project)) {
     override fun getDisplayName(): String {
         return "Zig"
     }

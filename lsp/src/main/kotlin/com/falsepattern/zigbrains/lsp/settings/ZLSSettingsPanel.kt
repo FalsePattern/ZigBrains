@@ -27,6 +27,7 @@ import com.falsepattern.zigbrains.direnv.Env
 import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.ZLSBundle
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
@@ -43,7 +44,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import kotlin.io.path.pathString
 
-class ZLSSettingsPanel(private val project: Project?) : Disposable {
+class ZLSSettingsPanel(private val project: Project?) : ZigProjectConfigurationProvider.SettingsPanel {
     private val zlsPath = textFieldWithBrowseButton(
         project,
         FileChooserDescriptorFactory.createSingleFileDescriptor().withTitle(ZLSBundle.message("settings.zls-path.browse.title")),
@@ -66,7 +67,7 @@ class ZLSSettingsPanel(private val project: Project?) : Disposable {
         dispatchAutodetect(true)
     } }
 
-    fun attach(panel: Panel) = with(panel) {
+    override fun attach(panel: Panel) = with(panel) {
         group(ZLSBundle.message("settings.group.title")) {
             row(ZLSBundle.message("settings.zls-path.label")) {
                 cell(zlsPath).resizableColumn().align(AlignX.FILL)
@@ -89,7 +90,7 @@ class ZLSSettingsPanel(private val project: Project?) : Disposable {
         dispatchAutodetect(false)
     }
 
-    var data
+    override var data
         get() = ZLSSettings(
             direnv.isSelected,
             zlsPath.text,

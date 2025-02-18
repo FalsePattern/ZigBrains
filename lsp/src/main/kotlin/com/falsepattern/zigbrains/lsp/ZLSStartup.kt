@@ -20,29 +20,28 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.settings
+package com.falsepattern.zigbrains.lsp
 
-import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
+import com.falsepattern.zigbrains.direnv.DirenvCmd
+import com.falsepattern.zigbrains.direnv.emptyEnv
+import com.falsepattern.zigbrains.direnv.getDirenv
+import com.falsepattern.zigbrains.lsp.settings.zlsSettings
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.toNioPathOrNull
-import com.intellij.util.xmlb.annotations.Transient
+import com.intellij.openapi.startup.ProjectActivity
 import kotlin.io.path.pathString
 
-data class ZigProjectSettings(
-    var direnv: Boolean = false,
-    var overrideStdPath: Boolean = false,
-    var explicitPathToStd: String? = null,
-    var toolchainPath: String? = null
-): ZigProjectConfigurationProvider.Settings, ZigProjectConfigurationProvider.ToolchainProvider {
-    override fun apply(project: Project) {
-        project.zigProjectSettings.loadState(this)
-    }
-
-    @get:Transient
-    @set:Transient
-    override var toolchain: LocalZigToolchain?
-        get() = toolchainPath?.toNioPathOrNull()?.let { LocalZigToolchain(it) }
-        set(value) {
-            toolchainPath = value?.location?.pathString
+class ZLSStartup: ProjectActivity {
+    override suspend fun execute(project: Project) {
+        val zlsState = project.zlsSettings.state
+        if (zlsState.zlsPath.isBlank()) {
+            val env = if (DirenvCmd.direnvInstalled() && !project.isDefault && zlsState.direnv)
+                project.getDirenv()
+            else
+                emptyEnv
+            env.findExecutableOnPATH("zls")?.let {
+                zlsState.zlsPath = it.pathString
+                project.zlsSettings.state = zlsState
+            }
         }
+    }
 }
