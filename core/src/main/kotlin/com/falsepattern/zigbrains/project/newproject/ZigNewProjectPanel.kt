@@ -22,8 +22,7 @@
 
 package com.falsepattern.zigbrains.project.newproject
 
-import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsPanel
-import com.falsepattern.zigbrains.project.settings.ZigProjectSettingsPanel
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.template.ZigExecutableTemplate
 import com.falsepattern.zigbrains.project.template.ZigInitTemplate
 import com.falsepattern.zigbrains.project.template.ZigLibraryTemplate
@@ -44,8 +43,7 @@ import javax.swing.ListSelectionModel
 
 class ZigNewProjectPanel(private var handleGit: Boolean): Disposable {
     private val git = JBCheckBox()
-    private val projConf = ZigProjectSettingsPanel(null).also { Disposer.register(this, it) }
-    private val zlsConf = ZLSSettingsPanel(null).also { Disposer.register(this, it) }
+    private val panels = ZigProjectConfigurationProvider.createNewProjectSettingsPanels().onEach { Disposer.register(this, it) }
     private val templateList = JBList(JBList.createDefaultListModel(defaultTemplates)).apply {
         selectionMode = ListSelectionModel.SINGLE_SELECTION
         selectedIndex = 0
@@ -68,7 +66,7 @@ class ZigNewProjectPanel(private var handleGit: Boolean): Disposable {
 
     fun getData(): ZigProjectConfigurationData {
         val selectedTemplate = templateList.selectedValue
-        return ZigProjectConfigurationData(handleGit && git.isSelected, projConf.data, zlsConf.data, selectedTemplate)
+        return ZigProjectConfigurationData(handleGit && git.isSelected, panels.map { it.data }, selectedTemplate)
     }
 
     fun attach(p: Panel): Unit = with(p) {
@@ -85,8 +83,7 @@ class ZigNewProjectPanel(private var handleGit: Boolean): Disposable {
                     .align(AlignY.FILL)
             }
         }
-        projConf.attach(p)
-        zlsConf.attach(p)
+        panels.forEach { it.attach(p) }
     }
 
     override fun dispose() {

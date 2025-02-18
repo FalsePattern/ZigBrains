@@ -20,20 +20,27 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.settings
+package com.falsepattern.zigbrains.lsp
 
-import org.jetbrains.annotations.NonNls
+import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsConfigurable
+import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsPanel
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
+import com.falsepattern.zigbrains.shared.SubConfigurable
+import com.intellij.openapi.project.Project
 
-data class ZLSSettings(
-    var direnv: Boolean = false,
-    var zlsPath: @NonNls String = "",
-    var zlsConfigPath: @NonNls String = "",
-    var debug: Boolean = false,
-    var messageTrace: Boolean = false,
-    var buildOnSave: Boolean = false,
-    var buildOnSaveStep: @NonNls String = "install",
-    var globalVarDeclarations: Boolean = false,
-    var comptimeInterpreter: Boolean = false,
-    var inlayHints: Boolean = true,
-    var inlayHintsCompact: Boolean = true
-)
+class ZLSProjectConfigurationProvider: ZigProjectConfigurationProvider {
+    override fun handleMainConfigChanged(project: Project) {
+        startLSP(project, true)
+    }
+
+    override fun createConfigurable(project: Project): SubConfigurable {
+        return ZLSSettingsConfigurable(project)
+    }
+
+    override fun createNewProjectSettingsPanel(): ZigProjectConfigurationProvider.SettingsPanel {
+        return ZLSSettingsPanel(null)
+    }
+
+    override val priority: Int
+        get() = 1000
+}

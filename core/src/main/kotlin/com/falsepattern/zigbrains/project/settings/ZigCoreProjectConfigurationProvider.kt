@@ -22,27 +22,21 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
+import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.toNioPathOrNull
-import com.intellij.util.xmlb.annotations.Transient
-import kotlin.io.path.pathString
 
-data class ZigProjectSettings(
-    var direnv: Boolean = false,
-    var overrideStdPath: Boolean = false,
-    var explicitPathToStd: String? = null,
-    var toolchainPath: String? = null
-): ZigProjectConfigurationProvider.Settings, ZigProjectConfigurationProvider.ToolchainProvider {
-    override fun apply(project: Project) {
-        project.zigProjectSettings.loadState(this)
+class ZigCoreProjectConfigurationProvider: ZigProjectConfigurationProvider {
+    override fun handleMainConfigChanged(project: Project) {
     }
 
-    @get:Transient
-    @set:Transient
-    override var toolchain: LocalZigToolchain?
-        get() = toolchainPath?.toNioPathOrNull()?.let { LocalZigToolchain(it) }
-        set(value) {
-            toolchainPath = value?.location?.pathString
-        }
+    override fun createConfigurable(project: Project): SubConfigurable {
+        return ZigProjectConfigurable(project)
+    }
+
+    override fun createNewProjectSettingsPanel(): ZigProjectConfigurationProvider.SettingsPanel {
+        return ZigProjectSettingsPanel(null)
+    }
+
+    override val priority: Int
+        get() = 0
 }

@@ -22,10 +22,7 @@
 
 package com.falsepattern.zigbrains.project.newproject
 
-import com.falsepattern.zigbrains.lsp.settings.ZLSSettings
-import com.falsepattern.zigbrains.lsp.settings.zlsSettings
-import com.falsepattern.zigbrains.project.settings.ZigProjectSettings
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.template.ZigInitTemplate
 import com.falsepattern.zigbrains.project.template.ZigProjectTemplate
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
@@ -45,21 +42,21 @@ import kotlinx.coroutines.launch
 @JvmRecord
 data class ZigProjectConfigurationData(
     val git: Boolean,
-    val projConf: ZigProjectSettings,
-    val zlsConf: ZLSSettings,
+    val conf: List<ZigProjectConfigurationProvider.Settings>,
     val selectedTemplate: ZigProjectTemplate
 ) {
     @RequiresBackgroundThread
     suspend fun generateProject(requestor: Any, project: Project, baseDir: VirtualFile, forceGitignore: Boolean): Boolean {
         return reportProgress { reporter ->
-            project.zigProjectSettings.loadState(projConf)
-            project.zlsSettings.loadState(zlsConf)
+            conf.forEach { it.apply(project) }
 
             val template = selectedTemplate
 
             if (!reporter.indeterminateStep("Initializing project") {
                 if (template is ZigInitTemplate) {
-                    val toolchain = projConf.toolchain ?: run {
+                    val toolchain = conf
+                        .mapNotNull { it as? ZigProjectConfigurationProvider.ToolchainProvider }
+                        .firstNotNullOfOrNull { it.toolchain } ?: run {
                         Notification(
                             "zigbrains",
                             "Tried to generate project with zig init, but zig toolchain is invalid",

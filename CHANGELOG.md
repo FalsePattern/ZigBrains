@@ -17,6 +17,9 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+- LSP
+  - LSP4IJ is no longer a hard dependency, ZLS support is now an optional feature.
+
 ## [20.3.0]
 
 - Zig

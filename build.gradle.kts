@@ -105,11 +105,12 @@ dependencies {
 
         pluginVerifier()
         zipSigner()
-        plugin(lsp4ijPluginString)
+//        plugin(lsp4ijPluginString)
     }
 
     runtimeOnly(project(":core"))
     runtimeOnly(project(":cidr"))
+    runtimeOnly(project(":lsp"))
 }
 
 intellijPlatform {

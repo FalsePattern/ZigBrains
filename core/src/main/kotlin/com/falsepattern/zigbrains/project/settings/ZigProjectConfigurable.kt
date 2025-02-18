@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.lsp.startLSP
 import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
@@ -45,7 +44,7 @@ class ZigProjectConfigurable(private val project: Project): SubConfigurable {
         val modified = service.isModified(data)
         service.state = data
         if (modified) {
-            startLSP(project, true)
+            ZigProjectConfigurationProvider.mainConfigChanged(project)
         }
     }
 

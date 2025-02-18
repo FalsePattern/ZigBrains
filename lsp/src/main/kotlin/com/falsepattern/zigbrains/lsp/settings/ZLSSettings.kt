@@ -20,29 +20,26 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.settings
+package com.falsepattern.zigbrains.lsp.settings
 
-import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.toNioPathOrNull
-import com.intellij.util.xmlb.annotations.Transient
-import kotlin.io.path.pathString
+import org.jetbrains.annotations.NonNls
 
-data class ZigProjectSettings(
+data class ZLSSettings(
     var direnv: Boolean = false,
-    var overrideStdPath: Boolean = false,
-    var explicitPathToStd: String? = null,
-    var toolchainPath: String? = null
-): ZigProjectConfigurationProvider.Settings, ZigProjectConfigurationProvider.ToolchainProvider {
+    var zlsPath: @NonNls String = "",
+    var zlsConfigPath: @NonNls String = "",
+    var debug: Boolean = false,
+    var messageTrace: Boolean = false,
+    var buildOnSave: Boolean = false,
+    var buildOnSaveStep: @NonNls String = "install",
+    var globalVarDeclarations: Boolean = false,
+    var comptimeInterpreter: Boolean = false,
+    var inlayHints: Boolean = true,
+    var inlayHintsCompact: Boolean = true
+): ZigProjectConfigurationProvider.Settings {
     override fun apply(project: Project) {
-        project.zigProjectSettings.loadState(this)
+        project.zlsSettings.loadState(this)
     }
-
-    @get:Transient
-    @set:Transient
-    override var toolchain: LocalZigToolchain?
-        get() = toolchainPath?.toNioPathOrNull()?.let { LocalZigToolchain(it) }
-        set(value) {
-            toolchainPath = value?.location?.pathString
-        }
 }

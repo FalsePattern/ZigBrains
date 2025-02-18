@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
-class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
+class ZigProjectSettingsPanel(private val project: Project?) : ZigProjectConfigurationProvider.SettingsPanel {
     private val direnv = JBCheckBox(ZigBrainsBundle.message("settings.project.label.direnv")).apply { addActionListener {
         dispatchAutodetect(true)
     } }
@@ -107,7 +107,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
         }
     }
 
-    var data
+    override var data
         get() = ZigProjectSettings(
             direnv.isSelected,
             stdFieldOverride.isSelected,
@@ -123,7 +123,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : Disposable {
             dispatchUpdateUI()
         }
 
-    fun attach(p: Panel): Unit = with(p) {
+    override fun attach(p: Panel): Unit = with(p) {
         val project = project ?: ProjectManager.getInstance().defaultProject
         data = project.zigProjectSettings.state
         group(ZigBrainsBundle.message("settings.project.group.title")) {
