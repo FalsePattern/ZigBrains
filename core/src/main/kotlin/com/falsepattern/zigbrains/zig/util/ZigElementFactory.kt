@@ -20,37 +20,27 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.execution.build
+package com.falsepattern.zigbrains.zig.util
 
-import com.falsepattern.zigbrains.project.execution.base.ZigTopLevelLineMarker
+import com.falsepattern.zigbrains.zig.ZigFileType
 import com.falsepattern.zigbrains.zig.psi.ZigTypes
-import com.intellij.icons.AllIcons.RunConfigurations.TestState
+import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.elementType
-import javax.swing.Icon
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.impl.source.tree.LeafElement
 
-class ZigLineMarkerBuild: ZigTopLevelLineMarker() {
-    override fun getDeclaration(element: PsiElement): PsiElement? {
-        if (element.elementType != ZigTypes.IDENTIFIER)
-            return null
-
-        if (!element.textMatches("build"))
-            return null
-
-        val parent = element.parent ?: return null
-        if (parent.elementType != ZigTypes.FN_DECL_PROTO)
-            return null
-
-        val file = element.containingFile ?: return null
-
-        val fileName = file.virtualFile.name
-        if (fileName != "build.zig")
-            return null
-
-        return parent.parent
+object ZigElementFactory {
+    private val LOG = Logger.getInstance(ZigElementFactory::class.java)
+    fun createZigFile(project: Project, text: CharSequence): PsiFile {
+        return PsiFileFactory.getInstance(project).createFileFromText("a.zig", ZigFileType, text)
     }
 
-    override fun getIcon(element: PsiElement): Icon {
-        return TestState.Run
+    fun createZigIdentifier(project: Project, name: String): PsiElement? {
+        val file = createZigFile(project, "const $name = undefined;")
+        val identifier = file.findElementAt("const ".length) ?: return null
+        LOG.assertTrue(identifier is LeafElement && identifier.elementType == ZigTypes.IDENTIFIER, name)
+        return identifier
     }
 }

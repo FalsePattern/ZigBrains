@@ -87,7 +87,7 @@ private fun getIndentBasedOnParentType(
 
     //Function declaration parameters
     if (parentType == PARAM_DECL_LIST ||
-        parentType == FN_PROTO && childType === PLACEHOLDER
+        parentType == FN_DECL_PROTO && childType === PLACEHOLDER
     )
         return normalIndent
 

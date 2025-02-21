@@ -20,31 +20,12 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.execution.run
+package com.falsepattern.zigbrains.zig.psi;
 
-import com.falsepattern.zigbrains.project.execution.base.ZigTopLevelLineMarker
-import com.falsepattern.zigbrains.zig.psi.ZigTypes
-import com.intellij.icons.AllIcons.RunConfigurations.TestState
-import com.intellij.psi.PsiElement
-import com.intellij.psi.util.elementType
-import javax.swing.Icon
+import com.falsepattern.zigbrains.zig.references.ZigType;
 
-class ZigLineMarkerRun: ZigTopLevelLineMarker() {
-    override fun getDeclaration(element: PsiElement): PsiElement? {
-        if (element.elementType != ZigTypes.IDENTIFIER)
-            return null
-
-        if (!element.textMatches("main"))
-            return null
-
-        val parent = element.parent
-        if (parent.elementType != ZigTypes.FN_DECL_PROTO)
-            return null
-
-        return parent.parent
-    }
-
-    override fun getIcon(element: PsiElement): Icon {
-        return TestState.Run
+public interface ZigTypedElement {
+    default ZigType getType() {
+        return ZigType.Generic;
     }
 }

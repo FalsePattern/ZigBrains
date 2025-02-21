@@ -20,31 +20,23 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.execution.run
+package com.falsepattern.zigbrains.zig.psi.impl.mixins
 
-import com.falsepattern.zigbrains.project.execution.base.ZigTopLevelLineMarker
-import com.falsepattern.zigbrains.zig.psi.ZigTypes
-import com.intellij.icons.AllIcons.RunConfigurations.TestState
-import com.intellij.psi.PsiElement
-import com.intellij.psi.util.elementType
-import javax.swing.Icon
+import com.falsepattern.zigbrains.zig.psi.ZigContainerField
+import com.falsepattern.zigbrains.zig.psi.ZigContainerMembers
+import com.intellij.extapi.psi.ASTWrapperPsiElement
+import com.intellij.lang.ASTNode
+import com.intellij.psi.util.childrenOfType
+import com.intellij.util.resettableLazy
 
-class ZigLineMarkerRun: ZigTopLevelLineMarker() {
-    override fun getDeclaration(element: PsiElement): PsiElement? {
-        if (element.elementType != ZigTypes.IDENTIFIER)
-            return null
-
-        if (!element.textMatches("main"))
-            return null
-
-        val parent = element.parent
-        if (parent.elementType != ZigTypes.FN_DECL_PROTO)
-            return null
-
-        return parent.parent
+abstract class ZigContainerMembersMixinImpl(node: ASTNode): ASTWrapperPsiElement(node), ZigContainerMembers {
+    private val _isNamespace = resettableLazy {
+        childrenOfType<ZigContainerField>().isEmpty()
     }
+    override val isNamespace by _isNamespace
 
-    override fun getIcon(element: PsiElement): Icon {
-        return TestState.Run
+    override fun subtreeChanged() {
+        super.subtreeChanged()
+        _isNamespace.reset()
     }
 }

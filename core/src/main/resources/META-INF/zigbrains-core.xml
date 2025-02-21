@@ -2,6 +2,7 @@
     <resource-bundle>zigbrains.Bundle</resource-bundle>
     <!-- region Zig -->
     <extensions defaultExtensionNs="com.intellij">
+        <!-- core -->
         <colorSettingsPage
                 implementation="com.falsepattern.zigbrains.zig.highlighter.ZigColorSettingsPage"/>
         <fileType
@@ -28,6 +29,14 @@
         <lang.syntaxHighlighterFactory
                 language="Zig"
                 implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>
+        <lang.namesValidator
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.renaming.ZigNamesValidator"/>
+        <elementDescriptionProvider
+                implementation="com.falsepattern.zigbrains.zig.renaming.ZigElementDescriptionProvider"/>
+        <annotator
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSemanticHighlighter"/>
 
         <!-- String manipulation -->
         <enterHandlerDelegate
