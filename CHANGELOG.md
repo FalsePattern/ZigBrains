@@ -27,6 +27,11 @@ Changelog structure reference:
 - Project
   - New project panel is now much more compact
 
+### Fixed
+
+- Zig
+  - `zig env` failure causes an IDE error
+
 ## [20.3.0]
 
 - Zig

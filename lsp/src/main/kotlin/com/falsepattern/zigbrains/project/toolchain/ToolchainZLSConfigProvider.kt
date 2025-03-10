@@ -41,6 +41,15 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
 
         val env = toolchain.zig.getEnv(project)
 
+        if (env == null) {
+            Notification(
+                "zigbrains-lsp",
+                "Failed to evaluate zig env",
+                NotificationType.ERROR
+            ).notify(project)
+            return previous
+        }
+
         val exe = env.zigExecutable.toNioPathOrNull() ?: run {
             Notification(
                 "zigbrains-lsp",
@@ -52,7 +61,7 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
         if (!exe.toFile().exists()) {
             Notification(
                 "zigbrains-lsp",
-                "Zig executable does not exiust: $exe",
+                "Zig executable does not exist: $exe",
                 NotificationType.ERROR
             ).notify(project)
             return previous

@@ -25,6 +25,7 @@ package com.falsepattern.zigbrains.project.toolchain.tools
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainEnvironmentSerializable
 import com.intellij.openapi.project.Project
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.nio.file.Path
 
@@ -36,8 +37,13 @@ class ZigCompilerTool(toolchain: AbstractZigToolchain) : ZigTool(toolchain) {
         return toolchain.pathToExecutable(toolName)
     }
 
-    suspend fun getEnv(project: Project?): ZigToolchainEnvironmentSerializable {
-        return envJson.decodeFromString<ZigToolchainEnvironmentSerializable>(callWithArgs(toolchain.workingDirectory(project), "env").stdout)
+    suspend fun getEnv(project: Project?): ZigToolchainEnvironmentSerializable? {
+        val stdout = callWithArgs(toolchain.workingDirectory(project), "env").stdout
+        return try {
+            envJson.decodeFromString<ZigToolchainEnvironmentSerializable>(stdout)
+        } catch (e: SerializationException) {
+            null
+        }
     }
 }
 

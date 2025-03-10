@@ -166,7 +166,7 @@ class ZigProjectSettingsPanel(private val project: Project) : ZigProjectConfigur
         val toolchain = pathToToolchain?.let { LocalZigToolchain(it) }
         val zig = toolchain?.zig
         if (zig?.path()?.toFile()?.exists() != true) {
-            toolchainVersion.text = ""
+            toolchainVersion.text = "[zig binary not found]"
 
             if (!stdFieldOverride.isSelected) {
                 pathToStd.text = ""
@@ -174,6 +174,13 @@ class ZigProjectSettingsPanel(private val project: Project) : ZigProjectConfigur
             return
         }
         val env = zig.getEnv(project)
+        if (env == null) {
+            toolchainVersion.text = "[failed to run zig env]"
+            if (!stdFieldOverride.isSelected) {
+                pathToStd.text = ""
+            }
+            return
+        }
         val version = env.version
         val stdPath = env.stdPath(toolchain, project)
         toolchainVersion.text = version
