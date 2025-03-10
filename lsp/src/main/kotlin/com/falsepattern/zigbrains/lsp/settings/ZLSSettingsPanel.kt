@@ -54,12 +54,12 @@ import kotlin.io.path.pathString
 class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationProvider.SettingsPanel {
     private val zlsPath = textFieldWithBrowseButton(
         project,
-        FileChooserDescriptorFactory.createSingleFileDescriptor()
+        FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor()
             .withTitle(ZLSBundle.message("settings.zls-path.browse.title")),
     ).also { Disposer.register(this, it) }
     private val zlsConfigPath = textFieldWithBrowseButton(
         project,
-        FileChooserDescriptorFactory.createSingleFileDescriptor()
+        FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor()
             .withTitle(ZLSBundle.message("settings.zls-config-path.browse.title"))
     ).also { Disposer.register(this, it) }
 

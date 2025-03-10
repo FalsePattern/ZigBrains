@@ -202,7 +202,7 @@ class FilePathConfigurable(
 
     class FilePathConfigModule(private val serializedName: String, @Nls private val label: String) : PathConfigModule<FilePathConfigurable>() {
         private val field = TextFieldWithBrowseButton(
-            TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFileDescriptor()),
+            TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor()),
             this
         )
 
