@@ -19,6 +19,8 @@ Changelog structure reference:
 
 ### Added
 
+- Zig
+  - Changing the zig standard library path in the project settings now properly updates the dependency
 - ZLS
   - All of the config options are now exposed in the GUI
 
