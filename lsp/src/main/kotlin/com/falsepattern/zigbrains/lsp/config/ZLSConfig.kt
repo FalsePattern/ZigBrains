@@ -26,12 +26,35 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.annotations.NonNls
 
+@Suppress("PropertyName")
 @Serializable
 data class ZLSConfig(
-    @SerialName("zig_exe_path") val zigExePath: @NonNls String? = null,
-    @SerialName("zig_lib_path") val zigLibPath: @NonNls String? = null,
-    @SerialName("enable_build_on_save") val buildOnSave: Boolean? = null,
-    @SerialName("build_on_save_step") val buildOnSaveStep: @NonNls String? = null,
-    @SerialName("dangerous_comptime_experiments_do_not_enable") val comptimeInterpreter: Boolean? = null,
-    @SerialName("highlight_global_var_declarations") val globalVarDeclarations: Boolean? = null
+    val enable_snippets: Boolean = true,
+    val enable_argument_placeholders: Boolean = true,
+    val completion_label_details: Boolean = true,
+    val enable_build_on_save: Boolean? = null,
+    val build_on_save_args: List<String> = emptyList(),
+    val semantic_tokens: SemanticTokens = SemanticTokens.full,
+    val inlay_hints_show_variable_type_hints: Boolean = true,
+    val inlay_hints_show_struct_literal_field_type: Boolean = true,
+    val inlay_hints_show_parameter_name: Boolean = true,
+    val inlay_hints_show_builtin: Boolean = true,
+    val inlay_hints_exclude_single_argument: Boolean = true,
+    val inlay_hints_hide_redundant_param_names: Boolean = false,
+    val inlay_hints_hide_redundant_param_names_last_token: Boolean = false,
+    val force_autofix: Boolean = false,
+    val warn_style: Boolean = false,
+    val highlight_global_var_declarations: Boolean = false,
+    val skip_std_references: Boolean = false,
+    val prefer_ast_check_as_child_process: Boolean = true,
+    val builtin_path: String? = null,
+    val zig_lib_path: @NonNls String? = null,
+    val zig_exe_path: @NonNls String? = null,
+    val build_runner_path: @NonNls String? = null,
+    val global_cache_path: @NonNls String? = null,
 )
+enum class SemanticTokens {
+    none,
+    partial,
+    full,
+}

@@ -17,6 +17,16 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- ZLS
+  - All of the config options are now exposed in the GUI
+
+### Changed
+
+- Project
+  - New project panel is now much more compact
+
 ## [20.3.0]
 
 - Zig

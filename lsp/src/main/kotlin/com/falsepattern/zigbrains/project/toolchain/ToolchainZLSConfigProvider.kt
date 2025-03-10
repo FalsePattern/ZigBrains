@@ -81,6 +81,6 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
         if (lib == null)
             return previous
 
-        return previous.copy(zigExePath = exe.pathString, zigLibPath = lib.pathString)
+        return previous.copy(zig_exe_path = exe.pathString, zig_lib_path = lib.pathString)
     }
 }

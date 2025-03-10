@@ -30,10 +30,26 @@ class ZLSSettingsConfigProvider: ZLSConfigProvider {
     override fun getEnvironment(project: Project, previous: ZLSConfig): ZLSConfig {
         val state = project.zlsSettings.state
         return previous.copy(
-            buildOnSave = state.buildOnSave,
-            buildOnSaveStep = state.buildOnSaveStep,
-            globalVarDeclarations = state.globalVarDeclarations,
-            comptimeInterpreter = state.comptimeInterpreter
+            enable_snippets = state.enable_snippets,
+            enable_argument_placeholders = state.enable_argument_placeholders,
+            completion_label_details = state.completion_label_details,
+            enable_build_on_save = state.enable_build_on_save,
+            build_on_save_args = state.build_on_save_args,
+            semantic_tokens = state.semantic_tokens,
+            inlay_hints_show_variable_type_hints = state.inlay_hints_show_variable_type_hints,
+            inlay_hints_show_struct_literal_field_type = state.inlay_hints_show_struct_literal_field_type,
+            inlay_hints_show_parameter_name = state.inlay_hints_show_parameter_name,
+            inlay_hints_show_builtin = state.inlay_hints_show_builtin,
+            inlay_hints_exclude_single_argument = state.inlay_hints_exclude_single_argument,
+            inlay_hints_hide_redundant_param_names = state.inlay_hints_hide_redundant_param_names,
+            inlay_hints_hide_redundant_param_names_last_token = state.inlay_hints_hide_redundant_param_names_last_token,
+            warn_style = state.warn_style,
+            highlight_global_var_declarations = state.highlight_global_var_declarations,
+            skip_std_references = state.skip_std_references,
+            prefer_ast_check_as_child_process = state.prefer_ast_check_as_child_process,
+            builtin_path = state.builtin_path,
+            build_runner_path = state.build_runner_path,
+            global_cache_path = state.global_cache_path,
         )
     }
 }

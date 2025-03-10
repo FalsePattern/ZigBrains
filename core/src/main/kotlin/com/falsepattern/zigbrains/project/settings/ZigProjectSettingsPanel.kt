@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
-class ZigProjectSettingsPanel(private val project: Project?) : ZigProjectConfigurationProvider.SettingsPanel {
+class ZigProjectSettingsPanel(private val project: Project) : ZigProjectConfigurationProvider.SettingsPanel {
     private val direnv = JBCheckBox(ZigBrainsBundle.message("settings.project.label.direnv")).apply { addActionListener {
         dispatchAutodetect(true)
     } }
@@ -96,7 +96,7 @@ class ZigProjectSettingsPanel(private val project: Project?) : ZigProjectConfigu
         if (!force && pathToToolchain.text.isNotBlank())
             return
         val data = UserDataHolderBase()
-        data.putUserData(LocalZigToolchain.DIRENV_KEY, DirenvCmd.direnvInstalled() && project?.isDefault == false && direnv.isSelected)
+        data.putUserData(LocalZigToolchain.DIRENV_KEY, !project.isDefault && direnv.isSelected && DirenvCmd.direnvInstalled())
         val tc = ZigToolchainProvider.suggestToolchain(project, data) ?: return
         if (tc !is LocalZigToolchain) {
             TODO("Implement non-local zig toolchain in config")
@@ -124,21 +124,29 @@ class ZigProjectSettingsPanel(private val project: Project?) : ZigProjectConfigu
         }
 
     override fun attach(p: Panel): Unit = with(p) {
-        val project = project ?: ProjectManager.getInstance().defaultProject
         data = project.zigProjectSettings.state
-        group(ZigBrainsBundle.message("settings.project.group.title")) {
+        if (project.isDefault) {
             row(ZigBrainsBundle.message("settings.project.label.toolchain")) {
                 cell(pathToToolchain).resizableColumn().align(AlignX.FILL)
-                if (DirenvCmd.direnvInstalled() && !project.isDefault) {
-                    cell(direnv)
-                }
             }
             row(ZigBrainsBundle.message("settings.project.label.toolchain-version")) {
                 cell(toolchainVersion)
             }
-            row(ZigBrainsBundle.message("settings.project.label.std-location")) {
-                cell(pathToStd).resizableColumn().align(AlignX.FILL)
-                cell(stdFieldOverride)
+        } else {
+            group(ZigBrainsBundle.message("settings.project.group.title")) {
+                row(ZigBrainsBundle.message("settings.project.label.toolchain")) {
+                    cell(pathToToolchain).resizableColumn().align(AlignX.FILL)
+                    if (DirenvCmd.direnvInstalled()) {
+                        cell(direnv)
+                    }
+                }
+                row(ZigBrainsBundle.message("settings.project.label.toolchain-version")) {
+                    cell(toolchainVersion)
+                }
+                row(ZigBrainsBundle.message("settings.project.label.std-location")) {
+                    cell(pathToStd).resizableColumn().align(AlignX.FILL)
+                    cell(stdFieldOverride)
+                }
             }
         }
         dispatchAutodetect(false)

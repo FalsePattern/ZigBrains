@@ -27,6 +27,7 @@ import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsPanel
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 
 class ZLSProjectConfigurationProvider: ZigProjectConfigurationProvider {
     override fun handleMainConfigChanged(project: Project) {
@@ -38,7 +39,7 @@ class ZLSProjectConfigurationProvider: ZigProjectConfigurationProvider {
     }
 
     override fun createNewProjectSettingsPanel(): ZigProjectConfigurationProvider.SettingsPanel {
-        return ZLSSettingsPanel(null)
+        return ZLSSettingsPanel(ProjectManager.getInstance().defaultProject)
     }
 
     override val priority: Int
