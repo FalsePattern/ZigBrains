@@ -85,7 +85,9 @@ class ZigStepDiscoveryService(private val project: Project) {
             "build", "-l",
             timeoutMillis = currentTimeoutSec * 1000L
         )
-        if (result.checkSuccess(LOG)) {
+        if (result == null) {
+            errorReload(ErrorType.MissingZigExe)
+        } else if (result.checkSuccess(LOG)) {
             currentTimeoutSec = DEFAULT_TIMEOUT_SEC
             val lines = result.stdoutLines
             val steps = ArrayList<Pair<String, String?>>()

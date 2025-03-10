@@ -38,7 +38,7 @@ class ZigCompilerTool(toolchain: AbstractZigToolchain) : ZigTool(toolchain) {
     }
 
     suspend fun getEnv(project: Project?): ZigToolchainEnvironmentSerializable? {
-        val stdout = callWithArgs(toolchain.workingDirectory(project), "env").stdout
+        val stdout = callWithArgs(toolchain.workingDirectory(project), "env")?.stdout ?: return null
         return try {
             envJson.decodeFromString<ZigToolchainEnvironmentSerializable>(stdout)
         } catch (e: SerializationException) {

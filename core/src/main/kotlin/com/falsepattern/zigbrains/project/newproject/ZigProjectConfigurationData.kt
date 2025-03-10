@@ -74,12 +74,20 @@ data class ZigProjectConfigurationData(
                         return@indeterminateStep false
                     }
                     val result = zig.callWithArgs(workDir, "init")
+                    if (result == null) {
+                        Notification(
+                            "zigbrains",
+                            "\"zig init\" could not run because the zig executable was missing!",
+                            NotificationType.ERROR
+                        ).notify(project)
+                        return@indeterminateStep false
+                    }
                     if (result.exitCode != 0) {
                         Notification(
                             "zigbrains",
                             "\"zig init\" failed with exit code ${result.exitCode}! Check the IDE log files!",
                             NotificationType.ERROR
-                        )
+                        ).notify(project)
                         System.err.println(result.stderr)
                         return@indeterminateStep false
                     }

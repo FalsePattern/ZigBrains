@@ -30,6 +30,7 @@ interface ZigStepDiscoveryListener {
 
     enum class ErrorType {
         MissingToolchain,
+        MissingZigExe,
         MissingBuildZig,
         GeneralError
     }

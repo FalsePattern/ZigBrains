@@ -31,6 +31,7 @@ Changelog structure reference:
 
 - Zig
   - `zig env` failure causes an IDE error
+  - A local toolchain disappearing (std directory or zig exe deleted) is now handled properly
 
 ## [20.3.0]
 
