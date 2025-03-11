@@ -41,7 +41,7 @@ class ZonCommenter: CodeDocumentationAwareCommenter, IndentedCommenter {
 
     override fun forceIndentedLineComment() = true
 
-    override fun getLineCommentTokenType(): IElementType = ZonTypes.COMMENT
+    override fun getLineCommentTokenType(): IElementType = ZonTypes.LINE_COMMENT
 
     override fun getBlockCommentTokenType() = null
 

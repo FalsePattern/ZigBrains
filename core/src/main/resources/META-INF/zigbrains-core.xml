@@ -64,11 +64,6 @@
 
     <!-- region Zon -->
     <extensions defaultExtensionNs="com.intellij">
-        <colorSettingsPage
-                implementation="com.falsepattern.zigbrains.zon.highlighting.ZonColorSettingsPage"/>
-        <completion.contributor
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.completion.ZonCompletionContributor"/>
         <fileType
                 name="Zon File"
                 implementationClass="com.falsepattern.zigbrains.zon.ZonFileType"
@@ -81,9 +76,6 @@
         <lang.commenter
                 language="Zon"
                 implementationClass="com.falsepattern.zigbrains.zon.comments.ZonCommenter"/>
-        <lang.foldingBuilder
-                language="Zon"
-                implementationClass="com.falsepattern.zigbrains.zon.folding.ZonFoldingBuilder"/>
         <lang.formatter
                 language="Zon"
                 implementationClass="com.falsepattern.zigbrains.zon.formatter.ZonFormattingModelBuilder"/>

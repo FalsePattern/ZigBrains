@@ -20,10 +20,25 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.zon.psi.mixins
+package com.falsepattern.zigbrains.zon.lexer
 
-import com.intellij.psi.PsiElement
+import com.falsepattern.zigbrains.zig.lexerstring.ZigLexerStringAdapter
+import com.falsepattern.zigbrains.zig.psi.ZigTypes
+import com.falsepattern.zigbrains.zon.psi.ZonTypes
+import com.intellij.lexer.LayeredLexer
+import com.intellij.lexer.MergingLexerAdapter
+import com.intellij.psi.tree.IElementType
+import com.intellij.psi.tree.TokenSet
 
-interface ZonEntryMixin: PsiElement {
-    val keys: Set<String>
+class ZonHighlightingLexer: LayeredLexer(ZonLexerAdapter()) {
+    init {
+        registerSelfStoppingLayer(
+            MergingLexerAdapter(
+                ZigLexerStringAdapter(),
+                TokenSet.create(ZigTypes.STRING_LITERAL_SINGLE, ZigTypes.CHAR_LITERAL)
+            ),
+            arrayOf(ZonTypes.STRING_LITERAL_SINGLE, ZonTypes.CHAR_LITERAL),
+            IElementType.EMPTY_ARRAY
+        )
+    }
 }

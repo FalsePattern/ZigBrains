@@ -34,46 +34,57 @@
   elementTypeClass="com.falsepattern.zigbrains.zon.parser.ZonElementType"
   tokenTypeClass="com.falsepattern.zigbrains.zon.parser.ZonTokenType"
   tokens=[
+    LINE_COMMENT='comment'
     DOT='.'
+    EQUAL='='
     LBRACE='{'
     RBRACE='}'
-    EQ='='
     COMMA=','
-    COMMENT='comment'
-    ID='identifier'
-    STRING_LITERAL_SINGLE='string'
-    LINE_STRING='multiline string'
-    BAD_STRING='unterminated string'
-    BOOL_TRUE='true'
-    BOOL_FALSE='false'
+    KEYWORD_FALSE='false'
+    KEYWORD_TRUE='true'
+    KEYWORD_NULL='null'
+    NUM_NAN='nan'
+    NUM_INF='inf'
+    CHAR_LITERAL='char literal'
+    STRING_LITERAL_SINGLE='string literal'
+    STRING_LITERAL_MULTI='multiline string literal'
+    FLOAT='float'
+    INTEGER='integer'
+    IDENTIFIER='identifier'
+    BAD_SQUOT='unterminated quote'
+    BAD_DQUOT='unterminated double quote'
   ]
-
-  //Mixins
-  mixin("entry")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonEntryMixinImpl"
-  implements("entry")="com.falsepattern.zigbrains.zon.psi.mixins.ZonEntryMixin"
-
-  mixin("identifier")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonIdentifierMixinImpl"
-  implements("identifier")="com.falsepattern.zigbrains.zon.psi.mixins.ZonIdentifierMixin"
 }
 
-zonFile ::= entry
+Root ::= Expr
 
-entry ::= DOT LBRACE (list | struct | ()) RBRACE
+Expr
+::= CHAR_LITERAL
+  | StringLiteral
+  | DOT IDENTIFIER
+  | DOT InitList
+  | Bool
+  | Number
+  | KEYWORD_NULL
 
-struct ::= (property | property_placeholder) (COMMA (property_placeholder? property property_placeholder? | property_placeholder))* COMMA?
 
-list ::= value (COMMA value)* COMMA?
+InitList
+::= LBRACE ZB_InitList_Body RBRACE {pin=1}
 
-property ::= DOT identifier EQ value
+private ZB_InitList_Body
+::= FieldInit (COMMA ZB_InitList_FieldInit)* COMMA?
+  | Expr (COMMA ZB_InitList_Expr)* COMMA?
+  | ()
 
-identifier ::= ID
+private ZB_InitList_FieldInit ::= FieldInit {recoverWhile="ZB_InitList_Recover"}
+private ZB_InitList_Expr ::= Expr {recoverWhile="ZB_InitList_Recover"}
 
-property_placeholder ::= DOT? INTELLIJ_COMPLETION_DUMMY
+private ZB_InitList_Recover ::= !(COMMA | RBRACE)
 
-private value ::= entry | boolean | STRING_LITERAL | value_placeholder
+FieldInit ::= DOT IDENTIFIER EQUAL Expr
 
-value_placeholder ::= INTELLIJ_COMPLETION_DUMMY
+Bool ::= KEYWORD_TRUE | KEYWORD_FALSE
 
-boolean ::= BOOL_TRUE | BOOL_FALSE
+Number ::= FLOAT | INTEGER | NUM_NAN | NUM_INF
 
-STRING_LITERAL ::= STRING_LITERAL_SINGLE | LINE_STRING+
+StringLiteral ::= STRING_LITERAL_SINGLE | STRING_LITERAL_MULTI
