@@ -73,6 +73,11 @@
                 serverId="ZigBrains"
                 languageId="zig"
         />
+        <languageMapping
+                language="Zon"
+                serverId="ZigBrains"
+                languageId="zon"
+        />
         <semanticTokensColorsProvider
                 serverId="ZigBrains"
                 class="com.falsepattern.zigbrains.lsp.highlighting.ZLSSemanticTokenColorsProvider"

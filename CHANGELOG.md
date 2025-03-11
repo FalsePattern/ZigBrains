@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Zon
+  - ZLS integration
+
 ### Changed
 
 - Zon
