@@ -28,7 +28,7 @@ import com.intellij.lang.PairedBraceMatcher
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
 
-class ZonBraceMatcher : PairedBraceMatcher {
+class ZonBraceMatcher: PairedBraceMatcher {
     override fun getPairs() =
         PAIRS
 
@@ -39,5 +39,5 @@ class ZonBraceMatcher : PairedBraceMatcher {
         file?.findElementAt(openingBraceOffset)?.parent?.textOffset ?: openingBraceOffset
 }
 
-private val PAIR = BracePair(ZonTypes.LBRACE, ZonTypes.RBRACE, true)
-private val PAIRS = arrayOf(PAIR)
+private val BRACE_PAIR = BracePair(ZonTypes.LBRACE, ZonTypes.RBRACE, true)
+private val PAIRS = arrayOf(BRACE_PAIR)

@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- Zon
+  - Fully refactored the parser for parity with the zig parser
+
 ## [21.0.0]
 
 ### Added

@@ -34,6 +34,7 @@ import static com.falsepattern.zigbrains.zig.psi.ZigTypes.*;
 %implements FlexLexer
 %function advance
 %type IElementType
+%unicode
 
 CRLF=\R
 WHITE_SPACE=[\s]+
