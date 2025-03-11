@@ -17,6 +17,31 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [22.0.0]
+
+### Added
+
+- LSP
+  - Error/Warning banner at the top of the editor when ZLS is misconfigured/not running
+  - ZLS version indicator in the zig settings
+
+- Toolchain
+  - More descriptive error messages when toolchain detection fails
+
+### Changed
+
+- Project
+  - !!BREAKING CHANGE!! Changed file format of zig tasks to store command line arguments as strings instead of string lists.
+This (and newer) versions of the plugin will automatically upgrade tasks from 21.1.0 and before.
+
+### Fixed
+
+- Debugging
+  - Breakpoints could not be placed inside zig code in Android Studio
+
+- Project
+  - Zig run/debug configuration command line arguments would lose quotes around arguments
+
 ## [21.1.0]
 
 ### Added

@@ -42,11 +42,7 @@ class ZLSSettingsConfigurable(private val project: Project): SubConfigurable {
     override fun apply() {
         val data = appSettingsComponent?.data ?: return
         val settings = project.zlsSettings
-        val reloadZLS = settings.isModified(data)
         settings.state = data
-        if (reloadZLS) {
-            startLSP(project, true)
-        }
     }
 
     override fun reset() {

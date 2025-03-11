@@ -38,7 +38,7 @@ data class ZLSSettings(
     val enable_argument_placeholders: Boolean = true,
     val completion_label_details: Boolean = true,
     val enable_build_on_save: Boolean = false,
-    val build_on_save_args: List<String> = emptyList(),
+    val build_on_save_args: String = "",
     val semantic_tokens: SemanticTokens = SemanticTokens.full,
     val inlay_hints_show_variable_type_hints: Boolean = true,
     val inlay_hints_show_struct_literal_field_type: Boolean = true,

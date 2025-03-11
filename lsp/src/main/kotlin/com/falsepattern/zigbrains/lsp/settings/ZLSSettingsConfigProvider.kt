@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.lsp.settings
 
 import com.falsepattern.zigbrains.lsp.config.ZLSConfig
 import com.falsepattern.zigbrains.lsp.config.ZLSConfigProvider
+import com.falsepattern.zigbrains.shared.cli.translateCommandline
 import com.intellij.openapi.project.Project
 
 class ZLSSettingsConfigProvider: ZLSConfigProvider {
@@ -34,7 +35,14 @@ class ZLSSettingsConfigProvider: ZLSConfigProvider {
             enable_argument_placeholders = state.enable_argument_placeholders,
             completion_label_details = state.completion_label_details,
             enable_build_on_save = state.enable_build_on_save,
-            build_on_save_args = state.build_on_save_args,
+            build_on_save_args = run {
+                val args = state.build_on_save_args
+                return@run if (args.isEmpty()) {
+                    emptyList()
+                } else {
+                    translateCommandline(args).toList()
+                }
+                                     },
             semantic_tokens = state.semantic_tokens,
             inlay_hints_show_variable_type_hints = state.inlay_hints_show_variable_type_hints,
             inlay_hints_show_struct_literal_field_type = state.inlay_hints_show_struct_literal_field_type,

@@ -131,7 +131,7 @@ private fun getName(
     project: Project
 ): String {
     val tc = state.toolchain ?: return "Zig"
-    val version = runBlocking { tc.zig.getEnv(project)?.version } ?: return "Zig"
+    val version = runBlocking { tc.zig.getEnv(project) }.mapCatching { it.version }.getOrElse { return "Zig" }
     return "Zig $version"
 }
 
@@ -155,7 +155,7 @@ suspend fun getRoot(
         }
     }
     if (toolchain != null) {
-        val stdPath = toolchain.zig.getEnv(project)?.stdPath(toolchain, project) ?: return null
+        val stdPath = toolchain.zig.getEnv(project).mapCatching { it.stdPath(toolchain, project) }.getOrNull() ?: return null
         val roots = stdPath.refreshAndFindVirtualDirectory() ?: return null
         return roots
     }

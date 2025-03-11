@@ -36,6 +36,6 @@ class ZigDebugParametersBinary @Throws(ExecutionException::class) constructor(dr
     ZigDebugParametersBase<ZigProfileStateBinary>(driverConfiguration, toolchain, profileState) {
         private val executableFile = profileState.configuration.exePath.path?.toFile() ?: throw ExecutionException(ZigDebugBundle.message("exception.missing-exe-path"))
     override fun getInstaller(): Installer {
-        return ZigDebugEmitBinaryInstaller(profileState, toolchain, executableFile, profileState.configuration.args.args)
+        return ZigDebugEmitBinaryInstaller(profileState, toolchain, executableFile, profileState.configuration.args.argsSplit())
     }
 }

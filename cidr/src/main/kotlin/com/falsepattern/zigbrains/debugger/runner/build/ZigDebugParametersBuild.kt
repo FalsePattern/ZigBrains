@@ -53,7 +53,7 @@ class ZigDebugParametersBuild(
     private lateinit var executableFile: File
 
     override fun getInstaller(): Installer {
-        return ZigDebugEmitBinaryInstaller(profileState, toolchain, executableFile, profileState.configuration.exeArgs.args)
+        return ZigDebugEmitBinaryInstaller(profileState, toolchain, executableFile, profileState.configuration.exeArgs.argsSplit())
     }
 
     @Throws(ExecutionException::class)

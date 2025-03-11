@@ -52,10 +52,10 @@ class ZigExecConfigRun(project: Project, factory: ConfigurationFactory): ZigExec
         if (!debug || optimization.forced) {
             result.addAll(listOf("-O", optimization.level.name))
         }
-        result.addAll(compilerArgs.args)
+        result.addAll(compilerArgs.argsSplit())
         if (!debug) {
             result.add("--")
-            result.addAll(exeArgs.args)
+            result.addAll(exeArgs.argsSplit())
         }
         return result
     }

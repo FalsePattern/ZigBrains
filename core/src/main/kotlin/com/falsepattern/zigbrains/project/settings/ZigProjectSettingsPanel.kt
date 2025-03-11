@@ -27,11 +27,11 @@ import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
-import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.util.io.toNioPathOrNull
@@ -41,7 +41,7 @@ import com.intellij.platform.ide.progress.withModalProgress
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBCheckBox
-import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
@@ -68,7 +68,7 @@ class ZigProjectSettingsPanel(private val project: Project) : ZigProjectConfigur
         })
         Disposer.register(this, it)
     }
-    private val toolchainVersion = JBLabel()
+    private val toolchainVersion = JBTextArea().also { it.isEditable = false }
     private val stdFieldOverride = JBCheckBox(ZigBrainsBundle.message("settings.project.label.override-std")).apply {
         addChangeListener {
             if (isSelected) {
@@ -161,35 +161,39 @@ class ZigProjectSettingsPanel(private val project: Project) : ZigProjectConfigur
         }
     }
 
-
     private suspend fun updateUI() {
-        val pathToToolchain = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull()
         delay(200)
-        val toolchain = pathToToolchain?.let { LocalZigToolchain(it) }
-        val zig = toolchain?.zig
-        if (zig?.path()?.toFile()?.exists() != true) {
-            toolchainVersion.text = "[zig binary not found]"
-
-            if (!stdFieldOverride.isSelected) {
-                pathToStd.text = ""
+        val pathToToolchain = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull()
+        if (pathToToolchain == null) {
+            withEDTContext(ModalityState.any()) {
+                toolchainVersion.text = "[toolchain path empty or invalid]"
+                if (!stdFieldOverride.isSelected) {
+                    pathToStd.text = ""
+                }
             }
             return
         }
-        val env = zig.getEnv(project)
-        if (env == null) {
-            toolchainVersion.text = "[failed to run zig env]"
-            if (!stdFieldOverride.isSelected) {
-                pathToStd.text = ""
+        val toolchain = LocalZigToolchain(pathToToolchain)
+        val zig = toolchain.zig
+        val env = zig.getEnv(project).getOrElse { throwable ->
+            throwable.printStackTrace()
+            withEDTContext(ModalityState.any()) {
+                toolchainVersion.text = "[failed to run \"zig env\"]\n${throwable.message}"
+                if (!stdFieldOverride.isSelected) {
+                    pathToStd.text = ""
+                }
             }
             return
         }
         val version = env.version
         val stdPath = env.stdPath(toolchain, project)
-        toolchainVersion.text = version
-        toolchainVersion.foreground = JBColor.foreground()
 
-        if (!stdFieldOverride.isSelected) {
-            pathToStd.text = stdPath?.pathString ?: ""
+        withEDTContext(ModalityState.any()) {
+            toolchainVersion.text = version
+            toolchainVersion.foreground = JBColor.foreground()
+            if (!stdFieldOverride.isSelected) {
+                pathToStd.text = stdPath?.pathString ?: ""
+            }
         }
     }
 
