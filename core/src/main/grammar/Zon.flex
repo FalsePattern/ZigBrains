@@ -38,52 +38,120 @@ import static com.falsepattern.zigbrains.zon.psi.ZonTypes.*;
 
 CRLF=\R
 WHITE_SPACE=[\s]+
-LINE_COMMENT="//" [^\n]* | "////" [^\n]*
-COMMENT="///".*
 
-ID=[A-Za-z_][A-Za-z0-9_]*
-
+bin=[01]
+bin_="_"? {bin}
+oct=[0-7]
+oct_="_"? {oct}
 hex=[0-9a-fA-F]
-char_escape
-    = "\\x" {hex} {hex}
-    | "\\u{" {hex}+ "}"
-    | "\\" [nr\\t'\"]
+hex_="_"? {hex}
+dec=[0-9]
+dec_="_"? {dec}
 
-string_char
-    = {char_escape}
-    | [^\\\"\n]
+bin_int={bin} {bin_}*
+oct_int={oct} {oct_}*
+dec_int={dec} {dec_}*
+hex_int={hex} {hex_}*
 
-LINE_STRING=("\\\\" [^\n]* [ \n]*)+
+char_char= \\ .
+         | [^\'\n]
 
-%state STRING_LITERAL
-%state ID_STRING
-%state UNCLOSED_STRING
+string_char= \\ .
+           | [^\"\n]
+
+all_nl_wrap=[^\n]* [ \n]*
+all_no_nl=[^\n]+
+
+
+FLOAT= "0x" {hex_int} "." {hex_int} ([pP] [-+]? {dec_int})?
+     |      {dec_int} "." {dec_int} ([eE] [-+]? {dec_int})?
+     | "0x" {hex_int} [pP] [-+]? {dec_int}
+     |      {dec_int} [eE] [-+]? {dec_int}
+
+INTEGER= "0b" {bin_int}
+       | "0o" {oct_int}
+       | "0x" {hex_int}
+       |      {dec_int}
+
+IDENTIFIER_PLAIN=[A-Za-z_][A-Za-z0-9_]*
+
+%state STR_LIT
+%state STR_MULT_LINE
+%state CHAR_LIT
+
+%state ID_QUOT
+%state UNT_SQUOT
+%state UNT_DQUOT
+
+%state LINE_CMT
 %%
 
+//Comments
 
-<YYINITIAL>      {WHITE_SPACE}            { return WHITE_SPACE; }
+<YYINITIAL>      "//"                     { yybegin(LINE_CMT); }
+<LINE_CMT>       {all_nl_wrap} "//"       { }
+<LINE_CMT>       {all_no_nl}          { }
+<LINE_CMT>       \n                       { yybegin(YYINITIAL); return LINE_COMMENT; }
+<LINE_CMT>       <<EOF>>                  { yybegin(YYINITIAL); return LINE_COMMENT; }
+
+//Symbols
+
 <YYINITIAL>      "."                      { return DOT; }
-<YYINITIAL>      "IntellijIdeaRulezzz"    { return INTELLIJ_COMPLETION_DUMMY; }
+<YYINITIAL>      "="                      { return EQUAL; }
 <YYINITIAL>      "{"                      { return LBRACE; }
 <YYINITIAL>      "}"                      { return RBRACE; }
-<YYINITIAL>      "="                      { return EQ; }
 <YYINITIAL>      ","                      { return COMMA; }
-<YYINITIAL>      "true"                   { return BOOL_TRUE; }
-<YYINITIAL>      "false"                  { return BOOL_FALSE; }
-<YYINITIAL>      {COMMENT}                { return COMMENT; }
-<YYINITIAL>      {LINE_COMMENT}           { return COMMENT; }
 
-<YYINITIAL>      {ID}                     { return ID; }
-<YYINITIAL>      "@\""                    { yybegin(ID_STRING); }
-<ID_STRING>      {string_char}*"\""       { yybegin(YYINITIAL); return ID; }
-<ID_STRING>      [^]                      { yypushback(1); yybegin(UNCLOSED_STRING); }
+//Keywords
 
-<YYINITIAL>      "\""                     { yybegin(STRING_LITERAL); }
-<STRING_LITERAL> {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
-<STRING_LITERAL> [^]                      { yypushback(1); yybegin(UNCLOSED_STRING); }
+<YYINITIAL>      "false"                  { return KEYWORD_FALSE; }
+<YYINITIAL>      "true"                   { return KEYWORD_TRUE; }
+<YYINITIAL>      "null"                   { return KEYWORD_NULL; }
+<YYINITIAL>      "nan"                    { return NUM_NAN; }
+<YYINITIAL>      "inf"                    { return NUM_INF; }
 
-<UNCLOSED_STRING>[^\n]*{CRLF}             { yybegin(YYINITIAL); return BAD_STRING; }
+//Strings
 
-<YYINITIAL>      {LINE_STRING}            { return LINE_STRING; }
+<YYINITIAL>      "'"                      { yybegin(CHAR_LIT); }
+<CHAR_LIT>       {char_char}*"'"          { yybegin(YYINITIAL); return CHAR_LITERAL; }
+<CHAR_LIT>       <<EOF>>                  { yybegin(YYINITIAL); return BAD_SQUOT; }
+<CHAR_LIT>       [^]                      { yypushback(1); yybegin(UNT_SQUOT); }
+
+<YYINITIAL>      "\""                     { yybegin(STR_LIT); }
+<STR_LIT>        {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
+<STR_LIT>        <<EOF>>                  { yybegin(YYINITIAL); return BAD_DQUOT; }
+<STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
+
+<YYINITIAL>      "\\\\"                   { yybegin(STR_MULT_LINE); }
+<STR_MULT_LINE>  {all_nl_wrap} "\\\\"     { }
+<STR_MULT_LINE>  {all_no_nl}              { }
+<STR_MULT_LINE>  \n                       { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
+<STR_MULT_LINE>  <<EOF>>                  { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
+
+//Numbers
+
+<YYINITIAL>      {FLOAT}                  { return FLOAT; }
+<YYINITIAL>      {INTEGER}                { return INTEGER; }
+
+//Identifiers
+
+<YYINITIAL>      {IDENTIFIER_PLAIN}       { return IDENTIFIER; }
+<YYINITIAL>      "@\""                    { yybegin(ID_QUOT); }
+<ID_QUOT>        {string_char}*"\""       { yybegin(YYINITIAL); return IDENTIFIER; }
+<ID_QUOT>        <<EOF>>                  { yybegin(YYINITIAL); return BAD_DQUOT; }
+<ID_QUOT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
+
+//Error handling
+
+<UNT_SQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_SQUOT; }
+<UNT_SQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_SQUOT; }
+<UNT_SQUOT>       {all_no_nl}             { }
+<UNT_DQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_DQUOT; }
+<UNT_DQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_DQUOT; }
+<UNT_DQUOT>       {all_no_nl}             { }
+
+//Misc
+
+<YYINITIAL>      {WHITE_SPACE}            { return WHITE_SPACE; }
 
 [^] { return BAD_CHARACTER; }

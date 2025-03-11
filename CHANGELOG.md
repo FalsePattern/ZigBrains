@@ -17,6 +17,18 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [21.1.0]
+
+### Added
+
+- Zon
+  - ZLS integration
+
+### Changed
+
+- Zon
+  - Fully refactored the parser for parity with the zig parser
+
 ## [21.0.0]
 
 ### Added

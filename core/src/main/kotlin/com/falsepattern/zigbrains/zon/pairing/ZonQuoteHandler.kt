@@ -27,7 +27,10 @@ import com.intellij.codeInsight.editorActions.MultiCharQuoteHandler
 import com.intellij.codeInsight.editorActions.SimpleTokenSetQuoteHandler
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
 
-class ZonQuoteHandler: SimpleTokenSetQuoteHandler(ZonTypes.STRING_LITERAL_SINGLE, ZonTypes.BAD_STRING), MultiCharQuoteHandler {
-    override fun getClosingQuote(iterator: HighlighterIterator, offset: Int) =
-        "\""
+class ZonQuoteHandler: SimpleTokenSetQuoteHandler(ZonTypes.STRING_LITERAL_SINGLE, ZonTypes.IDENTIFIER, ZonTypes.BAD_DQUOT, ZonTypes.CHAR_LITERAL, ZonTypes.BAD_SQUOT), MultiCharQuoteHandler {
+    override fun getClosingQuote(iterator: HighlighterIterator, offset: Int) = when(iterator.tokenType) {
+        ZonTypes.STRING_LITERAL_SINGLE, ZonTypes.IDENTIFIER, ZonTypes.BAD_DQUOT -> "\""
+        ZonTypes.CHAR_LITERAL, ZonTypes.BAD_SQUOT -> "'"
+        else -> null
+    }
 }

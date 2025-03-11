@@ -27,13 +27,18 @@ import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
 import com.intellij.psi.TokenType
 import com.intellij.psi.formatter.common.AbstractBlock
+import com.intellij.psi.tree.IElementType
 
 class ZonBlock(
     node: ASTNode,
     wrap: Wrap?,
     alignment: Alignment?,
-    private val spacingBuilder: SpacingBuilder
+    val spacingBuilder: SpacingBuilder
 ) : AbstractBlock(node, wrap, alignment) {
+
+    override fun getSpacing(child1: Block?, child2: Block) = null
+
+    override fun isLeaf() = myNode.firstChildNode == null
 
     override fun buildChildren(): MutableList<Block> {
         val blocks = ArrayList<Block>()
@@ -44,33 +49,41 @@ class ZonBlock(
             }
             child = child.treeNext
         }
+
         return blocks
     }
 
-    override fun getIndent(): Indent {
-        val parent = myNode.treeParent ?: return Indent.getNoneIndent()
-        val elementType = myNode.elementType
-        return if (parent.elementType == ZonTypes.ENTRY &&
-            elementType != ZonTypes.DOT &&
-            elementType != ZonTypes.LBRACE &&
-            elementType != ZonTypes.RBRACE
-        ) {
-            Indent.getNormalIndent()
-        } else {
-            Indent.getNoneIndent()
-        }
-    }
-
-    override fun getSpacing(child1: Block?, child2: Block) = null
-
-    override fun isLeaf(): Boolean = myNode.firstChildNode == null
-
     override fun getChildIndent(): Indent {
-        return if (myNode.elementType == ZonTypes.ENTRY) {
-            Indent.getNormalIndent()
-        } else {
-            Indent.getNoneIndent()
-        }
+        val node = this.node
+        return getIndentBasedOnParentType(node, null, node.elementType, PLACEHOLDER)
     }
 
+    override fun getIndent(): Indent {
+        val node = this.node
+        val parent = node.treeParent ?: return noneIndent
+        return getIndentBasedOnParentType(parent, node, parent.elementType, node.elementType)
+    }
 }
+private fun getIndentBasedOnParentType(
+    parent: ASTNode,
+    child: ASTNode?,
+    parentType: IElementType,
+    childType: IElementType
+): Indent {
+    //Struct/tuple initializers
+    if (parentType == ZonTypes.INIT_LIST && !childType.isBrace)
+        return normalIndent
+
+    return noneIndent
+}
+
+private val normalIndent: Indent get() = Indent.getNormalIndent()
+
+private val noneIndent: Indent get() = Indent.getNoneIndent()
+
+private val IElementType?.isBrace: Boolean
+    get() {
+        return this == ZonTypes.LBRACE || this == ZonTypes.RBRACE
+    }
+
+private val PLACEHOLDER = IElementType("placeholder", null)
