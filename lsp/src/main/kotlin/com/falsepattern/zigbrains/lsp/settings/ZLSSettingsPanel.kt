@@ -44,7 +44,6 @@ import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.Row
-import com.jetbrains.rd.generator.nova.GenerationSpec.Companion.nullIfEmpty
 import org.jetbrains.annotations.PropertyKey
 import java.lang.IllegalArgumentException
 import java.util.*
@@ -228,9 +227,9 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
             highlight_global_var_declarations.isSelected,
             skip_std_references.isSelected,
             prefer_ast_check_as_child_process.isSelected,
-            builtin_path.text?.nullIfEmpty(),
-            build_runner_path.text?.nullIfEmpty(),
-            global_cache_path.text?.nullIfEmpty(),
+            builtin_path.text?.ifBlank { null },
+            build_runner_path.text?.ifBlank { null },
+            global_cache_path.text?.ifBlank { null },
         )
         set(value) {
             direnv.isSelected = value.direnv
