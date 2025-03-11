@@ -87,7 +87,7 @@ class BuildToolWindowContext(private val project: Project): Disposable {
                         val factory = firstConfigFactory<ZigConfigTypeBuild>()
                         val newConfig = manager.createConfiguration("zig build $stepName", factory)
                         val config = newConfig.configuration as ZigExecConfigBuild
-                        config.buildSteps.args = listOf(stepName)
+                        config.buildSteps.args = stepName
                         manager.addConfiguration(newConfig)
                         return@run newConfig
                     }
@@ -213,7 +213,7 @@ private fun getViewport(project: Project): JBScrollPane? {
 private fun getExistingRunConfig(manager: RunManager, stepName: String): RunnerAndConfigurationSettings? {
     for (config in manager.getConfigurationSettingsList(ZigConfigTypeBuild::class.java)) {
         val build = config.configuration as? ZigExecConfigBuild ?: continue
-        val steps = build.buildSteps.args
+        val steps = build.buildSteps.argsSplit()
         if (steps.size != 1)
             continue
         if (steps[0] != stepName)

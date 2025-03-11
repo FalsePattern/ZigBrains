@@ -45,6 +45,10 @@
         />
         <postStartupActivity
                 implementation="com.falsepattern.zigbrains.lsp.ZLSStartup"/>
+
+        <editorNotificationProvider
+                implementation="com.falsepattern.zigbrains.lsp.notification.ZigEditorNotificationProvider"
+        />
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">

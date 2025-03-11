@@ -32,6 +32,6 @@ import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
 class ZigDebugParametersRun(driverConfiguration: DebuggerDriverConfiguration, toolchain: AbstractZigToolchain, profileState: ZigProfileStateRun) :
     ZigDebugParametersEmitBinaryBase<ZigProfileStateRun>(driverConfiguration, toolchain, profileState) {
     override fun getInstaller(): Installer {
-        return ZigDebugEmitBinaryInstaller(profileState, toolchain, executableFile, profileState.configuration.exeArgs.args)
+        return ZigDebugEmitBinaryInstaller(profileState, toolchain, executableFile, profileState.configuration.exeArgs.argsSplit())
     }
 }

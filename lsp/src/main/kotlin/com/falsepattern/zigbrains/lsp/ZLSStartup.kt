@@ -26,8 +26,12 @@ import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.settings.zlsSettings
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
+import com.intellij.ui.EditorNotifications
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.io.path.pathString
 
 class ZLSStartup: ProjectActivity {
@@ -41,6 +45,17 @@ class ZLSStartup: ProjectActivity {
             env.findExecutableOnPATH("zls")?.let {
                 zlsState.zlsPath = it.pathString
                 project.zlsSettings.state = zlsState
+            }
+        }
+        project.zigCoroutineScope.launch {
+            var currentState = project.zlsRunningAsync()
+            while (!project.isDisposed) {
+                val running = project.zlsRunningAsync()
+                if (currentState != running) {
+                    EditorNotifications.getInstance(project).updateAllNotifications()
+                }
+                currentState = running
+                delay(1000)
             }
         }
     }

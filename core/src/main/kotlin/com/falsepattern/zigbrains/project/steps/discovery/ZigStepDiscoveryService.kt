@@ -84,9 +84,12 @@ class ZigStepDiscoveryService(private val project: Project) {
             project.guessProjectDir()?.toNioPathOrNull(),
             "build", "-l",
             timeoutMillis = currentTimeoutSec * 1000L
-        )
+        ).getOrElse { throwable ->
+            errorReload(ErrorType.MissingZigExe, throwable.message)
+            null
+        }
         if (result == null) {
-            errorReload(ErrorType.MissingZigExe)
+            {}
         } else if (result.checkSuccess(LOG)) {
             currentTimeoutSec = DEFAULT_TIMEOUT_SEC
             val lines = result.stdoutLines

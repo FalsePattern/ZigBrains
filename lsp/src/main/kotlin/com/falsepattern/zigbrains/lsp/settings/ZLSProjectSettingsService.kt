@@ -25,6 +25,7 @@ package com.falsepattern.zigbrains.lsp.settings
 import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.ZLSBundle
+import com.falsepattern.zigbrains.lsp.startLSP
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.toNioPathOrNull
@@ -32,9 +33,9 @@ import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.util.application
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.nio.file.Path
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
 
@@ -51,45 +52,43 @@ class ZLSProjectSettingsService(val project: Project): PersistentStateComponent<
     @Volatile
     private var valid = false
 
-    private val mutex = ReentrantLock()
+    private val mutex = Mutex()
     override fun getState(): ZLSSettings {
         return state.copy()
     }
 
     fun setState(value: ZLSSettings) {
-        mutex.withLock {
-            this.state = value
-            dirty = true
+        runBlocking {
+            mutex.withLock {
+                this@ZLSProjectSettingsService.state = value
+                dirty = true
+            }
         }
+        startLSP(project, true)
     }
 
     override fun loadState(state: ZLSSettings) {
-        mutex.withLock {
-            this.state = state
-            dirty = true
-        }
+        setState(state)
     }
 
-    fun isModified(otherData: ZLSSettings): Boolean {
-        return state != otherData
-    }
-
-    fun validate(): Boolean {
+    suspend fun validateAsync(): Boolean {
         mutex.withLock {
             if (dirty) {
                 val state = this.state
-                valid = if (application.isDispatchThread) {
-                    runWithModalProgressBlocking(ModalTaskOwner.project(project), ZLSBundle.message("progress.title.validate")) {
-                        doValidate(project, state)
-                    }
-                } else {
-                    runBlocking {
-                        doValidate(project, state)
-                    }
-                }
+                valid = doValidate(project, state)
                 dirty = false
             }
             return valid
+        }
+    }
+
+    fun validateSync() = if (application.isDispatchThread) {
+        runWithModalProgressBlocking(ModalTaskOwner.project(project), ZLSBundle.message("progress.title.validate")) {
+            validateAsync()
+        }
+    } else {
+        runBlocking {
+            validateAsync()
         }
     }
 }

@@ -71,13 +71,41 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
         return features
     }
 
-    override fun isEnabled(project: Project): Boolean {
-        return (project.getUserData(ENABLED_KEY) != false) && project.zlsSettings.validate()
-    }
+    override fun isEnabled(project: Project) = project.zlsEnabledSync()
 
     override fun setEnabled(enabled: Boolean, project: Project) {
-        project.putUserData(ENABLED_KEY, enabled)
+        project.zlsEnabled(enabled)
     }
+}
+
+suspend fun Project.zlsEnabledAsync(): Boolean {
+    return (getUserData(ENABLED_KEY) != false) && zlsSettings.validateAsync()
+}
+
+fun Project.zlsEnabledSync(): Boolean {
+    return (getUserData(ENABLED_KEY) != false) && zlsSettings.validateSync()
+}
+
+fun Project.zlsEnabled(value: Boolean) {
+    putUserData(ENABLED_KEY, value)
+}
+
+suspend fun Project.zlsRunningAsync(): Boolean {
+    if (!zlsEnabledAsync())
+        return false
+    return zlsRunningLsp4ij()
+}
+
+fun Project.zlsRunningSync(): Boolean {
+    if (!zlsEnabledSync())
+        return false
+    return zlsRunningLsp4ij()
+}
+
+private fun Project.zlsRunningLsp4ij(): Boolean {
+    val manager = service<LanguageServerManager>()
+    val status = manager.getServerStatus("ZigBrains")
+    return status == ServerStatus.started || status == ServerStatus.starting
 }
 
 class ZLSStarter: LanguageServerStarter {
@@ -87,7 +115,10 @@ class ZLSStarter: LanguageServerStarter {
             val status = manager.getServerStatus("ZigBrains")
             if ((status == ServerStatus.started || status == ServerStatus.starting) && !restart)
                 return@launch
-            manager.start("ZigBrains")
+            manager.stop("ZigBrains")
+            if (project.zlsSettings.validateAsync()) {
+                manager.start("ZigBrains")
+            }
         }
     }
 

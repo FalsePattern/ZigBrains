@@ -39,12 +39,11 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
         var state = svc.state
         val toolchain = state.toolchain ?: ZigToolchainProvider.suggestToolchain(project, UserDataHolderBase()) ?: return previous
 
-        val env = toolchain.zig.getEnv(project)
-
-        if (env == null) {
+        val env = toolchain.zig.getEnv(project).getOrElse { throwable ->
+            throwable.printStackTrace()
             Notification(
                 "zigbrains-lsp",
-                "Failed to evaluate zig env",
+                "Failed to evaluate \"zig env\": ${throwable.message}",
                 NotificationType.ERROR
             ).notify(project)
             return previous
