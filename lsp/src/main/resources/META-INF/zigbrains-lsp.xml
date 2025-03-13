@@ -88,10 +88,10 @@
         />
     </extensions>
 
-    <applicationListeners>
+    <projectListeners>
         <listener
                 class="com.falsepattern.zigbrains.lsp.ZLSStarter"
                 topic="com.falsepattern.zigbrains.lsp.LanguageServerStarter"
         />
-    </applicationListeners>
+    </projectListeners>
 </idea-plugin>

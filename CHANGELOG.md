@@ -19,6 +19,9 @@ Changelog structure reference:
 
 ### Fixed
 
+- LSP
+  - Changing ZLS configs would not restart ZLS
+
 - Project
   - Occasional "AWT events are not allowed inside write action" error coming from LSP
   - IllegalStateException coming from the standard library handler
