@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [22.0.0]
+
 ### Added
 
 - LSP
