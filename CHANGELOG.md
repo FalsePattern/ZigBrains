@@ -17,6 +17,16 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [22.0.1]
+
+### Fixed
+
+- LSP
+  - Changing ZLS configs would not restart ZLS
+
+- Project
+  - Occasional "AWT events are not allowed inside write action" error coming from LSP
+
 ## [22.0.0]
 
 ### Added

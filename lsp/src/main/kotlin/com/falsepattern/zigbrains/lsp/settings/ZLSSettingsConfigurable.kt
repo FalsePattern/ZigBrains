@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains.lsp.settings
 
-import com.falsepattern.zigbrains.lsp.startLSP
 import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
