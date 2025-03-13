@@ -79,31 +79,23 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
         suspend fun reload(project: Project, state: ZigProjectSettings) {
             val moduleId = ModuleId(ZIG_MODULE_ID)
             val workspaceModel = WorkspaceModel.getInstance(project)
-            if (moduleId !in workspaceModel.currentSnapshot) {
-                val baseModuleDir = project.guessProjectDir()?.toVirtualFileUrl(workspaceModel.getVirtualFileUrlManager()) ?: return
-
-                val moduleEntitySource = LegacyBridgeJpsEntitySourceFactory.getInstance(project)
-                    .createEntitySourceForModule(baseModuleDir, null)
-
-                val moduleEntity = ModuleEntity(ZIG_MODULE_ID, emptyList(), moduleEntitySource)
-                workspaceModel.update("Add new module") {builder ->
-                    builder.addEntity(moduleEntity)
-                }
-            }
-            val moduleEntity = workspaceModel.currentSnapshot.resolve(moduleId) ?: return
             val root = getRoot(state, project) ?: return
             val libRoot = LibraryRoot(root.toVirtualFileUrl(workspaceModel.getVirtualFileUrlManager()), LibraryRootTypeId.SOURCES)
             val libraryTableId = LibraryTableId.ProjectLibraryTableId
             val libraryId = LibraryId(ZIG_LIBRARY_ID, libraryTableId)
-            if (libraryId in workspaceModel.currentSnapshot) {
-                val library = workspaceModel.currentSnapshot.resolve(libraryId) ?: return
-                workspaceModel.update("Update library") { builder ->
-                    builder.modifyLibraryEntity(library) {
-                        roots.clear()
-                        roots.add(libRoot)
-                    }
+            val baseModuleDir = project.guessProjectDir()?.toVirtualFileUrl(workspaceModel.getVirtualFileUrlManager()) ?: return
+            workspaceModel.update("Update Zig std") { builder ->
+                builder.resolve(moduleId)?.let { moduleEntity ->
+                    builder.removeEntity(moduleEntity)
                 }
-            } else {
+                val moduleEntitySource = LegacyBridgeJpsEntitySourceFactory.getInstance(project)
+                    .createEntitySourceForModule(baseModuleDir, null)
+
+                val moduleEntity = builder.addEntity(ModuleEntity(ZIG_MODULE_ID, emptyList(), moduleEntitySource))
+
+                builder.resolve(libraryId)?.let { libraryEntity ->
+                    builder.removeEntity(libraryEntity)
+                }
                 val libraryEntitySource = LegacyBridgeJpsEntitySourceFactory
                     .getInstance(project)
                     .createEntitySourceForProjectLibrary(null)
@@ -114,13 +106,11 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
                 ) {
                     roots.add(libRoot)
                 }
-                workspaceModel.update("Add new library") { builder ->
-                    builder.addEntity(libraryEntity)
-                }
-            }
-            workspaceModel.update("Link dep") { builder ->
+                builder.addEntity(libraryEntity)
                 builder.modifyModuleEntity(moduleEntity) {
-                    dependencies.add(LibraryDependency(libraryId, false, DependencyScope.COMPILE))
+                    val dep = LibraryDependency(libraryId, false, DependencyScope.COMPILE)
+                    dependencies.clear()
+                    dependencies.add(dep)
                 }
             }
         }

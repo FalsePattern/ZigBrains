@@ -21,6 +21,7 @@ Changelog structure reference:
 
 - Project
   - Occasional "AWT events are not allowed inside write action" error coming from LSP
+  - IllegalStateException coming from the standard library handler
 
 ## [22.0.0]
 
