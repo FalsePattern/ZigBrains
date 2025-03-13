@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- LSP
+  - Error/Warning banner at the top of the editor when ZLS is misconfigured/not running
+
 ### Fixed
 
 - Debugging
