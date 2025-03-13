@@ -39,7 +39,7 @@ class ZigExecConfigBinary(project: Project, factory: ConfigurationFactory) : Zig
         get() = ZigDebugBundle.message("configuration.binary.suggested-name")
 
     override suspend fun buildCommandLineArgs(debug: Boolean): List<String> {
-        return args.args
+        return args.argsSplit()
     }
 
     override fun getConfigurables(): List<ZigConfigurable<*>> {

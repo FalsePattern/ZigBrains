@@ -27,6 +27,9 @@ Changelog structure reference:
 - Debugging
   - Breakpoints could not be placed inside zig code in Android Studio
 
+- Project
+  - Zig run/debug configuration command line arguments would lose quotes around arguments
+
 ## [21.1.0]
 
 ### Added

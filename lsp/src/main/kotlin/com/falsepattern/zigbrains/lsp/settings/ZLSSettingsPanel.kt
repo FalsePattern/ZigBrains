@@ -207,14 +207,7 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
             enable_argument_placeholders.isSelected,
             completion_label_details.isSelected,
             enable_build_on_save.isSelected,
-            run {
-                val args = build_on_save_args.text ?: ""
-                return@run if (args.isEmpty()) {
-                    emptyList()
-                } else {
-                    translateCommandline(args).toList()
-                }
-            },
+            build_on_save_args.text,
             semantic_tokens.item ?: SemanticTokens.full,
             inlay_hints_show_variable_type_hints.isSelected,
             inlay_hints_show_struct_literal_field_type.isSelected,
@@ -240,7 +233,7 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
             enable_argument_placeholders.isSelected = value.enable_argument_placeholders
             completion_label_details.isSelected = value.completion_label_details
             enable_build_on_save.isSelected = value.enable_build_on_save
-            build_on_save_args.text = value.build_on_save_args.joinToString(separator = " ") { it }
+            build_on_save_args.text = value.build_on_save_args
             semantic_tokens.item = value.semantic_tokens
             inlay_hints_show_variable_type_hints.isSelected = value.inlay_hints_show_variable_type_hints
             inlay_hints_show_struct_literal_field_type.isSelected = value.inlay_hints_show_struct_literal_field_type
@@ -294,80 +287,4 @@ private fun Panel.fancyRow(
 ) = row(ZLSBundle.message(label)) {
     contextHelp(ZLSBundle.message(tooltip))
     cb()
-}
-
-
-@Throws(Exception::class)
-private fun translateCommandline(toProcess: String): List<String> {
-    if (toProcess.isEmpty()) {
-        return emptyList()
-    }
-    val normal = 0
-    val inQuote = 1
-    val inDoubleQuote = 2
-    val inEscape = 3
-    var state = normal
-    var escapeState = normal
-    val tok = StringTokenizer(toProcess, "\\\"' ", true)
-    val v = ArrayList<String>()
-    val current = StringBuilder()
-
-    while (tok.hasMoreTokens()) {
-        val nextTok = tok.nextToken()
-        when (state) {
-            inQuote -> if ("'" == nextTok) {
-                state = normal
-            } else if ("\\" == nextTok) {
-                escapeState = inQuote
-                state = inEscape
-            } else {
-                current.append(nextTok)
-            }
-
-            inDoubleQuote -> if ("\"" == nextTok) {
-                state = normal
-            } else if ("\\" == nextTok) {
-                escapeState = inDoubleQuote
-                state = inEscape
-            } else {
-                current.append(nextTok)
-            }
-
-            inEscape -> {
-                current.append(when(nextTok) {
-                    "n" -> "\n"
-                    "r" -> "\r"
-                    "t" -> "\t"
-                    else -> nextTok
-                })
-                state = escapeState
-            }
-
-            else -> if ("'" == nextTok) {
-                state = inQuote
-            } else if ("\"" == nextTok) {
-                state = inDoubleQuote
-            } else if (" " == nextTok) {
-                if (current.isNotEmpty()) {
-                    v.add(current.toString())
-                    current.setLength(0)
-                }
-            } else if ("\\" == nextTok) {
-                escapeState = normal
-                state = inEscape
-            } else {
-                current.append(nextTok)
-            }
-        }
-    }
-
-    if (current.isNotEmpty()) {
-        v.add(current.toString())
-    }
-
-    if (state != inQuote && state != inDoubleQuote) {
-        return v
-    } else {
-        throw IllegalArgumentException("unbalanced quotes in $toProcess")
-    }
 }

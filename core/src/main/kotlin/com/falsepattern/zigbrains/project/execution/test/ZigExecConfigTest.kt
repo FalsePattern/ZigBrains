@@ -51,7 +51,7 @@ class ZigExecConfigTest(project: Project, factory: ConfigurationFactory): ZigExe
         if (!debug || optimization.forced) {
             result.addAll(listOf("-O", optimization.level.name))
         }
-        result.addAll(compilerArgs.args)
+        result.addAll(compilerArgs.argsSplit())
         if (debug) {
             result.add("--test-no-exec")
         }

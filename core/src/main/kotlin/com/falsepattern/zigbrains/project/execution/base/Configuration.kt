@@ -347,14 +347,18 @@ class ArgsConfigurable(
     @Transient private val serializedName: String,
     @Transient @Nls private val guiName: String
 ) : ZigConfigurable<ArgsConfigurable>, Cloneable {
-    var args: List<String> = emptyList()
+    var args: String = ""
 
     override fun readExternal(element: Element) {
-        args = element.readStrings(serializedName) ?: return
+        args = element.readString(serializedName) ?: element.readStrings(serializedName)?.joinToString(separator = " ") { if (it.contains(' ')) "\"$it\"" else it } ?: ""
+    }
+
+    fun argsSplit(): List<String> {
+        return translateCommandline(args)
     }
 
     override fun writeExternal(element: Element) {
-        element.writeStrings(serializedName, args)
+        element.writeString(serializedName, args)
     }
 
     override fun createEditor(): ZigConfigModule<ArgsConfigurable> {
@@ -376,12 +380,12 @@ class ArgsConfigurable(
         }
 
         override fun apply(configurable: ArgsConfigurable): Boolean {
-            configurable.args = translateCommandline(argsField.text)
+            configurable.args = argsField.text ?: ""
             return true
         }
 
         override fun reset(configurable: ArgsConfigurable) {
-            argsField.text = configurable.args.joinToString(separator = " ")
+            argsField.text = configurable.args
         }
 
         override fun construct(p: Panel): Unit = with(p) {
