@@ -26,6 +26,12 @@ Changelog structure reference:
 - Toolchain
   - More descriptive error messages when toolchain detection fails
 
+### Changed
+
+- Project
+  - !!BREAKING CHANGE!! Changed file format of zig tasks to store command line arguments as strings instead of string lists.
+This (and newer) versions of the plugin will automatically upgrade tasks from 21.1.0 and before.
+
 ### Fixed
 
 - Debugging
