@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Debugging
+  - Breakpoints could not be placed inside zig code in Android Studio
+
 ## [21.1.0]
 
 ### Added
