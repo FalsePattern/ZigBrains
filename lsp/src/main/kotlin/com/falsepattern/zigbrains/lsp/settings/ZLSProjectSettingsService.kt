@@ -82,7 +82,7 @@ class ZLSProjectSettingsService(val project: Project): PersistentStateComponent<
         }
     }
 
-    fun validateSync() = if (application.isDispatchThread) {
+    fun validateSync() = if (application.isDispatchThread && !application.isWriteAccessAllowed) {
         runWithModalProgressBlocking(ModalTaskOwner.project(project), ZLSBundle.message("progress.title.validate")) {
             validateAsync()
         }

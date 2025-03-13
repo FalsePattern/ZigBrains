@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - Occasional "AWT events are not allowed inside write action" error coming from LSP
+
 ## [22.0.0]
 
 ### Added
