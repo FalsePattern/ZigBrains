@@ -21,6 +21,7 @@ Changelog structure reference:
 
 - LSP
   - Error/Warning banner at the top of the editor when ZLS is misconfigured/not running
+  - ZLS version indicator in the zig settings
 
 - Toolchain
   - More descriptive error messages when toolchain detection fails

@@ -29,24 +29,38 @@ import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.config.SemanticTokens
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
+import com.falsepattern.zigbrains.shared.cli.call
+import com.falsepattern.zigbrains.shared.cli.createCommandLineSafe
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.execution.processTools.mapFlat
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.openapi.vfs.toNioPathOrNull
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.withModalProgress
+import com.intellij.ui.DocumentAdapter
+import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.fields.ExtendableTextField
 import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.Row
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.annotations.PropertyKey
-import java.lang.IllegalArgumentException
-import java.util.*
+import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
 @Suppress("PrivatePropertyName")
@@ -55,12 +69,23 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
         project,
         FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor()
             .withTitle(ZLSBundle.message("settings.zls-path.browse.title")),
-    ).also { Disposer.register(this, it) }
+    ).also {
+        it.textField.document.addDocumentListener(object: DocumentAdapter() {
+            override fun textChanged(p0: DocumentEvent) {
+                dispatchUpdateUI()
+            }
+        })
+        Disposer.register(this, it)
+    }
     private val zlsConfigPath = textFieldWithBrowseButton(
         project,
         FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor()
             .withTitle(ZLSBundle.message("settings.zls-config-path.browse.title"))
     ).also { Disposer.register(this, it) }
+
+    private val zlsVersion = JBTextArea().also { it.isEditable = false }
+
+    private var debounce: Job? = null
 
     private val inlayHints = JBCheckBox()
     private val enable_snippets = JBCheckBox()
@@ -101,6 +126,9 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
                     if (DirenvCmd.direnvInstalled()) {
                         cell(direnv)
                     }
+                }
+                row(ZLSBundle.message("settings.zls-version.label")) {
+                    cell(zlsVersion)
                 }
                 fancyRow(
                     "settings.zls-config-path.label",
@@ -250,6 +278,7 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
             builtin_path.text = value.builtin_path ?: ""
             build_runner_path.text = value.build_runner_path ?: ""
             global_cache_path.text = value.global_cache_path ?: ""
+            dispatchUpdateUI()
         }
 
     private fun dispatchAutodetect(force: Boolean) {
@@ -265,18 +294,56 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
             getDirenv().findExecutableOnPATH("zls")?.let {
                 if (force || zlsPath.text.isBlank()) {
                     zlsPath.text = it.pathString
+                    dispatchUpdateUI()
                 }
             }
         }
     }
 
     override fun dispose() {
+        debounce?.cancel("Disposed")
     }
 
     private suspend fun getDirenv(): Env {
         if (!project.isDefault && DirenvCmd.direnvInstalled() && direnv.isSelected)
             return project.getDirenv()
         return emptyEnv
+    }
+
+    private fun dispatchUpdateUI() {
+        debounce?.cancel("New debounce")
+        debounce = project.zigCoroutineScope.launch {
+            updateUI()
+        }
+    }
+
+    private suspend fun updateUI() {
+        if (project.isDefault)
+            return
+        delay(200)
+        val zlsPath = this.zlsPath.text.ifBlank { null }?.toNioPathOrNull()
+        if (zlsPath == null) {
+            withEDTContext(ModalityState.any()) {
+                zlsVersion.text = "[zls path empty or invalid]"
+            }
+            return
+        }
+        val workingDir = project.guessProjectDir()?.toNioPathOrNull()
+        val result = createCommandLineSafe(workingDir, zlsPath, "version")
+            .map { it.withEnvironment(getDirenv().env) }
+            .mapFlat { it.call() }
+            .getOrElse { throwable ->
+                throwable.printStackTrace()
+                withEDTContext(ModalityState.any()) {
+                    zlsVersion.text = "[failed to run \"zls version\"]\n${throwable.message}"
+                }
+                return
+            }
+        val version = result.stdout
+        withEDTContext(ModalityState.any()) {
+            zlsVersion.text = version
+            zlsVersion.foreground = JBColor.foreground()
+        }
     }
 }
 

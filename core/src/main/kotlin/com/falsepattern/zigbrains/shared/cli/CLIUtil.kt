@@ -23,8 +23,19 @@
 package com.falsepattern.zigbrains.shared.cli
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.process.ProcessOutput
 import com.intellij.openapi.options.ConfigurationException
+import com.intellij.util.io.awaitExit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.pathString
 
 
 //From Apache Ant
@@ -99,5 +110,41 @@ fun coloredCliFlags(colored: Boolean, debug: Boolean): List<String> {
         emptyList()
     } else {
         listOf("--color", if (colored) "on" else "off")
+    }
+}
+
+fun createCommandLineSafe(
+    workingDirectory: Path?,
+    exe: Path,
+    vararg parameters: String,
+): Result<GeneralCommandLine> {
+    if (!exe.exists())
+        return Result.failure(IllegalArgumentException("file does not exist: ${exe.pathString}"))
+    if (exe.isDirectory())
+        return Result.failure(IllegalArgumentException("file is a directory: ${exe.pathString}"))
+    val cli = GeneralCommandLine()
+        .withExePath(exe.toString())
+        .withWorkingDirectory(workingDirectory)
+        .withParameters(*parameters)
+        .withCharset(Charsets.UTF_8)
+    return Result.success(cli)
+}
+
+suspend fun GeneralCommandLine.call(timeoutMillis: Long = Long.MAX_VALUE): Result<ProcessOutput> {
+    val (process, exitCode) = withContext(Dispatchers.IO) {
+        val process = createProcess()
+        val exit = withTimeoutOrNull(timeoutMillis) {
+            process.awaitExit()
+        }
+        process to exit
+    }
+    return runInterruptible {
+        Result.success(ProcessOutput(
+            process.inputStream.bufferedReader().use { it.readText() },
+            process.errorStream.bufferedReader().use { it.readText() },
+            exitCode ?: -1,
+            exitCode == null,
+            false
+        ))
     }
 }
