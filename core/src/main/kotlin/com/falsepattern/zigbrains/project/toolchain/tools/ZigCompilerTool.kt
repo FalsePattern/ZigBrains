@@ -27,6 +27,7 @@ import com.falsepattern.zigbrains.project.toolchain.ZigToolchainEnvironmentSeria
 import com.intellij.openapi.project.Project
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import java.lang.IllegalStateException
 import java.nio.file.Path
 
 class ZigCompilerTool(toolchain: AbstractZigToolchain) : ZigTool(toolchain) {
@@ -37,12 +38,12 @@ class ZigCompilerTool(toolchain: AbstractZigToolchain) : ZigTool(toolchain) {
         return toolchain.pathToExecutable(toolName)
     }
 
-    suspend fun getEnv(project: Project?): ZigToolchainEnvironmentSerializable? {
-        val stdout = callWithArgs(toolchain.workingDirectory(project), "env")?.stdout ?: return null
+    suspend fun getEnv(project: Project?): Result<ZigToolchainEnvironmentSerializable> {
+        val stdout = callWithArgs(toolchain.workingDirectory(project), "env").getOrElse { throwable -> return Result.failure(throwable) }.stdout
         return try {
-            envJson.decodeFromString<ZigToolchainEnvironmentSerializable>(stdout)
+            Result.success(envJson.decodeFromString<ZigToolchainEnvironmentSerializable>(stdout))
         } catch (e: SerializationException) {
-            null
+            Result.failure(IllegalStateException("could not deserialize zig env", e))
         }
     }
 }

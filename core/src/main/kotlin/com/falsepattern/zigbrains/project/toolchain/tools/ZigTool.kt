@@ -31,13 +31,15 @@ import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.nio.file.Path
-import kotlin.io.path.isRegularFile
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.pathString
 
 abstract class ZigTool(val toolchain: AbstractZigToolchain) {
     abstract val toolName: String
 
-    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE): ProcessOutput? {
-        val cli = createBaseCommandLine(workingDirectory, *parameters) ?: return null
+    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE): Result<ProcessOutput> {
+        val cli = createBaseCommandLine(workingDirectory, *parameters).let { it.getOrElse { return Result.failure(it) } }
 
         val (process, exitCode) = withContext(Dispatchers.IO) {
             val process = cli.createProcess()
@@ -47,28 +49,30 @@ abstract class ZigTool(val toolchain: AbstractZigToolchain) {
             process to exit
         }
         return runInterruptible {
-            ProcessOutput(
+            Result.success(ProcessOutput(
                 process.inputStream.bufferedReader().use { it.readText() },
                 process.errorStream.bufferedReader().use { it.readText() },
                 exitCode ?: -1,
                 exitCode == null,
                 false
-            )
+            ))
         }
     }
 
     private suspend fun createBaseCommandLine(
         workingDirectory: Path?,
         vararg parameters: String
-    ): GeneralCommandLine? {
+    ): Result<GeneralCommandLine> {
         val exe = toolchain.pathToExecutable(toolName)
-        if (!exe.isRegularFile())
-            return null
+        if (!exe.exists())
+            return Result.failure(IllegalArgumentException("file does not exist: ${exe.pathString}"))
+        if (exe.isDirectory())
+            return Result.failure(IllegalArgumentException("file is a directory: ${exe.pathString}"))
         val cli = GeneralCommandLine()
             .withExePath(exe.toString())
             .withWorkingDirectory(workingDirectory)
             .withParameters(*parameters)
             .withCharset(Charsets.UTF_8)
-        return toolchain.patchCommandLine(cli)
+        return Result.success(toolchain.patchCommandLine(cli))
     }
 }

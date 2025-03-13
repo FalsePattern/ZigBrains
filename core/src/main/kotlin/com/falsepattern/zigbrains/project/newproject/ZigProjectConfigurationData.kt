@@ -73,11 +73,10 @@ data class ZigProjectConfigurationData(
                         ).notify(project)
                         return@indeterminateStep false
                     }
-                    val result = zig.callWithArgs(workDir, "init")
-                    if (result == null) {
+                    val result = zig.callWithArgs(workDir, "init").getOrElse { throwable ->
                         Notification(
                             "zigbrains",
-                            "\"zig init\" could not run because the zig executable was missing!",
+                            "Failed to run \"zig init\": ${throwable.message}",
                             NotificationType.ERROR
                         ).notify(project)
                         return@indeterminateStep false
