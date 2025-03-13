@@ -55,6 +55,9 @@ class ZLSStartup: ProjectActivity {
                     EditorNotifications.getInstance(project).updateAllNotifications()
                 }
                 currentState = running
+                if (handleStartLSP(project)) {
+                    EditorNotifications.getInstance(project).updateAllNotifications()
+                }
                 delay(1000)
             }
         }

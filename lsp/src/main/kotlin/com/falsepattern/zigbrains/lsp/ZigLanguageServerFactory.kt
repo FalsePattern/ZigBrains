@@ -39,8 +39,11 @@ import com.redhat.devtools.lsp4ij.client.features.LSPClientFeatures
 import com.redhat.devtools.lsp4ij.client.features.LSPFormattingFeature
 import com.redhat.devtools.lsp4ij.client.features.LSPInlayHintFeature
 import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementSupport {
     override fun createConnectionProvider(project: Project): StreamConnectionProvider {
@@ -93,35 +96,67 @@ fun Project.zlsEnabled(value: Boolean) {
 suspend fun Project.zlsRunningAsync(): Boolean {
     if (!zlsEnabledAsync())
         return false
-    return zlsRunningLsp4ij()
+    return lsm.isRunning
 }
 
 fun Project.zlsRunningSync(): Boolean {
     if (!zlsEnabledSync())
         return false
-    return zlsRunningLsp4ij()
+    return lsm.isRunning
 }
 
-private fun Project.zlsRunningLsp4ij(): Boolean {
-    val manager = service<LanguageServerManager>()
-    val status = manager.getServerStatus("ZigBrains")
+private val Project.lsm get() = service<LanguageServerManager>()
+
+private val LanguageServerManager.isRunning get(): Boolean {
+    val status = getServerStatus("ZigBrains")
     return status == ServerStatus.started || status == ServerStatus.starting
 }
+
+private val START_MUTEX = Mutex()
 
 class ZLSStarter: LanguageServerStarter {
     override fun startLSP(project: Project, restart: Boolean) {
         project.zigCoroutineScope.launch {
-            val manager = project.service<LanguageServerManager>()
-            val status = manager.getServerStatus("ZigBrains")
-            if ((status == ServerStatus.started || status == ServerStatus.starting) && !restart)
-                return@launch
-            manager.stop("ZigBrains")
-            if (project.zlsSettings.validateAsync()) {
-                manager.start("ZigBrains")
+            START_MUTEX.withLock {
+                if (restart) {
+                    project.putUserData(RESTART_KEY, Unit)
+                } else {
+                    project.putUserData(START_KEY, Unit)
+                }
             }
         }
     }
+}
 
+private suspend fun doStart(project: Project, restart: Boolean) {
+    if (!restart && project.lsm.isRunning)
+        return
+    while (!project.isDisposed && project.lsm.isRunning) {
+        project.lsm.stop("ZigBrains")
+        delay(250)
+    }
+    if (project.zlsSettings.validateAsync()) {
+        delay(250)
+        project.lsm.start("ZigBrains")
+    }
+}
+
+suspend fun handleStartLSP(project: Project) = START_MUTEX.withLock {
+    if (project.getUserData(RESTART_KEY) != null) {
+        project.putUserData(RESTART_KEY, null)
+        project.putUserData(START_KEY, null)
+        doStart(project, true)
+        true
+    } else if (project.getUserData(START_KEY) != null) {
+        project.putUserData(START_KEY, null)
+        doStart(project, false)
+        true
+    } else {
+        false
+    }
 }
 
 private val ENABLED_KEY = Key.create<Boolean>("ZLS_ENABLED")
+
+private val RESTART_KEY = Key.create<Unit>("ZLS_RESTART_REQUEST")
+private val START_KEY = Key.create<Unit>("ZLS_START_REQUEST")
