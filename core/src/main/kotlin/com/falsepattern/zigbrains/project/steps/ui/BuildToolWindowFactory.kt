@@ -23,12 +23,13 @@
 package com.falsepattern.zigbrains.project.steps.ui
 
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import kotlinx.coroutines.launch
 
-class BuildToolWindowFactory: ToolWindowFactory {
+class BuildToolWindowFactory: ToolWindowFactory, DumbAware {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         project.zigCoroutineScope.launch {
             BuildToolWindowContext.create(project, toolWindow)

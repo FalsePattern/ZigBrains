@@ -39,6 +39,10 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
         private set
     var colored = ColoredConfigurable("colored")
         private set
+    var debugBuildSteps = ArgsConfigurable("debugBuildSteps", ZigBrainsBundle.message("exec.option.label.build.steps-debug"))
+        private set
+    var debugExtraArgs = ArgsConfigurable("debugCompilerArgs", ZigBrainsBundle.message("exec.option.label.build.args-debug"))
+        private set
     var exePath = FilePathConfigurable("exePath", ZigBrainsBundle.message("exec.option.label.build.exe-path-debug"))
         private set
     var exeArgs = ArgsConfigurable("exeArgs", ZigBrainsBundle.message("exec.option.label.build.exe-args-debug"))
@@ -48,23 +52,10 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
     override suspend fun buildCommandLineArgs(debug: Boolean): List<String> {
         val result = ArrayList<String>()
         result.add("build")
-        val argsSplit = buildSteps.argsSplit()
-        val steps = if (debug) {
-            val truncatedSteps = ArrayList<String>()
-            for (step in argsSplit) {
-                if (step == "run")
-                    continue
-
-                if (step == "test")
-                    throw ExecutionException(ZigBrainsBundle.message("exception.zig-build.debug.test-not-supported"))
-
-                truncatedSteps.add(step)
-            }
-            truncatedSteps
-        } else argsSplit
+        val steps = if (debug) debugBuildSteps.argsSplit() else buildSteps.argsSplit()
         result.addAll(steps)
         result.addAll(coloredCliFlags(colored.value, debug))
-        result.addAll(extraArgs.argsSplit())
+        result.addAll(if (debug) debugExtraArgs.argsSplit() else extraArgs.argsSplit())
         return result
     }
 
@@ -84,7 +75,7 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
     override fun getConfigurables(): List<ZigConfigurable<*>> {
         val baseCfg = super.getConfigurables() + listOf(buildSteps, extraArgs, colored)
         return if (ZBFeatures.debug()) {
-            baseCfg + listOf(exePath, exeArgs)
+            baseCfg + listOf(debugBuildSteps, debugExtraArgs, exePath, exeArgs)
         } else {
             baseCfg
         }

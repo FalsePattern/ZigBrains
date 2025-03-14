@@ -26,7 +26,9 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.run.ZigProcessHandler
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.shared.ipc.IPCUtil
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
+import com.falsepattern.zigbrains.shared.ipc.ipc
 import com.intellij.build.BuildTextConsoleView
 import com.intellij.execution.DefaultExecutionResult
 import com.intellij.execution.ExecutionException
@@ -36,6 +38,7 @@ import com.intellij.execution.configurations.PtyCommandLine
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.openapi.project.Project
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import kotlin.io.path.pathString
 
@@ -54,7 +57,7 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
     @Throws(ExecutionException::class)
     suspend fun startProcessSuspend(): ProcessHandler {
         val toolchain = environment.project.zigProjectSettings.state.toolchain ?: throw ExecutionException(ZigBrainsBundle.message("exception.zig-profile-state.start-process.no-toolchain"))
-        return ZigProcessHandler(getCommandLine(toolchain, false))
+        return startProcess(getCommandLine(toolchain, false), environment.project)
     }
 
     @Throws(ExecutionException::class)
@@ -74,16 +77,20 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
 }
 
 @Throws(ExecutionException::class)
-fun executeCommandLine(commandLine: GeneralCommandLine, environment: ExecutionEnvironment): DefaultExecutionResult {
-    val handler = startProcess(commandLine)
+suspend fun executeCommandLine(commandLine: GeneralCommandLine, environment: ExecutionEnvironment): DefaultExecutionResult {
+    val handler = startProcess(commandLine, environment.project)
     val console = BuildTextConsoleView(environment.project, false, emptyList())
     console.attachToProcess(handler)
     return DefaultExecutionResult(console, handler)
 }
 
 @Throws(ExecutionException::class)
-fun startProcess(commandLine: GeneralCommandLine): ProcessHandler {
-    val handler = ZigProcessHandler(commandLine)
+suspend fun startProcess(commandLine: GeneralCommandLine, project: Project): ProcessHandler {
+    val ipc = IPCUtil.wrapWithIPC(commandLine)
+    val handler = ZigProcessHandler(ipc?.cli ?: commandLine)
     ProcessTerminatedListener.attach(handler)
+    if (ipc != null) {
+        project.ipc?.launchWatcher(ipc, handler.process)
+    }
     return handler
 }

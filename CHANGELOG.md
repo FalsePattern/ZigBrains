@@ -17,6 +17,18 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [23.0.0]
+
+### Added
+
+- Project
+  - Zig std.Progress visualization in the zig tool window (Linux/macOS only)
+
+### Removed
+
+- Project
+  - Executable / Library new project templates temporarily removed until zig stabilizes
+
 ## [22.0.1]
 
 ### Fixed
