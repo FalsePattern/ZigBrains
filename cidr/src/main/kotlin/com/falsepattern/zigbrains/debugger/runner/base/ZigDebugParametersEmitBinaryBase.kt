@@ -54,7 +54,7 @@ abstract class ZigDebugParametersEmitBinaryBase<ProfileState: ZigProfileState<*>
         val exe = tmpDir.resolve("executable")
         commandLine.addParameters("-femit-bin=${exe.absolutePathString()}")
 
-        if (listener.executeCommandLineWithHook(commandLine))
+        if (listener.executeCommandLineWithHook(profileState.environment.project, commandLine))
             throw ExecutionException(ZigDebugBundle.message("debug.base.compile.failed.generic"))
 
         return withContext(Dispatchers.IO) {
