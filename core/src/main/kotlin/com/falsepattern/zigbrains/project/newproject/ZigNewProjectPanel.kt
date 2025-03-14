@@ -92,7 +92,7 @@ class ZigNewProjectPanel(private var handleGit: Boolean): Disposable {
 
 
 private val defaultTemplates get() = listOf(
-    ZigExecutableTemplate(),
-    ZigLibraryTemplate(),
+//    ZigExecutableTemplate(),
+//    ZigLibraryTemplate(),
     ZigInitTemplate()
 )

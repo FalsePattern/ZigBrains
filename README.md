@@ -38,6 +38,7 @@ and might as well utilize the full semver string for extra information.
 ## Supporters
 
 - ### [Techatrix](https://github.com/Techatrix)
+- ### [nuxusr](https://github.com/nuxusr)
 - gree7
 - xceno
 - AnErrupTion

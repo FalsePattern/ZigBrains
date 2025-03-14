@@ -82,6 +82,7 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
                 } catch (e: ExecutionException) {
                     console.print("\n", ConsoleViewContentType.ERROR_OUTPUT)
                     e.message?.let { listener.console.print(it, ConsoleViewContentType.SYSTEM_OUTPUT) }
+                    throw e;
                 }
                 if (listener.isBuildFailed) {
                     val executionResult = DefaultExecutionResult(console, listener.processHandler)

@@ -23,6 +23,8 @@
 package com.falsepattern.zigbrains.debugger.runner.base
 
 import com.falsepattern.zigbrains.project.run.ZigProcessHandler
+import com.falsepattern.zigbrains.shared.ipc.IPCUtil
+import com.falsepattern.zigbrains.shared.ipc.ipc
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ProcessEvent
@@ -30,6 +32,7 @@ import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
+import com.intellij.openapi.project.Project
 import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.io.awaitExit
 import kotlinx.coroutines.Dispatchers
@@ -43,9 +46,14 @@ class PreLaunchProcessListener(val console: ConsoleView) : ProcessListener {
         private set
 
     @Throws(ExecutionException::class)
-    suspend fun executeCommandLineWithHook(commandLine: GeneralCommandLine): Boolean {
+    suspend fun executeCommandLineWithHook(project: Project, commandLine: GeneralCommandLine): Boolean {
         return withProgressText(commandLine.commandLineString) {
-            val processHandler = ZigProcessHandler(commandLine)
+            val ipc = IPCUtil.wrapWithIPC(commandLine)
+            val cli = ipc?.cli ?: commandLine
+            val processHandler = ZigProcessHandler(cli)
+            if (ipc != null) {
+                project.ipc?.launchWatcher(ipc, processHandler.process)
+            }
             this@PreLaunchProcessListener.processHandler = processHandler
             hook(processHandler)
             processHandler.startNotify()
