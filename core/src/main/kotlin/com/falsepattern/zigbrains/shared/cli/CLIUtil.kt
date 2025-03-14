@@ -23,9 +23,12 @@
 package com.falsepattern.zigbrains.shared.cli
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.shared.ipc.IPCUtil
+import com.falsepattern.zigbrains.shared.ipc.ipc
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.openapi.options.ConfigurationException
+import com.intellij.openapi.project.Project
 import com.intellij.util.io.awaitExit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
@@ -130,9 +133,14 @@ fun createCommandLineSafe(
     return Result.success(cli)
 }
 
-suspend fun GeneralCommandLine.call(timeoutMillis: Long = Long.MAX_VALUE): Result<ProcessOutput> {
+suspend fun GeneralCommandLine.call(timeoutMillis: Long = Long.MAX_VALUE, ipcProject: Project? = null): Result<ProcessOutput> {
+    val ipc = if (ipcProject != null) IPCUtil.wrapWithIPC(this) else null
+    val cli = ipc?.cli ?: this
     val (process, exitCode) = withContext(Dispatchers.IO) {
-        val process = createProcess()
+        val process = cli.createProcess()
+        if (ipc != null) {
+            ipcProject!!.ipc?.launchWatcher(ipc, process)
+        }
         val exit = withTimeoutOrNull(timeoutMillis) {
             process.awaitExit()
         }

@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Project
+  - Zig std.Progress visualization in the zig tool window (Linux/macOS only)
+
 ## [22.0.1]
 
 ### Fixed

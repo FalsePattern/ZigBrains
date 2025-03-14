@@ -27,14 +27,15 @@ import com.falsepattern.zigbrains.shared.cli.call
 import com.falsepattern.zigbrains.shared.cli.createCommandLineSafe
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ProcessOutput
+import com.intellij.openapi.project.Project
 import java.nio.file.Path
 
 abstract class ZigTool(val toolchain: AbstractZigToolchain) {
     abstract val toolName: String
 
-    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE): Result<ProcessOutput> {
+    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE, ipcProject: Project? = null): Result<ProcessOutput> {
         val cli = createBaseCommandLine(workingDirectory, *parameters).let { it.getOrElse { return Result.failure(it) } }
-        return cli.call(timeoutMillis)
+        return cli.call(timeoutMillis, ipcProject = ipcProject)
     }
 
     private suspend fun createBaseCommandLine(

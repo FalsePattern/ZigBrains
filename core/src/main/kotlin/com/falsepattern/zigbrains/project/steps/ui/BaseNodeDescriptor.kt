@@ -28,7 +28,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.ui.SimpleTextAttributes
 import javax.swing.Icon
 
-open class BaseNodeDescriptor<T>(project: Project?, displayName: String, displayIcon: Icon, private var description: String? = null): PresentableNodeDescriptor<T>(project, null) {
+open class BaseNodeDescriptor<T>(project: Project?, displayName: String, displayIcon: Icon? = null, private var description: String? = null): PresentableNodeDescriptor<T>(project, null) {
     init {
         icon = displayIcon
         myName = displayName

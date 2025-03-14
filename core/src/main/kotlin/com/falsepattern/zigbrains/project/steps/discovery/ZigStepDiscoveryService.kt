@@ -83,7 +83,8 @@ class ZigStepDiscoveryService(private val project: Project) {
         val result = zig.callWithArgs(
             project.guessProjectDir()?.toNioPathOrNull(),
             "build", "-l",
-            timeoutMillis = currentTimeoutSec * 1000L
+            timeoutMillis = currentTimeoutSec * 1000L,
+            ipcProject = project
         ).getOrElse { throwable ->
             errorReload(ErrorType.MissingZigExe, throwable.message)
             null
@@ -106,7 +107,7 @@ class ZigStepDiscoveryService(private val project: Project) {
         } else if (result.isTimeout) {
             timeoutReload(currentTimeoutSec)
             currentTimeoutSec *= 2
-        } else if (result.stderrLines.any { it.contains("error: no build.zig file found, in the current directory or any parent directories") }) {
+        } else if (result.stderrLines.any { it.contains("error: no build.zig file found") }) {
             errorReload(ErrorType.MissingBuildZig, result.stderr)
         } else {
             errorReload(ErrorType.GeneralError, result.stderr)
@@ -158,6 +159,6 @@ val Project.zigStepDiscovery get() = service<ZigStepDiscoveryService>()
 
 private val SPACES = Regex("\\s+")
 
-private const val DEFAULT_TIMEOUT_SEC = 10
+private const val DEFAULT_TIMEOUT_SEC = 32
 
 private val LOG = Logger.getInstance(ZigStepDiscoveryService::class.java)

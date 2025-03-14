@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains.project.steps.ui
 
-import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.build.ZigConfigTypeBuild
 import com.falsepattern.zigbrains.project.execution.build.ZigExecConfigBuild
@@ -30,6 +29,10 @@ import com.falsepattern.zigbrains.project.execution.firstConfigFactory
 import com.falsepattern.zigbrains.project.steps.discovery.ZigStepDiscoveryListener
 import com.falsepattern.zigbrains.project.steps.discovery.zigStepDiscovery
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
+import com.falsepattern.zigbrains.shared.ipc.IPCUtil
+import com.falsepattern.zigbrains.shared.ipc.ZigIPCService
+import com.falsepattern.zigbrains.shared.ipc.ipc
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.execution.ProgramRunnerUtil
 import com.intellij.execution.RunManager
 import com.intellij.execution.RunnerAndConfigurationSettings
@@ -38,47 +41,58 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.wm.ToolWindow
-import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.AnimatedIcon
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
+import com.intellij.ui.components.panels.VerticalLayout
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.treeStructure.Tree
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
+import java.awt.Component
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 import javax.swing.SwingConstants
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
+import javax.swing.tree.MutableTreeNode
 import javax.swing.tree.TreePath
 
 
+@OptIn(ExperimentalUnsignedTypes::class)
 class BuildToolWindowContext(private val project: Project): Disposable {
-    val rootNode: DefaultMutableTreeNode = DefaultMutableTreeNode(BaseNodeDescriptor<Any>(project, project.name, AllIcons.Actions.ProjectDirectory))
-    private val buildZig: DefaultMutableTreeNode = DefaultMutableTreeNode(BaseNodeDescriptor<Any>(project, ZigBrainsBundle.message("build.tool.window.tree.steps.label"), Icons.Zig))
-    init {
-        rootNode.add(buildZig)
+    inner class TreeBox() {
+        val panel = JPanel(VerticalLayout(0))
+        val root = DefaultMutableTreeNode(BaseNodeDescriptor<Any>(project, ""))
+        val model = DefaultTreeModel(root)
+        val tree = Tree(model).also { it.isRootVisible = false }
     }
+    private val viewPanel = JPanel(VerticalLayout(0))
+    private val steps = TreeBox()
+    private val build = if (IPCUtil.haveIPC) TreeBox() else null
+    private var live = AtomicBoolean(true)
+    init {
+        viewPanel.add(JBLabel(ZigBrainsBundle.message("build.tool.window.tree.steps.label")))
+        viewPanel.add(steps.panel)
+        steps.panel.setNotScanned()
 
-    private fun setViewportTree(viewport: JBScrollPane) {
-        val model = DefaultTreeModel(rootNode)
-        val tree = Tree(model)
-        tree.expandPath(TreePath(model.getPathToRoot(buildZig)))
-        viewport.setViewportView(tree)
-        tree.addMouseListener(object : MouseAdapter() {
+        steps.tree.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 if (e.clickCount == 2) {
-                    val node = tree.lastSelectedPathComponent as? DefaultMutableTreeNode ?: return
+                    val node = steps.tree.lastSelectedPathComponent as? DefaultMutableTreeNode ?: return
                     val step = node.userObject as? StepNodeDescriptor ?: return
 
                     val stepName = step.element?.name ?: return
@@ -97,6 +111,58 @@ class BuildToolWindowContext(private val project: Project): Disposable {
                 }
             }
         })
+
+        if (build != null) {
+            viewPanel.add(JBLabel(ZigBrainsBundle.message("build.tool.window.tree.build.label")))
+            viewPanel.add(build.panel)
+            build.panel.setNoBuilds()
+
+            project.zigCoroutineScope.launch {
+                while (!project.isDisposed && live.get()) {
+                    val ipc = project.ipc ?: return@launch
+                    withTimeoutOrNull(1000) {
+                        ipc.changed.receive()
+                    } ?: continue
+                    ipc.mutex.withLock {
+                        withEDTContext(ModalityState.any()) {
+                            if (ipc.nodes.isEmpty()) {
+                                build.root.removeAllChildren()
+                                build.panel.setNoBuilds()
+                                return@withEDTContext
+                            }
+                            val allNodes = ArrayList(ipc.nodes)
+                            val existingNodes = ArrayList<ZigIPCService.IPCTreeNode>()
+                            val removedNodes = ArrayList<ZigIPCService.IPCTreeNode>()
+                            build.root.children().iterator().forEach { child ->
+                                if (child !is ZigIPCService.IPCTreeNode) {
+                                    return@forEach
+                                }
+                                if (child !in allNodes) {
+                                    removedNodes.add(child)
+                                } else {
+                                    existingNodes.add(child)
+                                }
+                            }
+                            val newNodes = ArrayList<MutableTreeNode>(allNodes)
+                            newNodes.removeAll(existingNodes)
+                            removedNodes.forEach { build.root.remove(it) }
+                            newNodes.forEach { build.root.add(it) }
+                            if (removedNodes.isNotEmpty() || newNodes.isNotEmpty()) {
+                                build.model.reload(build.root)
+                            }
+                            if (build.root.childCount == 0) {
+                                build.panel.setNoBuilds()
+                            } else {
+                                build.panel.setViewportBody(build.tree)
+                            }
+                            for (bn in allNodes) {
+                                expandRecursively(build, bn)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun createContentPanel(): Content {
@@ -120,51 +186,62 @@ class BuildToolWindowContext(private val project: Project): Disposable {
         c.weighty = 1.0
         c.fill = GridBagConstraints.BOTH
         val viewport = JBScrollPane()
-        viewport.setViewportNoContent()
+        viewport.setViewportView(viewPanel)
         body.add(viewport, c)
         val content = ContentFactory.getInstance().createContent(contentPanel, "", false)
-        content.putUserData(VIEWPORT, viewport)
         return content
     }
 
     override fun dispose() {
-
+        live.set(false)
     }
 
     companion object {
         suspend fun create(project: Project, window: ToolWindow) {
-            withEDTContext {
+            withEDTContext(ModalityState.any()) {
                 val context = BuildToolWindowContext(project)
                 Disposer.register(context, project.zigStepDiscovery.register(context.BuildReloadListener()))
                 Disposer.register(window.disposable, context)
                 window.contentManager.addContent(context.createContentPanel())
             }
         }
+
+        private fun expandRecursively(box: TreeBox, node: ZigIPCService.IPCTreeNode) {
+            if (node.changed) {
+                box.model.reload(node)
+                node.changed = false
+            }
+            box.tree.expandPath(TreePath(box.model.getPathToRoot(node)))
+            node.children().asIterator().forEach { child ->
+                (child as? ZigIPCService.IPCTreeNode)?.let { expandRecursively(box, it) }
+            }
+        }
     }
 
     inner class BuildReloadListener: ZigStepDiscoveryListener {
         override suspend fun preReload() {
-            getViewport(project)?.setViewportLoading()
+            steps.panel.setRunningZigBuild()
         }
 
-        override suspend fun postReload(steps: List<Pair<String, String?>>) {
-            buildZig.removeAllChildren()
-            for ((task, description) in steps) {
+        override suspend fun postReload(stepInfo: List<Pair<String, String?>>) {
+            steps.root.removeAllChildren()
+            for ((task, description) in stepInfo) {
                 val icon = when(task) {
                     "install" -> AllIcons.Actions.Install
                     "uninstall" -> AllIcons.Actions.Uninstall
                     else -> AllIcons.RunConfigurations.TestState.Run
                 }
-                buildZig.add(DefaultMutableTreeNode(StepNodeDescriptor(project, task, icon, description)))
+                steps.root.add(DefaultMutableTreeNode(StepNodeDescriptor(project, task, icon, description)))
             }
-            withEDTContext {
-                getViewport(project)?.let { setViewportTree(it) }
+            withEDTContext(ModalityState.any()) {
+                steps.model.reload(steps.root)
+                steps.panel.setViewportBody(steps.tree)
             }
         }
 
         override suspend fun errorReload(type: ZigStepDiscoveryListener.ErrorType, details: String?) {
-            withEDTContext {
-                getViewport(project)?.setViewportError(ZigBrainsBundle.message(when(type) {
+            withEDTContext(ModalityState.any()) {
+                steps.panel.setViewportError(ZigBrainsBundle.message(when(type) {
                     ZigStepDiscoveryListener.ErrorType.MissingToolchain -> "build.tool.window.status.error.missing-toolchain"
                     ZigStepDiscoveryListener.ErrorType.MissingZigExe -> "build.tool.window.status.error.missing-zig-exe"
                     ZigStepDiscoveryListener.ErrorType.MissingBuildZig -> "build.tool.window.status.error.missing-build-zig"
@@ -174,22 +251,32 @@ class BuildToolWindowContext(private val project: Project): Disposable {
         }
 
         override suspend fun timeoutReload(seconds: Int) {
-            withEDTContext {
-                getViewport(project)?.setViewportError(ZigBrainsBundle.message("build.tool.window.status.timeout", seconds), null)
+            withEDTContext(ModalityState.any()) {
+                steps.panel.setViewportError(ZigBrainsBundle.message("build.tool.window.status.timeout", seconds), null)
             }
         }
     }
 }
 
-private fun JBScrollPane.setViewportLoading() {
-    setViewportView(JBLabel(ZigBrainsBundle.message("build.tool.window.status.loading"), AnimatedIcon.Default(), SwingConstants.CENTER))
+private fun JPanel.setViewportBody(component: Component) {
+    removeAll()
+    add(component)
+    repaint()
 }
 
-private fun JBScrollPane.setViewportNoContent() {
-    setViewportView(JBLabel(ZigBrainsBundle.message("build.tool.window.status.not-scanned"), AllIcons.General.Information, SwingConstants.CENTER))
+private fun JPanel.setRunningZigBuild() {
+    setViewportBody(JBLabel(ZigBrainsBundle.message("build.tool.window.status.loading"), AnimatedIcon.Default(), SwingConstants.CENTER))
 }
 
-private fun JBScrollPane.setViewportError(msg: String, details: String?) {
+private fun JPanel.setNotScanned() {
+    setViewportBody(JBLabel(ZigBrainsBundle.message("build.tool.window.status.not-scanned"), AllIcons.General.Information, SwingConstants.CENTER))
+}
+
+private fun JPanel.setNoBuilds() {
+    setViewportBody(JBLabel(ZigBrainsBundle.message("build.tool.window.status.no-builds"), AllIcons.General.Information, SwingConstants.CENTER))
+}
+
+private fun JPanel.setViewportError(msg: String, details: String?) {
     val result = JPanel()
     result.layout = BoxLayout(result, BoxLayout.Y_AXIS)
     result.add(JBLabel(msg, AllIcons.General.Error, SwingConstants.CENTER))
@@ -200,14 +287,7 @@ private fun JBScrollPane.setViewportError(msg: String, details: String?) {
         val scroll = JBScrollPane(code)
         result.add(scroll)
     }
-    setViewportView(result)
-}
-
-private fun getViewport(project: Project): JBScrollPane? {
-    val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("zigbrains.build") ?: return null
-    val cm = toolWindow.contentManager
-    val content = cm.getContent(0) ?: return null
-    return content.getUserData(VIEWPORT)
+    setViewportBody(result)
 }
 
 private fun getExistingRunConfig(manager: RunManager, stepName: String): RunnerAndConfigurationSettings? {
@@ -222,5 +302,3 @@ private fun getExistingRunConfig(manager: RunManager, stepName: String): RunnerA
     }
     return null
 }
-
-private val VIEWPORT = Key.create<JBScrollPane>("MODEL")
