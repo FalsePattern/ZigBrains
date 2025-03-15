@@ -71,11 +71,10 @@ object IPCUtil {
         }
         //FIFO created, hack cli
         val exePath = cli.exePath
-        val argBuilder = StringBuilder()
-        argBuilder.append("exec {var}>${fifoFile.pathString}; ZIG_PROGRESS=\$var $exePath ${cli.parametersList.parametersString}; exec {var}>&-")
+        val args = "exec {var}>${fifoFile.pathString}; ZIG_PROGRESS=\$var $exePath ${cli.parametersList.parametersString}; exec {var}>&-"
         cli.withExePath("bash")
         cli.parametersList.clearAll()
-        cli.addParameters("-c", argBuilder.toString())
+        cli.addParameters("-c", args)
         return IPC(cli, fifoFile, fifo)
     }
 
