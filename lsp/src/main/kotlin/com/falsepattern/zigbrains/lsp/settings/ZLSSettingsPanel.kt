@@ -339,7 +339,7 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
                 }
                 return
             }
-        val version = result.stdout
+        val version = result.stdout.trim()
         withEDTContext(ModalityState.any()) {
             zlsVersion.text = version
             zlsVersion.foreground = JBColor.foreground()
