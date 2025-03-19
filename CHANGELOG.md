@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - mkfifo/bash for zig progress visualization is now detected more reliably (fixes error on macOS)
+
 ## [23.0.0]
 
 ### Added
