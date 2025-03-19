@@ -36,8 +36,10 @@ import static com.falsepattern.zigbrains.zig.psi.ZigTypes.*;
 %type IElementType
 %unicode
 
-CRLF=\R
-WHITE_SPACE=[\s]+
+WHITE_SPACE=\s+
+
+// visual studio parity
+LF=\r\n?|[\n\u0085\u2028\u2029]
 
 bin=[01]
 bin_="_"? {bin}
@@ -54,13 +56,13 @@ dec_int={dec} {dec_}*
 hex_int={hex} {hex_}*
 
 char_char= \\ .
-         | [^\'\n]
+         | [^\'\r\n\u0085\u2028\u2029]
 
 string_char= \\ .
-           | [^\"\n]
+           | [^\"\r\n\u0085\u2028\u2029]
 
-all_nl_wrap=[^\n]* [ \n]*
-all_no_nl=[^\n]+
+nl_wrap={LF} (\s|{LF})*
+all_no_nl=[^\r\n\u0085\u2028\u2029]+
 
 
 FLOAT= "0x" {hex_int} "." {hex_int} ([pP] [-+]? {dec_int})?
@@ -84,30 +86,35 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 %state UNT_SQUOT
 %state UNT_DQUOT
 
-%state CDOC_CMT
-%state DOC_CMT
-%state LINE_CMT
+%state CMT_LINE
+%state CMT_DOC
+%state CMT_CDOC
 %%
 
 //Comments
 
-<YYINITIAL>      "//!"                    { yybegin(CDOC_CMT); }
-<CDOC_CMT>       {all_nl_wrap} "//!"      { }
-<CDOC_CMT>       {all_no_nl}          { }
-<CDOC_CMT>       \n                       { yybegin(YYINITIAL); return CONTAINER_DOC_COMMENT; }
-<CDOC_CMT>       <<EOF>>                  { yybegin(YYINITIAL); return CONTAINER_DOC_COMMENT; }
+<YYINITIAL>      "//!"                    { yybegin(CMT_CDOC); }
+<YYINITIAL>      "////"                   { yybegin(CMT_LINE); }
+<YYINITIAL>      "///"                    { yybegin(CMT_DOC); }
+<YYINITIAL>      "//"                     { yybegin(CMT_LINE); }
 
-<YYINITIAL>      "///"                    { yybegin(DOC_CMT); }
-<DOC_CMT>        {all_nl_wrap} "///"      { }
-<DOC_CMT>        {all_no_nl}          { }
-<DOC_CMT>        \n                       { yybegin(YYINITIAL); return DOC_COMMENT; }
-<DOC_CMT>        <<EOF>>                  { yybegin(YYINITIAL); return DOC_COMMENT; }
+<CMT_LINE>       {all_no_nl}              { }
+<CMT_LINE>       {nl_wrap} "////"         { }
+<CMT_LINE>       {nl_wrap} "///"          { yypushback(yylength()); yybegin(YYINITIAL); return LINE_COMMENT; }
+<CMT_LINE>       {nl_wrap} "//"           { }
+<CMT_LINE>       {LF}                     { yybegin(YYINITIAL); return LINE_COMMENT; }
+<CMT_LINE>       <<EOF>>                  { yybegin(YYINITIAL); return LINE_COMMENT; }
 
-<YYINITIAL>      "//"                     { yybegin(LINE_CMT); }
-<LINE_CMT>       {all_nl_wrap} "//"       { }
-<LINE_CMT>       {all_no_nl}          { }
-<LINE_CMT>       \n                       { yybegin(YYINITIAL); return LINE_COMMENT; }
-<LINE_CMT>       <<EOF>>                  { yybegin(YYINITIAL); return LINE_COMMENT; }
+<CMT_DOC>        {all_no_nl}              { }
+<CMT_DOC>        {nl_wrap} "////"         { yypushback(yylength()); yybegin(YYINITIAL); return DOC_COMMENT; }
+<CMT_DOC>        {nl_wrap} "///"          { }
+<CMT_DOC>        {LF}                     { yybegin(YYINITIAL); return DOC_COMMENT; }
+<CMT_DOC>        <<EOF>>                  { yybegin(YYINITIAL); return DOC_COMMENT; }
+
+<CMT_CDOC>       {all_no_nl}              { }
+<CMT_CDOC>       {nl_wrap} "//!"          { }
+<CMT_CDOC>       {LF}                     { yybegin(YYINITIAL); return CONTAINER_DOC_COMMENT; }
+<CMT_CDOC>       <<EOF>>                  { yybegin(YYINITIAL); return CONTAINER_DOC_COMMENT; }
 
 //Symbols
 <YYINITIAL>      "&"                      { return AMPERSAND; }
@@ -227,23 +234,30 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <YYINITIAL>      "volatile"               { return KEYWORD_VOLATILE; }
 <YYINITIAL>      "while"                  { return KEYWORD_WHILE; }
 
+//Strings
+
 <YYINITIAL>      "'"                      { yybegin(CHAR_LIT); }
 <CHAR_LIT>       {char_char}*"'"          { yybegin(YYINITIAL); return CHAR_LITERAL; }
 <CHAR_LIT>       <<EOF>>                  { yybegin(YYINITIAL); return BAD_SQUOT; }
 <CHAR_LIT>       [^]                      { yypushback(1); yybegin(UNT_SQUOT); }
 
-<YYINITIAL>      {FLOAT}                  { return FLOAT; }
-<YYINITIAL>      {INTEGER}                { return INTEGER; }
-
 <YYINITIAL>      "\""                     { yybegin(STR_LIT); }
 <STR_LIT>        {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
 <STR_LIT>        <<EOF>>                  { yybegin(YYINITIAL); return BAD_DQUOT; }
 <STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
+
 <YYINITIAL>      "\\\\"                   { yybegin(STR_MULT_LINE); }
-<STR_MULT_LINE>  {all_nl_wrap} "\\\\"     { }
-<STR_MULT_LINE>  {all_no_nl}          { }
-<STR_MULT_LINE>  \n                       { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
+<STR_MULT_LINE>  {all_no_nl}              { }
+<STR_MULT_LINE>  {nl_wrap} "\\\\"         { }
+<STR_MULT_LINE>  {LF}                     { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
 <STR_MULT_LINE>  <<EOF>>                  { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
+
+//Numbers
+
+<YYINITIAL>      {FLOAT}                  { return FLOAT; }
+<YYINITIAL>      {INTEGER}                { return INTEGER; }
+
+//Identifiers
 
 <YYINITIAL>      {IDENTIFIER_PLAIN}       { return IDENTIFIER; }
 <YYINITIAL>      "@\""                    { yybegin(ID_QUOT); }
@@ -253,12 +267,16 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 <YYINITIAL>      {BUILTINIDENTIFIER}      { return BUILTINIDENTIFIER; }
 
+//Error handling
+
 <UNT_SQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_SQUOT; }
-<UNT_SQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_SQUOT; }
+<UNT_SQUOT>       {LF}                    { yybegin(YYINITIAL); return BAD_SQUOT; }
 <UNT_SQUOT>       {all_no_nl}             { }
 <UNT_DQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_DQUOT; }
-<UNT_DQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_DQUOT; }
+<UNT_DQUOT>       {LF}                    { yybegin(YYINITIAL); return BAD_DQUOT; }
 <UNT_DQUOT>       {all_no_nl}             { }
+
+//Misc
 
 <YYINITIAL>      {WHITE_SPACE}            { return WHITE_SPACE; }
 

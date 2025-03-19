@@ -36,8 +36,10 @@ import static com.falsepattern.zigbrains.zon.psi.ZonTypes.*;
 %type IElementType
 %unicode
 
-CRLF=\R
-WHITE_SPACE=[\s]+
+WHITE_SPACE=\s+
+
+// visual studio parity
+LF=\r\n?|[\n\u0085\u2028\u2029]
 
 bin=[01]
 bin_="_"? {bin}
@@ -54,13 +56,13 @@ dec_int={dec} {dec_}*
 hex_int={hex} {hex_}*
 
 char_char= \\ .
-         | [^\'\n]
+         | [^\'\r\n\u0085\u2028\u2029]
 
 string_char= \\ .
-           | [^\"\n]
+           | [^\"\r\n\u0085\u2028\u2029]
 
-all_nl_wrap=[^\n]* [ \n]*
-all_no_nl=[^\n]+
+nl_wrap={LF} (\s|{LF})*
+all_no_nl=[^\r\n\u0085\u2028\u2029]+
 
 
 FLOAT= "0x" {hex_int} "." {hex_int} ([pP] [-+]? {dec_int})?
@@ -83,16 +85,16 @@ IDENTIFIER_PLAIN=[A-Za-z_][A-Za-z0-9_]*
 %state UNT_SQUOT
 %state UNT_DQUOT
 
-%state LINE_CMT
+%state CMT_LINE
 %%
 
 //Comments
 
-<YYINITIAL>      "//"                     { yybegin(LINE_CMT); }
-<LINE_CMT>       {all_nl_wrap} "//"       { }
-<LINE_CMT>       {all_no_nl}          { }
-<LINE_CMT>       \n                       { yybegin(YYINITIAL); return LINE_COMMENT; }
-<LINE_CMT>       <<EOF>>                  { yybegin(YYINITIAL); return LINE_COMMENT; }
+<YYINITIAL>      "//"                     { yybegin(CMT_LINE); }
+<CMT_LINE>       {all_no_nl}              { }
+<CMT_LINE>       {nl_wrap} "//"           { }
+<CMT_LINE>       \R                       { yybegin(YYINITIAL); return LINE_COMMENT; }
+<CMT_LINE>       <<EOF>>                  { yybegin(YYINITIAL); return LINE_COMMENT; }
 
 //Symbols
 
@@ -123,9 +125,9 @@ IDENTIFIER_PLAIN=[A-Za-z_][A-Za-z0-9_]*
 <STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
 
 <YYINITIAL>      "\\\\"                   { yybegin(STR_MULT_LINE); }
-<STR_MULT_LINE>  {all_nl_wrap} "\\\\"     { }
 <STR_MULT_LINE>  {all_no_nl}              { }
-<STR_MULT_LINE>  \n                       { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
+<STR_MULT_LINE>  {nl_wrap} "\\\\"         { }
+<STR_MULT_LINE>  {LF}                     { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
 <STR_MULT_LINE>  <<EOF>>                  { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
 
 //Numbers
@@ -144,10 +146,10 @@ IDENTIFIER_PLAIN=[A-Za-z_][A-Za-z0-9_]*
 //Error handling
 
 <UNT_SQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_SQUOT; }
-<UNT_SQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_SQUOT; }
+<UNT_SQUOT>       {LF}                    { yybegin(YYINITIAL); return BAD_SQUOT; }
 <UNT_SQUOT>       {all_no_nl}             { }
 <UNT_DQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_DQUOT; }
-<UNT_DQUOT>       {CRLF}                  { yybegin(YYINITIAL); return BAD_DQUOT; }
+<UNT_DQUOT>       {LF}                    { yybegin(YYINITIAL); return BAD_DQUOT; }
 <UNT_DQUOT>       {all_no_nl}             { }
 
 //Misc
