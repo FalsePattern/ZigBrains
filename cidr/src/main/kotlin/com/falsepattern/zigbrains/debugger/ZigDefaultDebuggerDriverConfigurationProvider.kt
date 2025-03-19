@@ -27,6 +27,7 @@ import com.falsepattern.zigbrains.debugger.toolchain.*
 import com.falsepattern.zigbrains.debugger.win.MSVCDriverConfiguration
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.zig.ZigLanguage
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DoNotAskOption
 import com.intellij.openapi.ui.MessageDialogBuilder
@@ -85,7 +86,7 @@ private suspend fun availabilityCheck(project: Project, kind: DebuggerKind): Boo
     }
 
     if (downloadDebugger) {
-        val result = withEDTContext {
+        val result = withEDTContext(ModalityState.any()) {
             service.downloadDebugger(project, kind)
         }
         if (result is ZigDebuggerToolchainService.DownloadResult.Ok) {
@@ -104,7 +105,7 @@ private suspend fun showDialog(project: Project, message: String, action: String
         }
     }
 
-    return withEDTContext {
+    return withEDTContext(ModalityState.any()) {
         MessageDialogBuilder
             .okCancel(ZigDebugBundle.message("debugger.run.unavailable"), message)
             .yesText(action)

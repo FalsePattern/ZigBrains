@@ -39,9 +39,8 @@ import org.eclipse.lsp4j.jsonrpc.debug.messages.DebugResponseMessage
 import org.eclipse.lsp4j.jsonrpc.messages.Message
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import java.io.InputStream
-import java.lang.RuntimeException
 import java.security.MessageDigest
-import java.util.Base64
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.zip.Inflater
 

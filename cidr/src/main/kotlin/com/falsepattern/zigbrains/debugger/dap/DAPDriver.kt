@@ -26,11 +26,7 @@ import com.falsepattern.zigbrains.project.run.ZigProcessHandler
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.PtyCommandLine
-import com.intellij.execution.process.BaseProcessHandler
-import com.intellij.execution.process.ProcessAdapter
-import com.intellij.execution.process.ProcessEvent
-import com.intellij.execution.process.ProcessListener
-import com.intellij.execution.process.ProcessOutputType
+import com.intellij.execution.process.*
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.KeyWithDefaultValue
 import com.intellij.openapi.util.io.toNioPathOrNull
@@ -45,9 +41,12 @@ import com.jetbrains.cidr.execution.debugger.memory.AddressRange
 import com.jetbrains.cidr.system.HostMachine
 import com.jetbrains.cidr.system.LocalHost
 import io.ktor.util.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.coroutines.future.asDeferred
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.eclipse.lsp4j.debug.*
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer
@@ -58,8 +57,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.OutputStream
 import java.io.PipedOutputStream
-import java.lang.Exception
-import java.util.TreeMap
+import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import kotlin.math.min

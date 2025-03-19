@@ -17,6 +17,14 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [23.0.1]
+
+### Fixed
+
+- Project
+  - mkfifo/bash for zig progress visualization is now detected more reliably (fixes error on macOS)
+  - Deadlock when launching zig build tasks
+
 ## [23.0.0]
 
 ### Added

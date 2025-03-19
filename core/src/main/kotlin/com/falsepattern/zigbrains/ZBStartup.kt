@@ -23,8 +23,6 @@
 package com.falsepattern.zigbrains
 
 import com.falsepattern.zigbrains.direnv.DirenvCmd
-import com.falsepattern.zigbrains.direnv.emptyEnv
-import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider

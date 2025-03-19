@@ -27,55 +27,105 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.util.io.awaitExit
-import java.io.File
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
+import java.nio.charset.Charset
 import java.nio.file.Path
-import javax.swing.tree.DefaultMutableTreeNode
 import kotlin.io.path.deleteIfExists
+import kotlin.io.path.inputStream
 import kotlin.io.path.pathString
 
 /**
  * Zig build progress node IPC glue code
  */
 object IPCUtil {
-    val haveIPC = checkHaveIPC()
 
-    private fun checkHaveIPC(): Boolean {
+    val haveIPC: Boolean get() = info != null
+
+    @JvmRecord
+    data class IPCInfo(val mkfifo: MKFifo, val bash: String)
+
+    private val info: IPCInfo? by lazy { runBlocking {
+        createInfo()
+    } }
+
+    private suspend fun createInfo(): IPCInfo? {
         if (SystemInfo.isWindows) {
-            return false;
+            return null
         }
-        val mkfifo = emptyEnv.findExecutableOnPATH("mkfifo")
-        val bash = emptyEnv.findExecutableOnPATH("bash")
-        return mkfifo != null && bash != null
-    }
+        val mkfifo = emptyEnv
+            .findAllExecutablesOnPATH("mkfifo")
+            .map { it.pathString }
+            .map(::MKFifo)
+            .toList()
+            .find { mkfifo ->
+                val fifo = mkfifo.createTemp() ?: return@find false
+                fifo.second.close()
+                true
+            } ?: return null
 
-    private suspend fun mkfifo(path: Path): AutoCloseable? {
-        val cli = GeneralCommandLine("mkfifo", path.pathString)
-        val process = cli.createProcess()
-        val exitCode = process.awaitExit()
-        return if (exitCode == 0) AutoCloseable {
-            path.deleteIfExists()
-        } else null
-    }
+        val selectedBash = emptyEnv
+            .findAllExecutablesOnPATH("bash")
+            .map { it.pathString }
+            .filter {
+                val cli = GeneralCommandLine(it)
+                val tmpFile = FileUtil.createTempFile("zigbrains-bash-detection", null, true).toPath()
+                try {
+                    cli.addParameters("-c", "exec {var}>${tmpFile.pathString}; echo foo >&\$var; exec {var}>&-")
+                    val process = cli.createProcess()
+                    val exitCode = process.awaitExit()
+                    if (exitCode != 0) {
+                        return@filter false
+                    }
+                    val text = tmpFile.inputStream().use { it.readAllBytes().toString(Charset.defaultCharset()).trim() }
+                    if (text != "foo") {
+                        return@filter false
+                    }
+                    true
+                } finally {
+                    tmpFile.deleteIfExists()
+                }
+            }
+            .firstOrNull() ?: return null
 
-    data class IPC(val cli: GeneralCommandLine, val fifoPath: Path, val fifoClose: AutoCloseable)
+        return IPCInfo(mkfifo, selectedBash)
+    }
 
     suspend fun wrapWithIPC(cli: GeneralCommandLine): IPC? {
         if (!haveIPC)
             return null
-        val fifoFile = FileUtil.createTempFile("zigbrains-ipc-pipe", null, true).toPath()
-        fifoFile.deleteIfExists()
-        val fifo = mkfifo(fifoFile)
-        if (fifo == null) {
-            fifoFile.deleteIfExists()
-            return null
-        }
+        val (fifoFile, fifo) = info!!.mkfifo.createTemp() ?: return null
         //FIFO created, hack cli
         val exePath = cli.exePath
         val args = "exec {var}>${fifoFile.pathString}; ZIG_PROGRESS=\$var $exePath ${cli.parametersList.parametersString}; exec {var}>&-"
-        cli.withExePath("bash")
+        cli.withExePath(info!!.bash)
         cli.parametersList.clearAll()
         cli.addParameters("-c", args)
         return IPC(cli, fifoFile, fifo)
     }
 
+    @JvmRecord
+    data class MKFifo(val exe: String) {
+        suspend fun createTemp(): Pair<Path, AutoCloseable>? {
+            val fifoFile = FileUtil.createTempFile("zigbrains-ipc-pipe", null, true).toPath()
+            fifoFile.deleteIfExists()
+            val fifo = create(fifoFile)
+            if (fifo == null) {
+                fifoFile.deleteIfExists()
+                return null
+            }
+            return Pair(fifoFile, fifo)
+        }
+        suspend fun create(path: Path): AutoCloseable? {
+            val cli = GeneralCommandLine(exe, path.pathString)
+            val process = cli.createProcess()
+            val exitCode = process.awaitExit()
+            return if (exitCode == 0) AutoCloseable {
+                path.deleteIfExists()
+            } else null
+        }
+    }
 }

@@ -27,10 +27,8 @@ import com.falsepattern.zigbrains.debugger.settings.MSVCDownloadPermission
 import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings
 import com.falsepattern.zigbrains.debugger.toolchain.ZigDebuggerToolchainService.Companion.downloadPath
 import com.falsepattern.zigbrains.shared.coroutine.withCurrentEDTModalityContext
-import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.platform.util.progress.withProgressText
