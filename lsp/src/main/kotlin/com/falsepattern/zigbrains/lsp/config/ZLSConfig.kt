@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains.lsp.config
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.annotations.NonNls
 

@@ -26,7 +26,6 @@ import com.falsepattern.zigbrains.project.steps.ui.BaseNodeDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.util.asSafely
 import java.io.DataInput
-import javax.swing.tree.DefaultMutableTreeNode
 
 data class Payload(val completed: UInt, val estimatedTotal: UInt, val name: String, var children: ArrayList<Payload> = ArrayList()) {
     companion object {

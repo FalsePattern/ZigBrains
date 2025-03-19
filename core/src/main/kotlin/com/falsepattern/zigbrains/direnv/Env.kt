@@ -29,7 +29,10 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import org.jetbrains.annotations.NonNls
 import java.io.File
-import kotlin.io.path.*
+import kotlin.io.path.absolute
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isExecutable
+import kotlin.io.path.isRegularFile
 
 data class Env(val env: Map<String, String>) {
     private val path get() = getVariable("PATH")?.split(File.pathSeparatorChar)
