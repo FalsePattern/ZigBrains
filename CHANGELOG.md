@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [23.0.1]
+
 ### Fixed
 
 - Project
