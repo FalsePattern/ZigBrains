@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [23.0.2]
+
+### Fixed
+
+- Zig
+  - Documentation comment after regular comment was being highlighted as regular comment
+
 ## [23.0.1]
 
 ### Fixed
