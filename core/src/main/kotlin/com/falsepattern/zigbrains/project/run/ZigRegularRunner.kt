@@ -32,12 +32,13 @@ import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.RunContentBuilder
 import com.intellij.execution.ui.RunContentDescriptor
+import com.intellij.openapi.application.ModalityState
 
 class ZigRegularRunner: ZigProgramRunner<ZigProfileState<*>>(DefaultRunExecutor.EXECUTOR_ID) {
     override suspend fun execute(state: ZigProfileState<*>, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor? {
         val cli = state.getCommandLine(toolchain, false)
         val exec = executeCommandLine(cli, environment)
-        return withEDTContext {
+        return withEDTContext(ModalityState.any()) {
             val runContentBuilder = RunContentBuilder(exec, environment)
             runContentBuilder.showRunContent(null)
         }
