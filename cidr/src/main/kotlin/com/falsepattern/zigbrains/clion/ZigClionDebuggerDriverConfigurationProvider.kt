@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.clion
 
 import com.falsepattern.zigbrains.debugger.ZigDebuggerDriverConfigurationProvider
 import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo

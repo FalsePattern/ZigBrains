@@ -49,7 +49,6 @@ import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguratio
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.nio.file.Path

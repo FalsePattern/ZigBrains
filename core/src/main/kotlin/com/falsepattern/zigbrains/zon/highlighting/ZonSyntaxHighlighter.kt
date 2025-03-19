@@ -22,8 +22,6 @@
 
 package com.falsepattern.zigbrains.zon.highlighting
 
-import com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter
-import com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.Companion
 import com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.Companion.BAD_CHAR
 import com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.Companion.CHAR
 import com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.Companion.COMMENT
@@ -35,16 +33,12 @@ import com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.Companion
 import com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter.Companion.STRING_ESC_V
 import com.falsepattern.zigbrains.zig.psi.ZigTypes
 import com.falsepattern.zigbrains.zon.lexer.ZonHighlightingLexer
-import com.falsepattern.zigbrains.zon.lexer.ZonLexerAdapter
 import com.falsepattern.zigbrains.zon.psi.ZonTypes
-import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.StringEscapesTokenTypes
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
-import org.jetbrains.annotations.NonNls
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as DefaultColors
 
 class ZonSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getHighlightingLexer() = ZonHighlightingLexer()

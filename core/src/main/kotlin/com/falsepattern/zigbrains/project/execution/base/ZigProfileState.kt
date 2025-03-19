@@ -26,8 +26,8 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.run.ZigProcessHandler
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
-import com.falsepattern.zigbrains.shared.ipc.IPCUtil
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
+import com.falsepattern.zigbrains.shared.ipc.IPCUtil
 import com.falsepattern.zigbrains.shared.ipc.ipc
 import com.intellij.build.BuildTextConsoleView
 import com.intellij.execution.DefaultExecutionResult

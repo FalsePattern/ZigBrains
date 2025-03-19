@@ -22,14 +22,11 @@
 
 package com.falsepattern.zigbrains.shared.ipc
 
-import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.project.steps.ui.BaseNodeDescriptor
-import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.ipc.Payload.Companion.readPayload
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.google.common.io.LittleEndianDataInputStream
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -93,7 +90,7 @@ class ZigIPCService(val project: Project) {
         return roots
     }
 
-    private suspend fun watch(ipc: IPCUtil.IPC, process: Process) {
+    private suspend fun watch(ipc: IPC, process: Process) {
         val currentNode = IPCTreeNode(BaseNodeDescriptor<Any>(project, "pid: ${process.pid()}", AllIcons.Actions.InlayGear))
         mutex.withLock {
             nodes.add(currentNode)
@@ -125,7 +122,7 @@ class ZigIPCService(val project: Project) {
         }
     }
 
-    fun launchWatcher(ipc: IPCUtil.IPC, process: Process) {
+    fun launchWatcher(ipc: IPC, process: Process) {
         project.zigCoroutineScope.launch {
             watch(ipc, process)
         }

@@ -27,7 +27,6 @@ import com.falsepattern.zigbrains.project.toolchain.ZigToolchainEnvironmentSeria
 import com.intellij.openapi.project.Project
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import java.lang.IllegalStateException
 import java.nio.file.Path
 
 class ZigCompilerTool(toolchain: AbstractZigToolchain) : ZigTool(toolchain) {

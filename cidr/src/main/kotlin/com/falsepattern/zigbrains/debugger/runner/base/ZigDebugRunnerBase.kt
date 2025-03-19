@@ -40,6 +40,7 @@ import com.intellij.execution.runners.RunContentBuilder
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.RunContentDescriptor
+import com.intellij.openapi.application.ModalityState
 import com.intellij.platform.util.progress.reportProgress
 import com.intellij.xdebugger.XDebugProcess
 import com.intellij.xdebugger.XDebugProcessStarter
@@ -86,7 +87,7 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
                 }
                 if (listener.isBuildFailed) {
                     val executionResult = DefaultExecutionResult(console, listener.processHandler)
-                    return@reportProgress withEDTContext {
+                    return@reportProgress withEDTContext(ModalityState.any()) {
                         val runContentBuilder = RunContentBuilder(executionResult, environment)
                         runContentBuilder.showRunContent(null)
                     }

@@ -25,10 +25,14 @@ package com.falsepattern.zigbrains.direnv
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.util.EnvironmentUtil
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
 import org.jetbrains.annotations.NonNls
 import java.io.File
-import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.absolute
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isExecutable
+import kotlin.io.path.isRegularFile
 
 data class Env(val env: Map<String, String>) {
     private val path get() = getVariable("PATH")?.split(File.pathSeparatorChar)
@@ -36,9 +40,11 @@ data class Env(val env: Map<String, String>) {
     private fun getVariable(name: @NonNls String) =
         env.getOrElse(name) { EnvironmentUtil.getValue(name) }
 
-    fun findExecutableOnPATH(exe: @NonNls String): Path? {
+    suspend fun findExecutableOnPATH(exe: @NonNls String) = findAllExecutablesOnPATH(exe).firstOrNull()
+
+    fun findAllExecutablesOnPATH(exe: @NonNls String) = flow {
         val exeName = if (SystemInfo.isWindows) "$exe.exe" else exe
-        val paths = path ?: return null
+        val paths = path ?: return@flow
         for (dir in paths) {
             val path = dir.toNioPathOrNull()?.absolute() ?: continue
             if (!path.toFile().exists() || !path.isDirectory())
@@ -46,9 +52,8 @@ data class Env(val env: Map<String, String>) {
             val exePath = path.resolve(exeName).absolute()
             if (!exePath.isRegularFile() || !exePath.isExecutable())
                 continue
-            return exePath
+            emit(exePath)
         }
-        return null
     }
 }
 

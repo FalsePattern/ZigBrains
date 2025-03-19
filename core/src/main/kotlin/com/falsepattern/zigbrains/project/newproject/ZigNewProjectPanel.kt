@@ -23,9 +23,7 @@
 package com.falsepattern.zigbrains.project.newproject
 
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
-import com.falsepattern.zigbrains.project.template.ZigExecutableTemplate
 import com.falsepattern.zigbrains.project.template.ZigInitTemplate
-import com.falsepattern.zigbrains.project.template.ZigLibraryTemplate
 import com.falsepattern.zigbrains.project.template.ZigProjectTemplate
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionToolbarPosition
