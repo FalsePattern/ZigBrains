@@ -34,8 +34,8 @@ class ZigCoreProjectConfigurationProvider: ZigProjectConfigurationProvider {
         return ZigProjectConfigurable(project)
     }
 
-    override fun createNewProjectSettingsPanel(): ZigProjectConfigurationProvider.SettingsPanel {
-        return ZigProjectSettingsPanel(ProjectManager.getInstance().defaultProject)
+    override fun createNewProjectSettingsPanel(holder: ZigProjectConfigurationProvider.SettingsPanelHolder): ZigProjectConfigurationProvider.SettingsPanel {
+        return ZigProjectSettingsPanel(holder, ProjectManager.getInstance().defaultProject)
     }
 
     override val priority: Int

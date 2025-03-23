@@ -205,6 +205,7 @@ publishVersions.forEach {
         archiveFile = distFile(it)
         token = providers.environmentVariable("IJ_PUBLISH_TOKEN")
         channels = if (pluginVersion.contains("-")) listOf("nightly") else listOf("default")
+        setDependsOn(dependsOn.filter { if (it is TaskProvider<*>) it.name != "signPlugin" && it.name != "buildPlugin" else true })
     }
     tasks.named("publish").configure {
         dependsOn("jbpublish-$it")

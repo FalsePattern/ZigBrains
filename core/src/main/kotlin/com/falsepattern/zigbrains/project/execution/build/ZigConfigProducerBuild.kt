@@ -25,6 +25,7 @@ package com.falsepattern.zigbrains.project.execution.build
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigProducer
 import com.falsepattern.zigbrains.project.execution.firstConfigFactory
+import com.falsepattern.zigbrains.zig.psi.ZigFile
 import com.intellij.execution.actions.ConfigurationFromContext
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.openapi.vfs.VirtualFile
@@ -36,15 +37,14 @@ class ZigConfigProducerBuild: ZigConfigProducer<ZigExecConfigBuild>() {
         return firstConfigFactory<ZigConfigTypeBuild>()
     }
 
-    override fun setupConfigurationFromContext(configuration: ZigExecConfigBuild, element: PsiElement, filePath: Path, theFile: VirtualFile): Boolean {
-        if (LINE_MARKER.elementMatches(element)) {
-            configuration.name = ZigBrainsBundle.message("configuration.build.marker-name")
-            return true
-        }
-        return false
+    override fun setupConfigurationFromContext(configuration: ZigExecConfigBuild, element: PsiElement, psiFile: ZigFile, filePath: Path, theFile: VirtualFile): Boolean {
+        if (theFile.name != "build.zig")
+            return false
+        configuration.name = ZigBrainsBundle.message("configuration.build.marker-name")
+        return true
     }
 
-    override fun isConfigurationFromContext(configuration: ZigExecConfigBuild, element: PsiElement, filePath: Path, theFile: VirtualFile): Boolean {
+    override fun isConfigurationFromContext(configuration: ZigExecConfigBuild, element: PsiElement, psiFile: ZigFile, filePath: Path, theFile: VirtualFile): Boolean {
         return filePath.parent == (configuration.workingDirectory.path ?: return false)
     }
 
@@ -52,5 +52,3 @@ class ZigConfigProducerBuild: ZigConfigProducer<ZigExecConfigBuild>() {
         return self.configurationType is ZigConfigTypeBuild
     }
 }
-
-private val LINE_MARKER = ZigLineMarkerBuild()

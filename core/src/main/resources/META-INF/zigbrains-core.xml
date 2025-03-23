@@ -193,10 +193,14 @@
         <action
                 id="zigbrains.file.new"
                 class="com.falsepattern.zigbrains.project.actions.ZigNewFileAction"
-                icon="com.falsepattern.zigbrains.Icons.Zig"
-        >
+                icon="com.falsepattern.zigbrains.Icons.Zig">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="FileTemplateSeparatorGroup"/>
         </action>
+        <!--suppress PluginXmlValidity -->
+        <action id="zigbrains.file.run"
+                class="com.falsepattern.zigbrains.project.actions.ZigRunFileAction"
+                icon="AllIcons.RunConfigurations.TestState.Run"
+                use-shortcut-of="RunClass"/>
     </actions>
     <!-- endregion Project -->
 

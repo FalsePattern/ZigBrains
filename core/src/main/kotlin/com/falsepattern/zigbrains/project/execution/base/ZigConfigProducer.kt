@@ -41,7 +41,7 @@ abstract class ZigConfigProducer<T: ZigExecConfig<T>>: LazyRunConfigurationProdu
         val psiFile = element.containingFile as? ZigFile ?: return false
         val theFile = psiFile.virtualFile ?: return false
         val filePath = theFile.toNioPathOrNull() ?: return false
-        return setupConfigurationFromContext(configuration, element, filePath, theFile)
+        return setupConfigurationFromContext(configuration, element, psiFile, filePath, theFile)
     }
 
     override fun isConfigurationFromContext(configuration: T, context: ConfigurationContext): Boolean {
@@ -49,7 +49,7 @@ abstract class ZigConfigProducer<T: ZigExecConfig<T>>: LazyRunConfigurationProdu
         val psiFile = element.containingFile as? ZigFile ?: return false
         val theFile = psiFile.virtualFile ?: return false
         val filePath = theFile.toNioPathOrNull() ?: return false
-        return isConfigurationFromContext(configuration, element, filePath, theFile)
+        return isConfigurationFromContext(configuration, element, psiFile, filePath, theFile)
     }
 
     /*
@@ -78,7 +78,7 @@ abstract class ZigConfigProducer<T: ZigExecConfig<T>>: LazyRunConfigurationProdu
     }
      */
 
-    protected abstract fun setupConfigurationFromContext(configuration: T, element: PsiElement, filePath: Path, theFile: VirtualFile): Boolean
-    protected abstract fun isConfigurationFromContext(configuration: T, element: PsiElement, filePath: Path, theFile: VirtualFile): Boolean
+    protected abstract fun setupConfigurationFromContext(configuration: T, element: PsiElement, psiFile: ZigFile, filePath: Path, theFile: VirtualFile): Boolean
+    protected abstract fun isConfigurationFromContext(configuration: T, element: PsiElement, psiFile: ZigFile, filePath: Path, theFile: VirtualFile): Boolean
     abstract override fun shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean
 }

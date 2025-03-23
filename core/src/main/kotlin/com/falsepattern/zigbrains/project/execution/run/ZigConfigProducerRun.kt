@@ -24,10 +24,13 @@ package com.falsepattern.zigbrains.project.execution.run
 
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigProducer
 import com.falsepattern.zigbrains.project.execution.firstConfigFactory
+import com.falsepattern.zigbrains.zig.psi.ZigContainerMembers
+import com.falsepattern.zigbrains.zig.psi.ZigFile
 import com.intellij.execution.actions.ConfigurationFromContext
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.childrenOfType
 import java.nio.file.Path
 
 class ZigConfigProducerRun: ZigConfigProducer<ZigExecConfigRun>() {
@@ -35,16 +38,17 @@ class ZigConfigProducerRun: ZigConfigProducer<ZigExecConfigRun>() {
         return firstConfigFactory<ZigConfigTypeRun>()
     }
 
-    override fun setupConfigurationFromContext(configuration: ZigExecConfigRun, element: PsiElement, filePath: Path, theFile: VirtualFile): Boolean {
-        if (LINE_MARKER.elementMatches(element)) {
-            configuration.filePath.path = filePath
-            configuration.name = theFile.presentableName
-            return true
+    override fun setupConfigurationFromContext(configuration: ZigExecConfigRun, element: PsiElement, psiFile: ZigFile, filePath: Path, theFile: VirtualFile): Boolean {
+        val members = psiFile.childrenOfType<ZigContainerMembers>().firstOrNull() ?: return false
+        if (members.containerDeclarationList.none { it.decl?.fnProto?.identifier?.textMatches("main") == true }) {
+            return false
         }
-        return false
+        configuration.filePath.path = filePath
+        configuration.name = theFile.presentableName
+        return true
     }
 
-    override fun isConfigurationFromContext(configuration: ZigExecConfigRun, element: PsiElement, filePath: Path, theFile: VirtualFile): Boolean {
+    override fun isConfigurationFromContext(configuration: ZigExecConfigRun, element: PsiElement, psiFile: ZigFile, filePath: Path, theFile: VirtualFile): Boolean {
         return filePath == configuration.filePath.path
     }
 

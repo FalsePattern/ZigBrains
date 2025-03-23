@@ -39,9 +39,9 @@ import com.intellij.util.ui.JBUI
 import javax.swing.JList
 import javax.swing.ListSelectionModel
 
-class ZigNewProjectPanel(private var handleGit: Boolean): Disposable {
+class ZigNewProjectPanel(private var handleGit: Boolean): Disposable, ZigProjectConfigurationProvider.SettingsPanelHolder {
     private val git = JBCheckBox()
-    private val panels = ZigProjectConfigurationProvider.createNewProjectSettingsPanels().onEach { Disposer.register(this, it) }
+    override val panels = ZigProjectConfigurationProvider.createNewProjectSettingsPanels(this).onEach { Disposer.register(this, it) }
     private val templateList = JBList(JBList.createDefaultListModel(defaultTemplates)).apply {
         selectionMode = ListSelectionModel.SINGLE_SELECTION
         selectedIndex = 0

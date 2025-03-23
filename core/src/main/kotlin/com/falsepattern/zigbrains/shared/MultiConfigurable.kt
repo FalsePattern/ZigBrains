@@ -22,17 +22,19 @@
 
 package com.falsepattern.zigbrains.shared
 
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
 
-abstract class MultiConfigurable(private val configurables: List<SubConfigurable>): Configurable {
+abstract class MultiConfigurable(val configurables: List<SubConfigurable>): Configurable, ZigProjectConfigurationProvider.SettingsPanelHolder {
+    final override var panels: List<ZigProjectConfigurationProvider.SettingsPanel> = emptyList()
+        private set
+
     override fun createComponent(): JComponent? {
         return panel {
-            for (configurable in configurables) {
-                configurable.createComponent(this)
-            }
+            panels = configurables.map { it.createComponent(this@MultiConfigurable, this@panel) }
         }
     }
 
@@ -50,5 +52,6 @@ abstract class MultiConfigurable(private val configurables: List<SubConfigurable
 
     override fun disposeUIResources() {
         configurables.forEach { Disposer.dispose(it) }
+        panels = emptyList()
     }
 }

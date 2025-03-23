@@ -17,6 +17,18 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [23.1.0]
+
+### Added
+
+- Project
+    - Support running file main/tests with hotkey (default: ctrl+shift+f10)
+
+### Changed
+
+- Direnv
+  - Centralized all direnv toggling into a single project-level option
+
 ## [23.0.2]
 
 ### Fixed

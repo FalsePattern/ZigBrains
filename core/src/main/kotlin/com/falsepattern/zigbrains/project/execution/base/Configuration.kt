@@ -280,12 +280,6 @@ class ColoredConfigurable(serializedName: String): CheckboxConfigurable(serializ
     }
 }
 
-class DirenvConfigurable(serializedName: String, project: Project): CheckboxConfigurable(serializedName, ZigBrainsBundle.message("exec.option.label.direnv"), project.zigProjectSettings.state.direnv) {
-    override fun clone(): DirenvConfigurable {
-        return super.clone() as DirenvConfigurable
-    }
-}
-
 class OptimizationConfigurable(
     @Transient private val serializedName: String,
     var level: OptimizationLevel = OptimizationLevel.Debug,

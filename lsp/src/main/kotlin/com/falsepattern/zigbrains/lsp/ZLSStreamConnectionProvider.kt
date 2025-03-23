@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.config.ZLSConfigProviderBase
 import com.falsepattern.zigbrains.lsp.settings.zlsSettings
+import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -58,7 +59,7 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
             val state = svc.state
             val zlsPath: Path = state.zlsPath.let { zlsPath ->
                 if (zlsPath.isEmpty()) {
-                    val env = if (state.direnv) project.getDirenv() else emptyEnv
+                    val env = if (project.zigProjectSettings.state.direnv) project.getDirenv() else emptyEnv
                     env.findExecutableOnPATH("zls") ?: run {
                         Notification(
                             "zigbrains-lsp",
