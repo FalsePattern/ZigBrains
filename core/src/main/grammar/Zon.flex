@@ -90,7 +90,7 @@ IDENTIFIER_PLAIN=[A-Za-z_][A-Za-z0-9_]*
 
 <YYINITIAL>      "//"                     { yybegin(LINE_CMT); }
 <LINE_CMT>       {all_nl_wrap} "//"       { }
-<LINE_CMT>       {all_no_nl}          { }
+<LINE_CMT>       {all_no_nl}              { }
 <LINE_CMT>       \n                       { yybegin(YYINITIAL); return LINE_COMMENT; }
 <LINE_CMT>       <<EOF>>                  { yybegin(YYINITIAL); return LINE_COMMENT; }
 
