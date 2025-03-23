@@ -234,13 +234,12 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <YYINITIAL>      "volatile"               { return KEYWORD_VOLATILE; }
 <YYINITIAL>      "while"                  { return KEYWORD_WHILE; }
 
+//Strings
+
 <YYINITIAL>      "'"                      { yybegin(CHAR_LIT); }
 <CHAR_LIT>       {char_char}*"'"          { yybegin(YYINITIAL); return CHAR_LITERAL; }
 <CHAR_LIT>       <<EOF>>                  { yybegin(YYINITIAL); return BAD_SQUOT; }
 <CHAR_LIT>       [^]                      { yypushback(1); yybegin(UNT_SQUOT); }
-
-<YYINITIAL>      {FLOAT}                  { return FLOAT; }
-<YYINITIAL>      {INTEGER}                { return INTEGER; }
 
 <YYINITIAL>      "\""                     { yybegin(STR_LIT); }
 <STR_LIT>        {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
@@ -253,6 +252,13 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <STR_MULT_LINE>  {LF}                     { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
 <STR_MULT_LINE>  <<EOF>>                  { yybegin(YYINITIAL); return STRING_LITERAL_MULTI; }
 
+//Numbers
+
+<YYINITIAL>      {FLOAT}                  { return FLOAT; }
+<YYINITIAL>      {INTEGER}                { return INTEGER; }
+
+//Identifiers
+
 <YYINITIAL>      {IDENTIFIER_PLAIN}       { return IDENTIFIER; }
 <YYINITIAL>      "@\""                    { yybegin(ID_QUOT); }
 <ID_QUOT>        {string_char}*"\""       { yybegin(YYINITIAL); return IDENTIFIER; }
@@ -261,12 +267,16 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 
 <YYINITIAL>      {BUILTINIDENTIFIER}      { return BUILTINIDENTIFIER; }
 
+//Error handling
+
 <UNT_SQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_SQUOT; }
 <UNT_SQUOT>       {LF}                    { yybegin(YYINITIAL); return BAD_SQUOT; }
 <UNT_SQUOT>       {all_no_nl}             { }
 <UNT_DQUOT>       <<EOF>>                 { yybegin(YYINITIAL); return BAD_DQUOT; }
 <UNT_DQUOT>       {LF}                    { yybegin(YYINITIAL); return BAD_DQUOT; }
 <UNT_DQUOT>       {all_no_nl}             { }
+
+//Misc
 
 <YYINITIAL>      {WHITE_SPACE}            { return WHITE_SPACE; }
 
