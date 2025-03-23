@@ -29,6 +29,7 @@ import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.config.SemanticTokens
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
+import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.shared.cli.call
 import com.falsepattern.zigbrains.shared.cli.createCommandLineSafe
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
@@ -87,6 +88,8 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
 
     private var debounce: Job? = null
 
+    private var direnv: Boolean = project.zigProjectSettings.state.direnv
+
     private val inlayHints = JBCheckBox()
     private val enable_snippets = JBCheckBox()
     private val enable_argument_placeholders = JBCheckBox()
@@ -109,12 +112,6 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
     private val build_runner_path = ExtendableTextField()
     private val global_cache_path = ExtendableTextField()
 
-    private val direnv = JBCheckBox(ZLSBundle.message("settings.zls-path.use-direnv.label")).apply {
-        addActionListener {
-            dispatchAutodetect(true)
-        }
-    }
-
     override fun attach(p: Panel) = with(p) {
         if (!project.isDefault) {
             group(ZLSBundle.message("settings.group.title")) {
@@ -123,9 +120,6 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
                     "settings.zls-path.tooltip"
                 ) {
                     cell(zlsPath).resizableColumn().align(AlignX.FILL)
-                    if (DirenvCmd.direnvInstalled()) {
-                        cell(direnv)
-                    }
                 }
                 row(ZLSBundle.message("settings.zls-version.label")) {
                     cell(zlsVersion)
@@ -225,9 +219,13 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
         dispatchAutodetect(false)
     }
 
+    override fun direnvChanged(state: Boolean) {
+        direnv = state
+        dispatchAutodetect(true)
+    }
+
     override var data
         get() = ZLSSettings(
-            direnv.isSelected,
             zlsPath.text,
             zlsConfigPath.text,
             inlayHints.isSelected,
@@ -253,7 +251,6 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
             global_cache_path.text?.ifBlank { null },
         )
         set(value) {
-            direnv.isSelected = value.direnv
             zlsPath.text = value.zlsPath
             zlsConfigPath.text = value.zlsConfigPath
             inlayHints.isSelected = value.inlayHints
@@ -305,7 +302,7 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
     }
 
     private suspend fun getDirenv(): Env {
-        if (!project.isDefault && DirenvCmd.direnvInstalled() && direnv.isSelected)
+        if (!project.isDefault && DirenvCmd.direnvInstalled() && direnv)
             return project.getDirenv()
         return emptyEnv
     }

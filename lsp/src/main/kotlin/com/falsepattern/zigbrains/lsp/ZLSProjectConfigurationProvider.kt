@@ -38,7 +38,7 @@ class ZLSProjectConfigurationProvider: ZigProjectConfigurationProvider {
         return ZLSSettingsConfigurable(project)
     }
 
-    override fun createNewProjectSettingsPanel(): ZigProjectConfigurationProvider.SettingsPanel {
+    override fun createNewProjectSettingsPanel(holder: ZigProjectConfigurationProvider.SettingsPanelHolder): ZigProjectConfigurationProvider.SettingsPanel {
         return ZLSSettingsPanel(ProjectManager.getInstance().defaultProject)
     }
 

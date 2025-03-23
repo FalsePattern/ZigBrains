@@ -22,12 +22,14 @@
 
 package com.falsepattern.zigbrains.shared
 
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider.SettingsPanelHolder
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.ui.dsl.builder.Panel
 
 interface SubConfigurable: Disposable {
-    fun createComponent(panel: Panel)
+    fun createComponent(holder: SettingsPanelHolder, panel: Panel): ZigProjectConfigurationProvider.SettingsPanel
     fun isModified(): Boolean
     @Throws(ConfigurationException::class)
     fun apply()

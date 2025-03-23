@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NonNls
 
 @Suppress("PropertyName")
 data class ZLSSettings(
-    var direnv: Boolean = false,
     var zlsPath: @NonNls String = "",
     var zlsConfigPath: @NonNls String = "",
     val inlayHints: Boolean = true,

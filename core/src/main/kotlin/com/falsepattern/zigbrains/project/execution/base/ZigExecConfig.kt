@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.execution.base
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.direnv.DirenvCmd
+import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
@@ -43,8 +44,6 @@ abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: Con
     var workingDirectory = WorkDirectoryConfigurable("workingDirectory").apply { path = project.guessProjectDir()?.toNioPathOrNull() }
         private set
     var pty = CheckboxConfigurable("pty", ZigBrainsBundle.message("exec.option.label.emulate-terminal"), false)
-        private set
-    var direnv = DirenvConfigurable("direnv", project)
         private set
 
     abstract val suggestedName: @ActionText String
@@ -68,7 +67,7 @@ abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: Con
 
 
     suspend fun patchCommandLine(commandLine: GeneralCommandLine): GeneralCommandLine {
-        if (direnv.value) {
+        if (project.zigProjectSettings.state.direnv) {
             commandLine.withEnvironment(DirenvCmd.importDirenv(project).env)
         }
         return commandLine
@@ -82,10 +81,9 @@ abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: Con
         val myClone = super.clone() as ZigExecConfig<*>
         myClone.workingDirectory = workingDirectory.clone()
         myClone.pty = pty.clone()
-        myClone.direnv = direnv.clone()
         @Suppress("UNCHECKED_CAST")
         return myClone as T
     }
 
-    open fun getConfigurables(): List<ZigConfigurable<*>> = listOf(workingDirectory, pty, direnv)
+    open fun getConfigurables(): List<ZigConfigurable<*>> = listOf(workingDirectory, pty)
 }

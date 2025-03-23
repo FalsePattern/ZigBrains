@@ -52,9 +52,9 @@ import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
-class ZigProjectSettingsPanel(private val project: Project) : ZigProjectConfigurationProvider.SettingsPanel {
+class ZigProjectSettingsPanel(private val holder: ZigProjectConfigurationProvider.SettingsPanelHolder, private val project: Project) : ZigProjectConfigurationProvider.SettingsPanel {
     private val direnv = JBCheckBox(ZigBrainsBundle.message("settings.project.label.direnv")).apply { addActionListener {
-        dispatchAutodetect(true)
+        dispatchDirenvUpdate()
     } }
     private val pathToToolchain = textFieldWithBrowseButton(
         project,
@@ -85,6 +85,16 @@ class ZigProjectSettingsPanel(private val project: Project) : ZigProjectConfigur
         FileChooserDescriptorFactory.createSingleFolderDescriptor()
     ).also { Disposer.register(this, it) }
     private var debounce: Job? = null
+
+    private fun dispatchDirenvUpdate() {
+        holder.panels.forEach {
+            it.direnvChanged(direnv.isSelected)
+        }
+    }
+
+    override fun direnvChanged(state: Boolean) {
+        dispatchAutodetect(true)
+    }
 
     private fun dispatchAutodetect(force: Boolean) {
         project.zigCoroutineScope.launchWithEDT {

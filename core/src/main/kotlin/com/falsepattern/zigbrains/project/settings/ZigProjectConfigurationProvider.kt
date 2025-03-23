@@ -32,7 +32,7 @@ import com.intellij.ui.dsl.builder.Panel
 interface ZigProjectConfigurationProvider {
     fun handleMainConfigChanged(project: Project)
     fun createConfigurable(project: Project): SubConfigurable
-    fun createNewProjectSettingsPanel(): SettingsPanel?
+    fun createNewProjectSettingsPanel(holder: SettingsPanelHolder): SettingsPanel?
     val priority: Int
     companion object {
         private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigProjectConfigurationProvider>("com.falsepattern.zigbrains.projectConfigProvider")
@@ -42,13 +42,17 @@ interface ZigProjectConfigurationProvider {
         fun createConfigurables(project: Project): List<SubConfigurable> {
             return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.map { it.createConfigurable(project) }
         }
-        fun createNewProjectSettingsPanels(): List<SettingsPanel> {
-            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.mapNotNull { it.createNewProjectSettingsPanel() }
+        fun createNewProjectSettingsPanels(holder: SettingsPanelHolder): List<SettingsPanel> {
+            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.mapNotNull { it.createNewProjectSettingsPanel(holder) }
         }
     }
     interface SettingsPanel: Disposable {
         val data: Settings
         fun attach(p: Panel)
+        fun direnvChanged(state: Boolean)
+    }
+    interface SettingsPanelHolder {
+        val panels: List<SettingsPanel>
     }
     interface Settings {
         fun apply(project: Project)
