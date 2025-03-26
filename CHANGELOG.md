@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Project
+    - Support running file main/tests with hotkey (default: ctrl+shift+f10)
+
 ### Changed
 
 - Direnv
