@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.startLSP
+import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.toNioPathOrNull
@@ -96,7 +97,7 @@ class ZLSProjectSettingsService(val project: Project): PersistentStateComponent<
 private suspend fun doValidate(project: Project, state: ZLSSettings): Boolean {
     val zlsPath: Path = state.zlsPath.let { zlsPath ->
         if (zlsPath.isEmpty()) {
-            val env = if (state.direnv) project.getDirenv() else emptyEnv
+            val env = if (project.zigProjectSettings.state.direnv) project.getDirenv() else emptyEnv
             env.findExecutableOnPATH("zls") ?: run {
                 return false
             }

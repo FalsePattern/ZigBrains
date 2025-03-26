@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.settings.zlsSettings
+import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
@@ -38,7 +39,7 @@ class ZLSStartup: ProjectActivity {
     override suspend fun execute(project: Project) {
         val zlsState = project.zlsSettings.state
         if (zlsState.zlsPath.isBlank()) {
-            val env = if (DirenvCmd.direnvInstalled() && !project.isDefault && zlsState.direnv)
+            val env = if (DirenvCmd.direnvInstalled() && !project.isDefault && project.zigProjectSettings.state.direnv)
                 project.getDirenv()
             else
                 emptyEnv

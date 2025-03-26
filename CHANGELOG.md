@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- Direnv
+  - Centralized all direnv toggling into a single project-level option
+
 ## [23.0.2]
 
 ### Fixed

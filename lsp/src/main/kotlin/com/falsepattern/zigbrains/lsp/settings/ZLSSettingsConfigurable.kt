@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.lsp.settings
 
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
@@ -29,8 +30,10 @@ import com.intellij.ui.dsl.builder.Panel
 
 class ZLSSettingsConfigurable(private val project: Project): SubConfigurable {
     private var appSettingsComponent: ZLSSettingsPanel? = null
-    override fun createComponent(panel: Panel) {
-        appSettingsComponent = ZLSSettingsPanel(project).apply { attach(panel) }.also { Disposer.register(this, it) }
+    override fun createComponent(holder: ZigProjectConfigurationProvider.SettingsPanelHolder, panel: Panel): ZigProjectConfigurationProvider.SettingsPanel {
+        val settingsPanel = ZLSSettingsPanel(project).apply { attach(panel) }.also { Disposer.register(this, it) }
+        appSettingsComponent = settingsPanel
+        return settingsPanel
     }
 
     override fun isModified(): Boolean {

@@ -29,9 +29,11 @@ import com.intellij.ui.dsl.builder.Panel
 
 class ZigProjectConfigurable(private val project: Project): SubConfigurable {
     private var settingsPanel: ZigProjectSettingsPanel? = null
-    override fun createComponent(panel: Panel) {
+    override fun createComponent(holder: ZigProjectConfigurationProvider.SettingsPanelHolder, panel: Panel): ZigProjectConfigurationProvider.SettingsPanel {
         settingsPanel?.let { Disposer.dispose(it) }
-        settingsPanel = ZigProjectSettingsPanel(project).apply { attach(panel) }.also { Disposer.register(this, it) }
+        val sp = ZigProjectSettingsPanel(holder, project).apply { attach(panel) }.also { Disposer.register(this, it) }
+        settingsPanel = sp
+        return sp
     }
 
     override fun isModified(): Boolean {
