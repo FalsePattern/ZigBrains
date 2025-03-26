@@ -225,7 +225,7 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
     }
 
     override var data
-        get() = ZLSSettings(
+        get() = if (project.isDefault) ZLSSettings() else ZLSSettings(
             zlsPath.text,
             zlsConfigPath.text,
             inlayHints.isSelected,

@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - New project creation creates a blank ZLS config
+
 ## [23.1.0]
 
 ### Added
