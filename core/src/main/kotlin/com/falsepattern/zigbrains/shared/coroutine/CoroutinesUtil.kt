@@ -39,7 +39,7 @@ inline fun <T> runModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleF
     }
 }
 
-suspend inline fun <T> withEDTContext(state: ModalityState = ModalityState.defaultModalityState(), noinline block: suspend CoroutineScope.() -> T): T {
+suspend inline fun <T> withEDTContext(state: ModalityState, noinline block: suspend CoroutineScope.() -> T): T {
     return withContext(Dispatchers.EDT + state.asContextElement(), block = block)
 }
 
@@ -49,10 +49,10 @@ suspend inline fun <T> withCurrentEDTModalityContext(noinline block: suspend Cor
     }
 }
 
-suspend inline fun <T> runInterruptibleEDT(state: ModalityState = ModalityState.defaultModalityState(), noinline targetAction: () -> T): T {
+suspend inline fun <T> runInterruptibleEDT(state: ModalityState, noinline targetAction: () -> T): T {
     return runInterruptible(Dispatchers.EDT + state.asContextElement(), block = targetAction)
 }
 
-fun CoroutineScope.launchWithEDT(state: ModalityState = ModalityState.defaultModalityState(), block: suspend CoroutineScope.() -> Unit): Job {
+fun CoroutineScope.launchWithEDT(state: ModalityState, block: suspend CoroutineScope.() -> Unit): Job {
     return launch(Dispatchers.EDT + state.asContextElement(), block = block)
 }

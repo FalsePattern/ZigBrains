@@ -34,6 +34,7 @@ Changelog structure reference:
 
 - Project
   - File path browse buttons in zig run configurations didn't work
+  - Occasional GUI deadlocks
 
 - Zig
   - IPC wrapper wasn't passing exit code

@@ -95,7 +95,7 @@ class ZigProjectSettingsPanel(private val holder: ZigProjectConfigurationProvide
     }
 
     private fun dispatchAutodetect(force: Boolean) {
-        project.zigCoroutineScope.launchWithEDT {
+        project.zigCoroutineScope.launchWithEDT(ModalityState.any()) {
             withModalProgress(ModalTaskOwner.component(pathToToolchain), "Detecting Zig...", TaskCancellation.cancellable()) {
                 autodetect(force)
             }
