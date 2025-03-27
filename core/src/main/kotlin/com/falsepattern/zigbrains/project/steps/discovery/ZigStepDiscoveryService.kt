@@ -90,7 +90,7 @@ class ZigStepDiscoveryService(private val project: Project) {
             null
         }
         if (result == null) {
-            {}
+
         } else if (result.checkSuccess(LOG)) {
             currentTimeoutSec = DEFAULT_TIMEOUT_SEC
             val lines = result.stdoutLines

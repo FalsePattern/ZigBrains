@@ -35,7 +35,6 @@ import com.intellij.openapi.application.ModalityState
 
 class ZigRegularRunner: ZigProgramRunner<ZigProfileState<*>>(DefaultRunExecutor.EXECUTOR_ID) {
     override suspend fun execute(state: ZigProfileState<*>, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor? {
-        val cli = state.getCommandLine(toolchain, false)
         val exec = state.execute(environment.executor, this)
         return withEDTContext(ModalityState.any()) {
             val runContentBuilder = RunContentBuilder(exec, environment)
