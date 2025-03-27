@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - IPC wrapper wasn't passing exit code
+
 ## [23.1.2]
 
 ### Fixed
