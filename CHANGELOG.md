@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [24.0.0]
+
 ### Added
 
 - Project, Debugging
