@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.configurations.PtyCommandLine
 import com.jetbrains.cidr.execution.Installer
 import kotlinx.coroutines.async
 import kotlinx.coroutines.future.asCompletableFuture
@@ -39,7 +40,7 @@ class ZigDebugEmitBinaryInstaller<ProfileState: ZigProfileState<*>>(
 ): Installer {
     override fun install(): GeneralCommandLine {
         val cfg = profileState.configuration
-        val cli = GeneralCommandLine().withExePath(executableFile.absolutePath)
+        val cli = PtyCommandLine().withConsoleMode(false).withExePath(executableFile.absolutePath)
         cfg.workingDirectory.path?.let { x -> cli.withWorkDirectory(x.toFile()) }
         cli.addParameters(exeArgs)
         cli.withCharset(Charsets.UTF_8)

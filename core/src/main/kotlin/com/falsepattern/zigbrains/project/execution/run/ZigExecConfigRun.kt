@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.project.execution.run
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.base.*
-import com.falsepattern.zigbrains.shared.cli.coloredCliFlags
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
@@ -34,8 +33,6 @@ import kotlin.io.path.pathString
 
 class ZigExecConfigRun(project: Project, factory: ConfigurationFactory): ZigExecConfig<ZigExecConfigRun>(project, factory, ZigBrainsBundle.message("exec.type.run.label")) {
     var filePath = FilePathConfigurable("filePath", ZigBrainsBundle.message("exec.option.label.file-path"))
-        private set
-    var colored = ColoredConfigurable("colored")
         private set
     var optimization = OptimizationConfigurable("optimization")
         private set
@@ -47,7 +44,6 @@ class ZigExecConfigRun(project: Project, factory: ConfigurationFactory): ZigExec
     override suspend fun buildCommandLineArgs(debug: Boolean): List<String> {
         val result = ArrayList<String>()
         result.add(if (debug) "build-exe" else "run")
-        result.addAll(coloredCliFlags(colored.value, debug))
         result.add(filePath.path?.pathString ?: throw ExecutionException(ZigBrainsBundle.message("exception.zig.empty-file-path")))
         if (!debug || optimization.forced) {
             result.addAll(listOf("-O", optimization.level.name))
@@ -66,7 +62,6 @@ class ZigExecConfigRun(project: Project, factory: ConfigurationFactory): ZigExec
     override fun clone(): ZigExecConfigRun {
         val clone = super.clone()
         clone.filePath = filePath.clone()
-        clone.colored = colored.clone()
         clone.compilerArgs = compilerArgs.clone()
         clone.optimization = optimization.clone()
         clone.exeArgs = exeArgs.clone()
@@ -74,7 +69,7 @@ class ZigExecConfigRun(project: Project, factory: ConfigurationFactory): ZigExec
     }
 
     override fun getConfigurables(): List<ZigConfigurable<*>> {
-        return super.getConfigurables() + listOf(filePath, optimization, colored, compilerArgs, exeArgs)
+        return super.getConfigurables() + listOf(filePath, optimization, compilerArgs, exeArgs)
     }
 
     override fun getState(executor: Executor, environment: ExecutionEnvironment): ZigProfileState<ZigExecConfigRun> {
