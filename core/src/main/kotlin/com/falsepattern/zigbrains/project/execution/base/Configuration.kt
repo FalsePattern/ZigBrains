@@ -33,11 +33,11 @@ import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.TextBrowseFolderListener
-import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
+import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
@@ -161,12 +161,10 @@ class WorkDirectoryConfigurable(@Transient override val serializedName: String) 
     }
 
     class WorkDirectoryConfigModule(private val serializedName: String) : PathConfigModule<WorkDirectoryConfigurable>() {
-        private val field = TextFieldWithBrowseButton(
-            TextBrowseFolderListener(
-                FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.working-directory"))
-            ),
-            this
-        )
+        private val field = textFieldWithBrowseButton(
+            null,
+            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.working-directory"))
+        ).also { Disposer.register(this, it) }
 
         override var stringValue by field::text
 
@@ -201,9 +199,9 @@ class FilePathConfigurable(
     }
 
     class FilePathConfigModule(private val serializedName: String, @Nls private val label: String) : PathConfigModule<FilePathConfigurable>() {
-        private val field = TextFieldWithBrowseButton(
-            TextBrowseFolderListener(FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor()),
-            this
+        private val field = textFieldWithBrowseButton(
+            null,
+            FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor(),
         )
 
         override var stringValue by field::text
