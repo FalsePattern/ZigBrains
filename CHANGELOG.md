@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- LSP
+  - IDE warning when renaming symbols
+
 ## [23.1.1]
 
 ### Fixed

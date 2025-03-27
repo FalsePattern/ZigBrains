@@ -24,7 +24,8 @@ package com.falsepattern.zigbrains.lsp.notification
 
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.settings.zlsSettings
-import com.falsepattern.zigbrains.lsp.zlsRunningSync
+import com.falsepattern.zigbrains.lsp.zlsRunningAsync
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.falsepattern.zigbrains.zig.ZigFileType
 import com.falsepattern.zigbrains.zon.ZonFileType
 import com.intellij.openapi.fileEditor.FileEditor
@@ -33,6 +34,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotificationProvider
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import java.util.function.Function
 import javax.swing.JComponent
 
@@ -45,13 +48,21 @@ class ZigEditorNotificationProvider: EditorNotificationProvider, DumbAware {
             ZigFileType, ZonFileType -> {}
             else -> return null
         }
-        if (project.zlsRunningSync()) {
-            return null
+        val task = project.zigCoroutineScope.async {
+            if (project.zlsRunningAsync()) {
+                return@async null
+            } else {
+                return@async project.zlsSettings.validateAsync()
+            }
         }
         return Function { editor ->
             val status: EditorNotificationPanel.Status
             val message: String
-            if (!project.zlsSettings.validateSync()) {
+            val result = runBlocking { task.await() }
+            if (result == null)
+                return@Function null
+
+            if (!result) {
                 status = EditorNotificationPanel.Status.Error
                 message = ZLSBundle.message("notification.banner.zls-bad-config")
             } else {
