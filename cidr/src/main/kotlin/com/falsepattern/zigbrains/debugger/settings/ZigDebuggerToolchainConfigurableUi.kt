@@ -89,7 +89,7 @@ class ZigDebuggerToolchainConfigurableUi : ZigDebuggerUiComponent {
         row(ZigDebugBundle.message("settings.debugger.toolchain.debugger.label")) {
             comment = cell(debuggerKindComboBox)
                 .comment("", DEFAULT_COMMENT_WIDTH) {
-                    zigCoroutineScope.launchWithEDT(ModalityState.any()) {
+                    zigCoroutineScope.launchWithEDT(ModalityState.defaultModalityState()) {
                         withModalProgress(ModalTaskOwner.component(debuggerKindComboBox), "Downloading debugger", TaskCancellation.cancellable()) {
                             downloadDebugger()
                         }
@@ -97,7 +97,7 @@ class ZigDebuggerToolchainConfigurableUi : ZigDebuggerUiComponent {
                 }
                 .applyToComponent {
                     whenItemSelected(null) {
-                        zigCoroutineScope.launchWithEDT(ModalityState.any()) {
+                        zigCoroutineScope.launchWithEDT(ModalityState.defaultModalityState()) {
                             this@ZigDebuggerToolchainConfigurableUi.update()
                         }
                     }
@@ -112,7 +112,7 @@ class ZigDebuggerToolchainConfigurableUi : ZigDebuggerUiComponent {
                 cell(useClion)
             }
         }
-        zigCoroutineScope.launchWithEDT(ModalityState.any()) {
+        zigCoroutineScope.launchWithEDT(ModalityState.defaultModalityState()) {
             update()
         }
     }
