@@ -279,7 +279,7 @@ class ZLSSettingsPanel(private val project: Project) : ZigProjectConfigurationPr
         }
 
     private fun dispatchAutodetect(force: Boolean) {
-        project.zigCoroutineScope.launchWithEDT(ModalityState.any()) {
+        project.zigCoroutineScope.launchWithEDT(ModalityState.defaultModalityState()) {
             withModalProgress(ModalTaskOwner.component(zlsPath), "Detecting ZLS...", TaskCancellation.cancellable()) {
                 autodetect(force)
             }

@@ -17,7 +17,7 @@ Changelog structure reference:
 
 ## [Unreleased]
 
-## [24.0.0]
+## [24.0.1]
 
 ### Added
 
