@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.project.execution.test
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.base.*
-import com.falsepattern.zigbrains.shared.cli.coloredCliFlags
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
@@ -35,8 +34,6 @@ import kotlin.io.path.pathString
 class ZigExecConfigTest(project: Project, factory: ConfigurationFactory): ZigExecConfig<ZigExecConfigTest>(project, factory, ZigBrainsBundle.message("exec.type.test.label")) {
     var filePath = FilePathConfigurable("filePath", ZigBrainsBundle.message("exec.option.label.file-path"))
         private set
-    var colored = ColoredConfigurable("colored")
-        private set
     var optimization = OptimizationConfigurable("optimization")
         private set
     var compilerArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.compiler-args"))
@@ -46,7 +43,6 @@ class ZigExecConfigTest(project: Project, factory: ConfigurationFactory): ZigExe
     override suspend fun buildCommandLineArgs(debug: Boolean): List<String> {
         val result = ArrayList<String>()
         result.add("test")
-        result.addAll(coloredCliFlags(colored.value, debug))
         result.add(filePath.path?.pathString ?: throw ExecutionException(ZigBrainsBundle.message("exception.zig.empty-file-path")))
         if (!debug || optimization.forced) {
             result.addAll(listOf("-O", optimization.level.name))
@@ -64,14 +60,13 @@ class ZigExecConfigTest(project: Project, factory: ConfigurationFactory): ZigExe
     override fun clone(): ZigExecConfigTest {
         val clone = super.clone()
         clone.filePath = filePath.clone()
-        clone.colored = colored.clone()
         clone.compilerArgs = compilerArgs.clone()
         clone.optimization = optimization.clone()
         return clone
     }
 
     override fun getConfigurables(): List<ZigConfigurable<*>> {
-        return super.getConfigurables() + listOf(filePath, optimization, colored, compilerArgs)
+        return super.getConfigurables() + listOf(filePath, optimization, compilerArgs)
     }
 
     override fun getState(executor: Executor, environment: ExecutionEnvironment): ZigProfileState<ZigExecConfigTest> {

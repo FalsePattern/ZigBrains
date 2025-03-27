@@ -17,6 +17,16 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Project, Debugging
+  - TTY support for zig processes
+
+### Removed
+
+- Project
+  - "Emulate terminal" and "colored output" config options have been removed from zig run/test/build tasks, as they are no longer required for ZigBrains to work.
+
 ### Fixed
 
 - Zig

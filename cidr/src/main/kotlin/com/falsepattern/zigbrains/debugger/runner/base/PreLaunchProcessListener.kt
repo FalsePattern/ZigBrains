@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.debugger.runner.base
 
 import com.falsepattern.zigbrains.project.run.ZigProcessHandler
+import com.falsepattern.zigbrains.shared.cli.startIPCAwareProcess
 import com.falsepattern.zigbrains.shared.ipc.IPCUtil
 import com.falsepattern.zigbrains.shared.ipc.ipc
 import com.intellij.execution.ExecutionException
@@ -48,12 +49,7 @@ class PreLaunchProcessListener(val console: ConsoleView) : ProcessListener {
     @Throws(ExecutionException::class)
     suspend fun executeCommandLineWithHook(project: Project, commandLine: GeneralCommandLine): Boolean {
         return withProgressText(commandLine.commandLineString) {
-            val ipc = IPCUtil.wrapWithIPC(commandLine)
-            val cli = ipc?.cli ?: commandLine
-            val processHandler = ZigProcessHandler(cli)
-            if (ipc != null) {
-                project.ipc?.launchWatcher(ipc, processHandler.process)
-            }
+            val processHandler = commandLine.startIPCAwareProcess(project)
             this@PreLaunchProcessListener.processHandler = processHandler
             hook(processHandler)
             processHandler.startNotify()
@@ -74,10 +70,6 @@ class PreLaunchProcessListener(val console: ConsoleView) : ProcessListener {
 
     override fun processTerminated(event: ProcessEvent) {
         if (event.exitCode != 0) {
-            console.print(
-                "Process finished with exit code " + event.exitCode,
-                ConsoleViewContentType.NORMAL_OUTPUT
-            )
             isBuildFailed = true
         } else {
             isBuildFailed = false

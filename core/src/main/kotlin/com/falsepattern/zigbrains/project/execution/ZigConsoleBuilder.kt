@@ -20,12 +20,19 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.debugger
+package com.falsepattern.zigbrains.project.execution
 
-import com.intellij.execution.filters.Filter
-import com.intellij.execution.filters.TextConsoleBuilder
-import com.intellij.xdebugger.XDebugSession
-import com.jetbrains.cidr.execution.RunParameters
-import com.jetbrains.cidr.execution.debugger.CidrLocalDebugProcess
+import com.intellij.execution.filters.TextConsoleBuilderImpl
+import com.intellij.execution.ui.ConsoleView
+import com.intellij.openapi.project.Project
+import com.intellij.terminal.TerminalExecutionConsole
+import java.nio.file.Path
 
-class ZigLocalDebugProcess(parameters: RunParameters, session: XDebugSession, consoleBuilder: TextConsoleBuilder) : CidrLocalDebugProcess(parameters, session, consoleBuilder, { Filter.EMPTY_ARRAY }, true)
+class ZigConsoleBuilder(private val project: Project, private val emulateTerminal: Boolean = false): TextConsoleBuilderImpl(project) {
+    override fun createConsole(): ConsoleView {
+        return if (emulateTerminal)
+            TerminalExecutionConsole(project, null)
+        else
+            super.createConsole()
+    }
+}

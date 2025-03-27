@@ -25,7 +25,6 @@ package com.falsepattern.zigbrains.project.execution.build
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.base.*
 import com.falsepattern.zigbrains.shared.ZBFeatures
-import com.falsepattern.zigbrains.shared.cli.coloredCliFlags
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
@@ -36,8 +35,6 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
     var buildSteps = ArgsConfigurable("buildSteps", ZigBrainsBundle.message("exec.option.label.build.steps"))
         private set
     var extraArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.build.args"))
-        private set
-    var colored = ColoredConfigurable("colored")
         private set
     var debugBuildSteps = ArgsConfigurable("debugBuildSteps", ZigBrainsBundle.message("exec.option.label.build.steps-debug"))
         private set
@@ -54,7 +51,6 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
         result.add("build")
         val steps = if (debug) debugBuildSteps.argsSplit() else buildSteps.argsSplit()
         result.addAll(steps)
-        result.addAll(coloredCliFlags(colored.value, debug))
         result.addAll(if (debug) debugExtraArgs.argsSplit() else extraArgs.argsSplit())
         return result
     }
@@ -66,14 +62,13 @@ class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigEx
         val clone = super.clone()
         clone.buildSteps = buildSteps.clone()
         clone.exeArgs = exeArgs.clone()
-        clone.colored = colored.clone()
         clone.exePath = exePath.clone()
         clone.exeArgs = exeArgs.clone()
         return clone
     }
 
     override fun getConfigurables(): List<ZigConfigurable<*>> {
-        val baseCfg = super.getConfigurables() + listOf(buildSteps, extraArgs, colored)
+        val baseCfg = super.getConfigurables() + listOf(buildSteps, extraArgs)
         return if (ZBFeatures.debug()) {
             baseCfg + listOf(debugBuildSteps, debugExtraArgs, exePath, exeArgs)
         } else {

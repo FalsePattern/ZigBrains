@@ -274,12 +274,6 @@ open class CheckboxConfigurable(
     }
 }
 
-class ColoredConfigurable(serializedName: String): CheckboxConfigurable(serializedName, ZigBrainsBundle.message("exec.option.label.colored-terminal"), true) {
-    override fun clone(): ColoredConfigurable {
-        return super.clone() as ColoredConfigurable
-    }
-}
-
 class OptimizationConfigurable(
     @Transient private val serializedName: String,
     var level: OptimizationLevel = OptimizationLevel.Debug,
