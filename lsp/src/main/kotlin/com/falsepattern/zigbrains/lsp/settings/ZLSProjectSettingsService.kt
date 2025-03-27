@@ -27,6 +27,7 @@ import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.startLSP
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.intellij.ide.IdeEventQueue
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.toNioPathOrNull
@@ -83,15 +84,53 @@ class ZLSProjectSettingsService(val project: Project): PersistentStateComponent<
         }
     }
 
-    fun validateSync() = if (application.isDispatchThread && !application.isWriteAccessAllowed) {
-        runWithModalProgressBlocking(ModalTaskOwner.project(project), ZLSBundle.message("progress.title.validate")) {
-            validateAsync()
+    fun validateSync(): Boolean {
+        val isValid: Boolean? = runBlocking {
+            mutex.withLock {
+                if (dirty)
+                    null
+                else
+                    valid
+            }
         }
-    } else {
-        runBlocking {
-            validateAsync()
+        if (isValid != null) {
+            return isValid
+        }
+        return if (useModalProgress()) {
+            runWithModalProgressBlocking(ModalTaskOwner.project(project), ZLSBundle.message("progress.title.validate")) {
+                validateAsync()
+            }
+        } else {
+            runBlocking {
+                validateAsync()
+            }
         }
     }
+}
+
+private val prohibitClass: Class<*>? = runCatching {
+    Class.forName("com_intellij_ide_ProhibitAWTEvents".replace('_', '.'))
+}.getOrNull()
+
+private val postProcessors: List<*>? = runCatching {
+    if (prohibitClass == null)
+        return@runCatching null
+    val postProcessorsField = IdeEventQueue::class.java.getDeclaredField("postProcessors")
+    postProcessorsField.isAccessible = true
+    postProcessorsField.get(IdeEventQueue.getInstance()) as? List<*>
+}.getOrNull()
+
+private fun useModalProgress(): Boolean {
+    if (!application.isDispatchThread)
+        return false
+
+    if (application.isWriteAccessAllowed)
+        return false
+
+    if (postProcessors == null)
+        return true
+
+    return postProcessors.none { prohibitClass!!.isInstance(it) }
 }
 
 private suspend fun doValidate(project: Project, state: ZLSSettings): Boolean {
