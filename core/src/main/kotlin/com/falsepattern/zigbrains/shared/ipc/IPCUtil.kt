@@ -74,7 +74,7 @@ object IPCUtil {
                 val cli = GeneralCommandLine(it)
                 val tmpFile = FileUtil.createTempFile("zigbrains-bash-detection", null, true).toPath()
                 try {
-                    cli.addParameters("-c", "exec {var}>${tmpFile.pathString}; echo foo >&\$var; exec {var}>&-")
+                    cli.addParameters("-c", "exec {var}>${tmpFile.pathString}; echo foo >&\$var; ZB_EXIT=\$?; exec {var}>&-; exit \$ZB_EXIT")
                     val process = cli.createProcess()
                     val exitCode = process.awaitExit()
                     if (exitCode != 0) {
@@ -100,7 +100,7 @@ object IPCUtil {
         val (fifoFile, fifo) = info!!.mkfifo.createTemp() ?: return null
         //FIFO created, hack cli
         val exePath = cli.exePath
-        val args = "exec {var}>${fifoFile.pathString}; ZIG_PROGRESS=\$var $exePath ${cli.parametersList.parametersString}; exec {var}>&-"
+        val args = "exec {var}>${fifoFile.pathString}; ZIG_PROGRESS=\$var $exePath ${cli.parametersList.parametersString}; ZB_EXIT=\$?; exec {var}>&-; exit \$ZB_EXIT"
         cli.withExePath(info!!.bash)
         cli.parametersList.clearAll()
         cli.addParameters("-c", args)

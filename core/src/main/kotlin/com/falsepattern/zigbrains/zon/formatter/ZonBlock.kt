@@ -55,18 +55,16 @@ class ZonBlock(
 
     override fun getChildIndent(): Indent {
         val node = this.node
-        return getIndentBasedOnParentType(node, null, node.elementType, PLACEHOLDER)
+        return getIndentBasedOnParentType(node.elementType, PLACEHOLDER)
     }
 
     override fun getIndent(): Indent {
         val node = this.node
         val parent = node.treeParent ?: return noneIndent
-        return getIndentBasedOnParentType(parent, node, parent.elementType, node.elementType)
+        return getIndentBasedOnParentType(parent.elementType, node.elementType)
     }
 }
 private fun getIndentBasedOnParentType(
-    parent: ASTNode,
-    child: ASTNode?,
     parentType: IElementType,
     childType: IElementType
 ): Indent {

@@ -43,8 +43,6 @@ import org.jetbrains.annotations.Nls
 abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: ConfigurationFactory, @Nls name: String): LocatableConfigurationBase<ZigProfileState<T>>(project, factory, name) {
     var workingDirectory = WorkDirectoryConfigurable("workingDirectory").apply { path = project.guessProjectDir()?.toNioPathOrNull() }
         private set
-    var pty = CheckboxConfigurable("pty", ZigBrainsBundle.message("exec.option.label.emulate-terminal"), false)
-        private set
 
     abstract val suggestedName: @ActionText String
     @Throws(ExecutionException::class)
@@ -73,17 +71,12 @@ abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: Con
         return commandLine
     }
 
-    fun emulateTerminal(): Boolean {
-        return pty.value
-    }
-
     override fun clone(): T {
         val myClone = super.clone() as ZigExecConfig<*>
         myClone.workingDirectory = workingDirectory.clone()
-        myClone.pty = pty.clone()
         @Suppress("UNCHECKED_CAST")
         return myClone as T
     }
 
-    open fun getConfigurables(): List<ZigConfigurable<*>> = listOf(workingDirectory, pty)
+    open fun getConfigurables(): List<ZigConfigurable<*>> = listOf(workingDirectory)
 }

@@ -23,9 +23,11 @@
 package com.falsepattern.zigbrains.project.execution.base
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.execution.ZigConsoleBuilder
 import com.falsepattern.zigbrains.project.run.ZigProcessHandler
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.shared.cli.startIPCAwareProcess
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
 import com.falsepattern.zigbrains.shared.ipc.IPCUtil
 import com.falsepattern.zigbrains.shared.ipc.ipc
@@ -35,17 +37,25 @@ import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.CommandLineState
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PtyCommandLine
+import com.intellij.execution.filters.TextConsoleBuilder
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.project.Project
 import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.terminal.TerminalExecutionConsole
+import com.intellij.util.system.OS
+import kotlin.collections.contains
 import kotlin.io.path.pathString
 
 abstract class ZigProfileState<T: ZigExecConfig<T>> (
     environment: ExecutionEnvironment,
     val configuration: T
 ): CommandLineState(environment) {
+
+    init {
+        consoleBuilder = ZigConsoleBuilder(environment.project, true)
+    }
 
     @Throws(ExecutionException::class)
     override fun startProcess(): ProcessHandler {
@@ -57,7 +67,7 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
     @Throws(ExecutionException::class)
     suspend fun startProcessSuspend(): ProcessHandler {
         val toolchain = environment.project.zigProjectSettings.state.toolchain ?: throw ExecutionException(ZigBrainsBundle.message("exception.zig-profile-state.start-process.no-toolchain"))
-        return startProcess(getCommandLine(toolchain, false), environment.project)
+        return getCommandLine(toolchain, false).startIPCAwareProcess(environment.project, emulateTerminal = true)
     }
 
     @Throws(ExecutionException::class)
@@ -65,32 +75,11 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
         val workingDir = configuration.workingDirectory
         val zigExePath = toolchain.zig.path()
 
-        // TODO remove this check once JetBrains implements colored terminal in the debugger
-        // https://youtrack.jetbrains.com/issue/CPP-11622/ANSI-color-codes-not-honored-in-Debug-Run-Configuration-output-window
-        val cli = if (configuration.emulateTerminal() && !debug) PtyCommandLine().withConsoleMode(true).withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE) else GeneralCommandLine()
+        val cli = PtyCommandLine().withConsoleMode(false)
         cli.withExePath(zigExePath.pathString)
         workingDir.path?.let { cli.withWorkingDirectory(it) }
         cli.withCharset(Charsets.UTF_8)
         cli.addParameters(configuration.buildCommandLineArgs(debug))
         return configuration.patchCommandLine(cli)
     }
-}
-
-@Throws(ExecutionException::class)
-suspend fun executeCommandLine(commandLine: GeneralCommandLine, environment: ExecutionEnvironment): DefaultExecutionResult {
-    val handler = startProcess(commandLine, environment.project)
-    val console = BuildTextConsoleView(environment.project, false, emptyList())
-    console.attachToProcess(handler)
-    return DefaultExecutionResult(console, handler)
-}
-
-@Throws(ExecutionException::class)
-suspend fun startProcess(commandLine: GeneralCommandLine, project: Project): ProcessHandler {
-    val ipc = IPCUtil.wrapWithIPC(commandLine)
-    val handler = ZigProcessHandler(ipc?.cli ?: commandLine)
-    ProcessTerminatedListener.attach(handler)
-    if (ipc != null) {
-        project.ipc?.launchWatcher(ipc, handler.process)
-    }
-    return handler
 }

@@ -27,6 +27,7 @@ import com.falsepattern.zigbrains.project.steps.discovery.ZigStepDiscoveryListen
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -90,7 +91,7 @@ class ZigStepDiscoveryService(private val project: Project) {
             null
         }
         if (result == null) {
-            {}
+
         } else if (result.checkSuccess(LOG)) {
             currentTimeoutSec = DEFAULT_TIMEOUT_SEC
             val lines = result.stdoutLines
@@ -124,7 +125,7 @@ class ZigStepDiscoveryService(private val project: Project) {
     }
 
     private suspend fun dispatchReload() {
-        withEDTContext {
+        withEDTContext(ModalityState.defaultModalityState()) {
             FileDocumentManager.getInstance().saveAllDocuments()
         }
         doReload()

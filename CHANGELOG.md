@@ -17,6 +17,30 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [24.0.0]
+
+### Added
+
+- Project, Debugging
+  - TTY support for zig processes
+
+### Removed
+
+- Project
+  - "Emulate terminal" and "colored output" config options have been removed from zig run/test/build tasks, as they are no longer required for ZigBrains to work.
+
+### Fixed
+
+- Debugger
+  - Build errors didn't get shown in the console
+
+- Project
+  - File path browse buttons in zig run configurations didn't work
+  - Occasional GUI deadlocks
+
+- Zig
+  - IPC wrapper wasn't passing exit code
+
 ## [23.1.2]
 
 ### Fixed

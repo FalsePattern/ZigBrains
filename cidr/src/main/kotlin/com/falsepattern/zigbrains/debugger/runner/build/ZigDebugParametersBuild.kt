@@ -62,7 +62,7 @@ class ZigDebugParametersBuild(
             withContext(Dispatchers.IO) {
                 val commandLine = profileState.getCommandLine(toolchain, true)
                 if (listener.executeCommandLineWithHook(profileState.environment.project, commandLine))
-                    throw ExecutionException(ZigDebugBundle.message("debug.build.compile.failed.generic"))
+                    return@withContext
                 val cfg = profileState.configuration
                 val workingDir = cfg.workingDirectory.path
                 val exe = profileState.configuration.exePath.path ?: run {

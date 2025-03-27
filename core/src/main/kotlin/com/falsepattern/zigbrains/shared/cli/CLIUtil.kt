@@ -23,13 +23,18 @@
 package com.falsepattern.zigbrains.shared.cli
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.run.ZigProcessHandler
 import com.falsepattern.zigbrains.shared.ipc.IPCUtil
 import com.falsepattern.zigbrains.shared.ipc.ipc
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessOutput
+import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.awaitExit
+import com.intellij.util.system.OS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
@@ -108,14 +113,6 @@ fun translateCommandline(toProcess: String): List<String> {
     return result
 }
 
-fun coloredCliFlags(colored: Boolean, debug: Boolean): List<String> {
-    return if (debug) {
-        emptyList()
-    } else {
-        listOf("--color", if (colored) "on" else "off")
-    }
-}
-
 fun createCommandLineSafe(
     workingDirectory: Path?,
     exe: Path,
@@ -133,14 +130,27 @@ fun createCommandLineSafe(
     return Result.success(cli)
 }
 
-suspend fun GeneralCommandLine.call(timeoutMillis: Long = Long.MAX_VALUE, ipcProject: Project? = null): Result<ProcessOutput> {
-    val ipc = if (ipcProject != null) IPCUtil.wrapWithIPC(this) else null
+@Throws(ExecutionException::class)
+suspend fun GeneralCommandLine.startIPCAwareProcess(project: Project?, emulateTerminal: Boolean = false): ZigProcessHandler {
+    val ipc = if (project != null && !emulateTerminal) IPCUtil.wrapWithIPC(this) else null
     val cli = ipc?.cli ?: this
+    if (emulateTerminal && OS.CURRENT != OS.Windows && !cli.environment.contains("TERM")) {
+        cli.withEnvironment("TERM", "xterm-256color")
+    }
+    val handler = ZigProcessHandler(cli)
+    ProcessTerminatedListener.attach(handler)
+
+    if (ipc != null) {
+        project!!.ipc?.launchWatcher(ipc, handler.process)
+    }
+    return handler
+}
+
+
+suspend fun GeneralCommandLine.call(timeoutMillis: Long = Long.MAX_VALUE, ipcProject: Project? = null): Result<ProcessOutput> {
     val (process, exitCode) = withContext(Dispatchers.IO) {
-        val process = cli.createProcess()
-        if (ipc != null) {
-            ipcProject!!.ipc?.launchWatcher(ipc, process)
-        }
+        val handler = startIPCAwareProcess(ipcProject)
+        val process = handler.process
         val exit = withTimeoutOrNull(timeoutMillis) {
             process.awaitExit()
         }

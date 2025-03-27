@@ -31,6 +31,7 @@ import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.ide.plugins.PluginManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.observable.util.whenItemSelected
 import com.intellij.openapi.ui.ComboBox
@@ -88,7 +89,7 @@ class ZigDebuggerToolchainConfigurableUi : ZigDebuggerUiComponent {
         row(ZigDebugBundle.message("settings.debugger.toolchain.debugger.label")) {
             comment = cell(debuggerKindComboBox)
                 .comment("", DEFAULT_COMMENT_WIDTH) {
-                    zigCoroutineScope.launchWithEDT {
+                    zigCoroutineScope.launchWithEDT(ModalityState.any()) {
                         withModalProgress(ModalTaskOwner.component(debuggerKindComboBox), "Downloading debugger", TaskCancellation.cancellable()) {
                             downloadDebugger()
                         }
@@ -96,7 +97,7 @@ class ZigDebuggerToolchainConfigurableUi : ZigDebuggerUiComponent {
                 }
                 .applyToComponent {
                     whenItemSelected(null) {
-                        zigCoroutineScope.launchWithEDT {
+                        zigCoroutineScope.launchWithEDT(ModalityState.any()) {
                             this@ZigDebuggerToolchainConfigurableUi.update()
                         }
                     }
@@ -111,7 +112,7 @@ class ZigDebuggerToolchainConfigurableUi : ZigDebuggerUiComponent {
                 cell(useClion)
             }
         }
-        zigCoroutineScope.launchWithEDT {
+        zigCoroutineScope.launchWithEDT(ModalityState.any()) {
             update()
         }
     }

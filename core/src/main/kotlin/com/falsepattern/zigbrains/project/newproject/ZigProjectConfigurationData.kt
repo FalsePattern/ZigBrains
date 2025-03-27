@@ -119,10 +119,10 @@ data class ZigProjectConfigurationData(
             if (git) {
                 project.zigCoroutineScope.launch {
                     GitRepositoryInitializer.getInstance()?.initRepository(project, baseDir)
-                    createGitIgnoreFile(project, baseDir, requestor)
+                    createGitIgnoreFile(baseDir, requestor)
                 }
             } else if (forceGitignore) {
-                createGitIgnoreFile(project, baseDir, requestor)
+                createGitIgnoreFile(baseDir, requestor)
             }
 
             return@reportProgress true
@@ -131,7 +131,7 @@ data class ZigProjectConfigurationData(
 
 }
 
-private suspend fun createGitIgnoreFile(project: Project, projectDir: VirtualFile, requestor: Any) {
+private suspend fun createGitIgnoreFile(projectDir: VirtualFile, requestor: Any) {
     if (projectDir.findChild(".gitignore") != null) {
         return
     }

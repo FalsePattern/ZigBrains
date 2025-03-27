@@ -81,18 +81,18 @@ class BuildToolWindowContext(private val project: Project): Disposable {
         val tree = Tree(model).also { it.isRootVisible = false }
     }
     private val viewPanel = JPanel(VerticalLayout(0))
-    private val steps = TreeBox()
-    private val build = if (IPCUtil.haveIPC) TreeBox() else null
+    private val stepsBox = TreeBox()
+    private val buildBox = if (IPCUtil.haveIPC) TreeBox() else null
     private var live = AtomicBoolean(true)
     init {
         viewPanel.add(JBLabel(ZigBrainsBundle.message("build.tool.window.tree.steps.label")))
-        viewPanel.add(steps.panel)
-        steps.panel.setNotScanned()
+        viewPanel.add(stepsBox.panel)
+        stepsBox.panel.setNotScanned()
 
-        steps.tree.addMouseListener(object : MouseAdapter() {
+        stepsBox.tree.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 if (e.clickCount == 2) {
-                    val node = steps.tree.lastSelectedPathComponent as? DefaultMutableTreeNode ?: return
+                    val node = stepsBox.tree.lastSelectedPathComponent as? DefaultMutableTreeNode ?: return
                     val step = node.userObject as? StepNodeDescriptor ?: return
 
                     val stepName = step.element?.name ?: return
@@ -112,10 +112,10 @@ class BuildToolWindowContext(private val project: Project): Disposable {
             }
         })
 
-        if (build != null) {
+        if (buildBox != null) {
             viewPanel.add(JBLabel(ZigBrainsBundle.message("build.tool.window.tree.build.label")))
-            viewPanel.add(build.panel)
-            build.panel.setNoBuilds()
+            viewPanel.add(buildBox.panel)
+            buildBox.panel.setNoBuilds()
 
             project.zigCoroutineScope.launch {
                 while (!project.isDisposed && live.get()) {
@@ -126,14 +126,14 @@ class BuildToolWindowContext(private val project: Project): Disposable {
                     ipc.mutex.withLock {
                         withEDTContext(ModalityState.any()) {
                             if (ipc.nodes.isEmpty()) {
-                                build.root.removeAllChildren()
-                                build.panel.setNoBuilds()
+                                buildBox.root.removeAllChildren()
+                                buildBox.panel.setNoBuilds()
                                 return@withEDTContext
                             }
                             val allNodes = ArrayList(ipc.nodes)
                             val existingNodes = ArrayList<ZigIPCService.IPCTreeNode>()
                             val removedNodes = ArrayList<ZigIPCService.IPCTreeNode>()
-                            build.root.children().iterator().forEach { child ->
+                            buildBox.root.children().iterator().forEach { child ->
                                 if (child !is ZigIPCService.IPCTreeNode) {
                                     return@forEach
                                 }
@@ -145,18 +145,18 @@ class BuildToolWindowContext(private val project: Project): Disposable {
                             }
                             val newNodes = ArrayList<MutableTreeNode>(allNodes)
                             newNodes.removeAll(existingNodes)
-                            removedNodes.forEach { build.root.remove(it) }
-                            newNodes.forEach { build.root.add(it) }
+                            removedNodes.forEach { buildBox.root.remove(it) }
+                            newNodes.forEach { buildBox.root.add(it) }
                             if (removedNodes.isNotEmpty() || newNodes.isNotEmpty()) {
-                                build.model.reload(build.root)
+                                buildBox.model.reload(buildBox.root)
                             }
-                            if (build.root.childCount == 0) {
-                                build.panel.setNoBuilds()
+                            if (buildBox.root.childCount == 0) {
+                                buildBox.panel.setNoBuilds()
                             } else {
-                                build.panel.setViewportBody(build.tree)
+                                buildBox.panel.setViewportBody(buildBox.tree)
                             }
                             for (bn in allNodes) {
-                                expandRecursively(build, bn)
+                                expandRecursively(buildBox, bn)
                             }
                         }
                     }
@@ -220,28 +220,28 @@ class BuildToolWindowContext(private val project: Project): Disposable {
 
     inner class BuildReloadListener: ZigStepDiscoveryListener {
         override suspend fun preReload() {
-            steps.panel.setRunningZigBuild()
+            stepsBox.panel.setRunningZigBuild()
         }
 
-        override suspend fun postReload(stepInfo: List<Pair<String, String?>>) {
-            steps.root.removeAllChildren()
-            for ((task, description) in stepInfo) {
+        override suspend fun postReload(steps: List<Pair<String, String?>>) {
+            stepsBox.root.removeAllChildren()
+            for ((task, description) in steps) {
                 val icon = when(task) {
                     "install" -> AllIcons.Actions.Install
                     "uninstall" -> AllIcons.Actions.Uninstall
                     else -> AllIcons.RunConfigurations.TestState.Run
                 }
-                steps.root.add(DefaultMutableTreeNode(StepNodeDescriptor(project, task, icon, description)))
+                stepsBox.root.add(DefaultMutableTreeNode(StepNodeDescriptor(project, task, icon, description)))
             }
             withEDTContext(ModalityState.any()) {
-                steps.model.reload(steps.root)
-                steps.panel.setViewportBody(steps.tree)
+                stepsBox.model.reload(stepsBox.root)
+                stepsBox.panel.setViewportBody(stepsBox.tree)
             }
         }
 
         override suspend fun errorReload(type: ZigStepDiscoveryListener.ErrorType, details: String?) {
             withEDTContext(ModalityState.any()) {
-                steps.panel.setViewportError(ZigBrainsBundle.message(when(type) {
+                stepsBox.panel.setViewportError(ZigBrainsBundle.message(when(type) {
                     ZigStepDiscoveryListener.ErrorType.MissingToolchain -> "build.tool.window.status.error.missing-toolchain"
                     ZigStepDiscoveryListener.ErrorType.MissingZigExe -> "build.tool.window.status.error.missing-zig-exe"
                     ZigStepDiscoveryListener.ErrorType.MissingBuildZig -> "build.tool.window.status.error.missing-build-zig"
@@ -252,7 +252,7 @@ class BuildToolWindowContext(private val project: Project): Disposable {
 
         override suspend fun timeoutReload(seconds: Int) {
             withEDTContext(ModalityState.any()) {
-                steps.panel.setViewportError(ZigBrainsBundle.message("build.tool.window.status.timeout", seconds), null)
+                stepsBox.panel.setViewportError(ZigBrainsBundle.message("build.tool.window.status.timeout", seconds), null)
             }
         }
     }

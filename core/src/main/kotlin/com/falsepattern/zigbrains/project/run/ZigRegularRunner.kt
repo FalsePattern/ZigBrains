@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.project.run
 
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfig
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
-import com.falsepattern.zigbrains.project.execution.base.executeCommandLine
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.execution.configurations.RunProfile
@@ -36,8 +35,7 @@ import com.intellij.openapi.application.ModalityState
 
 class ZigRegularRunner: ZigProgramRunner<ZigProfileState<*>>(DefaultRunExecutor.EXECUTOR_ID) {
     override suspend fun execute(state: ZigProfileState<*>, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor? {
-        val cli = state.getCommandLine(toolchain, false)
-        val exec = executeCommandLine(cli, environment)
+        val exec = state.execute(environment.executor, this)
         return withEDTContext(ModalityState.any()) {
             val runContentBuilder = RunContentBuilder(exec, environment)
             runContentBuilder.showRunContent(null)

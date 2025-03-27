@@ -58,7 +58,7 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
         val project = environment.project
         val driverProviders = ZigDebuggerDriverConfigurationProviderBase.EXTENSION_POINT_NAME.extensionList
         for (provider in driverProviders) {
-            val driver = provider.getDebuggerConfiguration(project, isElevated = false, emulateTerminal = false, DebuggerDriverConfiguration::class.java) ?: continue
+            val driver = provider.getDebuggerConfiguration(project, isElevated = false, emulateTerminal = true, DebuggerDriverConfiguration::class.java) ?: continue
             return executeWithDriver(state, toolchain, environment, driver) ?: continue
         }
         return null
@@ -93,12 +93,12 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
                     }
                 }
             }
-            return@reportProgress runInterruptibleEDT {
+            return@reportProgress runInterruptibleEDT(ModalityState.any()) {
                 val debuggerManager = XDebuggerManager.getInstance(environment.project)
                 debuggerManager.startSession(environment, object: XDebugProcessStarter() {
                     override fun start(session: XDebugSession): XDebugProcess {
                         val project = session.project
-                        val textConsoleBuilder = SharedConsoleBuilder(console)
+                        val textConsoleBuilder = state.consoleBuilder
                         val debugProcess = ZigLocalDebugProcess(runParameters, session, textConsoleBuilder)
                         ProcessTerminatedListener.attach(debugProcess.processHandler, project)
                         debugProcess.start()
