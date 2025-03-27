@@ -29,6 +29,9 @@ Changelog structure reference:
 
 ### Fixed
 
+- Debugger
+  - Build errors didn't get shown in the console
+
 - Project
   - File path browse buttons in zig run configurations didn't work
 
