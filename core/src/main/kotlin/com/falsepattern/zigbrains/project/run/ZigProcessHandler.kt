@@ -24,10 +24,7 @@ package com.falsepattern.zigbrains.project.run
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PtyCommandLine
-import com.intellij.execution.process.AnsiEscapeDecoder.ColoredTextAcceptor
-import com.intellij.execution.process.KillableColoredProcessHandler
 import com.intellij.execution.process.KillableProcessHandler
-import com.intellij.openapi.util.Key
 import com.pty4j.PtyProcess
 import java.nio.charset.Charset
 

@@ -22,9 +22,7 @@
 
 package com.falsepattern.zigbrains.project.execution.base
 
-import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.direnv.DirenvCmd
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.direnv.DirenvService
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
@@ -65,8 +63,9 @@ abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: Con
 
 
     suspend fun patchCommandLine(commandLine: GeneralCommandLine): GeneralCommandLine {
-        if (project.zigProjectSettings.state.direnv) {
-            commandLine.withEnvironment(DirenvCmd.importDirenv(project).env)
+        val direnv = DirenvService.getInstance(project)
+        if (direnv.isEnabled.isEnabled(project)) {
+            commandLine.withEnvironment(direnv.import().env)
         }
         return commandLine
     }

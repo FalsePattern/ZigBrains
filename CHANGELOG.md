@@ -17,6 +17,22 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [25.0.0]
+
+### Fixed
+
+- Project
+  - Zig.iml file created in every project
+
+### Changed
+
+- Project
+  - BREAKING MAJOR UPDATE: Fully reworked toolchain and language server management 
+  The configuration menu is now very similar to the intellij java toolchain management,
+  with proper toolchain selection, detection, downloading, etc. This change will require
+  you to re-configure your toolchains!
+  - Zig external library root is now no longer shown if zig is not configured
+
 ## [24.0.1]
 
 ### Added

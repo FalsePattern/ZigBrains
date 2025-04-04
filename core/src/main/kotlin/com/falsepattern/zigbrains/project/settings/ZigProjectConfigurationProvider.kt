@@ -22,42 +22,56 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.falsepattern.zigbrains.shared.SubConfigurable
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
-import com.intellij.ui.dsl.builder.Panel
+import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.UserDataHolder
+import com.intellij.openapi.util.UserDataHolderBase
 
 interface ZigProjectConfigurationProvider {
-    fun handleMainConfigChanged(project: Project)
-    fun createConfigurable(project: Project): SubConfigurable
-    fun createNewProjectSettingsPanel(holder: SettingsPanelHolder): SettingsPanel?
-    val priority: Int
+    fun create(sharedState: IUserDataBridge): SubConfigurable<Project>?
+    val index: Int
     companion object {
         private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigProjectConfigurationProvider>("com.falsepattern.zigbrains.projectConfigProvider")
-        fun mainConfigChanged(project: Project) {
-            EXTENSION_POINT_NAME.extensionList.forEach { it.handleMainConfigChanged(project) }
-        }
-        fun createConfigurables(project: Project): List<SubConfigurable> {
-            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.map { it.createConfigurable(project) }
-        }
-        fun createNewProjectSettingsPanels(holder: SettingsPanelHolder): List<SettingsPanel> {
-            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.mapNotNull { it.createNewProjectSettingsPanel(holder) }
+        val PROJECT_KEY: Key<Project> = Key.create("Project")
+        fun createPanels(project: Project?): List<SubConfigurable<Project>> {
+            val sharedState = UserDataBridge()
+            sharedState.putUserData(PROJECT_KEY, project)
+            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.index }.mapNotNull { it.create(sharedState) }
         }
     }
-    interface SettingsPanel: Disposable {
-        val data: Settings
-        fun attach(p: Panel)
-        fun direnvChanged(state: Boolean)
+
+    interface IUserDataBridge: UserDataHolder {
+        fun addUserDataChangeListener(listener: UserDataListener)
+        fun removeUserDataChangeListener(listener: UserDataListener)
     }
-    interface SettingsPanelHolder {
-        val panels: List<SettingsPanel>
+
+    interface UserDataListener {
+        fun onUserDataChanged(key: Key<*>)
     }
-    interface Settings {
-        fun apply(project: Project)
-    }
-    interface ToolchainProvider {
-        val toolchain: AbstractZigToolchain?
+
+    class UserDataBridge: UserDataHolderBase(), IUserDataBridge {
+        private val listeners = ArrayList<UserDataListener>()
+        override fun <T : Any?> putUserData(key: Key<T>, value: T?) {
+            super.putUserData(key, value)
+            synchronized(listeners) {
+                listeners.forEach { listener ->
+                    listener.onUserDataChanged(key)
+                }
+            }
+        }
+
+        override fun addUserDataChangeListener(listener: UserDataListener) {
+            synchronized(listeners) {
+                listeners.add(listener)
+            }
+        }
+
+        override fun removeUserDataChangeListener(listener: UserDataListener) {
+            synchronized(listeners) {
+                listeners.remove(listener)
+            }
+        }
     }
 }

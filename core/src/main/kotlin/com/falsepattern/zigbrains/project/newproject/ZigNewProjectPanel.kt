@@ -39,9 +39,9 @@ import com.intellij.util.ui.JBUI
 import javax.swing.JList
 import javax.swing.ListSelectionModel
 
-class ZigNewProjectPanel(private var handleGit: Boolean): Disposable, ZigProjectConfigurationProvider.SettingsPanelHolder {
+class ZigNewProjectPanel(private var handleGit: Boolean): Disposable {
     private val git = JBCheckBox()
-    override val panels = ZigProjectConfigurationProvider.createNewProjectSettingsPanels(this).onEach { Disposer.register(this, it) }
+    val panels = ZigProjectConfigurationProvider.createPanels(null).onEach { Disposer.register(this, it) }
     private val templateList = JBList(JBList.createDefaultListModel(defaultTemplates)).apply {
         selectionMode = ListSelectionModel.SINGLE_SELECTION
         selectedIndex = 0
@@ -64,7 +64,7 @@ class ZigNewProjectPanel(private var handleGit: Boolean): Disposable, ZigProject
 
     fun getData(): ZigProjectConfigurationData {
         val selectedTemplate = templateList.selectedValue
-        return ZigProjectConfigurationData(handleGit && git.isSelected, panels.map { it.data }, selectedTemplate)
+        return ZigProjectConfigurationData(handleGit && git.isSelected, panels, selectedTemplate)
     }
 
     fun attach(p: Panel): Unit = with(p) {
@@ -73,6 +73,7 @@ class ZigNewProjectPanel(private var handleGit: Boolean): Disposable, ZigProject
                 cell(git)
             }
         }
+        panels.filter { it.newProjectBeforeInitSelector }.forEach { it.attach(p) }
         group("Zig Project Template") {
             row {
                 resizableRow()
@@ -81,7 +82,7 @@ class ZigNewProjectPanel(private var handleGit: Boolean): Disposable, ZigProject
                     .align(AlignY.FILL)
             }
         }
-        panels.forEach { it.attach(p) }
+        panels.filter { !it.newProjectBeforeInitSelector }.forEach { it.attach(p) }
     }
 
     override fun dispose() {

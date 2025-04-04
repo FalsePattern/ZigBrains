@@ -26,13 +26,13 @@ import com.falsepattern.zigbrains.debugger.ZigDebugBundle
 import com.falsepattern.zigbrains.debugger.execution.binary.ZigProfileStateBinary
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstaller
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.intellij.execution.ExecutionException
 import com.jetbrains.cidr.execution.Installer
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
 
 
-class ZigDebugParametersBinary @Throws(ExecutionException::class) constructor(driverConfiguration: DebuggerDriverConfiguration, toolchain: AbstractZigToolchain, profileState: ZigProfileStateBinary) :
+class ZigDebugParametersBinary @Throws(ExecutionException::class) constructor(driverConfiguration: DebuggerDriverConfiguration, toolchain: ZigToolchain, profileState: ZigProfileStateBinary) :
     ZigDebugParametersBase<ZigProfileStateBinary>(driverConfiguration, toolchain, profileState) {
         private val executableFile = profileState.configuration.exePath.path?.toFile() ?: throw ExecutionException(ZigDebugBundle.message("exception.missing-exe-path"))
     override fun getInstaller(): Installer {

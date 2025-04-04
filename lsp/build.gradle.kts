@@ -16,5 +16,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
     compileOnly("com.redhat.devtools.intellij:lsp4ij:$lsp4ijVersion")
     compileOnly("org.eclipse.lsp4j:org.eclipse.lsp4j:$lsp4jVersion")
-    implementation(project(":core"))
+    implementation(project(":core")) {
+        isTransitive = false
+    }
 }

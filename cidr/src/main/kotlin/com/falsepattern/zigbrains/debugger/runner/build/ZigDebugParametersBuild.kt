@@ -28,7 +28,7 @@ import com.falsepattern.zigbrains.debugger.runner.base.PreLaunchProcessListener
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstaller
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase
 import com.falsepattern.zigbrains.project.execution.build.ZigProfileStateBuild
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.intellij.execution.ExecutionException
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.platform.util.progress.withProgressText
@@ -46,7 +46,7 @@ import kotlin.io.path.isRegularFile
 
 class ZigDebugParametersBuild(
     driverConfiguration: DebuggerDriverConfiguration,
-    toolchain: AbstractZigToolchain,
+    toolchain: ZigToolchain,
     profileState: ZigProfileStateBuild
 ) : ZigDebugParametersBase<ZigProfileStateBuild>(driverConfiguration, toolchain, profileState), PreLaunchAware {
     @Volatile
