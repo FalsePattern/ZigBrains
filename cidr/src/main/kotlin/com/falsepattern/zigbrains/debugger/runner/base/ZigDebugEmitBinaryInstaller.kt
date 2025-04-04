@@ -23,7 +23,7 @@
 package com.falsepattern.zigbrains.debugger.runner.base
 
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PtyCommandLine
@@ -34,7 +34,7 @@ import java.io.File
 
 class ZigDebugEmitBinaryInstaller<ProfileState: ZigProfileState<*>>(
     private val profileState: ProfileState,
-    private val toolchain: AbstractZigToolchain,
+    private val toolchain: ZigToolchain,
     private val executableFile: File,
     private val exeArgs: List<String>
 ): Installer {

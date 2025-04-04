@@ -23,8 +23,8 @@
 package com.falsepattern.zigbrains.project.run
 
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.RunProfileState
@@ -61,7 +61,7 @@ abstract class ZigProgramRunner<ProfileState : ZigProfileState<*>>(protected val
 
         val state = castProfileState(baseState) ?: return null
 
-        val toolchain = environment.project.zigProjectSettings.state.toolchain ?: run {
+        val toolchain = ZigToolchainService.getInstance(environment.project).toolchain ?: run {
             Notification(
                 "zigbrains",
                 "Zig project toolchain not set, cannot execute program! Please configure it in [Settings | Languages & Frameworks | Zig]",
@@ -81,5 +81,5 @@ abstract class ZigProgramRunner<ProfileState : ZigProfileState<*>>(protected val
     protected abstract fun castProfileState(state: ZigProfileState<*>): ProfileState?
 
     @Throws(ExecutionException::class)
-    abstract suspend fun execute(state: ProfileState, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor?
+    abstract suspend fun execute(state: ProfileState, toolchain: ZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor?
 }

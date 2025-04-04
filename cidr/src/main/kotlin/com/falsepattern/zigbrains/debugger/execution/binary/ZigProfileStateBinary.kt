@@ -24,14 +24,14 @@ package com.falsepattern.zigbrains.debugger.execution.binary
 
 import com.falsepattern.zigbrains.debugger.ZigDebugBundle
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.runners.ExecutionEnvironment
 import kotlin.io.path.pathString
 
 class ZigProfileStateBinary(environment: ExecutionEnvironment, configuration: ZigExecConfigBinary) : ZigProfileState<ZigExecConfigBinary>(environment, configuration) {
-    override suspend fun getCommandLine(toolchain: AbstractZigToolchain, debug: Boolean): GeneralCommandLine {
+    override suspend fun getCommandLine(toolchain: ZigToolchain, debug: Boolean): GeneralCommandLine {
         val cli = GeneralCommandLine()
         val cfg = configuration
         cfg.workingDirectory.path?.let { cli.withWorkDirectory(it.toFile()) }

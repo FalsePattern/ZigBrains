@@ -25,6 +25,11 @@ which are the property of the Zig Software Foundation.
 (https://github.com/ziglang/logo)
 These art assets are licensed under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
 --------------------------------
+The art assets inside src/art/zls, and all copies of them, are derived from the Zig Language Server,
+which are the property of the zigtools organization.
+(https://github.com/zigtools/zls)
+These art assets are licensed under MIT license.
+--------------------------------
 Parts of the codebase are based on the intellij-zig plugin,
 developed by HTGAzureX1212 (https://github.com/HTGAzureX1212), licensed under the Apache 2.0 license.
 --------------------------------
@@ -38,3 +43,4 @@ All of the licenses listed here are available in the following files, bundled wi
 - licenses/GPL3.LICENSE
 - licenses/INTELLIJ-RUST.LICENSE
 - licenses/LGPL3.LICENSE
+- licenses/ZLS.LICENSE

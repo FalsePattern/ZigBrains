@@ -22,16 +22,72 @@
 
 package com.falsepattern.zigbrains.shared
 
-import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
-import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider.SettingsPanelHolder
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.options.ConfigurationException
+import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.util.Disposer
 import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.dsl.builder.panel
+import javax.swing.JComponent
 
-interface SubConfigurable: Disposable {
-    fun createComponent(holder: SettingsPanelHolder, panel: Panel): ZigProjectConfigurationProvider.SettingsPanel
-    fun isModified(): Boolean
-    @Throws(ConfigurationException::class)
-    fun apply()
-    fun reset()
+interface SubConfigurable<T>: Disposable {
+    fun attach(panel: Panel)
+    fun isModified(context: T): Boolean
+    fun apply(context: T)
+    fun reset(context: T?)
+
+    val newProjectBeforeInitSelector: Boolean get() = false
+
+    abstract class Adapter<T>: Configurable {
+        private val myConfigurables: MutableList<SubConfigurable<T>> = ArrayList()
+
+        abstract fun instantiate(): List<SubConfigurable<T>>
+        protected abstract val context: T
+
+        override fun createComponent(): JComponent? {
+            val configurables: List<SubConfigurable<T>>
+            synchronized(myConfigurables) {
+                if (myConfigurables.isEmpty()) {
+                    disposeConfigurables()
+                }
+                configurables = instantiate()
+                configurables.forEach { it.reset(context) }
+                myConfigurables.clear()
+                myConfigurables.addAll(configurables)
+            }
+            return panel {
+                configurables.forEach { it.attach(this) }
+            }
+        }
+
+        override fun isModified(): Boolean {
+            synchronized(myConfigurables) {
+                return myConfigurables.any { it.isModified(context) }
+            }
+        }
+
+        override fun apply() {
+            synchronized(myConfigurables) {
+                myConfigurables.forEach { it.apply(context) }
+            }
+        }
+
+        override fun reset() {
+            synchronized(myConfigurables) {
+                myConfigurables.forEach { it.reset(context) }
+            }
+        }
+
+        override fun disposeUIResources() {
+            synchronized(myConfigurables) {
+                disposeConfigurables()
+            }
+            super.disposeUIResources()
+        }
+
+        private fun disposeConfigurables() {
+            val configurables = ArrayList(myConfigurables)
+            myConfigurables.clear()
+            configurables.forEach { Disposer.dispose(it) }
+        }
+    }
 }

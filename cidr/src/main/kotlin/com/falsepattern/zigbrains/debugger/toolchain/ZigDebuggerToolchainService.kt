@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.debugger.toolchain
 
 import com.falsepattern.zigbrains.debugger.ZigDebugBundle
+import com.falsepattern.zigbrains.shared.Unarchiver
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.PathManager
@@ -34,20 +35,19 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.platform.util.progress.reportSequentialProgress
 import com.intellij.ui.BrowserHyperlinkListener
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.application
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import com.intellij.util.download.DownloadableFileService
-import com.intellij.util.io.Decompressor
 import com.intellij.util.system.CpuArch
 import com.intellij.util.system.OS
 import com.jetbrains.cidr.execution.debugger.CidrDebuggerPathManager
 import com.jetbrains.cidr.execution.debugger.backend.bin.UrlProvider
 import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.URL
@@ -168,7 +168,9 @@ class ZigDebuggerToolchainService {
         }
 
         try {
-            downloadAndUnArchive(baseDir, downloadableBinaries)
+            withContext(Dispatchers.IO) {
+                downloadAndUnArchive(baseDir, downloadableBinaries)
+            }
             return DownloadResult.Ok(baseDir)
         } catch (e: IOException) {
             //TODO logging
@@ -207,34 +209,40 @@ class ZigDebuggerToolchainService {
     @Throws(IOException::class)
     @RequiresEdt
     private suspend fun downloadAndUnArchive(baseDir: Path, binariesToDownload: List<DownloadableDebuggerBinary>) {
-        val service = DownloadableFileService.getInstance()
+        reportSequentialProgress { reporter ->
+            val service = DownloadableFileService.getInstance()
 
-        val downloadDir = baseDir.toFile()
-        downloadDir.deleteRecursively()
+            val downloadDir = baseDir.toFile()
+            downloadDir.deleteRecursively()
 
-        val descriptions = binariesToDownload.map {
-            service.createFileDescription(it.url, fileName(it.url))
-        }
-
-        val downloader = service.createDownloader(descriptions, "Debugger downloading")
-        val downloadDirectory = downloadPath().toFile()
-        val downloadResults = withContext(Dispatchers.IO) {
-            blockingContext {
-                downloader.download(downloadDirectory)
+            val descriptions = binariesToDownload.map {
+                service.createFileDescription(it.url, fileName(it.url))
             }
-        }
-        val versions = Properties()
-        for (result in downloadResults) {
-            val downloadUrl = result.second.downloadUrl
-            val binaryToDownload = binariesToDownload.first { it.url == downloadUrl }
-            val propertyName = binaryToDownload.propertyName
-            val archiveFile = result.first
-            Unarchiver.unarchive(archiveFile.toPath(), baseDir, binaryToDownload.prefix)
-            archiveFile.delete()
-            versions[propertyName] = binaryToDownload.version
-        }
 
-        saveVersionsFile(baseDir, versions)
+            val downloader = service.createDownloader(descriptions, "Debugger downloading")
+            val downloadDirectory = downloadPath().toFile()
+            val downloadResults = reporter.sizedStep(100) {
+                blockingContext {
+                    downloader.download(downloadDirectory)
+                }
+            }
+            val versions = Properties()
+            for (result in downloadResults) {
+                val downloadUrl = result.second.downloadUrl
+                val binaryToDownload = binariesToDownload.first { it.url == downloadUrl }
+                val propertyName = binaryToDownload.propertyName
+                val archiveFile = result.first
+                reporter.indeterminateStep {
+                    blockingContext {
+                        Unarchiver.unarchive(archiveFile.toPath(), baseDir, binaryToDownload.prefix)
+                    }
+                }
+                archiveFile.delete()
+                versions[propertyName] = binaryToDownload.version
+            }
+
+            saveVersionsFile(baseDir, versions)
+        }
     }
 
     private fun lldbUrls(): Pair<URL, URL>? {
@@ -326,38 +334,6 @@ class ZigDebuggerToolchainService {
 
         private fun fileName(url: String): String {
             return url.substringAfterLast("/")
-        }
-    }
-
-    private enum class Unarchiver {
-        ZIP {
-            override val extension = "zip"
-            override fun createDecompressor(file: Path) = Decompressor.Zip(file)
-        },
-        TAR {
-            override val extension = "tar.gz"
-            override fun createDecompressor(file: Path) = Decompressor.Tar(file)
-        },
-        VSIX {
-            override val extension = "vsix"
-            override fun createDecompressor(file: Path) = Decompressor.Zip(file)
-        };
-
-        protected abstract val extension: String
-        protected abstract fun createDecompressor(file: Path): Decompressor
-
-        companion object {
-            @Throws(IOException::class)
-            suspend fun unarchive(archivePath: Path, dst: Path, prefix: String? = null) {
-                runInterruptible {
-                    val unarchiver = entries.find { archivePath.name.endsWith(it.extension) } ?: error("Unexpected archive type: $archivePath")
-                    val dec = unarchiver.createDecompressor(archivePath)
-                    if (prefix != null) {
-                        dec.removePrefixPath(prefix)
-                    }
-                    dec.extract(dst)
-                }
-            }
         }
     }
 

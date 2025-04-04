@@ -22,11 +22,14 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.shared.MultiConfigurable
+import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.project.Project
 
-class ZigConfigurable(project: Project): MultiConfigurable(ZigProjectConfigurationProvider.createConfigurables(project)) {
-    override fun getDisplayName(): String {
-        return "Zig"
+class ZigConfigurable(override val context: Project) : SubConfigurable.Adapter<Project>() {
+    override fun instantiate(): List<SubConfigurable<Project>> {
+        return ZigProjectConfigurationProvider.createPanels(context)
     }
+
+    override fun getDisplayName() = ZigBrainsBundle.message("settings.project.display-name")
 }

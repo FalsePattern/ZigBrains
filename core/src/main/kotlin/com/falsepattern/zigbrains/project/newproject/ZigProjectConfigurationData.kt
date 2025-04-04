@@ -22,9 +22,10 @@
 
 package com.falsepattern.zigbrains.project.newproject
 
-import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.template.ZigInitTemplate
 import com.falsepattern.zigbrains.project.template.ZigProjectTemplate
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
+import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -42,7 +43,7 @@ import kotlinx.coroutines.launch
 @JvmRecord
 data class ZigProjectConfigurationData(
     val git: Boolean,
-    val conf: List<ZigProjectConfigurationProvider.Settings>,
+    val conf: List<SubConfigurable<Project>>,
     val selectedTemplate: ZigProjectTemplate
 ) {
     @RequiresBackgroundThread
@@ -54,9 +55,7 @@ data class ZigProjectConfigurationData(
 
             if (!reporter.indeterminateStep("Initializing project") {
                 if (template is ZigInitTemplate) {
-                    val toolchain = conf
-                        .mapNotNull { it as? ZigProjectConfigurationProvider.ToolchainProvider }
-                        .firstNotNullOfOrNull { it.toolchain } ?: run {
+                    val toolchain = ZigToolchainService.getInstance(project).toolchain ?: run {
                         Notification(
                             "zigbrains",
                             "Tried to generate project with zig init, but zig toolchain is invalid",

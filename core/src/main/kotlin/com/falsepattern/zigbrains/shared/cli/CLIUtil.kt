@@ -28,7 +28,6 @@ import com.falsepattern.zigbrains.shared.ipc.IPCUtil
 import com.falsepattern.zigbrains.shared.ipc.ipc
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.openapi.options.ConfigurationException

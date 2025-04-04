@@ -26,7 +26,6 @@ import com.intellij.execution.filters.TextConsoleBuilderImpl
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.openapi.project.Project
 import com.intellij.terminal.TerminalExecutionConsole
-import java.nio.file.Path
 
 class ZigConsoleBuilder(private val project: Project, private val emulateTerminal: Boolean = false): TextConsoleBuilderImpl(project) {
     override fun createConsole(): ConsoleView {
