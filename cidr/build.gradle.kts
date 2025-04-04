@@ -27,7 +27,9 @@ dependencies {
         create(IntelliJPlatformType.CLion, clionVersion, useInstaller = useInstaller)
         bundledPlugins("com.intellij.clion", "com.intellij.cidr.base", "com.intellij.nativeDebug")
     }
-    implementation(project(":core"))
+    implementation(project(":core")) {
+        isTransitive = false
+    }
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.debug:$lsp4jVersion") {
         exclude("org.eclipse.lsp4j", "org.eclipse.lsp4j")
         exclude("org.eclipse.lsp4j", "org.eclipse.lsp4j.jsonrpc")
