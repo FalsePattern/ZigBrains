@@ -22,18 +22,9 @@
 
 package com.falsepattern.zigbrains.project.toolchain
 
-import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool
-import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.openapi.project.Project
-import java.nio.file.Path
+import com.intellij.util.xmlb.annotations.OptionTag
 
-
-abstract class AbstractZigToolchain {
-    val zig: ZigCompilerTool by lazy { ZigCompilerTool(this) }
-
-    abstract fun workingDirectory(project: Project? = null): Path?
-
-    abstract suspend fun patchCommandLine(commandLine: GeneralCommandLine, project: Project? = null): GeneralCommandLine
-
-    abstract fun pathToExecutable(toolName: String, project: Project? = null): Path
-}
+data class ZigToolchainList(
+    @get:OptionTag(converter = ZigToolchainListConverter::class)
+    var toolchains: List<AbstractZigToolchain> = emptyList(),
+)

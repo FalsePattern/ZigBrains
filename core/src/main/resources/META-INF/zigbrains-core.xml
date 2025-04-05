@@ -144,6 +144,13 @@
                 id="ZigConfigurable"
                 displayName="Zig"
         />
+        <applicationConfigurable
+                parentId="ZigConfigurable"
+                instance="com.falsepattern.zigbrains.project.toolchain.ZigToolchainListEditor"
+                id="ZigToolchainConfigurable"
+                displayName="Toolchain"
+        />
+        <sdkType implementation="com.falsepattern.zigbrains.project.toolchain.ZigSDKType"/>
 
         <programRunner
                 implementation="com.falsepattern.zigbrains.project.run.ZigRegularRunner"

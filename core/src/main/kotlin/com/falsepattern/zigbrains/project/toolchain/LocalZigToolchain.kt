@@ -30,10 +30,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.KeyWithDefaultValue
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.toNioPathOrNull
 import java.nio.file.Path
 
-class LocalZigToolchain(val location: Path): AbstractZigToolchain() {
+class LocalZigToolchain(var location: Path, var std: Path? = null, var name: String? = null): AbstractZigToolchain() {
     override fun workingDirectory(project: Project?): Path? {
         return project?.guessProjectDir()?.toNioPathOrNull()
     }
@@ -61,6 +62,18 @@ class LocalZigToolchain(val location: Path): AbstractZigToolchain() {
                 // TODO
                 throw ExecutionException("The debugger only supports local zig toolchain")
             }
+        }
+
+        fun tryFromPathString(pathStr: String): LocalZigToolchain? {
+            return pathStr.toNioPathOrNull()?.let(::tryFromPath)
+        }
+
+        fun tryFromPath(path: Path): LocalZigToolchain? {
+            val tc = LocalZigToolchain(path)
+            if (!tc.zig.fileValid()) {
+                return null
+            }
+            return tc
         }
     }
 }

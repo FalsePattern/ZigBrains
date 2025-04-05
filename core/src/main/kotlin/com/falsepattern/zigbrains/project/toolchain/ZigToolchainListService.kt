@@ -22,18 +22,37 @@
 
 package com.falsepattern.zigbrains.project.toolchain
 
-import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool
-import com.intellij.execution.configurations.GeneralCommandLine
+import com.falsepattern.zigbrains.project.settings.ZigProjectSettings
+import com.falsepattern.zigbrains.project.toolchain.stdlib.ZigSyntheticLibrary
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
-import java.nio.file.Path
+import kotlinx.coroutines.launch
 
+@Service(Service.Level.APP)
+@State(
+    name = "ZigProjectSettings",
+    storages = [Storage("zigbrains.xml")]
+)
+class ZigToolchainListService(): PersistentStateComponent<ZigToolchainList> {
+    @Volatile
+    private var state = ZigToolchainList()
 
-abstract class AbstractZigToolchain {
-    val zig: ZigCompilerTool by lazy { ZigCompilerTool(this) }
+    override fun getState(): ZigToolchainList {
+        return state.copy()
+    }
 
-    abstract fun workingDirectory(project: Project? = null): Path?
+    fun setState(value: ZigToolchainList) {
+        this.state = value
+    }
 
-    abstract suspend fun patchCommandLine(commandLine: GeneralCommandLine, project: Project? = null): GeneralCommandLine
+    override fun loadState(state: ZigToolchainList) {
+        setState(state)
+    }
 
-    abstract fun pathToExecutable(toolName: String, project: Project? = null): Path
+    fun isModified(otherData: ZigToolchainList): Boolean {
+        return state != otherData
+    }
 }
+
+val zigToolchainList get() = service<ZigToolchainListService>()

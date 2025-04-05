@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider.Compani
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolder
+import com.intellij.util.asSafely
 import com.intellij.util.xmlb.Converter
 import kotlinx.serialization.json.*
 
@@ -43,6 +44,21 @@ sealed interface ZigToolchainProvider<in T: AbstractZigToolchain> {
         suspend fun suggestToolchain(project: Project?, extraData: UserDataHolder): AbstractZigToolchain? {
             return EXTENSION_POINT_NAME.extensionList.firstNotNullOfOrNull { it.suggestToolchain(project, extraData) }
         }
+
+        fun fromJson(json: JsonObject): AbstractZigToolchain? {
+            val marker = (json["marker"] as? JsonPrimitive)?.contentOrNull ?: return null
+            val data = json["data"] ?: return null
+            val provider = EXTENSION_POINT_NAME.extensionList.find { it.serialMarker == marker } ?: return null
+            return provider.deserialize(data)
+        }
+
+        fun toJson(tc: AbstractZigToolchain): JsonObject? {
+            val provider = EXTENSION_POINT_NAME.extensionList.find { it.canSerialize(tc) } ?: return null
+            return buildJsonObject {
+                put("marker", provider.serialMarker)
+                put("data", provider.serialize(tc))
+            }
+        }
     }
 }
 
@@ -52,18 +68,25 @@ private fun <T: AbstractZigToolchain> ZigToolchainProvider<T>.serialize(toolchai
 class ZigToolchainConverter: Converter<AbstractZigToolchain>() {
     override fun fromString(value: String): AbstractZigToolchain? {
         val json = Json.parseToJsonElement(value) as? JsonObject ?: return null
-        val marker = (json["marker"] as? JsonPrimitive)?.contentOrNull ?: return null
-        val data = json["data"] ?: return null
-        val provider = EXTENSION_POINT_NAME.extensionList.find { it.serialMarker == marker } ?: return null
-        return provider.deserialize(data)
+        return ZigToolchainProvider.fromJson(json)
     }
 
     override fun toString(value: AbstractZigToolchain): String? {
-        val provider = EXTENSION_POINT_NAME.extensionList.find { it.canSerialize(value) } ?: return null
-        return buildJsonObject {
-            put("marker", provider.serialMarker)
-            put("data", provider.serialize(value))
-        }.toString()
+        return ZigToolchainProvider.toJson(value)?.toString()
+    }
+}
+
+class ZigToolchainListConverter: Converter<List<AbstractZigToolchain>>() {
+    override fun fromString(value: String): List<AbstractZigToolchain> {
+        val json = Json.parseToJsonElement(value) as? JsonArray ?: return emptyList()
+        return json.mapNotNull { it.asSafely<JsonObject>()?.let { ZigToolchainProvider.fromJson(it) } }
     }
 
+    override fun toString(value: List<AbstractZigToolchain>): String {
+        return buildJsonArray {
+            value.mapNotNull { ZigToolchainProvider.toJson(it) }.forEach {
+                add(it)
+            }
+        }.toString()
+    }
 }
