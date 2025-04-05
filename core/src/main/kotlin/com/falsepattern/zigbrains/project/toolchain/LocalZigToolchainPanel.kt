@@ -101,12 +101,10 @@ class LocalZigToolchainPanel() : Disposable {
     }
 
     fun apply(cfg: LocalZigToolchainConfigurable): Boolean {
-        cfg.displayName = nameField.text
         val tc = cfg.toolchain
         val location = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull() ?: return false
         val std = if (stdFieldOverride.isSelected) pathToStd.text.ifBlank { null }?.toNioPathOrNull() else null
-        tc.location = location
-        tc.std = std
+        cfg.toolchain = tc.copy(location = location, std = std, name = nameField.text ?: "")
         return true
     }
 

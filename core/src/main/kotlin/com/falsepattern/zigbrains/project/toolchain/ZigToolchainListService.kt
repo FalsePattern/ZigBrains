@@ -22,37 +22,50 @@
 
 package com.falsepattern.zigbrains.project.toolchain
 
-import com.falsepattern.zigbrains.project.settings.ZigProjectSettings
-import com.falsepattern.zigbrains.project.toolchain.stdlib.ZigSyntheticLibrary
-import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.components.*
-import com.intellij.openapi.project.Project
-import kotlinx.coroutines.launch
+import com.intellij.util.xmlb.annotations.MapAnnotation
+import java.util.UUID
 
 @Service(Service.Level.APP)
 @State(
-    name = "ZigProjectSettings",
+    name = "ZigToolchainList",
     storages = [Storage("zigbrains.xml")]
 )
-class ZigToolchainListService(): PersistentStateComponent<ZigToolchainList> {
-    @Volatile
-    private var state = ZigToolchainList()
-
-    override fun getState(): ZigToolchainList {
-        return state.copy()
+class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchainListService.State>(State()) {
+    fun setToolchain(uuid: UUID, toolchain: AbstractZigToolchain) {
+        updateState {
+            val newMap = HashMap<String, AbstractZigToolchain.Ref>()
+            newMap.putAll(it.toolchains)
+            newMap.put(uuid.toString(), toolchain.toRef())
+            it.copy(toolchains = newMap)
+        }
     }
 
-    fun setState(value: ZigToolchainList) {
-        this.state = value
+    fun getToolchain(uuid: UUID): AbstractZigToolchain? {
+        return state.toolchains[uuid.toString()]?.resolve()
     }
 
-    override fun loadState(state: ZigToolchainList) {
-        setState(state)
+    fun removeToolchain(uuid: UUID) {
+        val str = uuid.toString()
+        updateState {
+            it.copy(toolchains = it.toolchains.filter { it.key != str })
+        }
     }
 
-    fun isModified(otherData: ZigToolchainList): Boolean {
-        return state != otherData
-    }
+    val toolchains: Sequence<Pair<UUID, AbstractZigToolchain>>
+        get() = state.toolchains
+            .asSequence()
+            .mapNotNull {
+                val uuid = UUID.fromString(it.key) ?: return@mapNotNull null
+                val tc = it.value.resolve() ?: return@mapNotNull null
+                uuid to tc
+            }
+
+    data class State(
+        @JvmField
+        @MapAnnotation(surroundKeyWithTag = false, surroundValueWithTag = false)
+        val toolchains: Map<String, AbstractZigToolchain.Ref> = emptyMap(),
+    )
 }
 
 val zigToolchainList get() = service<ZigToolchainListService>()

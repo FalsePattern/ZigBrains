@@ -25,7 +25,12 @@ package com.falsepattern.zigbrains.project.toolchain
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
+import com.intellij.util.xmlb.Converter
+import com.intellij.util.xmlb.annotations.Attribute
+import com.intellij.util.xmlb.annotations.MapAnnotation
+import com.intellij.util.xmlb.annotations.OptionTag
 import java.nio.file.Path
+import java.util.UUID
 
 
 abstract class AbstractZigToolchain {
@@ -36,4 +41,13 @@ abstract class AbstractZigToolchain {
     abstract suspend fun patchCommandLine(commandLine: GeneralCommandLine, project: Project? = null): GeneralCommandLine
 
     abstract fun pathToExecutable(toolName: String, project: Project? = null): Path
+
+    data class Ref(
+        @JvmField
+        @Attribute
+        val marker: String? = null,
+        @JvmField
+        @MapAnnotation(surroundWithTag = false)
+        val data: Map<String, String>? = null,
+    )
 }

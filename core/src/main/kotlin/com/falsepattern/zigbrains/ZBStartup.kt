@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider
+import com.falsepattern.zigbrains.project.toolchain.suggestZigToolchain
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.plugins.PluginManager
 import com.intellij.notification.Notification
@@ -80,7 +81,7 @@ class ZBStartup: ProjectActivity {
             data.putUserData(LocalZigToolchain.DIRENV_KEY,
                 DirenvCmd.direnvInstalled() && !project.isDefault && zigProjectState.direnv
             )
-            val tc = ZigToolchainProvider.suggestToolchain(project, data) ?: return
+            val tc = project.suggestZigToolchain(data) ?: return
             if (tc is LocalZigToolchain) {
                 zigProjectState.toolchainPath = tc.location.pathString
                 project.zigProjectSettings.state = zigProjectState

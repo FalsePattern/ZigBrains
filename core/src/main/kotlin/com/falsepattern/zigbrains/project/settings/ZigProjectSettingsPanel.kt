@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider
+import com.falsepattern.zigbrains.project.toolchain.suggestZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
@@ -107,7 +108,7 @@ class ZigProjectSettingsPanel(private val holder: ZigProjectConfigurationProvide
             return
         val data = UserDataHolderBase()
         data.putUserData(LocalZigToolchain.DIRENV_KEY, !project.isDefault && direnv.isSelected && DirenvCmd.direnvInstalled())
-        val tc = ZigToolchainProvider.suggestToolchain(project, data) ?: return
+        val tc = project.suggestZigToolchain(project) ?: return
         if (tc !is LocalZigToolchain) {
             TODO("Implement non-local zig toolchain in config")
         }

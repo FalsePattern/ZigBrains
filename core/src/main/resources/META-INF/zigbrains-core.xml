@@ -150,7 +150,6 @@
                 id="ZigToolchainConfigurable"
                 displayName="Toolchain"
         />
-        <sdkType implementation="com.falsepattern.zigbrains.project.toolchain.ZigSDKType"/>
 
         <programRunner
                 implementation="com.falsepattern.zigbrains.project.run.ZigRegularRunner"

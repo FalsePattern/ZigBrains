@@ -37,7 +37,7 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
     override suspend fun getEnvironment(project: Project, previous: ZLSConfig): ZLSConfig {
         val svc = project.zigProjectSettings
         var state = svc.state
-        val toolchain = state.toolchain ?: ZigToolchainProvider.suggestToolchain(project, UserDataHolderBase()) ?: return previous
+        val toolchain = state.toolchain ?: project.suggestZigToolchain(UserDataHolderBase()) ?: return previous
 
         val env = toolchain.zig.getEnv(project).getOrElse { throwable ->
             throwable.printStackTrace()

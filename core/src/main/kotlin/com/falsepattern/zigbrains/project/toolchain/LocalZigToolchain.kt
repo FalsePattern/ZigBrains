@@ -33,8 +33,10 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.toNioPathOrNull
 import java.nio.file.Path
+import java.util.UUID
+import kotlin.io.path.pathString
 
-class LocalZigToolchain(var location: Path, var std: Path? = null, var name: String? = null): AbstractZigToolchain() {
+data class LocalZigToolchain(val location: Path, val std: Path? = null, val name: String? = null): AbstractZigToolchain() {
     override fun workingDirectory(project: Project?): Path? {
         return project?.guessProjectDir()?.toNioPathOrNull()
     }

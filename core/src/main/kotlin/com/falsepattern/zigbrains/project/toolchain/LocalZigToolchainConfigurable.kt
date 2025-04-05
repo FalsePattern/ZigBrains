@@ -25,22 +25,28 @@ package com.falsepattern.zigbrains.project.toolchain
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.NlsContexts
-import com.intellij.openapi.util.NlsSafe
 import com.intellij.ui.dsl.builder.panel
 import kotlinx.coroutines.runBlocking
+import java.util.UUID
 import javax.swing.JComponent
 
 class LocalZigToolchainConfigurable(
-    val toolchain: LocalZigToolchain,
+    val uuid: UUID,
+    toolchain: LocalZigToolchain,
     private val project: Project
-): NamedConfigurable<LocalZigToolchain>() {
+): NamedConfigurable<UUID>() {
+    var toolchain: LocalZigToolchain = toolchain
+        set(value) {
+            zigToolchainList.setToolchain(uuid, value)
+            field = value
+        }
     private var myView: LocalZigToolchainPanel? = null
-    override fun setDisplayName(name: @NlsSafe String?) {
-        toolchain.name = name
+    override fun setDisplayName(name: String?) {
+        toolchain = toolchain.copy(name = name)
     }
 
-    override fun getEditableObject(): LocalZigToolchain? {
-        return toolchain
+    override fun getEditableObject(): UUID {
+        return uuid
     }
 
     override fun getBannerSlogan(): @NlsContexts.DetailedDescription String? {
@@ -65,7 +71,7 @@ class LocalZigToolchainConfigurable(
             val version = toolchain.zig.let { runBlocking { it.getEnv(project) } }.getOrNull()?.version
             if (version != null) {
                 theName = "Zig $version"
-                toolchain.name = theName
+                toolchain = toolchain.copy(name = theName)
             }
         }
         return theName
