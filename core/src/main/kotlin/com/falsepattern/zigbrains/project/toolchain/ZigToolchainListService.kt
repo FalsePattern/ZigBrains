@@ -63,7 +63,6 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
 
     data class State(
         @JvmField
-        @MapAnnotation(surroundKeyWithTag = false, surroundValueWithTag = false)
         val toolchains: Map<String, AbstractZigToolchain.Ref> = emptyMap(),
     )
 }

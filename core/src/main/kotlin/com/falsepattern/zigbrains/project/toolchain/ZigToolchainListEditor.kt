@@ -22,111 +22,94 @@
 
 package com.falsepattern.zigbrains.project.toolchain
 
+import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.intellij.ide.projectView.TreeStructureProvider
-import com.intellij.ide.util.treeView.AbstractTreeStructure
-import com.intellij.ide.util.treeView.AbstractTreeStructureBase
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.Presentation
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.PathManager
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.roots.ui.SdkAppearanceService
-import com.intellij.openapi.roots.ui.configuration.SdkListPresenter
-import com.intellij.openapi.roots.ui.configuration.SdkPopupFactory
+import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.ui.MasterDetailsComponent
-import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.ui.popup.util.BaseTreePopupStep
-import com.intellij.openapi.util.NlsContexts
-import com.intellij.ui.CollectionListModel
-import com.intellij.ui.ColoredListCellRenderer
-import com.intellij.ui.SimpleTextAttributes
-import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBPanel
-import com.intellij.ui.components.panels.HorizontalLayout
+import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.platform.ide.progress.TaskCancellation
+import com.intellij.platform.ide.progress.withModalProgress
+import com.intellij.platform.util.progress.withProgressText
+import com.intellij.ui.*
+import com.intellij.ui.components.JBList
+import com.intellij.ui.components.panels.OpaquePanel
+import com.intellij.ui.components.textFieldWithBrowseButton
+import com.intellij.ui.dsl.builder.Align
+import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.Cell
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.UnscaledGaps
 import com.intellij.ui.popup.list.ComboBoxPopup
-import com.intellij.ui.treeStructure.SimpleNode
-import com.intellij.ui.treeStructure.SimpleTreeStructure
+import com.intellij.util.Consumer
 import com.intellij.util.IconUtil
+import com.intellij.util.download.DownloadableFileService
+import com.intellij.util.system.CpuArch
+import com.intellij.util.text.SemVer
 import com.intellij.util.ui.EmptyIcon
-import com.intellij.util.ui.UIUtil.FontColor
+import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromStream
+import java.awt.BorderLayout
 import java.awt.Component
-import java.awt.LayoutManager
+import java.nio.file.Path
 import java.util.*
-import java.util.function.Consumer
-import javax.swing.AbstractListModel
-import javax.swing.BoxLayout
-import javax.swing.DefaultListModel
+import javax.accessibility.AccessibleContext
+import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 import javax.swing.JList
 import javax.swing.JPanel
 import javax.swing.ListCellRenderer
-import javax.swing.ListModel
-import javax.swing.SwingConstants
+import javax.swing.border.Border
+import javax.swing.event.DocumentEvent
 import javax.swing.tree.DefaultTreeModel
-import kotlin.io.path.pathString
 
-class ZigToolchainListEditor(): MasterDetailsComponent() {
+class ZigToolchainListEditor() : MasterDetailsComponent() {
     private var isTreeInitialized = false
+    private var myComponent: JComponent? = null
 
     override fun createComponent(): JComponent {
         if (!isTreeInitialized) {
             initTree()
             isTreeInitialized = true
         }
-        return super.createComponent()
+        val comp = super.createComponent()
+        myComponent = comp
+        return comp
     }
 
-    class ToolchainContext(private val project: Project?, private val model: ListModel<Any>): ComboBoxPopup.Context<Any> {
-        override fun getProject(): Project? {
-            return project
-        }
-
-        override fun getModel(): ListModel<Any> {
-            return model
-        }
-
-        override fun getRenderer(): ListCellRenderer<in Any> {
-            return object: ColoredListCellRenderer<Any>() {
-                override fun customizeCellRenderer(
-                    list: JList<out Any?>,
-                    value: Any?,
-                    index: Int,
-                    selected: Boolean,
-                    hasFocus: Boolean
-                ) {
-                    icon = EMPTY_ICON
-                    if (value is LocalZigToolchain) {
-                        icon = IconUtil.addIcon
-                        append(SdkListPresenter.presentDetectedSdkPath(value.location.pathString))
-                        if (value.name != null) {
-                            append(" ")
-                            append(value.name, SimpleTextAttributes.GRAYED_ATTRIBUTES)
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-
-    class ToolchainPopup(context: ToolchainContext,
-                         selected: Any?,
-                         onItemSelected: Consumer<Any>
-    ): ComboBoxPopup<Any>(context, selected, onItemSelected) {
-
-    }
-
-    override fun createActions(fromPopup: Boolean): List<AnAction?>? {
-        val add = object : DumbAwareAction({"lmaoo"}, Presentation.NULL_STRING, IconUtil.addIcon) {
+    override fun createActions(fromPopup: Boolean): List<AnAction> {
+        val add = object : DumbAwareAction({ "lmaoo" }, Presentation.NULL_STRING, IconUtil.addIcon) {
             override fun actionPerformed(e: AnActionEvent) {
                 val toolchains = suggestZigToolchains(zigToolchainList.toolchains.map { it.second }.toList())
-                val final = ArrayList<Any>()
-                final.addAll(toolchains)
-                val popup = ToolchainPopup(ToolchainContext(null, CollectionListModel(final)), null, {})
+                val final = ArrayList<TCListElemIn>()
+                final.add(TCListElem.Download)
+                final.add(TCListElem.FromDisk)
+                final.add(Separator("Detected toolchains", true))
+                final.addAll(toolchains.map { TCListElem.Toolchain(it) })
+                val model = TCModel(final)
+                val context = TCContext(null, model)
+                val popup = TCPopup(context, null, ::onItemSelected)
                 popup.showInBestPositionFor(e.dataContext)
             }
         }
@@ -140,6 +123,61 @@ class ZigToolchainListEditor(): MasterDetailsComponent() {
         super.onItemDeleted(item)
     }
 
+    private fun onItemSelected(elem: TCListElem) {
+        when (elem) {
+            is TCListElem.Toolchain -> {
+                val uuid = UUID.randomUUID()
+                zigToolchainList.setToolchain(uuid, elem.toolchain)
+                addToolchain(uuid, elem.toolchain)
+                (myTree.model as DefaultTreeModel).reload()
+            }
+
+            is TCListElem.Download -> {
+                zigCoroutineScope.async {
+                    withEDTContext(ModalityState.stateForComponent(myComponent!!)) {
+                        val info = withModalProgress(myComponent?.let { ModalTaskOwner.component(it) } ?: ModalTaskOwner.guess(), "Fetching zig version information", TaskCancellation.cancellable()) {
+                            ZigVersionInfo.download()
+                        }
+                        val dialog = DialogBuilder()
+                        val theList = ComboBox<String>(DefaultComboBoxModel(info.map { it.first }.toTypedArray()))
+                        val outputPath = textFieldWithBrowseButton(
+                            null,
+                            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))
+                        ).also {
+                            Disposer.register(dialog, it)
+                        }
+                        var archiveSizeCell: Cell<*>? = null
+                        fun detect(item: String) {
+                            outputPath.text = System.getProperty("user.home") + "/.zig/" + item
+                            val data = info.firstOrNull { it.first == item } ?: return
+                            val size = data.second.dist.size
+                            val sizeMb = size / (1024f * 1024f)
+                            archiveSizeCell?.comment?.text = "Archive size: %.2fMB".format(sizeMb)
+                        }
+                        theList.addItemListener {
+                            detect(it.item as String)
+                        }
+                        val center = panel {
+                            row("Version:") {
+                                cell(theList).resizableColumn().align(AlignX.FILL)
+                            }
+                            row("Location:") {
+                                cell(outputPath).resizableColumn().align(AlignX.FILL).apply { archiveSizeCell = comment("") }
+                            }
+                        }
+                        detect(info[0].first)
+                        dialog.centerPanel(center)
+                        dialog.setTitle("Version Selector")
+                        dialog.addCancelAction()
+                        dialog.showAndGet()
+                    }
+                }
+            }
+
+            is TCListElem.FromDisk -> {}
+        }
+    }
+
     override fun reset() {
         reloadTree()
         super.reset()
@@ -149,19 +187,159 @@ class ZigToolchainListEditor(): MasterDetailsComponent() {
 
     override fun getDisplayName() = ZigBrainsBundle.message("settings.toolchains.title")
 
-    private fun addLocalToolchain(uuid: UUID, toolchain: LocalZigToolchain) {
-        val node = MyNode(LocalZigToolchainConfigurable(uuid, toolchain, ProjectManager.getInstance().defaultProject))
+    private fun addToolchain(uuid: UUID, toolchain: AbstractZigToolchain) {
+        val node = MyNode(toolchain.createNamedConfigurable(uuid, ProjectManager.getInstance().defaultProject))
         addNode(node, myRoot)
     }
 
     private fun reloadTree() {
         myRoot.removeAllChildren()
         zigToolchainList.toolchains.forEach { (uuid, toolchain) ->
-            if (toolchain is LocalZigToolchain) {
-                addLocalToolchain(uuid, toolchain)
-            }
+            addToolchain(uuid, toolchain)
         }
         (myTree.model as DefaultTreeModel).reload()
+    }
+
+    override fun disposeUIResources() {
+        super.disposeUIResources()
+        myComponent = null
+    }
+}
+
+private sealed interface TCListElemIn
+
+private sealed interface TCListElem : TCListElemIn {
+    @JvmRecord
+    data class Toolchain(val toolchain: AbstractZigToolchain) : TCListElem
+    object Download : TCListElem
+    object FromDisk : TCListElem
+}
+
+@JvmRecord
+private data class Separator(val text: String, val separatorBar: Boolean) : TCListElemIn
+
+private class TCPopup(
+    context: TCContext,
+    selected: TCListElem?,
+    onItemSelected: Consumer<TCListElem>,
+) : ComboBoxPopup<TCListElem>(context, selected, onItemSelected)
+
+private class TCModel private constructor(elements: List<TCListElem>, private val separators: Map<TCListElem, Separator>) : CollectionListModel<TCListElem>(elements) {
+    companion object {
+        operator fun invoke(input: List<TCListElemIn>): TCModel {
+            val separators = IdentityHashMap<TCListElem, Separator>()
+            var lastSeparator: Separator? = null
+            val elements = ArrayList<TCListElem>()
+            input.forEach {
+                when (it) {
+                    is TCListElem -> {
+                        if (lastSeparator != null) {
+                            separators[it] = lastSeparator
+                            lastSeparator = null
+                        }
+                        elements.add(it)
+                    }
+
+                    is Separator -> lastSeparator = it
+                }
+            }
+            val model = TCModel(elements, separators)
+            return model
+        }
+    }
+
+    fun separatorAbove(elem: TCListElem) = separators[elem]
+}
+
+private class TCContext(private val project: Project?, private val model: TCModel) : ComboBoxPopup.Context<TCListElem> {
+    override fun getProject(): Project? {
+        return project
+    }
+
+    override fun getModel(): TCModel {
+        return model
+    }
+
+    override fun getRenderer(): ListCellRenderer<in TCListElem> {
+        return TCCellRenderer(::getModel)
+    }
+}
+
+private class TCCellRenderer(val getModel: () -> TCModel) : ColoredListCellRenderer<TCListElem>() {
+
+    override fun getListCellRendererComponent(
+        list: JList<out TCListElem?>?,
+        value: TCListElem?,
+        index: Int,
+        selected: Boolean,
+        hasFocus: Boolean
+    ): Component? {
+        val component = super.getListCellRendererComponent(list, value, index, selected, hasFocus) as SimpleColoredComponent
+        val panel = object : CellRendererPanel(BorderLayout()) {
+            val myContext = component.accessibleContext
+
+            override fun getAccessibleContext(): AccessibleContext? {
+                return myContext
+            }
+
+            override fun setBorder(border: Border?) {
+                component.border = border
+            }
+        }
+        panel.add(component, BorderLayout.CENTER)
+
+        component.isOpaque = true
+        list?.let { background = if (selected) it.selectionBackground else it.background }
+
+        val model = getModel()
+
+        val separator = value?.let { model.separatorAbove(it) }
+
+        if (separator != null) {
+            val separatorText = separator.text
+            val vGap = if (UIUtil.isUnderNativeMacLookAndFeel()) 1 else 3
+            val separatorComponent = GroupHeaderSeparator(JBUI.insets(vGap, 10, vGap, 0))
+            separatorComponent.isHideLine = !separator.separatorBar
+            if (separatorText.isNotBlank()) {
+                separatorComponent.caption = separatorText
+            }
+
+            val wrapper = OpaquePanel(BorderLayout())
+            wrapper.add(separatorComponent, BorderLayout.CENTER)
+            list?.let { wrapper.background = it.background }
+            panel.add(wrapper, BorderLayout.NORTH)
+        }
+
+        return panel
+    }
+
+    override fun customizeCellRenderer(
+        list: JList<out TCListElem?>,
+        value: TCListElem?,
+        index: Int,
+        selected: Boolean,
+        hasFocus: Boolean
+    ) {
+        icon = EMPTY_ICON
+        when (value) {
+            is TCListElem.Toolchain -> {
+                icon = Icons.Zig
+                val toolchain = value.toolchain
+                toolchain.render(this)
+            }
+
+            is TCListElem.Download -> {
+                icon = AllIcons.Actions.Download
+                append("Download Zig\u2026")
+            }
+
+            is TCListElem.FromDisk -> {
+                icon = AllIcons.General.OpenDisk
+                append("Add Zig from disk\u2026")
+            }
+
+            null -> {}
+        }
     }
 }
 

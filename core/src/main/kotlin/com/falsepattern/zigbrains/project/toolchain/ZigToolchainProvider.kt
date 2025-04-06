@@ -26,6 +26,7 @@ import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.UserDataHolder
+import com.intellij.ui.SimpleColoredComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
@@ -46,6 +47,7 @@ sealed interface ZigToolchainProvider {
     fun matchesSuggestion(toolchain: AbstractZigToolchain, suggestion: AbstractZigToolchain): Boolean
     fun createConfigurable(uuid: UUID, toolchain: AbstractZigToolchain, project: Project): NamedConfigurable<UUID>
     fun suggestToolchains(): List<AbstractZigToolchain>
+    fun render(toolchain: AbstractZigToolchain, component: SimpleColoredComponent)
 }
 
 fun AbstractZigToolchain.Ref.resolve(): AbstractZigToolchain? {
@@ -75,4 +77,9 @@ fun suggestZigToolchains(existing: List<AbstractZigToolchain>): List<AbstractZig
         val suggestions = ext.suggestToolchains()
         suggestions.filter { suggestion -> compatibleExisting.none { existing -> ext.matchesSuggestion(existing, suggestion) } }
     }
+}
+
+fun AbstractZigToolchain.render(component: SimpleColoredComponent) {
+    val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
+    return provider.render(this, component)
 }

@@ -49,6 +49,12 @@ suspend inline fun <T> withCurrentEDTModalityContext(noinline block: suspend Cor
     }
 }
 
+fun <T, R> T.letBlocking(targetAction: suspend CoroutineScope.(T) -> R): R {
+    return runBlocking {
+        targetAction(this@letBlocking)
+    }
+}
+
 suspend inline fun <T> runInterruptibleEDT(state: ModalityState, noinline targetAction: () -> T): T {
     return runInterruptible(Dispatchers.EDT + state.asContextElement(), block = targetAction)
 }

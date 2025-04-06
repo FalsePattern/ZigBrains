@@ -30,8 +30,13 @@ import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ui.configuration.SdkPopupBuilder
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.UserDataHolder
+import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.openapi.util.text.StringUtil
+import com.intellij.ui.SimpleColoredComponent
+import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.EnvironmentUtil
+import com.intellij.util.IconUtil
 import com.intellij.util.system.OS
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -98,4 +103,24 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
         EnvironmentUtil.getValue("PATH")?.split(File.pathSeparatorChar)?.let { res.addAll(it.toList()) }
         return res.mapNotNull { LocalZigToolchain.tryFromPathString(it) }
     }
+
+    override fun render(toolchain: AbstractZigToolchain, component: SimpleColoredComponent) {
+        toolchain as LocalZigToolchain
+        component.append(presentDetectedPath(toolchain.location.pathString))
+        if (toolchain.name != null) {
+            component.append(" ")
+            component.append(toolchain.name, SimpleTextAttributes.GRAYED_ATTRIBUTES)
+        }
+    }
+}
+
+
+private fun presentDetectedPath(home: String, maxLength: Int = 50, suffixLength: Int = 30): String {
+    //for macOS, let's try removing Bundle internals
+    var home = home
+    home = StringUtil.trimEnd(home, "/Contents/Home") //NON-NLS
+    home = StringUtil.trimEnd(home, "/Contents/MacOS") //NON-NLS
+    home = FileUtil.getLocationRelativeToUserHome(home, false)
+    home = StringUtil.shortenTextWithEllipsis(home, maxLength, suffixLength)
+    return home
 }

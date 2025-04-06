@@ -32,6 +32,7 @@ import com.intellij.openapi.util.KeyWithDefaultValue
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.toNioPathOrNull
+import kotlinx.coroutines.runBlocking
 import java.nio.file.Path
 import java.util.UUID
 import kotlin.io.path.pathString
@@ -71,10 +72,16 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, val name
         }
 
         fun tryFromPath(path: Path): LocalZigToolchain? {
-            val tc = LocalZigToolchain(path)
+            var tc = LocalZigToolchain(path)
             if (!tc.zig.fileValid()) {
                 return null
             }
+            tc.zig
+                .getEnvBlocking(null)
+                .getOrNull()
+                ?.version
+                ?.let { "Zig $it" }
+                ?.let { tc = tc.copy(name = it) }
             return tc
         }
     }

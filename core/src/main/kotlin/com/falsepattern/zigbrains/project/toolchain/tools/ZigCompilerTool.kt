@@ -25,6 +25,7 @@ package com.falsepattern.zigbrains.project.toolchain.tools
 import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainEnvironmentSerializable
 import com.intellij.openapi.project.Project
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.nio.file.Path
@@ -45,6 +46,8 @@ class ZigCompilerTool(toolchain: AbstractZigToolchain) : ZigTool(toolchain) {
             Result.failure(IllegalStateException("could not deserialize zig env", e))
         }
     }
+
+    fun getEnvBlocking(project: Project?) = runBlocking { getEnv(project) }
 }
 
 private val envJson = Json {
