@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
@@ -85,11 +86,10 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
 
     override fun createConfigurable(
         uuid: UUID,
-        toolchain: ZigToolchain,
-        project: Project
-    ): NamedConfigurable<UUID> {
+        toolchain: ZigToolchain
+    ): ZigToolchainConfigurable<*> {
         toolchain as LocalZigToolchain
-        return LocalZigToolchainConfigurable(uuid, toolchain, project)
+        return LocalZigToolchainConfigurable(uuid, toolchain)
     }
 
     override fun suggestToolchains(): List<ZigToolchain> {

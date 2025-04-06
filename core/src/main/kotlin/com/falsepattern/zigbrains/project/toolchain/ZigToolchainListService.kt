@@ -67,6 +67,9 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
         @JvmField
         val toolchains: Map<String, ZigToolchain.Ref> = emptyMap(),
     )
-}
 
-val zigToolchainList get() = service<ZigToolchainListService>()
+    companion object {
+        @JvmStatic
+        fun getInstance(): ZigToolchainListService = service()
+    }
+}

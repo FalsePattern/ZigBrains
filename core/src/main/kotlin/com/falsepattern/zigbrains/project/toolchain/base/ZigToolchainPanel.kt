@@ -20,18 +20,28 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.local
+package com.falsepattern.zigbrains.project.toolchain.base
 
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
-import java.util.UUID
+import com.intellij.openapi.Disposable
+import com.intellij.ui.components.JBTextField
+import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.Panel
 
-class LocalZigToolchainConfigurable(
-    uuid: UUID,
-    toolchain: LocalZigToolchain
-): ZigToolchainConfigurable<LocalZigToolchain>(uuid, toolchain) {
-    override fun createPanel() = LocalZigToolchainPanel()
+abstract class ZigToolchainPanel<T: ZigToolchain>: Disposable {
+    private val nameField = JBTextField()
 
-    override fun setDisplayName(name: String?) {
-        toolchain = toolchain.copy(name = name)
+    protected var nameFieldValue: String?
+        get() = nameField.text.ifBlank { null }
+        set(value) {nameField.text = value ?: ""}
+
+    open fun attach(p: Panel): Unit = with(p) {
+        row("Name") {
+            cell(nameField).resizableColumn().align(AlignX.FILL)
+        }
+        separator()
     }
+
+    abstract fun isModified(toolchain: T): Boolean
+    abstract fun apply(toolchain: T): T?
+    abstract fun reset(toolchain: T)
 }

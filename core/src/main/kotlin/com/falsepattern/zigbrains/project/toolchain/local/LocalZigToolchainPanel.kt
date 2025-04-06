@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainPanel
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
@@ -45,8 +46,7 @@ import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
-class LocalZigToolchainPanel() : Disposable {
-    private val nameField = JBTextField()
+class LocalZigToolchainPanel() : ZigToolchainPanel<LocalZigToolchain>() {
     private val pathToToolchain = textFieldWithBrowseButton(
         null,
         FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))
@@ -75,11 +75,8 @@ class LocalZigToolchainPanel() : Disposable {
     ).also { Disposer.register(this, it) }
     private var debounce: Job? = null
 
-    fun attach(p: Panel): Unit = with(p) {
-        row("Name") {
-            cell(nameField).resizableColumn().align(AlignX.FILL)
-        }
-        separator()
+    override fun attach(p: Panel): Unit = with(p) {
+        super.attach(p)
         row(ZigBrainsBundle.message("settings.project.label.toolchain")) {
             cell(pathToToolchain).resizableColumn().align(AlignX.FILL)
         }
@@ -92,27 +89,23 @@ class LocalZigToolchainPanel() : Disposable {
         }
     }
 
-    fun isModified(cfg: LocalZigToolchainConfigurable): Boolean {
-        val name = nameField.text.ifBlank { null } ?: return false
-        val tc = cfg.toolchain
+    override fun isModified(toolchain: LocalZigToolchain): Boolean {
+        val name = nameFieldValue ?: return false
         val location = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull() ?: return false
         val std = if (stdFieldOverride.isSelected) pathToStd.text.ifBlank { null }?.toNioPathOrNull() else null
-        return name != cfg.displayName || tc.location != location || tc.std != std
+        return name != toolchain.name || toolchain.location != location || toolchain.std != std
     }
 
-    fun apply(cfg: LocalZigToolchainConfigurable): Boolean {
-        val tc = cfg.toolchain
-        val location = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull() ?: return false
+    override fun apply(toolchain: LocalZigToolchain): LocalZigToolchain? {
+        val location = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull() ?: return null
         val std = if (stdFieldOverride.isSelected) pathToStd.text.ifBlank { null }?.toNioPathOrNull() else null
-        cfg.toolchain = tc.copy(location = location, std = std, name = nameField.text ?: "")
-        return true
+        return toolchain.copy(location = location, std = std, name = nameFieldValue ?: "")
     }
 
-    fun reset(cfg: LocalZigToolchainConfigurable) {
-        nameField.text = cfg.displayName ?: ""
-        val tc = cfg.toolchain
-        this.pathToToolchain.text = tc.location.pathString
-        val std = tc.std
+    override fun reset(toolchain: LocalZigToolchain) {
+        nameFieldValue = toolchain.name
+        this.pathToToolchain.text = toolchain.location.pathString
+        val std = toolchain.std
         if (std != null) {
             stdFieldOverride.isSelected = true
             pathToStd.text = std.pathString

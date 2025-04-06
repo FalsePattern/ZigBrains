@@ -140,13 +140,13 @@
         />
         <projectConfigurable
                 parentId="language"
-                instance="com.falsepattern.zigbrains.project.settings.ZigConfigurable"
+                instance="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainEditor"
                 id="ZigConfigurable"
                 displayName="Zig"
         />
         <applicationConfigurable
                 parentId="ZigConfigurable"
-                instance="com.falsepattern.zigbrains.project.toolchain.ZigToolchainListEditor"
+                instance="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainListEditor"
                 id="ZigToolchainConfigurable"
                 displayName="Toolchain"
         />

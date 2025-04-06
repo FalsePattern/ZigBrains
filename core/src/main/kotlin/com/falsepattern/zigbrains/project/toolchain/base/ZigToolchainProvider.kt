@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.project.toolchain.base
 
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
@@ -39,7 +40,7 @@ internal interface ZigToolchainProvider {
     fun deserialize(data: Map<String, String>): ZigToolchain?
     fun serialize(toolchain: ZigToolchain): Map<String, String>
     fun matchesSuggestion(toolchain: ZigToolchain, suggestion: ZigToolchain): Boolean
-    fun createConfigurable(uuid: UUID, toolchain: ZigToolchain, project: Project): NamedConfigurable<UUID>
+    fun createConfigurable(uuid: UUID, toolchain: ZigToolchain): ZigToolchainConfigurable<*>
     fun suggestToolchains(): List<ZigToolchain>
     fun render(toolchain: ZigToolchain, component: SimpleColoredComponent)
 }
@@ -60,12 +61,13 @@ suspend fun Project?.suggestZigToolchain(extraData: UserDataHolder): ZigToolchai
     return EXTENSION_POINT_NAME.extensionList.firstNotNullOfOrNull { it.suggestToolchain(this, extraData) }
 }
 
-fun ZigToolchain.createNamedConfigurable(uuid: UUID, project: Project): NamedConfigurable<UUID> {
+fun ZigToolchain.createNamedConfigurable(uuid: UUID): ZigToolchainConfigurable<*> {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
-    return provider.createConfigurable(uuid, this, project)
+    return provider.createConfigurable(uuid, this)
 }
 
-fun suggestZigToolchains(existing: List<ZigToolchain>): List<ZigToolchain> {
+fun suggestZigToolchains(): List<ZigToolchain> {
+    val existing = ZigToolchainListService.getInstance().toolchains.map { (uuid, tc) -> tc }.toList()
     return EXTENSION_POINT_NAME.extensionList.flatMap { ext ->
         val compatibleExisting = existing.filter { ext.isCompatible(it) }
         val suggestions = ext.suggestToolchains()

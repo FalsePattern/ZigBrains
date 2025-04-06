@@ -25,12 +25,15 @@ package com.falsepattern.zigbrains.project.toolchain.base
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.MapAnnotation
 import java.nio.file.Path
 
-abstract class ZigToolchain {
+abstract class ZigToolchain: UserDataHolderBase() {
     val zig: ZigCompilerTool by lazy { ZigCompilerTool(this) }
+
+    abstract val name: String?
 
     abstract fun workingDirectory(project: Project? = null): Path?
 
