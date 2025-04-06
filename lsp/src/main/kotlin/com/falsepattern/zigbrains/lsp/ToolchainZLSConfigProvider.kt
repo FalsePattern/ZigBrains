@@ -20,18 +20,18 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain
+package com.falsepattern.zigbrains.lsp
 
 import com.falsepattern.zigbrains.lsp.config.SuspendingZLSConfigProvider
 import com.falsepattern.zigbrains.lsp.config.ZLSConfig
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchain
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.util.io.toNioPathOrNull
 import kotlin.io.path.pathString
-
 
 class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
     override suspend fun getEnvironment(project: Project, previous: ZLSConfig): ZLSConfig {

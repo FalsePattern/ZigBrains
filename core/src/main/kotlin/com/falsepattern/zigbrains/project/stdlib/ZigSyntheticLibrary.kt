@@ -20,7 +20,7 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.stdlib
+package com.falsepattern.zigbrains.project.stdlib
 
 import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.project.settings.ZigProjectSettings

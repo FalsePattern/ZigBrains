@@ -24,28 +24,17 @@ package com.falsepattern.zigbrains.project.execution.base
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.ZigConsoleBuilder
-import com.falsepattern.zigbrains.project.run.ZigProcessHandler
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.cli.startIPCAwareProcess
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
-import com.falsepattern.zigbrains.shared.ipc.IPCUtil
-import com.falsepattern.zigbrains.shared.ipc.ipc
-import com.intellij.build.BuildTextConsoleView
-import com.intellij.execution.DefaultExecutionResult
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.CommandLineState
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PtyCommandLine
-import com.intellij.execution.filters.TextConsoleBuilder
 import com.intellij.execution.process.ProcessHandler
-import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.execution.runners.ExecutionEnvironment
-import com.intellij.openapi.project.Project
 import com.intellij.platform.ide.progress.ModalTaskOwner
-import com.intellij.terminal.TerminalExecutionConsole
-import com.intellij.util.system.OS
-import kotlin.collections.contains
 import kotlin.io.path.pathString
 
 abstract class ZigProfileState<T: ZigExecConfig<T>> (
@@ -71,7 +60,7 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
     }
 
     @Throws(ExecutionException::class)
-    open suspend fun getCommandLine(toolchain: AbstractZigToolchain, debug: Boolean): GeneralCommandLine {
+    open suspend fun getCommandLine(toolchain: ZigToolchain, debug: Boolean): GeneralCommandLine {
         val workingDir = configuration.workingDirectory
         val zigExePath = toolchain.zig.path()
 

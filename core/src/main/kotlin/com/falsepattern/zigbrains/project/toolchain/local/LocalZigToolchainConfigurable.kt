@@ -20,8 +20,9 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain
+package com.falsepattern.zigbrains.project.toolchain.local
 
+import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.NlsContexts

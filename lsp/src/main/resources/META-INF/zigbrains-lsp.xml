@@ -56,7 +56,7 @@
                 implementation="com.falsepattern.zigbrains.lsp.settings.ZLSSettingsConfigProvider"
         />
         <zlsConfigProvider
-                implementation="com.falsepattern.zigbrains.project.toolchain.ToolchainZLSConfigProvider"
+                implementation="com.falsepattern.zigbrains.lsp.ToolchainZLSConfigProvider"
         />
         <projectConfigProvider
                 implementation="com.falsepattern.zigbrains.lsp.ZLSProjectConfigurationProvider"

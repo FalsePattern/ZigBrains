@@ -20,58 +20,52 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain
+package com.falsepattern.zigbrains.project.toolchain.base
 
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.ui.SimpleColoredComponent
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.flattenConcat
-import kotlinx.coroutines.flow.map
 import java.util.UUID
 
 private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainProvider>("com.falsepattern.zigbrains.toolchainProvider")
 
-sealed interface ZigToolchainProvider {
-    suspend fun suggestToolchain(project: Project?, extraData: UserDataHolder): AbstractZigToolchain?
+internal interface ZigToolchainProvider {
+    suspend fun suggestToolchain(project: Project?, extraData: UserDataHolder): ZigToolchain?
 
     val serialMarker: String
-    fun isCompatible(toolchain: AbstractZigToolchain): Boolean
-    fun deserialize(data: Map<String, String>): AbstractZigToolchain?
-    fun serialize(toolchain: AbstractZigToolchain): Map<String, String>
-    fun matchesSuggestion(toolchain: AbstractZigToolchain, suggestion: AbstractZigToolchain): Boolean
-    fun createConfigurable(uuid: UUID, toolchain: AbstractZigToolchain, project: Project): NamedConfigurable<UUID>
-    fun suggestToolchains(): List<AbstractZigToolchain>
-    fun render(toolchain: AbstractZigToolchain, component: SimpleColoredComponent)
+    fun isCompatible(toolchain: ZigToolchain): Boolean
+    fun deserialize(data: Map<String, String>): ZigToolchain?
+    fun serialize(toolchain: ZigToolchain): Map<String, String>
+    fun matchesSuggestion(toolchain: ZigToolchain, suggestion: ZigToolchain): Boolean
+    fun createConfigurable(uuid: UUID, toolchain: ZigToolchain, project: Project): NamedConfigurable<UUID>
+    fun suggestToolchains(): List<ZigToolchain>
+    fun render(toolchain: ZigToolchain, component: SimpleColoredComponent)
 }
 
-fun AbstractZigToolchain.Ref.resolve(): AbstractZigToolchain? {
+fun ZigToolchain.Ref.resolve(): ZigToolchain? {
     val marker = this.marker ?: return null
     val data = this.data ?: return null
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.serialMarker == marker } ?: return null
     return provider.deserialize(data)
 }
 
-fun AbstractZigToolchain.toRef(): AbstractZigToolchain.Ref {
+fun ZigToolchain.toRef(): ZigToolchain.Ref {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
-    return AbstractZigToolchain.Ref(provider.serialMarker, provider.serialize(this))
+    return ZigToolchain.Ref(provider.serialMarker, provider.serialize(this))
 }
 
-suspend fun Project?.suggestZigToolchain(extraData: UserDataHolder): AbstractZigToolchain? {
+suspend fun Project?.suggestZigToolchain(extraData: UserDataHolder): ZigToolchain? {
     return EXTENSION_POINT_NAME.extensionList.firstNotNullOfOrNull { it.suggestToolchain(this, extraData) }
 }
 
-fun AbstractZigToolchain.createNamedConfigurable(uuid: UUID, project: Project): NamedConfigurable<UUID> {
+fun ZigToolchain.createNamedConfigurable(uuid: UUID, project: Project): NamedConfigurable<UUID> {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
     return provider.createConfigurable(uuid, this, project)
 }
 
-fun suggestZigToolchains(existing: List<AbstractZigToolchain>): List<AbstractZigToolchain> {
+fun suggestZigToolchains(existing: List<ZigToolchain>): List<ZigToolchain> {
     return EXTENSION_POINT_NAME.extensionList.flatMap { ext ->
         val compatibleExisting = existing.filter { ext.isCompatible(it) }
         val suggestions = ext.suggestToolchains()
@@ -79,7 +73,7 @@ fun suggestZigToolchains(existing: List<AbstractZigToolchain>): List<AbstractZig
     }
 }
 
-fun AbstractZigToolchain.render(component: SimpleColoredComponent) {
+fun ZigToolchain.render(component: SimpleColoredComponent) {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
     return provider.render(this, component)
 }

@@ -19,14 +19,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
-package com.falsepattern.zigbrains.project.toolchain
 
+package com.falsepattern.zigbrains.project.toolchain.tools
+
+import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.toNioPathOrNull
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.nio.file.Path
-
 
 @JvmRecord
 @Serializable

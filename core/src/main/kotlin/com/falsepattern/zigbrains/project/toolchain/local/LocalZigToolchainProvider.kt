@@ -20,14 +20,14 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain
+package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.direnv.emptyEnv
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.projectRoots.Sdk
-import com.intellij.openapi.roots.ui.configuration.SdkPopupBuilder
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.util.io.FileUtil
@@ -36,12 +36,6 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.EnvironmentUtil
-import com.intellij.util.IconUtil
-import com.intellij.util.system.OS
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.serialization.json.*
 import java.io.File
 import java.util.UUID
 import kotlin.io.path.pathString
@@ -60,18 +54,18 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     override val serialMarker: String
         get() = "local"
 
-    override fun deserialize(data: Map<String, String>): AbstractZigToolchain? {
+    override fun deserialize(data: Map<String, String>): ZigToolchain? {
         val location = data["location"]?.toNioPathOrNull() ?: return null
         val std = data["std"]?.toNioPathOrNull()
         val name = data["name"]
         return LocalZigToolchain(location, std, name)
     }
 
-    override fun isCompatible(toolchain: AbstractZigToolchain): Boolean {
+    override fun isCompatible(toolchain: ZigToolchain): Boolean {
         return toolchain is LocalZigToolchain
     }
 
-    override fun serialize(toolchain: AbstractZigToolchain): Map<String, String> {
+    override fun serialize(toolchain: ZigToolchain): Map<String, String> {
         toolchain as LocalZigToolchain
         val map = HashMap<String, String>()
         toolchain.location.pathString.let { map["location"] = it }
@@ -81,8 +75,8 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     }
 
     override fun matchesSuggestion(
-        toolchain: AbstractZigToolchain,
-        suggestion: AbstractZigToolchain
+        toolchain: ZigToolchain,
+        suggestion: ZigToolchain
     ): Boolean {
         toolchain as LocalZigToolchain
         suggestion as LocalZigToolchain
@@ -91,20 +85,20 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
 
     override fun createConfigurable(
         uuid: UUID,
-        toolchain: AbstractZigToolchain,
+        toolchain: ZigToolchain,
         project: Project
     ): NamedConfigurable<UUID> {
         toolchain as LocalZigToolchain
         return LocalZigToolchainConfigurable(uuid, toolchain, project)
     }
 
-    override fun suggestToolchains(): List<AbstractZigToolchain> {
+    override fun suggestToolchains(): List<ZigToolchain> {
         val res = HashSet<String>()
         EnvironmentUtil.getValue("PATH")?.split(File.pathSeparatorChar)?.let { res.addAll(it.toList()) }
         return res.mapNotNull { LocalZigToolchain.tryFromPathString(it) }
     }
 
-    override fun render(toolchain: AbstractZigToolchain, component: SimpleColoredComponent) {
+    override fun render(toolchain: ZigToolchain, component: SimpleColoredComponent) {
         toolchain as LocalZigToolchain
         component.append(presentDetectedPath(toolchain.location.pathString))
         if (toolchain.name != null) {

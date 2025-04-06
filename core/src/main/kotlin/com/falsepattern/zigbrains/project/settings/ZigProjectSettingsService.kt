@@ -22,7 +22,7 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.project.toolchain.stdlib.ZigSyntheticLibrary
+import com.falsepattern.zigbrains.project.stdlib.ZigSyntheticLibrary
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project

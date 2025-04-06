@@ -20,7 +20,7 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain
+package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext

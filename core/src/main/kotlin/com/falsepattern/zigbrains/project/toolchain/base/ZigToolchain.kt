@@ -20,20 +20,16 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain
+package com.falsepattern.zigbrains.project.toolchain.base
 
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
-import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.MapAnnotation
-import com.intellij.util.xmlb.annotations.OptionTag
 import java.nio.file.Path
-import java.util.UUID
 
-
-abstract class AbstractZigToolchain {
+abstract class ZigToolchain {
     val zig: ZigCompilerTool by lazy { ZigCompilerTool(this) }
 
     abstract fun workingDirectory(project: Project? = null): Path?

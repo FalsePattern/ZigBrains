@@ -24,9 +24,8 @@ package com.falsepattern.zigbrains.project.settings
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.direnv.DirenvCmd
-import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider
-import com.falsepattern.zigbrains.project.toolchain.suggestZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope

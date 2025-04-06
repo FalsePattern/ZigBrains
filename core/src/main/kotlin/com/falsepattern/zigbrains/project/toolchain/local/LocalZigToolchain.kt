@@ -20,10 +20,11 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain
+package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
@@ -32,12 +33,9 @@ import com.intellij.openapi.util.KeyWithDefaultValue
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.toNioPathOrNull
-import kotlinx.coroutines.runBlocking
 import java.nio.file.Path
-import java.util.UUID
-import kotlin.io.path.pathString
 
-data class LocalZigToolchain(val location: Path, val std: Path? = null, val name: String? = null): AbstractZigToolchain() {
+data class LocalZigToolchain(val location: Path, val std: Path? = null, val name: String? = null): ZigToolchain() {
     override fun workingDirectory(project: Project?): Path? {
         return project?.guessProjectDir()?.toNioPathOrNull()
     }
@@ -58,7 +56,7 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, val name
         val DIRENV_KEY = KeyWithDefaultValue.create<Boolean>("ZIG_LOCAL_DIRENV")
 
         @Throws(ExecutionException::class)
-        fun ensureLocal(toolchain: AbstractZigToolchain): LocalZigToolchain {
+        fun ensureLocal(toolchain: ZigToolchain): LocalZigToolchain {
             if (toolchain is LocalZigToolchain) {
                 return toolchain
             } else {

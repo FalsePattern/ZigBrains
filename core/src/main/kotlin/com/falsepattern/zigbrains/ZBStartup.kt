@@ -24,9 +24,8 @@ package com.falsepattern.zigbrains
 
 import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.settings.zigProjectSettings
-import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider
-import com.falsepattern.zigbrains.project.toolchain.suggestZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchain
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.plugins.PluginManager
 import com.intellij.notification.Notification

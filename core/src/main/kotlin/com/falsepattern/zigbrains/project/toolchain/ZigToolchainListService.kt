@@ -22,8 +22,10 @@
 
 package com.falsepattern.zigbrains.project.toolchain
 
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.resolve
+import com.falsepattern.zigbrains.project.toolchain.base.toRef
 import com.intellij.openapi.components.*
-import com.intellij.util.xmlb.annotations.MapAnnotation
 import java.util.UUID
 
 @Service(Service.Level.APP)
@@ -32,16 +34,16 @@ import java.util.UUID
     storages = [Storage("zigbrains.xml")]
 )
 class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchainListService.State>(State()) {
-    fun setToolchain(uuid: UUID, toolchain: AbstractZigToolchain) {
+    fun setToolchain(uuid: UUID, toolchain: ZigToolchain) {
         updateState {
-            val newMap = HashMap<String, AbstractZigToolchain.Ref>()
+            val newMap = HashMap<String, ZigToolchain.Ref>()
             newMap.putAll(it.toolchains)
             newMap.put(uuid.toString(), toolchain.toRef())
             it.copy(toolchains = newMap)
         }
     }
 
-    fun getToolchain(uuid: UUID): AbstractZigToolchain? {
+    fun getToolchain(uuid: UUID): ZigToolchain? {
         return state.toolchains[uuid.toString()]?.resolve()
     }
 
@@ -52,7 +54,7 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
         }
     }
 
-    val toolchains: Sequence<Pair<UUID, AbstractZigToolchain>>
+    val toolchains: Sequence<Pair<UUID, ZigToolchain>>
         get() = state.toolchains
             .asSequence()
             .mapNotNull {
@@ -63,7 +65,7 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
 
     data class State(
         @JvmField
-        val toolchains: Map<String, AbstractZigToolchain.Ref> = emptyMap(),
+        val toolchains: Map<String, ZigToolchain.Ref> = emptyMap(),
     )
 }
 

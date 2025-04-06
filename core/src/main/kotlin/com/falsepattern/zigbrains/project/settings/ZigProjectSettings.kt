@@ -22,7 +22,7 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.util.xmlb.annotations.Transient

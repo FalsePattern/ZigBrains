@@ -22,7 +22,7 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.extensions.ExtensionPointName
@@ -58,6 +58,6 @@ interface ZigProjectConfigurationProvider {
         fun apply(project: Project)
     }
     interface ToolchainProvider {
-        val toolchain: AbstractZigToolchain?
+        val toolchain: ZigToolchain?
     }
 }

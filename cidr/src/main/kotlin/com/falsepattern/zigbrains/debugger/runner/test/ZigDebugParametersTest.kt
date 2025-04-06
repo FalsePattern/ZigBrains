@@ -25,11 +25,11 @@ package com.falsepattern.zigbrains.debugger.runner.test
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugEmitBinaryInstaller
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersEmitBinaryBase
 import com.falsepattern.zigbrains.project.execution.test.ZigProfileStateTest
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.jetbrains.cidr.execution.Installer
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
 
-class ZigDebugParametersTest(driverConfiguration: DebuggerDriverConfiguration, toolchain: AbstractZigToolchain, profileState: ZigProfileStateTest) :
+class ZigDebugParametersTest(driverConfiguration: DebuggerDriverConfiguration, toolchain: ZigToolchain, profileState: ZigProfileStateTest) :
     ZigDebugParametersEmitBinaryBase<ZigProfileStateTest>(driverConfiguration, toolchain, profileState) {
     override fun getInstaller(): Installer {
         return ZigDebugEmitBinaryInstaller(profileState, toolchain, executableFile, listOf())

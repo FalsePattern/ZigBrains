@@ -23,7 +23,7 @@
                 name="projectConfigProvider"
         />
         <extensionPoint
-                interface="com.falsepattern.zigbrains.project.toolchain.ZigToolchainProvider"
+                interface="com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider"
                 dynamic="true"
                 name="toolchainProvider"
         />

@@ -24,6 +24,10 @@ package com.falsepattern.zigbrains.project.toolchain
 
 import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.createNamedConfigurable
+import com.falsepattern.zigbrains.project.toolchain.base.render
+import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchains
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.icons.AllIcons
@@ -31,9 +35,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.Presentation
 import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -41,47 +43,31 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.ui.MasterDetailsComponent
 import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.withModalProgress
-import com.intellij.platform.util.progress.withProgressText
 import com.intellij.ui.*
-import com.intellij.ui.components.JBList
 import com.intellij.ui.components.panels.OpaquePanel
 import com.intellij.ui.components.textFieldWithBrowseButton
-import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Cell
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.popup.list.ComboBoxPopup
 import com.intellij.util.Consumer
 import com.intellij.util.IconUtil
-import com.intellij.util.download.DownloadableFileService
-import com.intellij.util.system.CpuArch
-import com.intellij.util.text.SemVer
 import com.intellij.util.ui.EmptyIcon
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.decodeFromStream
 import java.awt.BorderLayout
 import java.awt.Component
-import java.nio.file.Path
 import java.util.*
 import javax.accessibility.AccessibleContext
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 import javax.swing.JList
-import javax.swing.JPanel
 import javax.swing.ListCellRenderer
 import javax.swing.border.Border
-import javax.swing.event.DocumentEvent
 import javax.swing.tree.DefaultTreeModel
 
 class ZigToolchainListEditor() : MasterDetailsComponent() {
@@ -187,7 +173,7 @@ class ZigToolchainListEditor() : MasterDetailsComponent() {
 
     override fun getDisplayName() = ZigBrainsBundle.message("settings.toolchains.title")
 
-    private fun addToolchain(uuid: UUID, toolchain: AbstractZigToolchain) {
+    private fun addToolchain(uuid: UUID, toolchain: ZigToolchain) {
         val node = MyNode(toolchain.createNamedConfigurable(uuid, ProjectManager.getInstance().defaultProject))
         addNode(node, myRoot)
     }
@@ -210,7 +196,7 @@ private sealed interface TCListElemIn
 
 private sealed interface TCListElem : TCListElemIn {
     @JvmRecord
-    data class Toolchain(val toolchain: AbstractZigToolchain) : TCListElem
+    data class Toolchain(val toolchain: ZigToolchain) : TCListElem
     object Download : TCListElem
     object FromDisk : TCListElem
 }
