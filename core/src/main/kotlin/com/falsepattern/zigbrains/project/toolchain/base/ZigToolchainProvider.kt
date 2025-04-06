@@ -42,7 +42,7 @@ internal interface ZigToolchainProvider {
     fun matchesSuggestion(toolchain: ZigToolchain, suggestion: ZigToolchain): Boolean
     fun createConfigurable(uuid: UUID, toolchain: ZigToolchain): ZigToolchainConfigurable<*>
     fun suggestToolchains(): List<ZigToolchain>
-    fun render(toolchain: ZigToolchain, component: SimpleColoredComponent)
+    fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean)
 }
 
 fun ZigToolchain.Ref.resolve(): ZigToolchain? {
@@ -75,7 +75,7 @@ fun suggestZigToolchains(): List<ZigToolchain> {
     }
 }
 
-fun ZigToolchain.render(component: SimpleColoredComponent) {
+fun ZigToolchain.render(component: SimpleColoredComponent, isSuggestion: Boolean) {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
-    return provider.render(this, component)
+    return provider.render(this, component, isSuggestion)
 }

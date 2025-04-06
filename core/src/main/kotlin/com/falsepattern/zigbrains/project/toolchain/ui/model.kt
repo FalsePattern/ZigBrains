@@ -186,12 +186,13 @@ internal class TCCellRenderer(val getModel: () -> TCModel) : ColoredListCellRend
         icon = EMPTY_ICON
         when (value) {
             is TCListElem.Toolchain -> {
-                icon = when(value) {
-                    is TCListElem.Toolchain.Suggested -> AllIcons.General.Information
-                    is TCListElem.Toolchain.Actual -> Icons.Zig
+                val (icon, isSuggestion) = when(value) {
+                    is TCListElem.Toolchain.Suggested -> AllIcons.General.Information to true
+                    is TCListElem.Toolchain.Actual -> Icons.Zig to false
                 }
+                this.icon = icon
                 val toolchain = value.toolchain
-                toolchain.render(this)
+                toolchain.render(this, isSuggestion)
             }
 
             is TCListElem.Download -> {
