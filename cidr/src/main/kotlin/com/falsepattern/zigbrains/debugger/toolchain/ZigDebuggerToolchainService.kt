@@ -35,6 +35,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.platform.util.progress.reportSequentialProgress
 import com.intellij.ui.BrowserHyperlinkListener
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.components.JBPanel
@@ -47,6 +48,7 @@ import com.jetbrains.cidr.execution.debugger.CidrDebuggerPathManager
 import com.jetbrains.cidr.execution.debugger.backend.bin.UrlProvider
 import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.URL
@@ -167,7 +169,9 @@ class ZigDebuggerToolchainService {
         }
 
         try {
-            downloadAndUnArchive(baseDir, downloadableBinaries)
+            withContext(Dispatchers.IO) {
+                downloadAndUnArchive(baseDir, downloadableBinaries)
+            }
             return DownloadResult.Ok(baseDir)
         } catch (e: IOException) {
             //TODO logging
@@ -206,34 +210,40 @@ class ZigDebuggerToolchainService {
     @Throws(IOException::class)
     @RequiresEdt
     private suspend fun downloadAndUnArchive(baseDir: Path, binariesToDownload: List<DownloadableDebuggerBinary>) {
-        val service = DownloadableFileService.getInstance()
+        reportSequentialProgress { reporter ->
+            val service = DownloadableFileService.getInstance()
 
-        val downloadDir = baseDir.toFile()
-        downloadDir.deleteRecursively()
+            val downloadDir = baseDir.toFile()
+            downloadDir.deleteRecursively()
 
-        val descriptions = binariesToDownload.map {
-            service.createFileDescription(it.url, fileName(it.url))
-        }
-
-        val downloader = service.createDownloader(descriptions, "Debugger downloading")
-        val downloadDirectory = downloadPath().toFile()
-        val downloadResults = withContext(Dispatchers.IO) {
-            coroutineToIndicator {
-                downloader.download(downloadDirectory)
+            val descriptions = binariesToDownload.map {
+                service.createFileDescription(it.url, fileName(it.url))
             }
-        }
-        val versions = Properties()
-        for (result in downloadResults) {
-            val downloadUrl = result.second.downloadUrl
-            val binaryToDownload = binariesToDownload.first { it.url == downloadUrl }
-            val propertyName = binaryToDownload.propertyName
-            val archiveFile = result.first
-            Unarchiver.unarchive(archiveFile.toPath(), baseDir, binaryToDownload.prefix)
-            archiveFile.delete()
-            versions[propertyName] = binaryToDownload.version
-        }
 
-        saveVersionsFile(baseDir, versions)
+            val downloader = service.createDownloader(descriptions, "Debugger downloading")
+            val downloadDirectory = downloadPath().toFile()
+            val downloadResults = reporter.sizedStep(100) {
+                coroutineToIndicator {
+                    downloader.download(downloadDirectory)
+                }
+            }
+            val versions = Properties()
+            for (result in downloadResults) {
+                val downloadUrl = result.second.downloadUrl
+                val binaryToDownload = binariesToDownload.first { it.url == downloadUrl }
+                val propertyName = binaryToDownload.propertyName
+                val archiveFile = result.first
+                reporter.indeterminateStep {
+                    coroutineToIndicator {
+                        Unarchiver.unarchive(archiveFile.toPath(), baseDir, binaryToDownload.prefix)
+                    }
+                }
+                archiveFile.delete()
+                versions[propertyName] = binaryToDownload.version
+            }
+
+            saveVersionsFile(baseDir, versions)
+        }
     }
 
     private fun lldbUrls(): Pair<URL, URL>? {

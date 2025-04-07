@@ -25,15 +25,33 @@ package com.falsepattern.zigbrains.project.toolchain.ui
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchains
+import com.falsepattern.zigbrains.shared.coroutine.asContextElement
+import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.options.newEditor.SettingsDialog
+import com.intellij.openapi.options.newEditor.SettingsTreeView
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.util.concurrency.annotations.RequiresEdt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.awt.event.ItemEvent
+import java.lang.reflect.Field
+import java.lang.reflect.Method
+import java.util.UUID
 import javax.swing.JComponent
 import kotlin.collections.addAll
 
@@ -74,7 +92,7 @@ class ZigToolchainEditor(private val project: Project): Configurable {
 
     inner class UI(): Disposable, ZigToolchainListService.ToolchainListChangeListener {
         private val toolchainBox: TCComboBox
-        private var oldSelectionIndex: Int = 0
+        private var selectOnNextReload: UUID? = null
         private val model: TCModel
         init {
             model = TCModel(getModelList())
@@ -89,27 +107,44 @@ class ZigToolchainEditor(private val project: Project): Configurable {
                 return
             }
             val item = event.item
-            if (item !is TCListElem) {
-                toolchainBox.selectedIndex = oldSelectionIndex
+            if (item !is TCListElem.Pseudo)
                 return
-            }
-            when(item) {
-                is TCListElem.None, is TCListElem.Toolchain.Actual -> {
-                    oldSelectionIndex = toolchainBox.selectedIndex
-                }
-                else -> {
-                    toolchainBox.selectedIndex = oldSelectionIndex
+            zigCoroutineScope.launch(toolchainBox.asContextElement()) {
+                val uuid = ZigToolchainComboBoxHandler.onItemSelected(toolchainBox, item)
+                withEDTContext(toolchainBox.asContextElement()) {
+                    applyUUIDNowOrOnReload(uuid)
                 }
             }
         }
 
-        override fun toolchainListChanged() {
-            val selected = model.selected
-            val list = getModelList()
-            model.updateContents(list)
-            if (selected != null && list.contains(selected)) {
-                model.selectedItem = selected
-            } else {
+        override suspend fun toolchainListChanged() {
+            withContext(Dispatchers.EDT + toolchainBox.asContextElement()) {
+                val list = getModelList()
+                model.updateContents(list)
+                val onReload = selectOnNextReload
+                selectOnNextReload = null
+                if (onReload != null) {
+                    val element = list.firstOrNull { when(it) {
+                        is TCListElem.Toolchain.Actual -> it.uuid == onReload
+                        else -> false
+                    } }
+                    model.selectedItem = element
+                    return@withContext
+                }
+                val selected = model.selected
+                if (selected != null && list.contains(selected)) {
+                    model.selectedItem = selected
+                    return@withContext
+                }
+                if (selected is TCListElem.Toolchain.Actual) {
+                    val uuid = selected.uuid
+                    val element = list.firstOrNull { when(it) {
+                        is TCListElem.Toolchain.Actual -> it.uuid == uuid
+                        else -> false
+                    } }
+                    model.selectedItem = element
+                    return@withContext
+                }
                 model.selectedItem = TCListElem.None
             }
         }
@@ -117,6 +152,35 @@ class ZigToolchainEditor(private val project: Project): Configurable {
         fun attach(p: Panel): Unit = with(p) {
             row("Toolchain") {
                 cell(toolchainBox).resizableColumn().align(AlignX.FILL)
+                button("Funny") { e ->
+                    zigCoroutineScope.launchWithEDT(toolchainBox.asContextElement()) {
+                        val config = ZigToolchainListEditor()
+                        var inited = false
+                        var selectedUUID: UUID? = toolchainBox.selectedToolchain
+                        config.addItemSelectedListener {
+                            if (inited) {
+                                selectedUUID = it
+                            }
+                        }
+                        val apply = ShowSettingsUtil.getInstance().editConfigurable(DialogWrapper.findInstance(toolchainBox)?.contentPane, config) {
+                            config.selectNodeInTree(selectedUUID)
+                            inited = true
+                        }
+                        if (apply) {
+                            applyUUIDNowOrOnReload(selectedUUID)
+                        }
+                    }
+                }
+            }
+        }
+
+        @RequiresEdt
+        private fun applyUUIDNowOrOnReload(uuid: UUID?) {
+            toolchainBox.selectedToolchain = uuid
+            if (uuid != null && toolchainBox.selectedToolchain == null) {
+                selectOnNextReload = uuid
+            } else {
+                selectOnNextReload = null
             }
         }
 
@@ -130,8 +194,9 @@ class ZigToolchainEditor(private val project: Project): Configurable {
 
         fun reset() {
             toolchainBox.selectedToolchain = ZigToolchainService.getInstance(project).toolchainUUID
-            oldSelectionIndex = toolchainBox.selectedIndex
         }
+
+
 
         override fun dispose() {
             ZigToolchainListService.getInstance().removeChangeListener(this)

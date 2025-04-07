@@ -65,8 +65,8 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, override
             }
         }
 
-        fun tryFromPathString(pathStr: String): LocalZigToolchain? {
-            return pathStr.toNioPathOrNull()?.let(::tryFromPath)
+        fun tryFromPathString(pathStr: String?): LocalZigToolchain? {
+            return pathStr?.ifBlank { null }?.toNioPathOrNull()?.let(::tryFromPath)
         }
 
         fun tryFromPath(path: Path): LocalZigToolchain? {

@@ -22,8 +22,9 @@
 
 package com.falsepattern.zigbrains.shared
 
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.util.io.Decompressor
-import kotlinx.coroutines.runInterruptible
 import java.io.IOException
 import java.nio.file.Path
 import kotlin.io.path.name
@@ -51,16 +52,22 @@ enum class Unarchiver {
 
     companion object {
         @Throws(IOException::class)
-        suspend fun unarchive(archivePath: Path, dst: Path, prefix: String? = null) {
-            runInterruptible {
-                val unarchiver = entries.find { archivePath.name.endsWith(it.extension) }
-                                 ?: error("Unexpected archive type: $archivePath")
-                val dec = unarchiver.createDecompressor(archivePath)
-                if (prefix != null) {
-                    dec.removePrefixPath(prefix)
-                }
-                dec.extract(dst)
+        fun unarchive(archivePath: Path, dst: Path, prefix: String? = null) {
+            val unarchiver = entries.find { archivePath.name.endsWith(it.extension) }
+                             ?: error("Unexpected archive type: $archivePath")
+            val dec = unarchiver.createDecompressor(archivePath)
+            val indicator = ProgressManager.getInstance().progressIndicator ?: EmptyProgressIndicator()
+            indicator.isIndeterminate = true
+            indicator.text = "Extracting archive"
+            dec.filter {
+                indicator.text2 = it
+                indicator.checkCanceled()
+                true
             }
+            if (prefix != null) {
+                dec.removePrefixPath(prefix)
+            }
+            dec.extract(dst)
         }
     }
 }

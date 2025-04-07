@@ -39,7 +39,16 @@ import java.util.UUID
 )
 class ZigToolchainService: SerializablePersistentStateComponent<ZigToolchainService.State>(State()) {
     var toolchainUUID: UUID?
-        get() = state.toolchain.ifBlank { null }?.let { UUID.fromString(it) }
+        get() = state.toolchain.ifBlank { null }?.let { UUID.fromString(it) }?.takeIf {
+            if (ZigToolchainListService.getInstance().hasToolchain(it)) {
+                true
+            } else {
+                updateState {
+                    it.copy(toolchain = "")
+                }
+                false
+            }
+        }
         set(value) {
             updateState {
                 it.copy(toolchain = value?.toString() ?: "")
@@ -49,11 +58,10 @@ class ZigToolchainService: SerializablePersistentStateComponent<ZigToolchainServ
     val toolchain: ZigToolchain?
         get() = toolchainUUID?.let { ZigToolchainListService.getInstance().getToolchain(it) }
 
-    @JvmRecord
     data class State(
         @JvmField
         @Attribute
-        val toolchain: String = ""
+        var toolchain: String = ""
     )
 
     companion object {

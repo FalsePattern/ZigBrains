@@ -63,7 +63,10 @@ suspend inline fun <T> runInterruptibleEDT(context: CoroutineContext, noinline t
 }
 
 fun CoroutineScope.launchWithEDT(state: ModalityState, block: suspend CoroutineScope.() -> Unit): Job {
-    return launch(Dispatchers.EDT + state.asContextElement(), block = block)
+    return launchWithEDT(state.asContextElement(), block = block)
+}
+fun CoroutineScope.launchWithEDT(context: CoroutineContext, block: suspend CoroutineScope.() -> Unit): Job {
+    return launch(Dispatchers.EDT + context, block = block)
 }
 
 fun Component.asContextElement(): CoroutineContext {

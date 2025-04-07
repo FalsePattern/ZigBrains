@@ -27,20 +27,20 @@ import java.util.UUID
 
 
 internal sealed interface TCListElemIn
-
 internal sealed interface TCListElem : TCListElemIn {
+    sealed interface Pseudo: TCListElem
     sealed interface Toolchain : TCListElem {
         val toolchain: ZigToolchain
 
         @JvmRecord
-        data class Suggested(override val toolchain: ZigToolchain): Toolchain
+        data class Suggested(override val toolchain: ZigToolchain): Toolchain, Pseudo
 
         @JvmRecord
         data class Actual(val uuid: UUID, override val toolchain: ZigToolchain): Toolchain
     }
     object None: TCListElem
-    object Download : TCListElem
-    object FromDisk : TCListElem
+    object Download : TCListElem, Pseudo
+    object FromDisk : TCListElem, Pseudo
 
     companion object {
         val fetchGroup get() = listOf(Download, FromDisk)

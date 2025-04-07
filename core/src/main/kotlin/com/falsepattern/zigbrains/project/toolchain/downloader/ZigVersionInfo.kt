@@ -24,12 +24,12 @@ package com.falsepattern.zigbrains.project.toolchain.downloader
 
 import com.falsepattern.zigbrains.shared.Unarchiver
 import com.intellij.openapi.application.PathManager
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.io.toNioPathOrNull
-import com.intellij.platform.util.progress.reportProgress
-import com.intellij.platform.util.progress.reportSequentialProgress
-import com.intellij.platform.util.progress.withProgressText
+import com.intellij.platform.util.progress.*
 import com.intellij.util.asSafely
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.createDirectories
@@ -38,6 +38,8 @@ import com.intellij.util.io.move
 import com.intellij.util.system.CpuArch
 import com.intellij.util.system.OS
 import com.intellij.util.text.SemVer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -47,9 +49,14 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.decodeFromStream
 import java.io.File
+import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
 import kotlin.io.path.isDirectory
+import kotlin.io.path.name
 
 @JvmRecord
 data class ZigVersionInfo(
@@ -60,108 +67,145 @@ data class ZigVersionInfo(
     val src: Tarball?,
     val dist: Tarball
 ) {
-    suspend fun downloadAndUnpack(into: Path): Boolean {
-        return reportProgress { reporter ->
-            try {
-                into.createDirectories()
-            } catch (e: Exception) {
-                return@reportProgress false
-            }
-            val service = DownloadableFileService.getInstance()
-            val fileName = dist.tarball.substringAfterLast('/')
-            val tempFile = FileUtil.createTempFile(into.toFile(), "tarball", fileName, false, false)
-            val desc = service.createFileDescription(dist.tarball, tempFile.name)
-            val downloader = service.createDownloader(listOf(desc), "Zig version information downloading")
-            val downloadResults = reporter.sizedStep(100) {
-                coroutineToIndicator {
-                    downloader.download(into.toFile())
-                }
-            }
-            if (downloadResults.isEmpty())
-                return@reportProgress false
-            val tarball = downloadResults[0].first
-            reporter.indeterminateStep("Extracting tarball") {
-                Unarchiver.unarchive(tarball.toPath(), into)
-                tarball.delete()
-                val contents = Files.newDirectoryStream(into).use { it.toList() }
-                if (contents.size == 1 && contents[0].isDirectory()) {
-                    val src = contents[0]
-                    Files.newDirectoryStream(src).use { stream ->
-                        stream.forEach {
-                            it.move(into.resolve(src.relativize(it)))
-                        }
-                    }
-                    src.delete()
-                }
-            }
-            return@reportProgress true
+    @Throws(Exception::class)
+    suspend fun downloadAndUnpack(into: Path) {
+        reportProgress { reporter ->
+            into.createDirectories()
+            val tarball = downloadTarball(dist, into, reporter)
+            unpackTarball(tarball, into, reporter)
+            tarball.delete()
+            flattenDownloadDir(into, reporter)
         }
     }
+
     companion object {
         @OptIn(ExperimentalSerializationApi::class)
         suspend fun downloadVersionList(): List<ZigVersionInfo> {
-            val service = DownloadableFileService.getInstance()
-            val tempFile = FileUtil.createTempFile(tempPluginDir, "index", ".json", false, false)
-            val desc = service.createFileDescription("https://ziglang.org/download/index.json", tempFile.name)
-            val downloader = service.createDownloader(listOf(desc), "Zig version information downloading")
-            val downloadResults = coroutineToIndicator {
-                downloader.download(tempPluginDir)
+            return withContext(Dispatchers.IO) {
+                val service = DownloadableFileService.getInstance()
+                val tempFile = FileUtil.createTempFile(tempPluginDir, "index", ".json", false, false)
+                val desc = service.createFileDescription("https://ziglang.org/download/index.json", tempFile.name)
+                val downloader = service.createDownloader(listOf(desc), "Zig version information")
+                val downloadResults = coroutineToIndicator {
+                    downloader.download(tempPluginDir)
+                }
+                if (downloadResults.isEmpty())
+                    return@withContext emptyList()
+                val index = downloadResults[0].first
+                val info = index.inputStream().use { Json.decodeFromStream<JsonObject>(it) }
+                index.delete()
+                return@withContext info.mapNotNull { (version, data) -> parseVersion(version, data) }.toList()
             }
-            if (downloadResults.isEmpty())
-                return emptyList()
-            val index = downloadResults[0].first
-            val info = index.inputStream().use { Json.decodeFromStream<JsonObject>(it) }
-            index.delete()
-            return info.mapNotNull { (version, data) -> parseVersion(version, data) }.toList()
         }
+    }
 
-        private fun parseVersion(versionKey: String, data: JsonElement): ZigVersionInfo? {
-            if (data !is JsonObject)
-                return null
+    @JvmRecord
+    @Serializable
+    data class Tarball(val tarball: String, val shasum: String, val size: Int)
+}
 
-            val versionTag = data["version"]?.asSafely<JsonPrimitive>()?.content
-
-            val version = SemVer.parseFromText(versionTag) ?: SemVer.parseFromText(versionKey)
-                          ?: return null
-            val date = data["date"]?.asSafely<JsonPrimitive>()?.content ?: ""
-            val docs = data["docs"]?.asSafely<JsonPrimitive>()?.content ?: ""
-            val notes = data["notes"]?.asSafely<JsonPrimitive>()?.content?: ""
-            val src = data["src"]?.asSafely<JsonObject>()?.let { Json.decodeFromJsonElement<Tarball>(it) }
-            val dist = data.firstNotNullOfOrNull { (dist, tb) -> getTarballIfCompatible(dist, tb) }
-                       ?: return null
-
-
-            return ZigVersionInfo(version, date, docs, notes, src, dist)
+private suspend fun downloadTarball(dist: ZigVersionInfo.Tarball, into: Path, reporter: ProgressReporter): Path {
+    return withContext(Dispatchers.IO) {
+        val service = DownloadableFileService.getInstance()
+        val fileName = dist.tarball.substringAfterLast('/')
+        val tempFile = FileUtil.createTempFile(into.toFile(), "tarball", fileName, false, false)
+        val desc = service.createFileDescription(dist.tarball, tempFile.name)
+        val downloader = service.createDownloader(listOf(desc), "Zig tarball")
+        val downloadResults = reporter.sizedStep(100) {
+            coroutineToIndicator {
+                downloader.download(into.toFile())
+            }
         }
+        if (downloadResults.isEmpty())
+            throw IllegalStateException("No file downloaded")
+        return@withContext downloadResults[0].first.toPath()
+    }
+}
 
-        private fun getTarballIfCompatible(dist: String, tb: JsonElement): Tarball? {
-            if (!dist.contains('-'))
-                return null
-            val (arch, os) = dist.split('-', limit = 2)
-            val theArch = when (arch) {
-                "x86_64" -> CpuArch.X86_64
-                "i386" -> CpuArch.X86
-                "armv7a" -> CpuArch.ARM32
-                "aarch64" -> CpuArch.ARM64
-                else -> return null
+private suspend fun flattenDownloadDir(dir: Path, reporter: ProgressReporter) {
+    withContext(Dispatchers.IO) {
+        val contents = Files.newDirectoryStream(dir).use { it.toList() }
+        if (contents.size == 1 && contents[0].isDirectory()) {
+            val src = contents[0]
+            reporter.indeterminateStep {
+                coroutineToIndicator {
+                    val indicator = ProgressManager.getInstance().progressIndicator ?: EmptyProgressIndicator()
+                    indicator.isIndeterminate = true
+                    indicator.text = "Flattening directory"
+                    Files.newDirectoryStream(src).use { stream ->
+                        stream.forEach {
+                            indicator.text2 = it.name
+                            it.move(dir.resolve(src.relativize(it)))
+                        }
+                    }
+                }
             }
-            val theOS = when (os) {
-                "linux" -> OS.Linux
-                "windows" -> OS.Windows
-                "macos" -> OS.macOS
-                "freebsd" -> OS.FreeBSD
-                else -> return null
-            }
-            if (theArch != CpuArch.CURRENT || theOS != OS.CURRENT) {
-                return null
-            }
-            return Json.decodeFromJsonElement<Tarball>(tb)
+            src.delete()
         }
     }
 }
 
-@JvmRecord
-@Serializable
-data class Tarball(val tarball: String, val shasum: String, val size: Int)
+@OptIn(ExperimentalPathApi::class)
+private suspend fun unpackTarball(tarball: Path, into: Path, reporter: ProgressReporter) {
+    withContext(Dispatchers.IO) {
+        try {
+            reporter.indeterminateStep {
+                coroutineToIndicator {
+                    Unarchiver.unarchive(tarball, into)
+                }
+            }
+        } catch (e: Throwable) {
+            tarball.delete()
+            val contents = Files.newDirectoryStream(into).use { it.toList() }
+            if (contents.size == 1 && contents[0].isDirectory()) {
+                contents[0].deleteRecursively()
+            }
+            throw e
+        }
+    }
+}
+
+private fun parseVersion(versionKey: String, data: JsonElement): ZigVersionInfo? {
+    if (data !is JsonObject)
+        return null
+
+    val versionTag = data["version"]?.asSafely<JsonPrimitive>()?.content
+
+    val version = SemVer.parseFromText(versionTag) ?: SemVer.parseFromText(versionKey)
+                  ?: return null
+    val date = data["date"]?.asSafely<JsonPrimitive>()?.content ?: ""
+    val docs = data["docs"]?.asSafely<JsonPrimitive>()?.content ?: ""
+    val notes = data["notes"]?.asSafely<JsonPrimitive>()?.content ?: ""
+    val src = data["src"]?.asSafely<JsonObject>()?.let { Json.decodeFromJsonElement<ZigVersionInfo.Tarball>(it) }
+    val dist = data.firstNotNullOfOrNull { (dist, tb) -> getTarballIfCompatible(dist, tb) }
+               ?: return null
+
+
+    return ZigVersionInfo(version, date, docs, notes, src, dist)
+}
+
+private fun getTarballIfCompatible(dist: String, tb: JsonElement): ZigVersionInfo.Tarball? {
+    if (!dist.contains('-'))
+        return null
+    val (arch, os) = dist.split('-', limit = 2)
+    val theArch = when (arch) {
+        "x86_64" -> CpuArch.X86_64
+        "i386" -> CpuArch.X86
+        "armv7a" -> CpuArch.ARM32
+        "aarch64" -> CpuArch.ARM64
+        else -> return null
+    }
+    val theOS = when (os) {
+        "linux" -> OS.Linux
+        "windows" -> OS.Windows
+        "macos" -> OS.macOS
+        "freebsd" -> OS.FreeBSD
+        else -> return null
+    }
+    if (theArch != CpuArch.CURRENT || theOS != OS.CURRENT) {
+        return null
+    }
+    return Json.decodeFromJsonElement<ZigVersionInfo.Tarball>(tb)
+}
 
 private val tempPluginDir get(): File = PathManager.getTempPath().toNioPathOrNull()!!.resolve("zigbrains").toFile()

@@ -20,14 +20,16 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.ui
+package com.falsepattern.zigbrains.project.toolchain.downloader
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.project.toolchain.downloader.ZigVersionInfo
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
 import com.falsepattern.zigbrains.shared.coroutine.runInterruptibleEDT
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.observable.util.whenFocusGained
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.Disposer
@@ -43,95 +45,38 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Cell
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.asSafely
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.intellij.util.concurrency.annotations.RequiresEdt
 import java.awt.Component
-import java.nio.file.Files
 import java.nio.file.Path
-import java.util.UUID
+import java.util.*
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JList
 import javax.swing.event.DocumentEvent
-import kotlin.contracts.ExperimentalContracts
-import kotlin.io.path.exists
-import kotlin.io.path.isDirectory
 
 //TODO lang
 object Downloader {
-    suspend fun downloadToolchain(component: Component): UUID? {
+    suspend fun downloadToolchain(component: Component): ZigToolchain? {
         val info = withModalProgress(
             ModalTaskOwner.component(component),
             "Fetching zig version information",
-            TaskCancellation.cancellable()) {
-            withContext(Dispatchers.IO) {
-                ZigVersionInfo.downloadVersionList()
-            }
+            TaskCancellation.cancellable()
+        ) {
+            ZigVersionInfo.downloadVersionList()
         }
         val (downloadPath, version) = runInterruptibleEDT(component.asContextElement()) {
             selectToolchain(info)
         } ?: return null
         withModalProgress(
             ModalTaskOwner.component(component),
-            "Downloading zig tarball",
-            TaskCancellation.cancellable()) {
-            withContext(Dispatchers.IO) {
-                version.downloadAndUnpack(downloadPath)
-            }
+            "Installing Zig ${version.version}",
+            TaskCancellation.cancellable()
+        ) {
+            version.downloadAndUnpack(downloadPath)
         }
-        return null
+        return LocalZigToolchain.tryFromPath(downloadPath)
     }
 
-    private enum class DirectoryState {
-        Invalid,
-        NotAbsolute,
-        NotDirectory,
-        NotEmpty,
-        CreateNew,
-        Ok;
-
-        fun isValid(): Boolean {
-            return when(this) {
-                Invalid, NotAbsolute, NotDirectory, NotEmpty -> false
-                CreateNew, Ok -> true
-            }
-        }
-
-        companion object {
-            @OptIn(ExperimentalContracts::class)
-            @JvmStatic
-            fun determine(path: Path?): DirectoryState {
-                if (path == null) {
-                    return Invalid
-                }
-                if (!path.isAbsolute) {
-                    return NotAbsolute
-                }
-                if (!path.exists()) {
-                    var parent: Path? = path.parent
-                    while(parent != null) {
-                        if (!parent.exists()) {
-                            parent = parent.parent
-                            continue
-                        }
-                        if (!parent.isDirectory()) {
-                            return NotDirectory
-                        }
-                        return CreateNew
-                    }
-                    return Invalid
-                }
-                if (!path.isDirectory()) {
-                    return NotDirectory
-                }
-                val isEmpty = Files.newDirectoryStream(path).use { !it.iterator().hasNext() }
-                if (!isEmpty) {
-                    return NotEmpty
-                }
-                return Ok
-            }
-        }
-    }
-
+    @RequiresEdt
     private fun selectToolchain(info: List<ZigVersionInfo>): Pair<Path, ZigVersionInfo>? {
         val dialog = DialogBuilder()
         val theList = ComboBox(DefaultComboBoxModel(info.toTypedArray()))
@@ -148,32 +93,39 @@ object Downloader {
         }
         val outputPath = textFieldWithBrowseButton(
             null,
-            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))
+            FileChooserDescriptorFactory.createSingleFolderDescriptor()
+                .withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))
         )
         Disposer.register(dialog, outputPath)
         outputPath.textField.columns = 50
 
         lateinit var errorMessageBox: JBLabel
+        fun onChanged() {
+            val path = outputPath.text.ifBlank { null }?.toNioPathOrNull()
+            val state = DirectoryState.determine(path)
+            if (state.isValid()) {
+                errorMessageBox.icon = AllIcons.General.Information
+                dialog.setOkActionEnabled(true)
+            } else {
+                errorMessageBox.icon = AllIcons.General.Error
+                dialog.setOkActionEnabled(false)
+            }
+            errorMessageBox.text = when(state) {
+                DirectoryState.Invalid -> "Invalid path"
+                DirectoryState.NotAbsolute -> "Must be an absolute path"
+                DirectoryState.NotDirectory -> "Path is not a directory"
+                DirectoryState.NotEmpty -> "Directory is not empty"
+                DirectoryState.CreateNew -> "Directory will be created"
+                DirectoryState.Ok -> "Directory OK"
+            }
+            dialog.window.repaint()
+        }
+        outputPath.whenFocusGained {
+            onChanged()
+        }
         outputPath.addDocumentListener(object: DocumentAdapter() {
             override fun textChanged(e: DocumentEvent) {
-                val path = outputPath.text.ifBlank { null }?.toNioPathOrNull()
-                val state = DirectoryState.determine(path)
-                if (state.isValid()) {
-                    errorMessageBox.icon = AllIcons.General.Information
-                    dialog.setOkActionEnabled(true)
-                } else {
-                    errorMessageBox.icon = AllIcons.General.Error
-                    dialog.setOkActionEnabled(false)
-                }
-                errorMessageBox.text = when(state) {
-                    DirectoryState.Invalid -> "Invalid path"
-                    DirectoryState.NotAbsolute -> "Must be an absolute path"
-                    DirectoryState.NotDirectory -> "Path is not a directory"
-                    DirectoryState.NotEmpty -> "Directory is not empty"
-                    DirectoryState.CreateNew -> "Directory will be created"
-                    DirectoryState.Ok -> "Directory OK"
-                }
-                dialog.window.repaint()
+                onChanged()
             }
         })
         var archiveSizeCell: Cell<*>? = null
@@ -200,7 +152,7 @@ object Downloader {
         }
         detect(info[0])
         dialog.centerPanel(center)
-        dialog.setTitle("Version Selector")
+        dialog.setTitle("Zig Downloader")
         dialog.addCancelAction()
         dialog.addOkAction().also { it.setText("Download") }
         if (!dialog.showAndGet()) {
@@ -215,9 +167,5 @@ object Downloader {
                       ?: return null
 
         return path to version
-    }
-
-    private suspend fun installToolchain(path: Path, version: ZigVersionInfo): Boolean {
-        TODO("Not yet implemented")
     }
 }

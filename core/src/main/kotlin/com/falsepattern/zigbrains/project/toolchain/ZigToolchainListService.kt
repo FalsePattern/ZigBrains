@@ -25,7 +25,9 @@ package com.falsepattern.zigbrains.project.toolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.resolve
 import com.falsepattern.zigbrains.project.toolchain.base.toRef
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.components.*
+import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.util.UUID
 
@@ -37,17 +39,41 @@ import java.util.UUID
 class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchainListService.State>(State()) {
     private val changeListeners = ArrayList<WeakReference<ToolchainListChangeListener>>()
     fun setToolchain(uuid: UUID, toolchain: ZigToolchain) {
+        val str = uuid.toString()
+        val ref = toolchain.toRef()
         updateState {
             val newMap = HashMap<String, ZigToolchain.Ref>()
             newMap.putAll(it.toolchains)
-            newMap[uuid.toString()] = toolchain.toRef()
+            newMap[str] = ref
             it.copy(toolchains = newMap)
         }
         notifyChanged()
     }
 
+    fun registerNewToolchain(toolchain: ZigToolchain): UUID {
+        val ref = toolchain.toRef()
+        var uuid = UUID.randomUUID()
+        updateState {
+            val newMap = HashMap<String, ZigToolchain.Ref>()
+            newMap.putAll(it.toolchains)
+            var uuidStr = uuid.toString()
+            while (newMap.containsKey(uuidStr)) {
+                uuid = UUID.randomUUID()
+                uuidStr = uuid.toString()
+            }
+            newMap[uuidStr] = ref
+            it.copy(toolchains = newMap)
+        }
+        notifyChanged()
+        return uuid
+    }
+
     fun getToolchain(uuid: UUID): ZigToolchain? {
         return state.toolchains[uuid.toString()]?.resolve()
+    }
+
+    fun hasToolchain(uuid: UUID): Boolean {
+        return state.toolchains.containsKey(uuid.toString())
     }
 
     fun removeToolchain(uuid: UUID) {
@@ -67,7 +93,9 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
                     changeListeners.removeAt(i)
                     continue
                 }
-                v.toolchainListChanged()
+                zigCoroutineScope.launch {
+                    v.toolchainListChanged()
+                }
                 i++
             }
         }
@@ -87,6 +115,7 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
             }
         }
     }
+
 
     val toolchains: Sequence<Pair<UUID, ZigToolchain>>
         get() = state.toolchains
@@ -109,6 +138,6 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
 
     @FunctionalInterface
     interface ToolchainListChangeListener {
-        fun toolchainListChanged()
+        suspend fun toolchainListChanged()
     }
 }

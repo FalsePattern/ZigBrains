@@ -22,27 +22,56 @@
 
 package com.falsepattern.zigbrains.project.toolchain.ui
 
+import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.createNamedConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchains
+import com.falsepattern.zigbrains.project.toolchain.downloader.Downloader
+import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.Presentation
+import com.intellij.openapi.application.EDT
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.ui.MasterDetailsComponent
+import com.intellij.openapi.ui.NamedConfigurable
+import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.ui.DocumentAdapter
+import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.textFieldWithBrowseButton
+import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.panel
+import com.intellij.util.Consumer
 import com.intellij.util.IconUtil
+import com.intellij.util.asSafely
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.swing.JComponent
+import javax.swing.event.DocumentEvent
 import javax.swing.tree.DefaultTreeModel
 
-class ZigToolchainListEditor() : MasterDetailsComponent(), ZigToolchainListService.ToolchainListChangeListener {
+class ZigToolchainListEditor : MasterDetailsComponent(), ZigToolchainListService.ToolchainListChangeListener {
     private var isTreeInitialized = false
     private var registered: Boolean = false
+    private var itemSelectedListeners = ArrayList<Consumer<UUID?>>()
+
+    fun addItemSelectedListener(c: Consumer<UUID?>) {
+        synchronized(itemSelectedListeners) {
+            itemSelectedListeners.add(c)
+        }
+    }
 
     override fun createComponent(): JComponent {
         if (!isTreeInitialized) {
@@ -72,6 +101,14 @@ class ZigToolchainListEditor() : MasterDetailsComponent(), ZigToolchainListServi
         return listOf(add, MyDeleteAction())
     }
 
+    override fun updateSelection(configurable: NamedConfigurable<*>?) {
+        super.updateSelection(configurable)
+        val uuid = configurable?.editableObject as? UUID
+        synchronized(itemSelectedListeners) {
+            itemSelectedListeners.forEach { it.consume(uuid) }
+        }
+    }
+
     override fun onItemDeleted(item: Any?) {
         if (item is UUID) {
             ZigToolchainListService.getInstance().removeToolchain(item)
@@ -80,18 +117,15 @@ class ZigToolchainListEditor() : MasterDetailsComponent(), ZigToolchainListServi
     }
 
     private fun onItemSelected(elem: TCListElem) {
-        when (elem) {
-            is TCListElem.Toolchain -> {
-                val uuid = UUID.randomUUID()
-                ZigToolchainListService.getInstance().setToolchain(uuid, elem.toolchain)
-            }
-            is TCListElem.Download -> {
-                zigCoroutineScope.launch(myWholePanel.asContextElement()) {
-                    Downloader.downloadToolchain(myWholePanel)
+        if (elem !is TCListElem.Pseudo)
+            return
+        zigCoroutineScope.launch(myWholePanel.asContextElement()) {
+            val uuid = ZigToolchainComboBoxHandler.onItemSelected(myWholePanel, elem)
+            if (uuid != null) {
+                withEDTContext(myWholePanel.asContextElement()) {
+                    selectNodeInTree(uuid)
                 }
             }
-            is TCListElem.FromDisk -> {}
-            is TCListElem.None -> {}
         }
     }
 
@@ -110,11 +144,15 @@ class ZigToolchainListEditor() : MasterDetailsComponent(), ZigToolchainListServi
     }
 
     private fun reloadTree() {
+        val currentSelection = selectedObject?.asSafely<UUID>()
         myRoot.removeAllChildren()
         ZigToolchainListService.getInstance().toolchains.forEach { (uuid, toolchain) ->
             addToolchain(uuid, toolchain)
         }
         (myTree.model as DefaultTreeModel).reload()
+        currentSelection?.let {
+            selectNodeInTree(it)
+        }
     }
 
     override fun disposeUIResources() {
@@ -124,7 +162,9 @@ class ZigToolchainListEditor() : MasterDetailsComponent(), ZigToolchainListServi
         }
     }
 
-    override fun toolchainListChanged() {
-        reloadTree()
+    override suspend fun toolchainListChanged() {
+        withEDTContext(myWholePanel.asContextElement()) {
+            reloadTree()
+        }
     }
 }
