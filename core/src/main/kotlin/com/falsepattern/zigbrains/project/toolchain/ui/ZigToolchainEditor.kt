@@ -72,19 +72,15 @@ class ZigToolchainEditor(private val project: Project): Configurable {
         super.disposeUIResources()
     }
 
-    inner class UI(): Disposable {
+    inner class UI(): Disposable, ZigToolchainListService.ToolchainListChangeListener {
         private val toolchainBox: TCComboBox
         private var oldSelectionIndex: Int = 0
+        private val model: TCModel
         init {
-            val modelList = ArrayList<TCListElemIn>()
-            modelList.add(TCListElem.None)
-            modelList.addAll(ZigToolchainListService.Companion.getInstance().toolchains.map { it.asActual() })
-            modelList.add(Separator("", true))
-            modelList.addAll(TCListElem.fetchGroup)
-            modelList.add(Separator("Detected toolchains", true))
-            modelList.addAll(suggestZigToolchains().map { it.asSuggested() })
-            toolchainBox = TCComboBox(TCModel(modelList))
+            model = TCModel(getModelList())
+            toolchainBox = TCComboBox(model)
             toolchainBox.addItemListener(::itemStateChanged)
+            ZigToolchainListService.getInstance().addChangeListener(this)
             reset()
         }
 
@@ -107,6 +103,16 @@ class ZigToolchainEditor(private val project: Project): Configurable {
             }
         }
 
+        override fun toolchainListChanged() {
+            val selected = model.selected
+            val list = getModelList()
+            model.updateContents(list)
+            if (selected != null && list.contains(selected)) {
+                model.selectedItem = selected
+            } else {
+                model.selectedItem = TCListElem.None
+            }
+        }
 
         fun attach(p: Panel): Unit = with(p) {
             row("Toolchain") {
@@ -115,20 +121,32 @@ class ZigToolchainEditor(private val project: Project): Configurable {
         }
 
         fun isModified(): Boolean {
-            return ZigToolchainService.Companion.getInstance(project).toolchainUUID != toolchainBox.selectedToolchain
+            return ZigToolchainService.getInstance(project).toolchainUUID != toolchainBox.selectedToolchain
         }
 
         fun apply() {
-            ZigToolchainService.Companion.getInstance(project).toolchainUUID = toolchainBox.selectedToolchain
+            ZigToolchainService.getInstance(project).toolchainUUID = toolchainBox.selectedToolchain
         }
 
         fun reset() {
-            toolchainBox.selectedToolchain = ZigToolchainService.Companion.getInstance(project).toolchainUUID
+            toolchainBox.selectedToolchain = ZigToolchainService.getInstance(project).toolchainUUID
             oldSelectionIndex = toolchainBox.selectedIndex
         }
 
         override fun dispose() {
-
+            ZigToolchainListService.getInstance().removeChangeListener(this)
         }
     }
+}
+
+
+private fun getModelList(): List<TCListElemIn> {
+    val modelList = ArrayList<TCListElemIn>()
+    modelList.add(TCListElem.None)
+    modelList.addAll(ZigToolchainListService.getInstance().toolchains.map { it.asActual() })
+    modelList.add(Separator("", true))
+    modelList.addAll(TCListElem.fetchGroup)
+    modelList.add(Separator("Detected toolchains", true))
+    modelList.addAll(suggestZigToolchains().map { it.asSuggested() })
+    return modelList
 }

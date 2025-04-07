@@ -85,9 +85,15 @@ internal class TCComboBox(model: TCModel): ComboBox<TCListElem>(model) {
         }
 }
 
-internal class TCModel private constructor(elements: List<TCListElem>, private val separators: Map<TCListElem, Separator>) : CollectionComboBoxModel<TCListElem>(elements) {
+internal class TCModel private constructor(elements: List<TCListElem>, private var separators: Map<TCListElem, Separator>) : CollectionComboBoxModel<TCListElem>(elements) {
     companion object {
         operator fun invoke(input: List<TCListElemIn>): TCModel {
+            val (elements, separators) = convert(input)
+            val model = TCModel(elements, separators)
+            return model
+        }
+
+        private fun convert(input: List<TCListElemIn>): Pair<List<TCListElem>, Map<TCListElem, Separator>> {
             val separators = IdentityHashMap<TCListElem, Separator>()
             var lastSeparator: Separator? = null
             val elements = ArrayList<TCListElem>()
@@ -104,12 +110,17 @@ internal class TCModel private constructor(elements: List<TCListElem>, private v
                     is Separator -> lastSeparator = it
                 }
             }
-            val model = TCModel(elements, separators)
-            return model
+            return elements to separators
         }
     }
 
     fun separatorAbove(elem: TCListElem) = separators[elem]
+
+    fun updateContents(input: List<TCListElemIn>) {
+        val (elements, separators) = convert(input)
+        this.separators = separators
+        replaceAll(elements)
+    }
 }
 
 internal class TCContext(private val project: Project?, private val model: TCModel) : ComboBoxPopup.Context<TCListElem> {

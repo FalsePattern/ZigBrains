@@ -27,6 +27,7 @@ import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.createNamedConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchains
+import com.falsepattern.zigbrains.shared.coroutine.asContextElement
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -34,23 +35,25 @@ import com.intellij.openapi.actionSystem.Presentation
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.ui.MasterDetailsComponent
 import com.intellij.util.IconUtil
-import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.swing.JComponent
 import javax.swing.tree.DefaultTreeModel
 
-class ZigToolchainListEditor() : MasterDetailsComponent() {
+class ZigToolchainListEditor() : MasterDetailsComponent(), ZigToolchainListService.ToolchainListChangeListener {
     private var isTreeInitialized = false
-    private var myComponent: JComponent? = null
+    private var registered: Boolean = false
 
     override fun createComponent(): JComponent {
         if (!isTreeInitialized) {
             initTree()
             isTreeInitialized = true
         }
-        val comp = super.createComponent()
-        myComponent = comp
-        return comp
+        if (!registered) {
+            ZigToolchainListService.getInstance().addChangeListener(this)
+            registered = true
+        }
+        return super.createComponent()
     }
 
     override fun createActions(fromPopup: Boolean): List<AnAction> {
@@ -81,12 +84,10 @@ class ZigToolchainListEditor() : MasterDetailsComponent() {
             is TCListElem.Toolchain -> {
                 val uuid = UUID.randomUUID()
                 ZigToolchainListService.getInstance().setToolchain(uuid, elem.toolchain)
-                addToolchain(uuid, elem.toolchain)
-                (myTree.model as DefaultTreeModel).reload()
             }
             is TCListElem.Download -> {
-                zigCoroutineScope.async {
-                    Downloader.openDownloadDialog(myComponent!!)
+                zigCoroutineScope.launch(myWholePanel.asContextElement()) {
+                    Downloader.downloadToolchain(myWholePanel)
                 }
             }
             is TCListElem.FromDisk -> {}
@@ -118,6 +119,12 @@ class ZigToolchainListEditor() : MasterDetailsComponent() {
 
     override fun disposeUIResources() {
         super.disposeUIResources()
-        myComponent = null
+        if (registered) {
+            ZigToolchainListService.getInstance().removeChangeListener(this)
+        }
+    }
+
+    override fun toolchainListChanged() {
+        reloadTree()
     }
 }

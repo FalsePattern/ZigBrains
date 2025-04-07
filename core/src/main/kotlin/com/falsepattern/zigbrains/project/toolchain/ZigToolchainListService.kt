@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.resolve
 import com.falsepattern.zigbrains.project.toolchain.base.toRef
 import com.intellij.openapi.components.*
+import java.lang.ref.WeakReference
 import java.util.UUID
 
 @Service(Service.Level.APP)
@@ -34,13 +35,15 @@ import java.util.UUID
     storages = [Storage("zigbrains.xml")]
 )
 class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchainListService.State>(State()) {
+    private val changeListeners = ArrayList<WeakReference<ToolchainListChangeListener>>()
     fun setToolchain(uuid: UUID, toolchain: ZigToolchain) {
         updateState {
             val newMap = HashMap<String, ZigToolchain.Ref>()
             newMap.putAll(it.toolchains)
-            newMap.put(uuid.toString(), toolchain.toRef())
+            newMap[uuid.toString()] = toolchain.toRef()
             it.copy(toolchains = newMap)
         }
+        notifyChanged()
     }
 
     fun getToolchain(uuid: UUID): ZigToolchain? {
@@ -51,6 +54,37 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
         val str = uuid.toString()
         updateState {
             it.copy(toolchains = it.toolchains.filter { it.key != str })
+        }
+        notifyChanged()
+    }
+
+    private fun notifyChanged() {
+        synchronized(changeListeners) {
+            var i = 0
+            while (i < changeListeners.size) {
+                val v = changeListeners[i].get()
+                if (v == null) {
+                    changeListeners.removeAt(i)
+                    continue
+                }
+                v.toolchainListChanged()
+                i++
+            }
+        }
+    }
+
+    fun addChangeListener(listener: ToolchainListChangeListener) {
+        synchronized(changeListeners) {
+            changeListeners.add(WeakReference(listener))
+        }
+    }
+
+    fun removeChangeListener(listener: ToolchainListChangeListener) {
+        synchronized(changeListeners) {
+            changeListeners.removeIf {
+                val v = it.get()
+                v == null || v === listener
+            }
         }
     }
 
@@ -71,5 +105,10 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
     companion object {
         @JvmStatic
         fun getInstance(): ZigToolchainListService = service()
+    }
+
+    @FunctionalInterface
+    interface ToolchainListChangeListener {
+        fun toolchainListChanged()
     }
 }

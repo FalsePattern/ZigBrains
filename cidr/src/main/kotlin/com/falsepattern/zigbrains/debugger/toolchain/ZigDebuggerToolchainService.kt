@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.debugger.toolchain
 
 import com.falsepattern.zigbrains.debugger.ZigDebugBundle
+import com.falsepattern.zigbrains.shared.Unarchiver
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.PathManager
@@ -40,14 +41,12 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.util.application
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import com.intellij.util.download.DownloadableFileService
-import com.intellij.util.io.Decompressor
 import com.intellij.util.system.CpuArch
 import com.intellij.util.system.OS
 import com.jetbrains.cidr.execution.debugger.CidrDebuggerPathManager
 import com.jetbrains.cidr.execution.debugger.backend.bin.UrlProvider
 import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.URL
@@ -326,38 +325,6 @@ class ZigDebuggerToolchainService {
 
         private fun fileName(url: String): String {
             return url.substringAfterLast("/")
-        }
-    }
-
-    private enum class Unarchiver {
-        ZIP {
-            override val extension = "zip"
-            override fun createDecompressor(file: Path) = Decompressor.Zip(file)
-        },
-        TAR {
-            override val extension = "tar.gz"
-            override fun createDecompressor(file: Path) = Decompressor.Tar(file)
-        },
-        VSIX {
-            override val extension = "vsix"
-            override fun createDecompressor(file: Path) = Decompressor.Zip(file)
-        };
-
-        protected abstract val extension: String
-        protected abstract fun createDecompressor(file: Path): Decompressor
-
-        companion object {
-            @Throws(IOException::class)
-            suspend fun unarchive(archivePath: Path, dst: Path, prefix: String? = null) {
-                runInterruptible {
-                    val unarchiver = entries.find { archivePath.name.endsWith(it.extension) } ?: error("Unexpected archive type: $archivePath")
-                    val dec = unarchiver.createDecompressor(archivePath)
-                    if (prefix != null) {
-                        dec.removePrefixPath(prefix)
-                    }
-                    dec.extract(dst)
-                }
-            }
         }
     }
 
