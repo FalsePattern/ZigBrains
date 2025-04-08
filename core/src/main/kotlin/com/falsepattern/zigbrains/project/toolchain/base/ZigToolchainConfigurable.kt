@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.util.minimumWidth
 import java.util.UUID
 import javax.swing.JComponent
 
@@ -40,6 +41,8 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
         }
     private var myView: ZigToolchainPanel<T>? = null
 
+    var floating: Boolean = false
+
     abstract fun createPanel(): ZigToolchainPanel<T>
 
     override fun createOptionsPanel(): JComponent? {
@@ -51,7 +54,7 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
         }
         return panel {
             view.attach(this)
-        }
+        }.withMinimumWidth(20)
     }
 
     override fun getEditableObject(): UUID? {

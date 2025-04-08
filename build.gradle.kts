@@ -83,7 +83,7 @@ allprojects {
                 }
             }
             filter {
-                includeModule("com.redhat.devtools.intellij", "lsp4ij")
+//                includeModule("com.redhat.devtools.intellij", "lsp4ij")
             }
         }
         mavenCentral()
@@ -104,12 +104,12 @@ dependencies {
 
         pluginVerifier()
         zipSigner()
-        plugin(lsp4ijPluginString)
+//        plugin(lsp4ijPluginString)
     }
 
     runtimeOnly(project(":core"))
     runtimeOnly(project(":cidr"))
-    runtimeOnly(project(":lsp"))
+//    runtimeOnly(project(":lsp"))
 }
 
 intellijPlatform {

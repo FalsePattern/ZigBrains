@@ -24,7 +24,7 @@ package com.falsepattern.zigbrains.project.execution.base
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.ZigConsoleBuilder
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.cli.startIPCAwareProcess
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
@@ -55,7 +55,7 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
 
     @Throws(ExecutionException::class)
     suspend fun startProcessSuspend(): ProcessHandler {
-        val toolchain = environment.project.zigProjectSettings.state.toolchain ?: throw ExecutionException(ZigBrainsBundle.message("exception.zig-profile-state.start-process.no-toolchain"))
+        val toolchain = ZigToolchainService.getInstance(environment.project).toolchain ?: throw ExecutionException(ZigBrainsBundle.message("exception.zig-profile-state.start-process.no-toolchain"))
         return getCommandLine(toolchain, false).startIPCAwareProcess(environment.project, emulateTerminal = true)
     }
 

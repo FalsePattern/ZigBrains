@@ -4,7 +4,7 @@
     <vendor>FalsePattern</vendor>
 
     <depends config-file="zigbrains-core.xml">com.intellij.modules.platform</depends>
-    <depends config-file="zigbrains-lsp.xml">com.redhat.devtools.lsp4ij</depends>
+    <depends config-file="zigbrains-lsp.xml" optional="true">com.redhat.devtools.lsp4ij</depends>
     <depends config-file="zigbrains-debugger.xml" optional="true">com.intellij.modules.cidr.debugger</depends>
     <depends config-file="zigbrains-cidr.xml" optional="true">com.intellij.cidr.base</depends>
     <depends config-file="zigbrains-clion.xml" optional="true">com.intellij.clion</depends>

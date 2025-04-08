@@ -34,7 +34,7 @@ class ZLSProjectConfigurationProvider: ZigProjectConfigurationProvider {
         startLSP(project, true)
     }
 
-    override fun createConfigurable(project: Project): SubConfigurable {
+    override fun createConfigurable(project: Project): SubConfigurable<Project> {
         return ZLSSettingsConfigurable(project)
     }
 

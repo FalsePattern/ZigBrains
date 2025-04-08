@@ -140,7 +140,7 @@
         />
         <projectConfigurable
                 parentId="language"
-                instance="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainEditor"
+                instance="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainEditor$Adapter"
                 id="ZigConfigurable"
                 displayName="Zig"
         />

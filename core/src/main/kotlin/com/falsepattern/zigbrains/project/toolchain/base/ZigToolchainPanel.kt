@@ -27,9 +27,11 @@ import com.intellij.openapi.Disposable
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.util.preferredHeight
+import java.awt.Dimension
 
 abstract class ZigToolchainPanel<T: ZigToolchain>: Disposable {
-    private val nameField = JBTextField()
+    private val nameField = JBTextField(25)
 
     protected var nameFieldValue: String?
         get() = nameField.text.ifBlank { null }

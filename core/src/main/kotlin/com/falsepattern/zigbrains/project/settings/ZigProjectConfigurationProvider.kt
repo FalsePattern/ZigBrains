@@ -22,42 +22,26 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.SubConfigurable
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.extensions.ExtensionPointName
+import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
-import com.intellij.ui.dsl.builder.Panel
 
 interface ZigProjectConfigurationProvider {
     fun handleMainConfigChanged(project: Project)
-    fun createConfigurable(project: Project): SubConfigurable
-    fun createNewProjectSettingsPanel(holder: SettingsPanelHolder): SettingsPanel?
+    fun createConfigurable(project: Project): Configurable
+    fun createNewProjectSettingsPanel(): SubConfigurable<Project>?
     val priority: Int
     companion object {
         private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigProjectConfigurationProvider>("com.falsepattern.zigbrains.projectConfigProvider")
         fun mainConfigChanged(project: Project) {
             EXTENSION_POINT_NAME.extensionList.forEach { it.handleMainConfigChanged(project) }
         }
-        fun createConfigurables(project: Project): List<SubConfigurable> {
+        fun createConfigurables(project: Project): List<Configurable> {
             return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.map { it.createConfigurable(project) }
         }
-        fun createNewProjectSettingsPanels(holder: SettingsPanelHolder): List<SettingsPanel> {
-            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.mapNotNull { it.createNewProjectSettingsPanel(holder) }
+        fun createNewProjectSettingsPanels(): List<SubConfigurable<Project>> {
+            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.mapNotNull { it.createNewProjectSettingsPanel() }
         }
-    }
-    interface SettingsPanel: Disposable {
-        val data: Settings
-        fun attach(p: Panel)
-        fun direnvChanged(state: Boolean)
-    }
-    interface SettingsPanelHolder {
-        val panels: List<SettingsPanel>
-    }
-    interface Settings {
-        fun apply(project: Project)
-    }
-    interface ToolchainProvider {
-        val toolchain: ZigToolchain?
     }
 }

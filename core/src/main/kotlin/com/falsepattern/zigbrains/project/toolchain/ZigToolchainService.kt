@@ -37,8 +37,8 @@ import java.util.UUID
     name = "ZigToolchain",
     storages = [Storage("zigbrains.xml")]
 )
-class ZigToolchainService: SerializablePersistentStateComponent<ZigToolchainService.State>(State()) {
-    var toolchainUUID: UUID?
+class ZigToolchainService: SerializablePersistentStateComponent<ZigToolchainService.State>(State()), ZigToolchainService.IService {
+    override var toolchainUUID: UUID?
         get() = state.toolchain.ifBlank { null }?.let { UUID.fromString(it) }?.takeIf {
             if (ZigToolchainListService.getInstance().hasToolchain(it)) {
                 true
@@ -55,7 +55,7 @@ class ZigToolchainService: SerializablePersistentStateComponent<ZigToolchainServ
             }
         }
 
-    val toolchain: ZigToolchain?
+    override val toolchain: ZigToolchain?
         get() = toolchainUUID?.let { ZigToolchainListService.getInstance().getToolchain(it) }
 
     data class State(
@@ -66,6 +66,11 @@ class ZigToolchainService: SerializablePersistentStateComponent<ZigToolchainServ
 
     companion object {
         @JvmStatic
-        fun getInstance(project: Project): ZigToolchainService = project.service()
+        fun getInstance(project: Project): IService = project.service<ZigToolchainService>()
+    }
+
+    sealed interface IService {
+        var toolchainUUID: UUID?
+        val toolchain: ZigToolchain?
     }
 }

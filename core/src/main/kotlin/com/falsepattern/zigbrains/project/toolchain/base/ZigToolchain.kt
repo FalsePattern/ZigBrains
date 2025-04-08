@@ -25,21 +25,23 @@ package com.falsepattern.zigbrains.project.toolchain.base
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.MapAnnotation
 import java.nio.file.Path
 
-abstract class ZigToolchain: UserDataHolderBase() {
-    val zig: ZigCompilerTool by lazy { ZigCompilerTool(this) }
+/**
+ * These MUST be stateless and interchangeable! (e.g., immutable data class)
+ */
+interface ZigToolchain {
+    val zig: ZigCompilerTool get() = ZigCompilerTool(this)
 
-    abstract val name: String?
+    val name: String?
 
-    abstract fun workingDirectory(project: Project? = null): Path?
+    fun workingDirectory(project: Project? = null): Path?
 
-    abstract suspend fun patchCommandLine(commandLine: GeneralCommandLine, project: Project? = null): GeneralCommandLine
+    suspend fun patchCommandLine(commandLine: GeneralCommandLine, project: Project? = null): GeneralCommandLine
 
-    abstract fun pathToExecutable(toolName: String, project: Project? = null): Path
+    fun pathToExecutable(toolName: String, project: Project? = null): Path
 
     data class Ref(
         @JvmField

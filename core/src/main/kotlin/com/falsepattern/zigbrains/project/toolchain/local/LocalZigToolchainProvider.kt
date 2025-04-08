@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.direnv.emptyEnv
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider
@@ -37,17 +36,23 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.EnvironmentUtil
+import com.intellij.util.system.OS
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.UUID
+import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString
 
 class LocalZigToolchainProvider: ZigToolchainProvider {
     override suspend fun suggestToolchain(project: Project?, extraData: UserDataHolder): LocalZigToolchain? {
-        val env = if (project != null && (extraData.getUserData(LocalZigToolchain.DIRENV_KEY) ?: project.zigProjectSettings.state.direnv)) {
-            DirenvCmd.importDirenv(project)
-        } else {
-            emptyEnv
-        }
+        //TODO direnv
+//        val env = if (project != null && (extraData.getUserData(LocalZigToolchain.DIRENV_KEY) ?: project.zigProjectSettings.state.direnv)) {
+//            DirenvCmd.importDirenv(project)
+//        } else {
+//            emptyEnv
+//        }
+        val env = emptyEnv
         val zigExePath = env.findExecutableOnPATH("zig") ?: return null
         return LocalZigToolchain(zigExePath.parent)
     }
@@ -95,6 +100,18 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     override fun suggestToolchains(): List<ZigToolchain> {
         val res = HashSet<String>()
         EnvironmentUtil.getValue("PATH")?.split(File.pathSeparatorChar)?.let { res.addAll(it.toList()) }
+        val wellKnown = getWellKnown()
+        wellKnown.forEach { dir ->
+            if (!dir.isDirectory())
+                return@forEach
+            runCatching {
+                Files.newDirectoryStream(dir).use { stream ->
+                    stream.forEach { subDir ->
+                        res.add(subDir.pathString)
+                    }
+                }
+            }
+        }
         return res.mapNotNull { LocalZigToolchain.tryFromPathString(it) }
     }
 
@@ -119,6 +136,25 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     }
 }
 
+fun getSuggestedLocalToolchainPath(): Path? {
+    return getWellKnown().getOrNull(0)
+}
+
+private fun getWellKnown(): List<Path> {
+    val home = System.getProperty("user.home")?.toNioPathOrNull() ?: return emptyList()
+    val xdgDataHome = when(OS.CURRENT) {
+        OS.macOS -> home.resolve("Library")
+        OS.Windows -> System.getenv("LOCALAPPDATA")?.toNioPathOrNull()
+        else -> System.getenv("XDG_DATA_HOME")?.toNioPathOrNull() ?: home.resolve(Path.of(".local", "share"))
+    }
+    val res = ArrayList<Path>()
+    if (xdgDataHome != null && xdgDataHome.isDirectory()) {
+        res.add(xdgDataHome.resolve("zig"))
+        res.add(xdgDataHome.resolve("zigup"))
+    }
+    res.add(home.resolve(".zig"))
+    return res
+}
 
 private fun presentDetectedPath(home: String, maxLength: Int = 50, suffixLength: Int = 30): String {
     //for macOS, let's try removing Bundle internals

@@ -23,13 +23,13 @@
 package com.falsepattern.zigbrains.project.stdlib
 
 import com.falsepattern.zigbrains.Icons
-import com.falsepattern.zigbrains.project.settings.ZigProjectSettings
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.intellij.navigation.ItemPresentation
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.roots.SyntheticLibrary
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.refreshAndFindVirtualDirectory
 import com.intellij.platform.backend.workspace.WorkspaceModel
@@ -41,20 +41,20 @@ import java.util.*
 import javax.swing.Icon
 
 class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresentation {
-    private var state: ZigProjectSettings = project.zigProjectSettings.state.copy()
+    private var toolchain: ZigToolchain? = ZigToolchainService.getInstance(project).toolchain
     private val roots by lazy {
-        runBlocking {getRoot(state, project)}?.let { setOf(it) } ?: emptySet()
+        runBlocking {getRoot(toolchain, project)}?.let { setOf(it) } ?: emptySet()
     }
 
     private val name by lazy {
-        getName(state, project)
+        getName(toolchain, project)
     }
 
     override fun equals(other: Any?): Boolean {
         if (other !is ZigSyntheticLibrary)
             return false
 
-        return state == other.state
+        return toolchain == other.toolchain
     }
 
     override fun hashCode(): Int {
@@ -76,10 +76,10 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
     companion object {
         private const val ZIG_LIBRARY_ID = "Zig SDK"
         private const val ZIG_MODULE_ID = "Zig"
-        suspend fun reload(project: Project, state: ZigProjectSettings) {
+        suspend fun reload(project: Project, toolchain: ZigToolchain?) {
             val moduleId = ModuleId(ZIG_MODULE_ID)
             val workspaceModel = WorkspaceModel.getInstance(project)
-            val root = getRoot(state, project) ?: return
+            val root = getRoot(toolchain, project) ?: return
             val libRoot = LibraryRoot(root.toVirtualFileUrl(workspaceModel.getVirtualFileUrlManager()), LibraryRootTypeId.SOURCES)
             val libraryTableId = LibraryTableId.ProjectLibraryTableId
             val libraryId = LibraryId(ZIG_LIBRARY_ID, libraryTableId)
@@ -118,37 +118,39 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
 }
 
 private fun getName(
-    state: ZigProjectSettings,
+    toolchain: ZigToolchain?,
     project: Project
 ): String {
-    val tc = state.toolchain ?: return "Zig"
-    val version = runBlocking { tc.zig.getEnv(project) }.mapCatching { it.version }.getOrElse { return "Zig" }
-    return "Zig $version"
+    val tc = toolchain ?: return "Zig"
+    toolchain.name?.let { return it }
+    runBlocking { tc.zig.getEnv(project) }
+        .mapCatching { it.version }
+        .getOrNull()
+        ?.let { return "Zig $it" }
+    return "Zig"
 }
 
 suspend fun getRoot(
-    state: ZigProjectSettings,
+    toolchain: ZigToolchain?,
     project: Project
 ): VirtualFile? {
-    val toolchain = state.toolchain
-    if (state.overrideStdPath) run {
-        val ePathStr = state.explicitPathToStd ?: return@run
-        val ePath = ePathStr.toNioPathOrNull() ?: return@run
+    //TODO universal
+    if (toolchain !is LocalZigToolchain) {
+        return null
+    }
+    if (toolchain.std != null) run {
+        val ePath = toolchain.std
         if (ePath.isAbsolute) {
             val roots = ePath.refreshAndFindVirtualDirectory() ?: return@run
             return roots
-        } else if (toolchain != null) {
-            val stdPath = toolchain.location.resolve(ePath)
-            if (stdPath.isAbsolute) {
-                val roots = stdPath.refreshAndFindVirtualDirectory() ?: return@run
-                return roots
-            }
+        }
+        val stdPath = toolchain.location.resolve(ePath)
+        if (stdPath.isAbsolute) {
+            val roots = stdPath.refreshAndFindVirtualDirectory() ?: return@run
+            return roots
         }
     }
-    if (toolchain != null) {
-        val stdPath = toolchain.zig.getEnv(project).mapCatching { it.stdPath(toolchain, project) }.getOrNull() ?: return null
-        val roots = stdPath.refreshAndFindVirtualDirectory() ?: return null
-        return roots
-    }
-    return null
+    val stdPath = toolchain.zig.getEnv(project).mapCatching { it.stdPath(toolchain, project) }.getOrNull() ?: return null
+    val roots = stdPath.refreshAndFindVirtualDirectory() ?: return null
+    return roots
 }

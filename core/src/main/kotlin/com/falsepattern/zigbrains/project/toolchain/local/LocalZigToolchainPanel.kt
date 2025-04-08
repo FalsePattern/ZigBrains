@@ -59,7 +59,7 @@ class LocalZigToolchainPanel() : ZigToolchainPanel<LocalZigToolchain>() {
         Disposer.register(this, it)
     }
     private val toolchainVersion = JBTextArea().also { it.isEditable = false }
-    private val stdFieldOverride = JBCheckBox(ZigBrainsBundle.message("settings.project.label.override-std")).apply {
+    private val stdFieldOverride = JBCheckBox().apply {
         addChangeListener {
             if (isSelected) {
                 pathToStd.isEnabled = true
@@ -84,8 +84,8 @@ class LocalZigToolchainPanel() : ZigToolchainPanel<LocalZigToolchain>() {
             cell(toolchainVersion)
         }
         row(ZigBrainsBundle.message("settings.toolchain.local.std.label")) {
-            cell(pathToStd).resizableColumn().align(AlignX.FILL)
             cell(stdFieldOverride)
+            cell(pathToStd).resizableColumn().align(AlignX.FILL)
         }
     }
 

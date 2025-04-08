@@ -22,16 +22,56 @@
 
 package com.falsepattern.zigbrains.shared
 
-import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
-import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider.SettingsPanelHolder
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.options.ConfigurationException
+import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.util.Disposer
 import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.dsl.builder.panel
+import javax.swing.JComponent
 
-interface SubConfigurable: Disposable {
-    fun createComponent(holder: SettingsPanelHolder, panel: Panel): ZigProjectConfigurationProvider.SettingsPanel
-    fun isModified(): Boolean
-    @Throws(ConfigurationException::class)
-    fun apply()
-    fun reset()
+interface SubConfigurable<T>: Disposable {
+    fun attach(panel: Panel)
+    fun isModified(context: T): Boolean
+    fun apply(context: T)
+    fun reset(context: T?)
+
+    val newProjectBeforeInitSelector: Boolean get() = false
+
+    abstract class Adapter<T>: Configurable {
+        private var myConfigurable: SubConfigurable<T>? = null
+
+        abstract fun instantiate(): SubConfigurable<T>
+        protected abstract val context: T
+
+        override fun createComponent(): JComponent? {
+            if (myConfigurable != null) {
+                disposeUIResources()
+            }
+            val configurable = instantiate()
+            configurable.reset(context)
+            myConfigurable = configurable
+            return panel {
+                configurable.attach(this)
+            }
+        }
+
+        override fun isModified(): Boolean {
+            return myConfigurable?.isModified(context) == true
+        }
+
+        override fun apply() {
+            myConfigurable?.apply(context)
+        }
+
+        override fun reset() {
+            myConfigurable?.reset(context)
+        }
+
+        override fun disposeUIResources() {
+            val configurable = myConfigurable
+            myConfigurable = null
+            configurable?.let { Disposer.dispose(it) }
+            super.disposeUIResources()
+        }
+    }
 }

@@ -23,7 +23,6 @@
 package com.falsepattern.zigbrains
 
 import com.falsepattern.zigbrains.direnv.DirenvCmd
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchain
 import com.intellij.ide.BrowserUtil
@@ -71,19 +70,6 @@ class ZBStartup: ProjectActivity {
                     }
                 })
                 notif.notify(null)
-            }
-        }
-        //Autodetection
-        val zigProjectState = project.zigProjectSettings.state
-        if (zigProjectState.toolchainPath.isNullOrBlank()) {
-            val data = UserDataHolderBase()
-            data.putUserData(LocalZigToolchain.DIRENV_KEY,
-                DirenvCmd.direnvInstalled() && !project.isDefault && zigProjectState.direnv
-            )
-            val tc = project.suggestZigToolchain(data) ?: return
-            if (tc is LocalZigToolchain) {
-                zigProjectState.toolchainPath = tc.location.pathString
-                project.zigProjectSettings.state = zigProjectState
             }
         }
     }

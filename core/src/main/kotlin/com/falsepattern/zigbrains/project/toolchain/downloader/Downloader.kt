@@ -25,6 +25,7 @@ package com.falsepattern.zigbrains.project.toolchain.downloader
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.local.getSuggestedLocalToolchainPath
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
 import com.falsepattern.zigbrains.shared.coroutine.runInterruptibleEDT
 import com.intellij.icons.AllIcons
@@ -52,6 +53,7 @@ import java.util.*
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JList
 import javax.swing.event.DocumentEvent
+import kotlin.io.path.pathString
 
 object Downloader {
     suspend fun downloadToolchain(component: Component): ZigToolchain? {
@@ -129,7 +131,7 @@ object Downloader {
         })
         var archiveSizeCell: Cell<*>? = null
         fun detect(item: ZigVersionInfo) {
-            outputPath.text = System.getProperty("user.home") + "/.zig/" + item.version
+            outputPath.text = getSuggestedLocalToolchainPath()?.resolve(item.version.rawVersion)?.pathString ?: ""
             val size = item.dist.size
             val sizeMb = size / (1024f * 1024f)
             archiveSizeCell?.comment?.text = ZigBrainsBundle.message("settings.toolchain.downloader.archive-size.text", "%.2fMB".format(sizeMb))

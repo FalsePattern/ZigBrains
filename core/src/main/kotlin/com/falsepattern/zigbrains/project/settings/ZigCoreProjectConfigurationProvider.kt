@@ -22,20 +22,21 @@
 
 package com.falsepattern.zigbrains.project.settings
 
+import com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainEditor
 import com.falsepattern.zigbrains.shared.SubConfigurable
+import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 
 class ZigCoreProjectConfigurationProvider: ZigProjectConfigurationProvider {
     override fun handleMainConfigChanged(project: Project) {
     }
 
-    override fun createConfigurable(project: Project): SubConfigurable {
-        return ZigProjectConfigurable(project)
+    override fun createConfigurable(project: Project): Configurable {
+        return ZigToolchainEditor.Adapter(project)
     }
 
-    override fun createNewProjectSettingsPanel(holder: ZigProjectConfigurationProvider.SettingsPanelHolder): ZigProjectConfigurationProvider.SettingsPanel {
-        return ZigProjectSettingsPanel(holder, ProjectManager.getInstance().defaultProject)
+    override fun createNewProjectSettingsPanel(): SubConfigurable<Project> {
+        return ZigToolchainEditor().also { it.reset(null) }
     }
 
     override val priority: Int

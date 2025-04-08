@@ -22,8 +22,8 @@
 
 package com.falsepattern.zigbrains.project.steps.discovery
 
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
 import com.falsepattern.zigbrains.project.steps.discovery.ZigStepDiscoveryListener.ErrorType
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
@@ -76,7 +76,7 @@ class ZigStepDiscoveryService(private val project: Project) {
 
     private tailrec suspend fun doReload() {
         preReload()
-        val toolchain = project.zigProjectSettings.state.toolchain ?: run {
+        val toolchain = ZigToolchainService.getInstance(project).toolchain ?: run {
             errorReload(ErrorType.MissingToolchain)
             return
         }

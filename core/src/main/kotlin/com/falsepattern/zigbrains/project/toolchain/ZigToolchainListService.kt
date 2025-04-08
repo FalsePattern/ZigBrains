@@ -36,9 +36,19 @@ import java.util.UUID
     name = "ZigToolchainList",
     storages = [Storage("zigbrains.xml")]
 )
-class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchainListService.State>(State()) {
+class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchainListService.State>(State()), ZigToolchainListService.IService {
     private val changeListeners = ArrayList<WeakReference<ToolchainListChangeListener>>()
-    fun setToolchain(uuid: UUID, toolchain: ZigToolchain) {
+
+    override val toolchains: Sequence<Pair<UUID, ZigToolchain>>
+        get() = state.toolchains
+            .asSequence()
+            .mapNotNull {
+                val uuid = UUID.fromString(it.key) ?: return@mapNotNull null
+                val tc = it.value.resolve() ?: return@mapNotNull null
+                uuid to tc
+            }
+
+    override fun setToolchain(uuid: UUID, toolchain: ZigToolchain) {
         val str = uuid.toString()
         val ref = toolchain.toRef()
         updateState {
@@ -50,7 +60,7 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
         notifyChanged()
     }
 
-    fun registerNewToolchain(toolchain: ZigToolchain): UUID {
+    override fun registerNewToolchain(toolchain: ZigToolchain): UUID {
         val ref = toolchain.toRef()
         var uuid = UUID.randomUUID()
         updateState {
@@ -68,20 +78,35 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
         return uuid
     }
 
-    fun getToolchain(uuid: UUID): ZigToolchain? {
+    override fun getToolchain(uuid: UUID): ZigToolchain? {
         return state.toolchains[uuid.toString()]?.resolve()
     }
 
-    fun hasToolchain(uuid: UUID): Boolean {
+    override fun hasToolchain(uuid: UUID): Boolean {
         return state.toolchains.containsKey(uuid.toString())
     }
 
-    fun removeToolchain(uuid: UUID) {
+    override fun removeToolchain(uuid: UUID) {
         val str = uuid.toString()
         updateState {
             it.copy(toolchains = it.toolchains.filter { it.key != str })
         }
         notifyChanged()
+    }
+
+    override fun addChangeListener(listener: ToolchainListChangeListener) {
+        synchronized(changeListeners) {
+            changeListeners.add(WeakReference(listener))
+        }
+    }
+
+    override fun removeChangeListener(listener: ToolchainListChangeListener) {
+        synchronized(changeListeners) {
+            changeListeners.removeIf {
+                val v = it.get()
+                v == null || v === listener
+            }
+        }
     }
 
     private fun notifyChanged() {
@@ -101,31 +126,6 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
         }
     }
 
-    fun addChangeListener(listener: ToolchainListChangeListener) {
-        synchronized(changeListeners) {
-            changeListeners.add(WeakReference(listener))
-        }
-    }
-
-    fun removeChangeListener(listener: ToolchainListChangeListener) {
-        synchronized(changeListeners) {
-            changeListeners.removeIf {
-                val v = it.get()
-                v == null || v === listener
-            }
-        }
-    }
-
-
-    val toolchains: Sequence<Pair<UUID, ZigToolchain>>
-        get() = state.toolchains
-            .asSequence()
-            .mapNotNull {
-                val uuid = UUID.fromString(it.key) ?: return@mapNotNull null
-                val tc = it.value.resolve() ?: return@mapNotNull null
-                uuid to tc
-            }
-
     data class State(
         @JvmField
         val toolchains: Map<String, ZigToolchain.Ref> = emptyMap(),
@@ -133,7 +133,18 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
 
     companion object {
         @JvmStatic
-        fun getInstance(): ZigToolchainListService = service()
+        fun getInstance(): IService = service<ZigToolchainListService>()
+    }
+
+    sealed interface IService {
+        val toolchains: Sequence<Pair<UUID, ZigToolchain>>
+        fun setToolchain(uuid: UUID, toolchain: ZigToolchain)
+        fun registerNewToolchain(toolchain: ZigToolchain): UUID
+        fun getToolchain(uuid: UUID): ZigToolchain?
+        fun hasToolchain(uuid: UUID): Boolean
+        fun removeToolchain(uuid: UUID)
+        fun addChangeListener(listener: ToolchainListChangeListener)
+        fun removeChangeListener(listener: ToolchainListChangeListener)
     }
 
     @FunctionalInterface
