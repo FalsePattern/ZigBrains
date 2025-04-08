@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.toolchain.ui
 
 import ai.grazie.utils.attributes.value
 import com.falsepattern.zigbrains.Icons
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.toolchain.base.render
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
@@ -208,17 +209,17 @@ internal class TCCellRenderer(val getModel: () -> TCModel) : ColoredListCellRend
 
             is TCListElem.Download -> {
                 icon = AllIcons.Actions.Download
-                append("Download Zig\u2026")
+                append(ZigBrainsBundle.message("settings.toolchain.model.download.text"))
             }
 
             is TCListElem.FromDisk -> {
                 icon = AllIcons.General.OpenDisk
-                append("Add Zig from disk\u2026")
+                append(ZigBrainsBundle.message("settings.toolchain.model.from-disk.text"))
             }
 
             is TCListElem.None, null -> {
                 icon = AllIcons.General.BalloonError
-                append("<No Toolchain>", SimpleTextAttributes.ERROR_ATTRIBUTES)
+                append(ZigBrainsBundle.message("settings.toolchain.model.none.text"), SimpleTextAttributes.ERROR_ATTRIBUTES)
             }
         }
     }

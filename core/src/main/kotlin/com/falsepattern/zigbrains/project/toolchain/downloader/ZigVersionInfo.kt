@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.project.toolchain.downloader
 
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.shared.Unarchiver
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.progress.EmptyProgressIndicator
@@ -85,7 +86,7 @@ data class ZigVersionInfo(
                 val service = DownloadableFileService.getInstance()
                 val tempFile = FileUtil.createTempFile(tempPluginDir, "index", ".json", false, false)
                 val desc = service.createFileDescription("https://ziglang.org/download/index.json", tempFile.name)
-                val downloader = service.createDownloader(listOf(desc), "Zig version information")
+                val downloader = service.createDownloader(listOf(desc), ZigBrainsBundle.message("settings.toolchain.downloader.service.index"))
                 val downloadResults = coroutineToIndicator {
                     downloader.download(tempPluginDir)
                 }
@@ -110,7 +111,7 @@ private suspend fun downloadTarball(dist: ZigVersionInfo.Tarball, into: Path, re
         val fileName = dist.tarball.substringAfterLast('/')
         val tempFile = FileUtil.createTempFile(into.toFile(), "tarball", fileName, false, false)
         val desc = service.createFileDescription(dist.tarball, tempFile.name)
-        val downloader = service.createDownloader(listOf(desc), "Zig tarball")
+        val downloader = service.createDownloader(listOf(desc), ZigBrainsBundle.message("settings.toolchain.downloader.service.tarball"))
         val downloadResults = reporter.sizedStep(100) {
             coroutineToIndicator {
                 downloader.download(into.toFile())
@@ -131,7 +132,7 @@ private suspend fun flattenDownloadDir(dir: Path, reporter: ProgressReporter) {
                 coroutineToIndicator {
                     val indicator = ProgressManager.getInstance().progressIndicator ?: EmptyProgressIndicator()
                     indicator.isIndeterminate = true
-                    indicator.text = "Flattening directory"
+                    indicator.text = ZigBrainsBundle.message("settings.toolchain.downloader.progress.flatten")
                     Files.newDirectoryStream(src).use { stream ->
                         stream.forEach {
                             indicator.text2 = it.name

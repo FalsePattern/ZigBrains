@@ -53,12 +53,11 @@ import javax.swing.DefaultComboBoxModel
 import javax.swing.JList
 import javax.swing.event.DocumentEvent
 
-//TODO lang
 object Downloader {
     suspend fun downloadToolchain(component: Component): ZigToolchain? {
         val info = withModalProgress(
             ModalTaskOwner.component(component),
-            "Fetching zig version information",
+            ZigBrainsBundle.message("settings.toolchain.downloader.progress.fetch"),
             TaskCancellation.cancellable()
         ) {
             ZigVersionInfo.downloadVersionList()
@@ -68,7 +67,7 @@ object Downloader {
         } ?: return null
         withModalProgress(
             ModalTaskOwner.component(component),
-            "Installing Zig ${version.version}",
+            ZigBrainsBundle.message("settings.toolchain.downloader.progress.install", version.version.rawVersion),
             TaskCancellation.cancellable()
         ) {
             version.downloadAndUnpack(downloadPath)
@@ -94,7 +93,7 @@ object Downloader {
         val outputPath = textFieldWithBrowseButton(
             null,
             FileChooserDescriptorFactory.createSingleFolderDescriptor()
-                .withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))
+                .withTitle(ZigBrainsBundle.message("settings.toolchain.downloader.chooser.title"))
         )
         Disposer.register(dialog, outputPath)
         outputPath.textField.columns = 50
@@ -110,14 +109,14 @@ object Downloader {
                 errorMessageBox.icon = AllIcons.General.Error
                 dialog.setOkActionEnabled(false)
             }
-            errorMessageBox.text = when(state) {
-                DirectoryState.Invalid -> "Invalid path"
-                DirectoryState.NotAbsolute -> "Must be an absolute path"
-                DirectoryState.NotDirectory -> "Path is not a directory"
-                DirectoryState.NotEmpty -> "Directory is not empty"
-                DirectoryState.CreateNew -> "Directory will be created"
-                DirectoryState.Ok -> "Directory OK"
-            }
+            errorMessageBox.text = ZigBrainsBundle.message(when(state) {
+                DirectoryState.Invalid -> "settings.toolchain.downloader.state.invalid"
+                DirectoryState.NotAbsolute -> "settings.toolchain.downloader.state.not-absolute"
+                DirectoryState.NotDirectory -> "settings.toolchain.downloader.state.not-directory"
+                DirectoryState.NotEmpty -> "settings.toolchain.downloader.state.not-empty"
+                DirectoryState.CreateNew -> "settings.toolchain.downloader.state.create-new"
+                DirectoryState.Ok -> "settings.toolchain.downloader.state.ok"
+            })
             dialog.window.repaint()
         }
         outputPath.whenFocusGained {
@@ -133,16 +132,16 @@ object Downloader {
             outputPath.text = System.getProperty("user.home") + "/.zig/" + item.version
             val size = item.dist.size
             val sizeMb = size / (1024f * 1024f)
-            archiveSizeCell?.comment?.text = "Archive size: %.2fMB".format(sizeMb)
+            archiveSizeCell?.comment?.text = ZigBrainsBundle.message("settings.toolchain.downloader.archive-size.text", "%.2fMB".format(sizeMb))
         }
         theList.addItemListener {
             detect(it.item as ZigVersionInfo)
         }
         val center = panel {
-            row("Version:") {
+            row(ZigBrainsBundle.message("settings.toolchain.downloader.version.label")) {
                 cell(theList).resizableColumn().align(AlignX.FILL)
             }
-            row("Location:") {
+            row(ZigBrainsBundle.message("settings.toolchain.downloader.location.label")) {
                 cell(outputPath).resizableColumn().align(AlignX.FILL).apply { archiveSizeCell = comment("") }
             }
             row {
@@ -152,9 +151,9 @@ object Downloader {
         }
         detect(info[0])
         dialog.centerPanel(center)
-        dialog.setTitle("Zig Downloader")
+        dialog.setTitle(ZigBrainsBundle.message("settings.toolchain.downloader.title"))
         dialog.addCancelAction()
-        dialog.addOkAction().also { it.setText("Download") }
+        dialog.addOkAction().also { it.setText(ZigBrainsBundle.message("settings.toolchain.downloader.ok-action")) }
         if (!dialog.showAndGet()) {
             return null
         }

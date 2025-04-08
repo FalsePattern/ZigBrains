@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.project.toolchain.ui
 
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchains
@@ -58,7 +59,7 @@ import kotlin.collections.addAll
 class ZigToolchainEditor(private val project: Project): Configurable {
     private var myUi: UI? = null
     override fun getDisplayName(): @NlsContexts.ConfigurableName String? {
-        return "Zig"
+        return ZigBrainsBundle.message("settings.toolchain.editor.display-name")
     }
 
     override fun createComponent(): JComponent? {
@@ -150,9 +151,9 @@ class ZigToolchainEditor(private val project: Project): Configurable {
         }
 
         fun attach(p: Panel): Unit = with(p) {
-            row("Toolchain") {
+            row(ZigBrainsBundle.message("settings.toolchain.editor.toolchain.label")) {
                 cell(toolchainBox).resizableColumn().align(AlignX.FILL)
-                button("Funny") { e ->
+                button(ZigBrainsBundle.message("settings.toolchain.editor.toolchain.edit-button.name")) { e ->
                     zigCoroutineScope.launchWithEDT(toolchainBox.asContextElement()) {
                         val config = ZigToolchainListEditor()
                         var inited = false
@@ -211,7 +212,7 @@ private fun getModelList(): List<TCListElemIn> {
     modelList.addAll(ZigToolchainListService.getInstance().toolchains.map { it.asActual() })
     modelList.add(Separator("", true))
     modelList.addAll(TCListElem.fetchGroup)
-    modelList.add(Separator("Detected toolchains", true))
+    modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))
     modelList.addAll(suggestZigToolchains().map { it.asSuggested() })
     return modelList
 }

@@ -86,11 +86,11 @@ class ZigToolchainListEditor : MasterDetailsComponent(), ZigToolchainListService
     }
 
     override fun createActions(fromPopup: Boolean): List<AnAction> {
-        val add = object : DumbAwareAction({ "lmaoo" }, Presentation.NULL_STRING, IconUtil.addIcon) {
+        val add = object : DumbAwareAction({ ZigBrainsBundle.message("settings.toolchain.list.add-action.name") }, Presentation.NULL_STRING, IconUtil.addIcon) {
             override fun actionPerformed(e: AnActionEvent) {
                 val modelList = ArrayList<TCListElemIn>()
                 modelList.addAll(TCListElem.fetchGroup)
-                modelList.add(Separator("Detected toolchains", true))
+                modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))
                 modelList.addAll(suggestZigToolchains().map { it.asSuggested() })
                 val model = TCModel.Companion(modelList)
                 val context = TCContext(null, model)
@@ -134,9 +134,9 @@ class ZigToolchainListEditor : MasterDetailsComponent(), ZigToolchainListService
         super.reset()
     }
 
-    override fun getEmptySelectionString() = ZigBrainsBundle.message("settings.toolchains.empty")
+    override fun getEmptySelectionString() = ZigBrainsBundle.message("settings.toolchain.list.empty")
 
-    override fun getDisplayName() = ZigBrainsBundle.message("settings.toolchains.title")
+    override fun getDisplayName() = ZigBrainsBundle.message("settings.toolchain.list.title")
 
     private fun addToolchain(uuid: UUID, toolchain: ZigToolchain) {
         val node = MyNode(toolchain.createNamedConfigurable(uuid))

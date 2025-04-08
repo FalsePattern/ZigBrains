@@ -77,13 +77,13 @@ class LocalZigToolchainPanel() : ZigToolchainPanel<LocalZigToolchain>() {
 
     override fun attach(p: Panel): Unit = with(p) {
         super.attach(p)
-        row(ZigBrainsBundle.message("settings.project.label.toolchain")) {
+        row(ZigBrainsBundle.message("settings.toolchain.local.path.label")) {
             cell(pathToToolchain).resizableColumn().align(AlignX.FILL)
         }
-        row(ZigBrainsBundle.message("settings.project.label.toolchain-version")) {
+        row(ZigBrainsBundle.message("settings.toolchain.local.version.label")) {
             cell(toolchainVersion)
         }
-        row(ZigBrainsBundle.message("settings.project.label.std-location")) {
+        row(ZigBrainsBundle.message("settings.toolchain.local.std.label")) {
             cell(pathToStd).resizableColumn().align(AlignX.FILL)
             cell(stdFieldOverride)
         }

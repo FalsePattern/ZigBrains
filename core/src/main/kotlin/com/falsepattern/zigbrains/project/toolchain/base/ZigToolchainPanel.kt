@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.project.toolchain.base
 
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.intellij.openapi.Disposable
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.AlignX
@@ -35,7 +36,7 @@ abstract class ZigToolchainPanel<T: ZigToolchain>: Disposable {
         set(value) {nameField.text = value ?: ""}
 
     open fun attach(p: Panel): Unit = with(p) {
-        row("Name") {
+        row(ZigBrainsBundle.message("settings.toolchain.base.name.label")) {
             cell(nameField).resizableColumn().align(AlignX.FILL)
         }
         separator()

@@ -55,7 +55,7 @@ object LocalSelector {
         val path = textFieldWithBrowseButton(
             null,
             FileChooserDescriptorFactory.createSingleFolderDescriptor()
-                .withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))
+                .withTitle(ZigBrainsBundle.message("settings.toolchain.local-selector.chooser.title"))
         )
         Disposer.register(dialog, path)
         path.textField.columns = 50
@@ -65,7 +65,7 @@ object LocalSelector {
                 val tc = LocalZigToolchain.tryFromPathString(path.text)
                 if (tc == null) {
                     errorMessageBox.icon = AllIcons.General.Error
-                    errorMessageBox.text = "Invalid toolchain path"
+                    errorMessageBox.text = ZigBrainsBundle.message("settings.toolchain.local-selector.state.invalid")
                     dialog.setOkActionEnabled(false)
                 } else if (ZigToolchainListService
                         .getInstance()
@@ -74,17 +74,18 @@ object LocalSelector {
                         .any { it.location == tc.location }
                 ) {
                     errorMessageBox.icon = AllIcons.General.Warning
-                    errorMessageBox.text = tc.name?.let { "Toolchain already exists as \"$it\"" } ?: "Toolchain already exists"
+                    errorMessageBox.text = tc.name?.let { ZigBrainsBundle.message("settings.toolchain.local-selector.state.already-exists-named", it) }
+                                           ?: ZigBrainsBundle.message("settings.toolchain.local-selector.state.already-exists-unnamed")
                     dialog.setOkActionEnabled(true)
                 } else {
                     errorMessageBox.icon = Icons.Zig
-                    errorMessageBox.text = tc.name ?: "OK"
+                    errorMessageBox.text = tc.name ?: ZigBrainsBundle.message("settings.toolchain.local-selector.state.ok")
                     dialog.setOkActionEnabled(true)
                 }
             }
         })
         val center = panel {
-            row("Path:") {
+            row(ZigBrainsBundle.message("settings.toolchain.local-selector.path.label")) {
                 cell(path).resizableColumn().align(AlignX.FILL)
             }
             row {
@@ -93,9 +94,9 @@ object LocalSelector {
             }
         }
         dialog.centerPanel(center)
-        dialog.setTitle("Zig Browser")
+        dialog.setTitle(ZigBrainsBundle.message("settings.toolchain.local-selector.title"))
         dialog.addCancelAction()
-        dialog.addOkAction().also { it.setText("Add") }
+        dialog.addOkAction().also { it.setText(ZigBrainsBundle.message("settings.toolchain.local-selector.ok-action")) }
         if (!dialog.showAndGet()) {
             return null
         }
