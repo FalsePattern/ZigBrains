@@ -204,7 +204,7 @@ internal class TCCellRenderer(val getModel: () -> TCModel) : ColoredListCellRend
                 }
                 this.icon = icon
                 val toolchain = value.toolchain
-                toolchain.render(this, isSuggestion)
+                toolchain.render(this, isSuggestion, index == -1)
             }
 
             is TCListElem.Download -> {

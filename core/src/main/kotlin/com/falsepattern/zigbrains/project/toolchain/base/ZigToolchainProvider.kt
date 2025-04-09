@@ -42,7 +42,7 @@ internal interface ZigToolchainProvider {
     fun matchesSuggestion(toolchain: ZigToolchain, suggestion: ZigToolchain): Boolean
     fun createConfigurable(uuid: UUID, toolchain: ZigToolchain): ZigToolchainConfigurable<*>
     fun suggestToolchains(): List<Pair<SemVer?, ZigToolchain>>
-    fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean)
+    fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean)
 }
 
 fun ZigToolchain.Ref.resolve(): ZigToolchain? {
@@ -67,7 +67,7 @@ fun ZigToolchain.createNamedConfigurable(uuid: UUID): ZigToolchainConfigurable<*
 }
 
 fun suggestZigToolchains(): List<ZigToolchain> {
-    val existing = ZigToolchainListService.getInstance().toolchains.map { (uuid, tc) -> tc }.toList()
+    val existing = ZigToolchainListService.getInstance().toolchains.map { (_, tc) -> tc }.toList()
     return EXTENSION_POINT_NAME.extensionList.flatMap { ext ->
         val compatibleExisting = existing.filter { ext.isCompatible(it) }
         val suggestions = ext.suggestToolchains()
@@ -75,7 +75,7 @@ fun suggestZigToolchains(): List<ZigToolchain> {
     }.sortedByDescending { it.first }.map { it.second }
 }
 
-fun ZigToolchain.render(component: SimpleColoredComponent, isSuggestion: Boolean) {
+fun ZigToolchain.render(component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
-    return provider.render(this, component, isSuggestion)
+    return provider.render(this, component, isSuggestion, isSelected)
 }

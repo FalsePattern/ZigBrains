@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.toolchain.ToolchainListChangeListener
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.createNamedConfigurable
@@ -62,7 +63,7 @@ import javax.swing.JComponent
 import javax.swing.event.DocumentEvent
 import javax.swing.tree.DefaultTreeModel
 
-class ZigToolchainListEditor : MasterDetailsComponent(), ZigToolchainListService.ToolchainListChangeListener {
+class ZigToolchainListEditor : MasterDetailsComponent(), ToolchainListChangeListener {
     private var isTreeInitialized = false
     private var registered: Boolean = false
     private var itemSelectedListeners = ArrayList<Consumer<UUID?>>()

@@ -36,7 +36,7 @@ import java.util.UUID
     name = "ZigToolchainList",
     storages = [Storage("zigbrains.xml")]
 )
-class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchainListService.State>(State()), ZigToolchainListService.IService {
+class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchainListService.State>(State()), IZigToolchainListService {
     private val changeListeners = ArrayList<WeakReference<ToolchainListChangeListener>>()
 
     override val toolchains: Sequence<Pair<UUID, ZigToolchain>>
@@ -133,22 +133,22 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
 
     companion object {
         @JvmStatic
-        fun getInstance(): IService = service<ZigToolchainListService>()
+        fun getInstance(): IZigToolchainListService = service<ZigToolchainListService>()
     }
+}
 
-    sealed interface IService {
-        val toolchains: Sequence<Pair<UUID, ZigToolchain>>
-        fun setToolchain(uuid: UUID, toolchain: ZigToolchain)
-        fun registerNewToolchain(toolchain: ZigToolchain): UUID
-        fun getToolchain(uuid: UUID): ZigToolchain?
-        fun hasToolchain(uuid: UUID): Boolean
-        fun removeToolchain(uuid: UUID)
-        fun addChangeListener(listener: ToolchainListChangeListener)
-        fun removeChangeListener(listener: ToolchainListChangeListener)
-    }
+@FunctionalInterface
+interface ToolchainListChangeListener {
+    suspend fun toolchainListChanged()
+}
 
-    @FunctionalInterface
-    interface ToolchainListChangeListener {
-        suspend fun toolchainListChanged()
-    }
+sealed interface IZigToolchainListService {
+    val toolchains: Sequence<Pair<UUID, ZigToolchain>>
+    fun setToolchain(uuid: UUID, toolchain: ZigToolchain)
+    fun registerNewToolchain(toolchain: ZigToolchain): UUID
+    fun getToolchain(uuid: UUID): ZigToolchain?
+    fun hasToolchain(uuid: UUID): Boolean
+    fun removeToolchain(uuid: UUID)
+    fun addChangeListener(listener: ToolchainListChangeListener)
+    fun removeChangeListener(listener: ToolchainListChangeListener)
 }

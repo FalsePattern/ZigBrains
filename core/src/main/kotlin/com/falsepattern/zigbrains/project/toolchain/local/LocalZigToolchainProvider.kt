@@ -116,24 +116,33 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
         return res.mapNotNull { LocalZigToolchain.tryFromPathString(it) }
     }
 
-    override fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean) {
+    override fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {
         toolchain as LocalZigToolchain
-        val path = presentDetectedPath(toolchain.location.pathString)
         val name = toolchain.name
+        val path = presentDetectedPath(toolchain.location.pathString)
         val primary: String
         val secondary: String?
+        val tooltip: String?
         if (isSuggestion) {
             primary = path
             secondary = name
+            tooltip = null
         } else {
             primary = name ?: "Zig"
-            secondary = path
+            if (isSelected) {
+                secondary = null
+                tooltip = path
+            } else {
+                secondary = path
+                tooltip = null
+            }
         }
         component.append(primary)
         if (secondary != null) {
             component.append(" ")
             component.append(secondary, SimpleTextAttributes.GRAYED_ATTRIBUTES)
         }
+        component.toolTipText = tooltip
     }
 }
 

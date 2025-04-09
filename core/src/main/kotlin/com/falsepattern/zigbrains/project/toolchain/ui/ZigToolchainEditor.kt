@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.toolchain.ToolchainListChangeListener
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.project.toolchain.base.createNamedConfigurable
@@ -48,7 +49,7 @@ import java.util.UUID
 import javax.swing.JButton
 import kotlin.collections.addAll
 
-class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubConfigurable<Project>, ZigToolchainListService.ToolchainListChangeListener {
+class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubConfigurable<Project>, ToolchainListChangeListener {
     private val toolchainBox: TCComboBox
     private var selectOnNextReload: UUID? = null
     private val model: TCModel
