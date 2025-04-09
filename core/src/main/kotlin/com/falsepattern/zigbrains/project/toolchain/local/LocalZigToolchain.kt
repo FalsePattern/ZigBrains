@@ -32,6 +32,7 @@ import com.intellij.openapi.util.KeyWithDefaultValue
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.toNioPathOrNull
+import com.intellij.util.text.SemVer
 import java.nio.file.Path
 
 @JvmRecord
@@ -66,22 +67,27 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, override
             }
         }
 
-        fun tryFromPathString(pathStr: String?): LocalZigToolchain? {
+        fun tryFromPathString(pathStr: String?): Pair<SemVer?, LocalZigToolchain>? {
             return pathStr?.ifBlank { null }?.toNioPathOrNull()?.let(::tryFromPath)
         }
 
-        fun tryFromPath(path: Path): LocalZigToolchain? {
+        fun tryFromPath(path: Path): Pair<SemVer?, LocalZigToolchain>? {
             var tc = LocalZigToolchain(path)
             if (!tc.zig.fileValid()) {
                 return null
             }
-            tc.zig
+            val versionStr = tc.zig
                 .getEnvBlocking(null)
                 .getOrNull()
                 ?.version
-                ?.let { "Zig $it" }
-                ?.let { tc = tc.copy(name = it) }
-            return tc
+            val version: SemVer?
+            if (versionStr != null) {
+                version = SemVer.parseFromText(versionStr)
+                tc = tc.copy(name = "Zig $versionStr")
+            } else {
+                version = null
+            }
+            return version to tc
         }
     }
 }

@@ -52,7 +52,7 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
     private val toolchainBox: TCComboBox
     private var selectOnNextReload: UUID? = null
     private val model: TCModel
-    private lateinit var editButton: JButton
+    private var editButton: JButton? = null
     init {
         model = TCModel(getModelList())
         toolchainBox = TCComboBox(model)
@@ -60,15 +60,21 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
         ZigToolchainListService.getInstance().addChangeListener(this)
     }
 
+    private fun refreshButtonState(item: Any?) {
+        editButton?.isEnabled = item is TCListElem.Toolchain.Actual
+        editButton?.repaint()
+    }
+
     private fun itemStateChanged(event: ItemEvent) {
         if (event.stateChange != ItemEvent.SELECTED) {
             return
         }
         val item = event.item
+        refreshButtonState(item)
         if (item !is TCListElem.Pseudo)
             return
         zigCoroutineScope.launch(toolchainBox.asContextElement()) {
-            val uuid = ZigToolchainComboBoxHandler.onItemSelected(toolchainBox, item)
+            val uuid = runCatching { ZigToolchainComboBoxHandler.onItemSelected(toolchainBox, item) }.getOrNull()
             withEDTContext(toolchainBox.asContextElement()) {
                 applyUUIDNowOrOnReload(uuid)
             }
@@ -105,10 +111,6 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
             }
             model.selectedItem = TCListElem.None
         }
-        withContext(Dispatchers.EDT + editButton.asContextElement()) {
-            editButton.isEnabled = model.selectedItem is TCListElem.Toolchain.Actual
-            editButton.repaint()
-        }
     }
 
     override fun attach(p: Panel): Unit = with(p) {
@@ -129,7 +131,10 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
                         applyUUIDNowOrOnReload(selectedUUID)
                     }
                 }
-            }.component.let { editButton = it }
+            }.component.let {
+                editButton = it
+                refreshButtonState(toolchainBox.selectedItem)
+            }
         }
     }
 
@@ -154,6 +159,7 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
     override fun reset(context: Project?) {
         val project = context ?: ProjectManager.getInstance().defaultProject
         toolchainBox.selectedToolchain = ZigToolchainService.getInstance(project).toolchainUUID
+        refreshButtonState(toolchainBox.selectedItem)
     }
 
     override fun dispose() {

@@ -37,6 +37,7 @@ import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.EnvironmentUtil
 import com.intellij.util.system.OS
+import com.intellij.util.text.SemVer
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -97,7 +98,7 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
         return LocalZigToolchainConfigurable(uuid, toolchain)
     }
 
-    override fun suggestToolchains(): List<ZigToolchain> {
+    override fun suggestToolchains(): List<Pair<SemVer?, ZigToolchain>> {
         val res = HashSet<String>()
         EnvironmentUtil.getValue("PATH")?.split(File.pathSeparatorChar)?.let { res.addAll(it.toList()) }
         val wellKnown = getWellKnown()

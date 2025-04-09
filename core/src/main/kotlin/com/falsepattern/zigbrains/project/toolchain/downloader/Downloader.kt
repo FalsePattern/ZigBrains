@@ -74,7 +74,7 @@ object Downloader {
         ) {
             version.downloadAndUnpack(downloadPath)
         }
-        return LocalZigToolchain.tryFromPath(downloadPath)
+        return LocalZigToolchain.tryFromPath(downloadPath)?.second
     }
 
     @RequiresEdt

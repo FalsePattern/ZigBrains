@@ -25,9 +25,9 @@ package com.falsepattern.zigbrains.project.toolchain.base
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.ui.SimpleColoredComponent
+import com.intellij.util.text.SemVer
 import java.util.UUID
 
 private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainProvider>("com.falsepattern.zigbrains.toolchainProvider")
@@ -41,7 +41,7 @@ internal interface ZigToolchainProvider {
     fun serialize(toolchain: ZigToolchain): Map<String, String>
     fun matchesSuggestion(toolchain: ZigToolchain, suggestion: ZigToolchain): Boolean
     fun createConfigurable(uuid: UUID, toolchain: ZigToolchain): ZigToolchainConfigurable<*>
-    fun suggestToolchains(): List<ZigToolchain>
+    fun suggestToolchains(): List<Pair<SemVer?, ZigToolchain>>
     fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean)
 }
 
@@ -71,8 +71,8 @@ fun suggestZigToolchains(): List<ZigToolchain> {
     return EXTENSION_POINT_NAME.extensionList.flatMap { ext ->
         val compatibleExisting = existing.filter { ext.isCompatible(it) }
         val suggestions = ext.suggestToolchains()
-        suggestions.filter { suggestion -> compatibleExisting.none { existing -> ext.matchesSuggestion(existing, suggestion) } }
-    }
+        suggestions.filter { suggestion -> compatibleExisting.none { existing -> ext.matchesSuggestion(existing, suggestion.second) } }
+    }.sortedByDescending { it.first }.map { it.second }
 }
 
 fun ZigToolchain.render(component: SimpleColoredComponent, isSuggestion: Boolean) {
