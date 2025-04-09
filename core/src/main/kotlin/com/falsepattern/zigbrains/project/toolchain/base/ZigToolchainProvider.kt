@@ -23,11 +23,14 @@
 package com.falsepattern.zigbrains.project.toolchain.base
 
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.ui.SimpleColoredComponent
 import com.intellij.util.text.SemVer
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import java.util.UUID
 
 private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainProvider>("com.falsepattern.zigbrains.toolchainProvider")
@@ -41,7 +44,7 @@ internal interface ZigToolchainProvider {
     fun serialize(toolchain: ZigToolchain): Map<String, String>
     fun matchesSuggestion(toolchain: ZigToolchain, suggestion: ZigToolchain): Boolean
     fun createConfigurable(uuid: UUID, toolchain: ZigToolchain): ZigToolchainConfigurable<*>
-    fun suggestToolchains(): List<Pair<SemVer?, ZigToolchain>>
+    fun suggestToolchains(): List<Deferred<ZigToolchain>>
     fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean)
 }
 
@@ -66,13 +69,22 @@ fun ZigToolchain.createNamedConfigurable(uuid: UUID): ZigToolchainConfigurable<*
     return provider.createConfigurable(uuid, this)
 }
 
-fun suggestZigToolchains(): List<ZigToolchain> {
+fun suggestZigToolchains(): List<Deferred<ZigToolchain>> {
     val existing = ZigToolchainListService.getInstance().toolchains.map { (_, tc) -> tc }.toList()
     return EXTENSION_POINT_NAME.extensionList.flatMap { ext ->
         val compatibleExisting = existing.filter { ext.isCompatible(it) }
         val suggestions = ext.suggestToolchains()
-        suggestions.filter { suggestion -> compatibleExisting.none { existing -> ext.matchesSuggestion(existing, suggestion.second) } }
-    }.sortedByDescending { it.first }.map { it.second }
+        suggestions.map { suggestion ->
+            zigCoroutineScope.async {
+                val sugg = suggestion.await()
+                if (compatibleExisting.none { existing -> ext.matchesSuggestion(existing, sugg) }) {
+                    sugg
+                } else {
+                    throw IllegalArgumentException()
+                }
+            }
+        }
+    }
 }
 
 fun ZigToolchain.render(component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {

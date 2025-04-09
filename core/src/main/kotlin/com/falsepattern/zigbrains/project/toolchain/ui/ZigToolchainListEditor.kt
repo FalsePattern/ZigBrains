@@ -34,6 +34,7 @@ import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.Presentation
+import com.intellij.openapi.observable.util.whenListChanged
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.ui.MasterDetailsComponent
 import com.intellij.util.IconUtil
@@ -65,10 +66,13 @@ class ZigToolchainListEditor : MasterDetailsComponent(), ToolchainListChangeList
                 val modelList = ArrayList<TCListElemIn>()
                 modelList.addAll(TCListElem.fetchGroup)
                 modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))
-                modelList.addAll(suggestZigToolchains().map { it.asSuggested() })
-                val model = TCModel.Companion(modelList)
+                modelList.addAll(suggestZigToolchains().map { it.asPending() })
+                val model = TCModel(modelList)
                 val context = TCContext(null, model)
                 val popup = TCComboBoxPopup(context, null, ::onItemSelected)
+                model.whenListChanged {
+                    popup.syncWithModelChange()
+                }
                 popup.showInBestPositionFor(e.dataContext)
             }
         }

@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains.project.toolchain.local
 
-import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
@@ -32,8 +31,9 @@ import com.intellij.openapi.util.KeyWithDefaultValue
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.toNioPathOrNull
-import com.intellij.util.text.SemVer
+import kotlinx.coroutines.delay
 import java.nio.file.Path
+import kotlin.random.Random
 
 @JvmRecord
 data class LocalZigToolchain(val location: Path, val std: Path? = null, override val name: String? = null): ZigToolchain {
@@ -54,6 +54,10 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, override
         return location.resolve(exeName)
     }
 
+    override fun withName(newName: String?): LocalZigToolchain {
+        return this.copy(name = newName)
+    }
+
     companion object {
         val DIRENV_KEY = KeyWithDefaultValue.create<Boolean>("ZIG_LOCAL_DIRENV")
 
@@ -67,27 +71,23 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, override
             }
         }
 
-        fun tryFromPathString(pathStr: String?): Pair<SemVer?, LocalZigToolchain>? {
-            return pathStr?.ifBlank { null }?.toNioPathOrNull()?.let(::tryFromPath)
+        suspend fun tryFromPathString(pathStr: String?): LocalZigToolchain? {
+            return pathStr?.ifBlank { null }?.toNioPathOrNull()?.let { tryFromPath(it) }
         }
 
-        fun tryFromPath(path: Path): Pair<SemVer?, LocalZigToolchain>? {
+        suspend fun tryFromPath(path: Path): LocalZigToolchain? {
             var tc = LocalZigToolchain(path)
             if (!tc.zig.fileValid()) {
                 return null
             }
             val versionStr = tc.zig
-                .getEnvBlocking(null)
+                .getEnv(null)
                 .getOrNull()
                 ?.version
-            val version: SemVer?
             if (versionStr != null) {
-                version = SemVer.parseFromText(versionStr)
                 tc = tc.copy(name = "Zig $versionStr")
-            } else {
-                version = null
             }
-            return version to tc
+            return tc
         }
     }
 }

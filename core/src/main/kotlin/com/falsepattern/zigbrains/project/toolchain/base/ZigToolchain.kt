@@ -43,6 +43,11 @@ interface ZigToolchain {
 
     fun pathToExecutable(toolName: String, project: Project? = null): Path
 
+    /**
+     * Returned object must be the same class.
+     */
+    fun withName(newName: String?): ZigToolchain
+
     data class Ref(
         @JvmField
         @Attribute

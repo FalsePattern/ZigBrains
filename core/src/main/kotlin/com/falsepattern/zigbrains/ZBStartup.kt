@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains
 
-import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchain
 import com.intellij.ide.BrowserUtil

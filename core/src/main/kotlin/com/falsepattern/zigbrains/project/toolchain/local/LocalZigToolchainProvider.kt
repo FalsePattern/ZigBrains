@@ -22,13 +22,12 @@
 
 package com.falsepattern.zigbrains.project.toolchain.local
 
-import com.falsepattern.zigbrains.direnv.DirenvCmd
-import com.falsepattern.zigbrains.direnv.emptyEnv
+import com.falsepattern.zigbrains.direnv.Env
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.io.toNioPathOrNull
@@ -37,7 +36,8 @@ import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.EnvironmentUtil
 import com.intellij.util.system.OS
-import com.intellij.util.text.SemVer
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -53,7 +53,7 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
 //        } else {
 //            emptyEnv
 //        }
-        val env = emptyEnv
+        val env = Env.empty
         val zigExePath = env.findExecutableOnPATH("zig") ?: return null
         return LocalZigToolchain(zigExePath.parent)
     }
@@ -98,7 +98,7 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
         return LocalZigToolchainConfigurable(uuid, toolchain)
     }
 
-    override fun suggestToolchains(): List<Pair<SemVer?, ZigToolchain>> {
+    override fun suggestToolchains(): List<Deferred<ZigToolchain>> {
         val res = HashSet<String>()
         EnvironmentUtil.getValue("PATH")?.split(File.pathSeparatorChar)?.let { res.addAll(it.toList()) }
         val wellKnown = getWellKnown()
@@ -113,7 +113,7 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
                 }
             }
         }
-        return res.mapNotNull { LocalZigToolchain.tryFromPathString(it) }
+        return res.map { zigCoroutineScope.async { LocalZigToolchain.tryFromPathString(it) ?: throw IllegalArgumentException() } }
     }
 
     override fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {

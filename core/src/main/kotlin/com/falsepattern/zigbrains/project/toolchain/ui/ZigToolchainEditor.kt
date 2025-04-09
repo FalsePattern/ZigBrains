@@ -184,10 +184,10 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
 private fun getModelList(): List<TCListElemIn> {
     val modelList = ArrayList<TCListElemIn>()
     modelList.add(TCListElem.None)
-    modelList.addAll(ZigToolchainListService.getInstance().toolchains.map { it.asActual() })
+    modelList.addAll(ZigToolchainListService.getInstance().toolchains.map { it.asActual() }.sortedBy { it.toolchain.name })
     modelList.add(Separator("", true))
     modelList.addAll(TCListElem.fetchGroup)
     modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))
-    modelList.addAll(suggestZigToolchains().map { it.asSuggested() })
+    modelList.addAll(suggestZigToolchains().map { it.asPending() })
     return modelList
 }

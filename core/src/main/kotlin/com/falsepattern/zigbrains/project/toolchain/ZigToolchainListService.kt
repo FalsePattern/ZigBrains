@@ -109,6 +109,18 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
         }
     }
 
+    override fun <T: ZigToolchain> withUniqueName(toolchain: T): T {
+        val baseName = toolchain.name ?: ""
+        var index = 0
+        var currentName = baseName
+        while (toolchains.any { (_, existing) -> existing.name == currentName }) {
+            index++
+            currentName = "$baseName ($index)"
+        }
+        @Suppress("UNCHECKED_CAST")
+        return toolchain.withName(currentName) as T
+    }
+
     private fun notifyChanged() {
         synchronized(changeListeners) {
             var i = 0
@@ -151,4 +163,5 @@ sealed interface IZigToolchainListService {
     fun removeToolchain(uuid: UUID)
     fun addChangeListener(listener: ToolchainListChangeListener)
     fun removeChangeListener(listener: ToolchainListChangeListener)
+    fun <T: ZigToolchain> withUniqueName(toolchain: T): T
 }

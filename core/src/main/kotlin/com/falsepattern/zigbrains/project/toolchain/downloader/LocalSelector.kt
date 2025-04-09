@@ -28,12 +28,19 @@ import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
+import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.runInterruptibleEDT
+import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.Disposer
+import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.platform.ide.progress.TaskCancellation
+import com.intellij.platform.ide.progress.withModalProgress
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
@@ -42,17 +49,19 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import java.awt.Component
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.event.DocumentEvent
+import kotlin.io.path.pathString
 
 object LocalSelector {
-    suspend fun browseFromDisk(component: Component): ZigToolchain? {
-        return runInterruptibleEDT(component.asContextElement()) {
-            doBrowseFromDisk()
+    suspend fun browseFromDisk(component: Component, preSelected: LocalZigToolchain? = null): ZigToolchain? {
+        return withEDTContext(component.asContextElement()) {
+            doBrowseFromDisk(component, preSelected)
         }
     }
 
     @RequiresEdt
-    private fun doBrowseFromDisk(): ZigToolchain? {
+    private suspend fun doBrowseFromDisk(component: Component, preSelected: LocalZigToolchain?): ZigToolchain? {
         val dialog = DialogBuilder()
         val name = JBTextField().also { it.columns = 25 }
         val path = textFieldWithBrowseButton(
@@ -62,26 +71,31 @@ object LocalSelector {
         )
         Disposer.register(dialog, path)
         lateinit var errorMessageBox: JBLabel
-        fun verify(path: String) {
-            val tc = LocalZigToolchain.tryFromPathString(path)?.second
+        fun verify(tc: LocalZigToolchain?) {
+            var tc = tc
             if (tc == null) {
                 errorMessageBox.icon = AllIcons.General.Error
                 errorMessageBox.text = ZigBrainsBundle.message("settings.toolchain.local-selector.state.invalid")
                 dialog.setOkActionEnabled(false)
-            } else if (ZigToolchainListService
+            } else {
+                val existingToolchain = ZigToolchainListService
                     .getInstance()
                     .toolchains
                     .mapNotNull { it.second as? LocalZigToolchain }
-                    .any { it.location == tc.location }
-            ) {
-                errorMessageBox.icon = AllIcons.General.Warning
-                errorMessageBox.text = tc.name?.let { ZigBrainsBundle.message("settings.toolchain.local-selector.state.already-exists-named", it) }
-                                       ?: ZigBrainsBundle.message("settings.toolchain.local-selector.state.already-exists-unnamed")
-                dialog.setOkActionEnabled(true)
-            } else {
-                errorMessageBox.icon = AllIcons.General.Information
-                errorMessageBox.text = ZigBrainsBundle.message("settings.toolchain.local-selector.state.ok")
-                dialog.setOkActionEnabled(true)
+                    .firstOrNull { it.location == tc.location }
+                if (existingToolchain != null) {
+                    errorMessageBox.icon = AllIcons.General.Warning
+                    errorMessageBox.text = existingToolchain.name?.let { ZigBrainsBundle.message("settings.toolchain.local-selector.state.already-exists-named", it) }
+                        ?: ZigBrainsBundle.message("settings.toolchain.local-selector.state.already-exists-unnamed")
+                    dialog.setOkActionEnabled(true)
+                } else {
+                    errorMessageBox.icon = AllIcons.General.Information
+                    errorMessageBox.text = ZigBrainsBundle.message("settings.toolchain.local-selector.state.ok")
+                    dialog.setOkActionEnabled(true)
+                }
+            }
+            if (tc != null) {
+                tc = ZigToolchainListService.getInstance().withUniqueName(tc)
             }
             val prevNameDefault = name.emptyText.text.trim() == name.text.trim() || name.text.isBlank()
             name.emptyText.text = tc?.name ?: ""
@@ -89,9 +103,20 @@ object LocalSelector {
                 name.text = name.emptyText.text
             }
         }
+        suspend fun verify(path: String) {
+            val tc = runCatching { withModalProgress(ModalTaskOwner.component(component), "Resolving toolchain", TaskCancellation.cancellable()) {
+                LocalZigToolchain.tryFromPathString(path)
+            } }.getOrNull()
+            verify(tc)
+        }
+        val active = AtomicBoolean(false)
         path.addDocumentListener(object: DocumentAdapter() {
             override fun textChanged(e: DocumentEvent) {
-                verify(path.text)
+                if (!active.get())
+                    return
+                zigCoroutineScope.launchWithEDT(ModalityState.current()) {
+                    verify(path.text)
+                }
             }
         })
         val center = panel {
@@ -110,19 +135,29 @@ object LocalSelector {
         dialog.setTitle(ZigBrainsBundle.message("settings.toolchain.local-selector.title"))
         dialog.addCancelAction()
         dialog.addOkAction().also { it.setText(ZigBrainsBundle.message("settings.toolchain.local-selector.ok-action")) }
-        val chosenFile = FileChooser.chooseFile(
-            FileChooserDescriptorFactory.createSingleFolderDescriptor()
-                .withTitle(ZigBrainsBundle.message("settings.toolchain.local-selector.chooser.title")),
-            null,
-            null
-        )
-        if (chosenFile != null) {
-            verify(chosenFile.path)
-            path.text = chosenFile.path
+        if (preSelected == null) {
+            val chosenFile = FileChooser.chooseFile(
+                FileChooserDescriptorFactory.createSingleFolderDescriptor()
+                    .withTitle(ZigBrainsBundle.message("settings.toolchain.local-selector.chooser.title")),
+                null,
+                null
+            )
+            if (chosenFile != null) {
+                verify(chosenFile.path)
+                path.text = chosenFile.path
+            }
+        } else {
+            verify(preSelected)
+            path.text = preSelected.location.pathString
         }
+        active.set(true)
         if (!dialog.showAndGet()) {
+            active.set(false)
             return null
         }
-        return LocalZigToolchain.tryFromPathString(path.text)?.second?.also { it.copy(name = name.text.ifBlank { null } ?: it.name) }
+        active.set(false)
+        return runCatching { withModalProgress(ModalTaskOwner.component(component), "Resolving toolchain", TaskCancellation.cancellable()) {
+            LocalZigToolchain.tryFromPathString(path.text)?.let { it.withName(name.text.ifBlank { null } ?: it.name) }
+        } }.getOrNull()
     }
 }

@@ -34,6 +34,7 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
 
+@JvmRecord
 data class Env(val env: Map<String, String>) {
     private val path get() = getVariable("PATH")?.split(File.pathSeparatorChar)
 
@@ -55,6 +56,8 @@ data class Env(val env: Map<String, String>) {
             emit(exePath)
         }
     }
-}
 
-val emptyEnv = Env(emptyMap())
+    companion object {
+        val empty = Env(emptyMap())
+    }
+}

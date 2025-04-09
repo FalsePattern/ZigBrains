@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains.project.execution.base
 
-import com.falsepattern.zigbrains.direnv.DirenvCmd
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory

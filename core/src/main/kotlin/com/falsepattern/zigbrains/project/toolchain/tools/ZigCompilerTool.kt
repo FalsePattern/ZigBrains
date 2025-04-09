@@ -45,8 +45,6 @@ class ZigCompilerTool(toolchain: ZigToolchain) : ZigTool(toolchain) {
             Result.failure(IllegalStateException("could not deserialize zig env", e))
         }
     }
-
-    fun getEnvBlocking(project: Project?) = runBlocking { getEnv(project) }
 }
 
 private val envJson = Json {

@@ -74,7 +74,7 @@ object Downloader {
         ) {
             version.downloadAndUnpack(downloadPath)
         }
-        return LocalZigToolchain.tryFromPath(downloadPath)?.second
+        return LocalZigToolchain.tryFromPath(downloadPath)?.let { LocalSelector.browseFromDisk(component, it) }
     }
 
     @RequiresEdt

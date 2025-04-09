@@ -22,7 +22,7 @@
 
 package com.falsepattern.zigbrains.shared.ipc
 
-import com.falsepattern.zigbrains.direnv.emptyEnv
+import com.falsepattern.zigbrains.direnv.Env
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.FileUtil
@@ -56,7 +56,7 @@ object IPCUtil {
         if (SystemInfo.isWindows) {
             return null
         }
-        val mkfifo = emptyEnv
+        val mkfifo = Env.empty
             .findAllExecutablesOnPATH("mkfifo")
             .map { it.pathString }
             .map(::MKFifo)
@@ -67,7 +67,7 @@ object IPCUtil {
                 true
             } ?: return null
 
-        val selectedBash = emptyEnv
+        val selectedBash = Env.empty
             .findAllExecutablesOnPATH("bash")
             .map { it.pathString }
             .filter {

@@ -23,6 +23,10 @@
 package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 
@@ -41,6 +45,7 @@ internal sealed interface TCListElem : TCListElemIn {
     object None: TCListElem
     object Download : TCListElem, Pseudo
     object FromDisk : TCListElem, Pseudo
+    data class Pending(val elem: Deferred<TCListElem>): TCListElem
 
     companion object {
         val fetchGroup get() = listOf(Download, FromDisk)
@@ -53,3 +58,5 @@ internal data class Separator(val text: String, val line: Boolean) : TCListElemI
 internal fun Pair<UUID, ZigToolchain>.asActual() = TCListElem.Toolchain.Actual(first, second)
 
 internal fun ZigToolchain.asSuggested() = TCListElem.Toolchain.Suggested(this)
+
+internal fun Deferred<ZigToolchain>.asPending() = TCListElem.Pending(zigCoroutineScope.async { this@asPending.await().asSuggested() })

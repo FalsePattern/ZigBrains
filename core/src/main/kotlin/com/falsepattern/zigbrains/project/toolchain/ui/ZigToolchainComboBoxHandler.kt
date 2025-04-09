@@ -32,7 +32,7 @@ import java.util.UUID
 internal object ZigToolchainComboBoxHandler {
     @RequiresBackgroundThread
     suspend fun onItemSelected(context: Component, elem: TCListElem.Pseudo): UUID? = when(elem) {
-        is TCListElem.Toolchain.Suggested -> elem.toolchain
+        is TCListElem.Toolchain.Suggested -> ZigToolchainListService.getInstance().withUniqueName(elem.toolchain)
         is TCListElem.Download -> Downloader.downloadToolchain(context)
         is TCListElem.FromDisk -> LocalSelector.browseFromDisk(context)
     }?.let { ZigToolchainListService.getInstance().registerNewToolchain(it) }
