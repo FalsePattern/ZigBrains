@@ -27,6 +27,7 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
+import java.util.ArrayList
 import javax.swing.JComponent
 
 interface SubConfigurable<T>: Disposable {
@@ -38,40 +39,56 @@ interface SubConfigurable<T>: Disposable {
     val newProjectBeforeInitSelector: Boolean get() = false
 
     abstract class Adapter<T>: Configurable {
-        private var myConfigurable: SubConfigurable<T>? = null
+        private val myConfigurables: MutableList<SubConfigurable<T>> = ArrayList()
 
-        abstract fun instantiate(): SubConfigurable<T>
+        abstract fun instantiate(): List<SubConfigurable<T>>
         protected abstract val context: T
 
         override fun createComponent(): JComponent? {
-            if (myConfigurable != null) {
-                disposeUIResources()
+            val configurables: List<SubConfigurable<T>>
+            synchronized(myConfigurables) {
+                if (myConfigurables.isEmpty()) {
+                    disposeConfigurables()
+                }
+                configurables = instantiate()
+                configurables.forEach { it.reset(context) }
+                myConfigurables.clear()
+                myConfigurables.addAll(configurables)
             }
-            val configurable = instantiate()
-            configurable.reset(context)
-            myConfigurable = configurable
             return panel {
-                configurable.attach(this)
+                configurables.forEach { it.attach(this) }
             }
         }
 
         override fun isModified(): Boolean {
-            return myConfigurable?.isModified(context) == true
+            synchronized(myConfigurables) {
+                return myConfigurables.any { it.isModified(context) }
+            }
         }
 
         override fun apply() {
-            myConfigurable?.apply(context)
+            synchronized(myConfigurables) {
+                myConfigurables.forEach { it.apply(context) }
+            }
         }
 
         override fun reset() {
-            myConfigurable?.reset(context)
+            synchronized(myConfigurables) {
+                myConfigurables.forEach { it.reset(context) }
+            }
         }
 
         override fun disposeUIResources() {
-            val configurable = myConfigurable
-            myConfigurable = null
-            configurable?.let { Disposer.dispose(it) }
+            synchronized(myConfigurables) {
+                disposeConfigurables()
+            }
             super.disposeUIResources()
+        }
+
+        private fun disposeConfigurables() {
+            val configurables = ArrayList(myConfigurables)
+            myConfigurables.clear()
+            configurables.forEach { Disposer.dispose(it) }
         }
     }
 }

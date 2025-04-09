@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.ToolchainListChangeListener
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
@@ -169,9 +170,13 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
 
     override val newProjectBeforeInitSelector get() = true
 
-    class Adapter(override val context: Project): SubConfigurable.Adapter<Project>() {
-        override fun instantiate() = ZigToolchainEditor(context.isDefault)
-        override fun getDisplayName() = ZigBrainsBundle.message("settings.toolchain.editor.display-name")
+    class Provider: ZigProjectConfigurationProvider {
+        override fun create(project: Project?): SubConfigurable<Project>? {
+            return ZigToolchainEditor(project?.isDefault ?: false).also { it.reset(project) }
+        }
+
+        override val index: Int get() = 0
+
     }
 }
 

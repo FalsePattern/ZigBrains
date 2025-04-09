@@ -150,6 +150,20 @@ fun getSuggestedLocalToolchainPath(): Path? {
     return getWellKnown().getOrNull(0)
 }
 
+/**
+ * Returns the paths to the following list of folders:
+ *
+ * 1. DATA/zig
+ * 2. DATA/zigup
+ * 3. HOME/.zig
+ *
+ * Where DATA is:
+ *  - ~/Library on macOS
+ *  - %LOCALAPPDATA% on Windows
+ *  - $XDG_DATA_HOME (or ~/.local/share if not set) on other OSes
+ *
+ * and HOME is the user home path
+ */
 private fun getWellKnown(): List<Path> {
     val home = System.getProperty("user.home")?.toNioPathOrNull() ?: return emptyList()
     val xdgDataHome = when(OS.CURRENT) {

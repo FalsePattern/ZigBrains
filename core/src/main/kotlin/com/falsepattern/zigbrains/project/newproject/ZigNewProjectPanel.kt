@@ -41,7 +41,7 @@ import javax.swing.ListSelectionModel
 
 class ZigNewProjectPanel(private var handleGit: Boolean): Disposable {
     private val git = JBCheckBox()
-    val panels = ZigProjectConfigurationProvider.createNewProjectSettingsPanels().onEach { Disposer.register(this, it) }
+    val panels = ZigProjectConfigurationProvider.createPanels(null).onEach { Disposer.register(this, it) }
     private val templateList = JBList(JBList.createDefaultListModel(defaultTemplates)).apply {
         selectionMode = ListSelectionModel.SINGLE_SELECTION
         selectedIndex = 0

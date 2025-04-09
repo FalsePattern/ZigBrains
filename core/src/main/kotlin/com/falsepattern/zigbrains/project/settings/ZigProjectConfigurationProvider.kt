@@ -24,24 +24,15 @@ package com.falsepattern.zigbrains.project.settings
 
 import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.extensions.ExtensionPointName
-import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 
 interface ZigProjectConfigurationProvider {
-    fun handleMainConfigChanged(project: Project)
-    fun createConfigurable(project: Project): Configurable
-    fun createNewProjectSettingsPanel(): SubConfigurable<Project>?
-    val priority: Int
+    fun create(project: Project?): SubConfigurable<Project>?
+    val index: Int
     companion object {
         private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigProjectConfigurationProvider>("com.falsepattern.zigbrains.projectConfigProvider")
-        fun mainConfigChanged(project: Project) {
-            EXTENSION_POINT_NAME.extensionList.forEach { it.handleMainConfigChanged(project) }
-        }
-        fun createConfigurables(project: Project): List<Configurable> {
-            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.map { it.createConfigurable(project) }
-        }
-        fun createNewProjectSettingsPanels(): List<SubConfigurable<Project>> {
-            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.priority }.mapNotNull { it.createNewProjectSettingsPanel() }
+        fun createPanels(project: Project?): List<SubConfigurable<Project>> {
+            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.index }.mapNotNull { it.create(project) }
         }
     }
 }

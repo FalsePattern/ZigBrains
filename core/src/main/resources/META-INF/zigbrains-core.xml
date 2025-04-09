@@ -140,15 +140,17 @@
         />
         <projectConfigurable
                 parentId="language"
-                instance="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainEditor$Adapter"
+                instance="com.falsepattern.zigbrains.project.settings.ZigConfigurable"
                 id="ZigConfigurable"
-                displayName="Zig"
+                bundle="zigbrains.Bundle"
+                key="settings.project.display-name"
         />
         <applicationConfigurable
                 parentId="ZigConfigurable"
                 instance="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainListEditor"
                 id="ZigToolchainConfigurable"
-                displayName="Toolchain"
+                bundle="zigbrains.Bundle"
+                key="settings.toolchain.list.title"
         />
 
         <programRunner
@@ -186,7 +188,7 @@
                 implementation="com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchainProvider"
         />
         <projectConfigProvider
-                implementation="com.falsepattern.zigbrains.project.settings.ZigCoreProjectConfigurationProvider"
+                implementation="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainEditor$Provider"
         />
     </extensions>
 

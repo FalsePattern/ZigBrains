@@ -22,23 +22,15 @@
 
 package com.falsepattern.zigbrains.project.settings
 
-import com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainEditor
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.shared.SubConfigurable
-import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.NlsContexts
 
-class ZigCoreProjectConfigurationProvider: ZigProjectConfigurationProvider {
-    override fun handleMainConfigChanged(project: Project) {
+class ZigConfigurable(override val context: Project) : SubConfigurable.Adapter<Project>() {
+    override fun instantiate(): List<SubConfigurable<Project>> {
+        return ZigProjectConfigurationProvider.createPanels(context)
     }
 
-    override fun createConfigurable(project: Project): Configurable {
-        return ZigToolchainEditor.Adapter(project)
-    }
-
-    override fun createNewProjectSettingsPanel(): SubConfigurable<Project> {
-        return ZigToolchainEditor().also { it.reset(null) }
-    }
-
-    override val priority: Int
-        get() = 0
+    override fun getDisplayName() = ZigBrainsBundle.message("settings.project.display-name")
 }
