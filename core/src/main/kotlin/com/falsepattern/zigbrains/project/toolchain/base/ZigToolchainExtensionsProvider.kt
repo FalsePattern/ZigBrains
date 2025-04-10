@@ -22,15 +22,17 @@
 
 package com.falsepattern.zigbrains.project.toolchain.base
 
-import com.intellij.openapi.Disposable
-import com.intellij.ui.dsl.builder.Panel
+import com.intellij.openapi.extensions.ExtensionPointName
 
-interface ZigToolchainPanel<T: ZigToolchain>: Disposable {
-    fun attach(p: Panel)
-    fun isModified(toolchain: T): Boolean
-    /**
-     * Returned object must be the exact same class as the provided one.
-     */
-    fun apply(toolchain: T): T?
-    fun reset(toolchain: T)
+private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainExtensionsProvider>("com.falsepattern.zigbrains.toolchainExtensionsProvider")
+
+internal interface ZigToolchainExtensionsProvider {
+    fun <T : ZigToolchain> createExtensionPanel(): ZigToolchainPanel<T>?
+    val index: Int
+}
+
+fun <T: ZigToolchain> createZigToolchainExtensionPanels(): List<ZigToolchainPanel<T>> {
+    return EXTENSION_POINT_NAME.extensionList.sortedBy{ it.index }.mapNotNull {
+        it.createExtensionPanel()
+    }
 }

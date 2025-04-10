@@ -22,15 +22,25 @@
 
 package com.falsepattern.zigbrains.project.toolchain.base
 
+import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.intellij.openapi.Disposable
+import com.intellij.ui.components.JBTextField
+import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.util.preferredHeight
+import java.awt.Dimension
 
-interface ZigToolchainPanel<T: ZigToolchain>: Disposable {
-    fun attach(p: Panel)
-    fun isModified(toolchain: T): Boolean
-    /**
-     * Returned object must be the exact same class as the provided one.
-     */
-    fun apply(toolchain: T): T?
-    fun reset(toolchain: T)
+abstract class ZigToolchainPanelBase<T: ZigToolchain>: ZigToolchainPanel<T> {
+    private val nameField = JBTextField(25)
+
+    protected var nameFieldValue: String?
+        get() = nameField.text.ifBlank { null }
+        set(value) {nameField.text = value ?: ""}
+
+    override fun attach(p: Panel): Unit = with(p) {
+        row(ZigBrainsBundle.message("settings.toolchain.base.name.label")) {
+            cell(nameField).resizableColumn().align(AlignX.FILL)
+        }
+        separator()
+    }
 }

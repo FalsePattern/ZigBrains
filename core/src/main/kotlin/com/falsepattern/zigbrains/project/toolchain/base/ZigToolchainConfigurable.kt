@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains.project.toolchain.base
 
-import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.NlsContexts
@@ -39,19 +38,21 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
             zigToolchainList[uuid] = value
             field = value
         }
-    private var myView: ZigToolchainPanel<T>? = null
+    private var myViews: List<ZigToolchainPanel<T>> = emptyList()
 
     abstract fun createPanel(): ZigToolchainPanel<T>
 
     override fun createOptionsPanel(): JComponent? {
-        var view = myView
-        if (view == null) {
-            view = createPanel()
-            view.reset(toolchain)
-            myView = view
+        var views = myViews
+        if (views.isEmpty()) {
+            views = ArrayList<ZigToolchainPanel<T>>()
+            views.add(createPanel())
+            views.addAll(createZigToolchainExtensionPanels())
+            views.forEach { it.reset(toolchain) }
+            myViews = views
         }
         return panel {
-            view.attach(this)
+            views.forEach { it.attach(this@panel) }
         }.withMinimumWidth(20)
     }
 
@@ -68,20 +69,20 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
     }
 
     override fun isModified(): Boolean {
-        return myView?.isModified(toolchain) == true
+        return myViews.any { it.isModified(toolchain) }
     }
 
     override fun apply() {
-        myView?.apply(toolchain)?.let { toolchain = it }
+        toolchain = myViews.fold(toolchain) { tc, view -> view.apply(tc) ?: tc }
     }
 
     override fun reset() {
-        myView?.reset(toolchain)
+        myViews.forEach { it.reset(toolchain) }
     }
 
     override fun disposeUIResources() {
-        myView?.dispose()
-        myView = null
+        myViews.forEach { it.dispose() }
+        myViews = emptyList()
         super.disposeUIResources()
     }
 }

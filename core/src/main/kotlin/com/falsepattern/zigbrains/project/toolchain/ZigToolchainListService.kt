@@ -26,9 +26,6 @@ import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService.MySt
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.resolve
 import com.falsepattern.zigbrains.project.toolchain.base.toRef
-import com.falsepattern.zigbrains.shared.AccessibleStorage
-import com.falsepattern.zigbrains.shared.ChangeTrackingStorage
-import com.falsepattern.zigbrains.shared.IterableStorage
 import com.falsepattern.zigbrains.shared.UUIDMapSerializable
 import com.falsepattern.zigbrains.shared.UUIDStorage
 import com.intellij.openapi.components.*
@@ -38,25 +35,20 @@ import com.intellij.openapi.components.*
     name = "ZigToolchainList",
     storages = [Storage("zigbrains.xml")]
 )
-class ZigToolchainListService: UUIDMapSerializable.Converting<ZigToolchain, ZigToolchain.Ref, MyState>(MyState()), IZigToolchainListService {
+class ZigToolchainListService: UUIDMapSerializable.Converting<ZigToolchain, ZigToolchain.Ref, MyState>(MyState()) {
     override fun serialize(value: ZigToolchain) = value.toRef()
     override fun deserialize(value: ZigToolchain.Ref) = value.resolve()
     override fun getStorage(state: MyState) = state.toolchains
     override fun updateStorage(state: MyState, storage: ToolchainStorage) = state.copy(toolchains = storage)
 
-    data class MyState(
-        @JvmField
-        val toolchains: ToolchainStorage = emptyMap(),
-    )
+    data class MyState(@JvmField val toolchains: ToolchainStorage = emptyMap())
 
     companion object {
         @JvmStatic
-        fun getInstance(): IZigToolchainListService = service<ZigToolchainListService>()
+        fun getInstance(): ZigToolchainListService = service<ZigToolchainListService>()
     }
 }
 
-inline val zigToolchainList: IZigToolchainListService get() = ZigToolchainListService.getInstance()
-
-sealed interface IZigToolchainListService: ChangeTrackingStorage, AccessibleStorage<ZigToolchain>, IterableStorage<ZigToolchain>
+inline val zigToolchainList: ZigToolchainListService get() = ZigToolchainListService.getInstance()
 
 private typealias ToolchainStorage = UUIDStorage<ZigToolchain.Ref>

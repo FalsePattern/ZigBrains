@@ -23,10 +23,9 @@
 package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainPanel
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainPanelBase
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.util.Disposer
@@ -35,7 +34,6 @@ import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextArea
-import com.intellij.ui.components.JBTextField
 import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
@@ -46,7 +44,7 @@ import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
-class LocalZigToolchainPanel() : ZigToolchainPanel<LocalZigToolchain>() {
+class LocalZigToolchainPanel() : ZigToolchainPanelBase<LocalZigToolchain>() {
     private val pathToToolchain = textFieldWithBrowseButton(
         null,
         FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))
