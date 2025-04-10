@@ -22,7 +22,10 @@
 
 package com.falsepattern.zigbrains.project.toolchain
 
+import com.falsepattern.zigbrains.project.stdlib.ZigSyntheticLibrary
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.SerializablePersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
@@ -30,6 +33,8 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.annotations.Attribute
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 @Service(Service.Level.PROJECT)
@@ -37,7 +42,7 @@ import java.util.UUID
     name = "ZigToolchain",
     storages = [Storage("zigbrains.xml")]
 )
-class ZigToolchainService: SerializablePersistentStateComponent<ZigToolchainService.State>(State()), IZigToolchainService {
+class ZigToolchainService(val project: Project): SerializablePersistentStateComponent<ZigToolchainService.State>(State()), IZigToolchainService {
     override var toolchainUUID: UUID?
         get() = state.toolchain.ifBlank { null }?.let { UUID.fromString(it) }?.takeIf {
             if (ZigToolchainListService.getInstance().hasToolchain(it)) {
@@ -52,6 +57,9 @@ class ZigToolchainService: SerializablePersistentStateComponent<ZigToolchainServ
         set(value) {
             updateState {
                 it.copy(toolchain = value?.toString() ?: "")
+            }
+            zigCoroutineScope.launch(Dispatchers.EDT) {
+                ZigSyntheticLibrary.reload(project, toolchain)
             }
         }
 

@@ -41,8 +41,6 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
         }
     private var myView: ZigToolchainPanel<T>? = null
 
-    var floating: Boolean = false
-
     abstract fun createPanel(): ZigToolchainPanel<T>
 
     override fun createOptionsPanel(): JComponent? {

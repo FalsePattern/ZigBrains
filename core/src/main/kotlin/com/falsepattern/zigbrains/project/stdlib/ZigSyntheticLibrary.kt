@@ -35,6 +35,8 @@ import com.intellij.openapi.vfs.refreshAndFindVirtualDirectory
 import com.intellij.platform.backend.workspace.WorkspaceModel
 import com.intellij.platform.backend.workspace.toVirtualFileUrl
 import com.intellij.platform.workspace.jps.entities.*
+import com.intellij.project.isDirectoryBased
+import com.intellij.project.stateStore
 import com.intellij.workspaceModel.ide.legacyBridge.LegacyBridgeJpsEntitySourceFactory
 import kotlinx.coroutines.runBlocking
 import java.util.*
@@ -75,7 +77,7 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
 
     companion object {
         private const val ZIG_LIBRARY_ID = "Zig SDK"
-        private const val ZIG_MODULE_ID = "Zig"
+        private const val ZIG_MODULE_ID = "ZigBrains"
         suspend fun reload(project: Project, toolchain: ZigToolchain?) {
             val moduleId = ModuleId(ZIG_MODULE_ID)
             val workspaceModel = WorkspaceModel.getInstance(project)
@@ -83,7 +85,15 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
             val libRoot = LibraryRoot(root.toVirtualFileUrl(workspaceModel.getVirtualFileUrlManager()), LibraryRootTypeId.SOURCES)
             val libraryTableId = LibraryTableId.ProjectLibraryTableId
             val libraryId = LibraryId(ZIG_LIBRARY_ID, libraryTableId)
-            val baseModuleDir = project.guessProjectDir()?.toVirtualFileUrl(workspaceModel.getVirtualFileUrlManager()) ?: return
+
+            var baseModuleDirFile: VirtualFile? = null
+            if (project.isDirectoryBased) {
+                baseModuleDirFile = project.stateStore.directoryStorePath?.refreshAndFindVirtualDirectory()
+            }
+            if (baseModuleDirFile == null) {
+                baseModuleDirFile = project.guessProjectDir()
+            }
+            val baseModuleDir = baseModuleDirFile?.toVirtualFileUrl(workspaceModel.getVirtualFileUrlManager()) ?: return
             workspaceModel.update("Update Zig std") { builder ->
                 builder.resolve(moduleId)?.let { moduleEntity ->
                     builder.removeEntity(moduleEntity)
