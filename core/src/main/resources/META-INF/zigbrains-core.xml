@@ -190,6 +190,9 @@
         <projectConfigProvider
                 implementation="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainEditor$Provider"
         />
+        <projectConfigProvider
+                implementation="com.falsepattern.zigbrains.direnv.ui.DirenvEditor$Provider"
+        />
     </extensions>
 
     <actions resource-bundle="zigbrains.ActionsBundle">

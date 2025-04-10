@@ -22,6 +22,8 @@
 
 package com.falsepattern.zigbrains.project.toolchain.local
 
+import com.falsepattern.zigbrains.direnv.DirenvService
+import com.falsepattern.zigbrains.direnv.DirenvState
 import com.falsepattern.zigbrains.direnv.Env
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
@@ -36,8 +38,16 @@ import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.EnvironmentUtil
 import com.intellij.util.system.OS
-import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flattenConcat
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -46,18 +56,6 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString
 
 class LocalZigToolchainProvider: ZigToolchainProvider {
-    override suspend fun suggestToolchain(project: Project?, extraData: UserDataHolder): LocalZigToolchain? {
-        //TODO direnv
-//        val env = if (project != null && (extraData.getUserData(LocalZigToolchain.DIRENV_KEY) ?: project.zigProjectSettings.state.direnv)) {
-//            DirenvCmd.importDirenv(project)
-//        } else {
-//            emptyEnv
-//        }
-        val env = Env.empty
-        val zigExePath = env.findExecutableOnPATH("zig") ?: return null
-        return LocalZigToolchain(zigExePath.parent)
-    }
-
     override val serialMarker: String
         get() = "local"
 
@@ -98,22 +96,25 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
         return LocalZigToolchainConfigurable(uuid, toolchain)
     }
 
-    override fun suggestToolchains(): List<Deferred<ZigToolchain>> {
-        val res = HashSet<String>()
-        EnvironmentUtil.getValue("PATH")?.split(File.pathSeparatorChar)?.let { res.addAll(it.toList()) }
-        val wellKnown = getWellKnown()
-        wellKnown.forEach { dir ->
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun suggestToolchains(project: Project?, direnv: DirenvState): Flow<ZigToolchain> {
+        val env = if (project != null && direnv.isEnabled(project)) {
+            DirenvService.getInstance(project).import()
+        } else {
+            Env.empty
+        }
+        val pathToolchains = env.findAllExecutablesOnPATH("zig").mapNotNull { it.parent }
+        val wellKnown = getWellKnown().asFlow().flatMapConcat { dir ->
             if (!dir.isDirectory())
-                return@forEach
+                return@flatMapConcat emptyFlow<Path>()
             runCatching {
                 Files.newDirectoryStream(dir).use { stream ->
-                    stream.forEach { subDir ->
-                        res.add(subDir.pathString)
-                    }
+                    stream.toList().filterNotNull().asFlow()
                 }
-            }
+            }.getOrElse { emptyFlow() }
         }
-        return res.map { zigCoroutineScope.async { LocalZigToolchain.tryFromPathString(it) ?: throw IllegalArgumentException() } }
+        val joined = flowOf(pathToolchains, wellKnown).flattenConcat()
+        return joined.mapNotNull { LocalZigToolchain.tryFromPath(it) }
     }
 
     override fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {
@@ -121,21 +122,20 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
         val name = toolchain.name
         val path = presentDetectedPath(toolchain.location.pathString)
         val primary: String
-        val secondary: String?
+        var secondary: String?
         val tooltip: String?
         if (isSuggestion) {
             primary = path
             secondary = name
-            tooltip = null
         } else {
             primary = name ?: "Zig"
-            if (isSelected) {
-                secondary = null
-                tooltip = path
-            } else {
-                secondary = path
-                tooltip = null
-            }
+            secondary = path
+        }
+        if (isSelected) {
+            tooltip = secondary
+            secondary = null
+        } else {
+            tooltip = null
         }
         component.append(primary)
         if (secondary != null) {

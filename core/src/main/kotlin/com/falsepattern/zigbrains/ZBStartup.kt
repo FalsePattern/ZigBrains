@@ -22,8 +22,6 @@
 
 package com.falsepattern.zigbrains
 
-import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchain
 import com.intellij.ide.BrowserUtil
 import com.intellij.ide.plugins.PluginManager
 import com.intellij.notification.Notification
@@ -35,10 +33,8 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
-import com.intellij.openapi.util.UserDataHolderBase
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
-import kotlin.io.path.pathString
 
 class ZBStartup: ProjectActivity {
     var firstInit = true

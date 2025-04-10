@@ -29,24 +29,47 @@ import com.intellij.ide.impl.isTrusted
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.service
+import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
+import com.intellij.openapi.util.Key
+import com.intellij.openapi.vfs.toNioPathOrNull
 import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.io.awaitExit
+import com.intellij.util.xmlb.annotations.Attribute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.nio.file.Path
+import kotlin.io.path.isRegularFile
 
 @Service(Service.Level.PROJECT)
-class DirenvService(val project: Project) {
-    val mutex = Mutex()
+@State(
+    name = "Direnv",
+    storages = [Storage("zigbrains.xml")]
+)
+class DirenvService(val project: Project): SerializablePersistentStateComponent<DirenvService.State>(State()), IDirenvService {
+    private val mutex = Mutex()
 
-    suspend fun import(): Env {
+    override val isInstalled: Boolean by lazy {
+        // Using the builtin stuff here instead of Env because it should only scan for direnv on the process path
+        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS("direnv") != null
+    }
+
+    var isEnabledRaw: DirenvState
+        get() = state.enabled
+        set(value) {
+            updateState {
+                it.copy(enabled = value)
+            }
+        }
+
+    override val isEnabled: DirenvState
+        get() = isEnabledRaw
+
+    override suspend fun import(): Env {
         if (!isInstalled || !project.isTrusted() || project.isDefault)
             return Env.empty
         val workDir = project.guessProjectDir()?.toNioPath() ?: return Env.empty
@@ -100,13 +123,45 @@ class DirenvService(val project: Project) {
         return DirenvOutput(stdOut, false)
     }
 
-    val isInstalled: Boolean by lazy {
-        // Using the builtin stuff here instead of Env because it should only scan for direnv on the process path
-        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS("direnv") != null
+    fun hasDotEnv(): Boolean {
+        if (!isInstalled)
+            return false
+        val projectDir = project.guessProjectDir()?.toNioPathOrNull() ?: return false
+        return envFiles.any { projectDir.resolve(it).isRegularFile() }
     }
+
+    data class State(
+        @JvmField
+        @Attribute
+        var enabled: DirenvState = DirenvState.Auto
+    )
 
     companion object {
         private const val GROUP_DISPLAY_ID = "zigbrains-direnv"
-        fun getInstance(project: Project): DirenvService = project.service()
+        fun getInstance(project: Project): IDirenvService = project.service<DirenvService>()
+
+        val STATE_KEY = Key.create<DirenvState>("DIRENV_STATE")
     }
 }
+
+enum class DirenvState {
+    Auto,
+    Enabled,
+    Disabled;
+
+    fun isEnabled(project: Project?): Boolean {
+        return when(this) {
+            Enabled -> true
+            Disabled -> false
+            Auto -> project?.service<DirenvService>()?.hasDotEnv() == true
+        }
+    }
+}
+
+sealed interface IDirenvService {
+    val isInstalled: Boolean
+    val isEnabled: DirenvState
+    suspend fun import(): Env
+}
+
+private val envFiles = listOf(".envrc", ".env")

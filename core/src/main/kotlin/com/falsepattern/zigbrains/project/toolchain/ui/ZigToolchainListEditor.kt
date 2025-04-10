@@ -66,7 +66,7 @@ class ZigToolchainListEditor : MasterDetailsComponent(), ToolchainListChangeList
                 val modelList = ArrayList<TCListElemIn>()
                 modelList.addAll(TCListElem.fetchGroup)
                 modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))
-                modelList.addAll(suggestZigToolchains().map { it.asPending() })
+                modelList.add(suggestZigToolchains().asPending())
                 val model = TCModel(modelList)
                 val context = TCContext(null, model)
                 val popup = TCComboBoxPopup(context, null, ::onItemSelected)

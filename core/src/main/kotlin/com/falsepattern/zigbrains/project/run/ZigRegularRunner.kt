@@ -32,10 +32,13 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.RunContentBuilder
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.progress.blockingContext
 
 class ZigRegularRunner: ZigProgramRunner<ZigProfileState<*>>(DefaultRunExecutor.EXECUTOR_ID) {
     override suspend fun execute(state: ZigProfileState<*>, toolchain: ZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor? {
-        val exec = state.execute(environment.executor, this)
+        val exec = blockingContext {
+            state.execute(environment.executor, this)
+        }
         return withEDTContext(ModalityState.any()) {
             val runContentBuilder = RunContentBuilder(exec, environment)
             runContentBuilder.showRunContent(null)

@@ -35,6 +35,8 @@ import com.intellij.execution.configurations.PtyCommandLine
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.platform.util.progress.reportProgress
+import com.intellij.platform.util.progress.reportRawProgress
 import kotlin.io.path.pathString
 
 abstract class ZigProfileState<T: ZigExecConfig<T>> (

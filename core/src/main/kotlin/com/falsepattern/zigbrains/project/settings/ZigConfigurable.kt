@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsContexts
+import com.intellij.openapi.util.UserDataHolderBase
 
 class ZigConfigurable(override val context: Project) : SubConfigurable.Adapter<Project>() {
     override fun instantiate(): List<SubConfigurable<Project>> {

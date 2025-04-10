@@ -24,9 +24,9 @@ package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.util.UUID
 
 
@@ -45,7 +45,7 @@ internal sealed interface TCListElem : TCListElemIn {
     object None: TCListElem
     object Download : TCListElem, Pseudo
     object FromDisk : TCListElem, Pseudo
-    data class Pending(val elem: Deferred<TCListElem>): TCListElem
+    data class Pending(val elems: Flow<TCListElem>): TCListElem
 
     companion object {
         val fetchGroup get() = listOf(Download, FromDisk)
@@ -59,4 +59,4 @@ internal fun Pair<UUID, ZigToolchain>.asActual() = TCListElem.Toolchain.Actual(f
 
 internal fun ZigToolchain.asSuggested() = TCListElem.Toolchain.Suggested(this)
 
-internal fun Deferred<ZigToolchain>.asPending() = TCListElem.Pending(zigCoroutineScope.async { this@asPending.await().asSuggested() })
+internal fun Flow<ZigToolchain>.asPending() = TCListElem.Pending(map { it.asSuggested() })

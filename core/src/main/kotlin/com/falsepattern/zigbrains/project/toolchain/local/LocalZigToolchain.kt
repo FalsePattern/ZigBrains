@@ -22,18 +22,16 @@
 
 package com.falsepattern.zigbrains.project.toolchain.local
 
+import com.falsepattern.zigbrains.direnv.DirenvService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.openapi.util.KeyWithDefaultValue
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.toNioPathOrNull
-import kotlinx.coroutines.delay
 import java.nio.file.Path
-import kotlin.random.Random
 
 @JvmRecord
 data class LocalZigToolchain(val location: Path, val std: Path? = null, override val name: String? = null): ZigToolchain {
@@ -42,10 +40,9 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, override
     }
 
     override suspend fun patchCommandLine(commandLine: GeneralCommandLine, project: Project?): GeneralCommandLine {
-        //TODO direnv
-//        if (project != null && (commandLine.getUserData(DIRENV_KEY) ?: project.zigProjectSettings.state.direnv)) {
-//            commandLine.withEnvironment(DirenvCmd.importDirenv(project).env)
-//        }
+        if (project != null && (commandLine.getUserData(DirenvService.STATE_KEY) ?: DirenvService.getInstance(project).isEnabled).isEnabled(project)) {
+            commandLine.withEnvironment(DirenvService.getInstance(project).import().env)
+        }
         return commandLine
     }
 
@@ -59,8 +56,6 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, override
     }
 
     companion object {
-        val DIRENV_KEY = KeyWithDefaultValue.create<Boolean>("ZIG_LOCAL_DIRENV")
-
         @Throws(ExecutionException::class)
         fun ensureLocal(toolchain: ZigToolchain): LocalZigToolchain {
             if (toolchain is LocalZigToolchain) {

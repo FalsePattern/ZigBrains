@@ -23,6 +23,8 @@
 package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.direnv.DirenvService
+import com.falsepattern.zigbrains.direnv.DirenvState
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.ToolchainListChangeListener
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
@@ -35,10 +37,12 @@ import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.application.EDT
+import com.intellij.openapi.observable.util.whenListChanged
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.util.Key
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.util.concurrency.annotations.RequiresEdt
@@ -50,16 +54,24 @@ import java.util.UUID
 import javax.swing.JButton
 import kotlin.collections.addAll
 
-class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubConfigurable<Project>, ToolchainListChangeListener {
+class ZigToolchainEditor(private var project: Project?, private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge): SubConfigurable<Project>, ToolchainListChangeListener, ZigProjectConfigurationProvider.UserDataListener {
     private val toolchainBox: TCComboBox
     private var selectOnNextReload: UUID? = null
     private val model: TCModel
     private var editButton: JButton? = null
     init {
-        model = TCModel(getModelList())
+        val direnv = sharedState.getUserData(DirenvService.STATE_KEY) ?: project?.let { DirenvService.getInstance(it).isEnabled } ?: DirenvState.Disabled
+        model = TCModel(getModelList(project, direnv))
         toolchainBox = TCComboBox(model)
         toolchainBox.addItemListener(::itemStateChanged)
         ZigToolchainListService.getInstance().addChangeListener(this)
+        sharedState.addUserDataChangeListener(this)
+        model.whenListChanged {
+            if (toolchainBox.isPopupVisible) {
+                toolchainBox.isPopupVisible = false
+                toolchainBox.isPopupVisible = true
+            }
+        }
     }
 
     private fun refreshButtonState(item: Any?) {
@@ -85,7 +97,8 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
 
     override suspend fun toolchainListChanged() {
         withContext(Dispatchers.EDT + toolchainBox.asContextElement()) {
-            val list = getModelList()
+            val direnv = sharedState.getUserData(DirenvService.STATE_KEY) ?: project?.let { DirenvService.getInstance(it).isEnabled } ?: DirenvState.Disabled
+            val list = getModelList(project, direnv)
             model.updateContents(list)
             val onReload = selectOnNextReload
             selectOnNextReload = null
@@ -115,9 +128,16 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
         }
     }
 
+    override fun onUserDataChanged(key: Key<*>) {
+        if (key == DirenvService.STATE_KEY) {
+            zigCoroutineScope.launch { toolchainListChanged() }
+        }
+    }
+
+
     override fun attach(p: Panel): Unit = with(p) {
         row(ZigBrainsBundle.message(
-            if (isForDefaultProject)
+            if (project?.isDefault == true)
                 "settings.toolchain.editor.toolchain-default.label"
             else
                 "settings.toolchain.editor.toolchain.label")
@@ -169,25 +189,23 @@ class ZigToolchainEditor(private val isForDefaultProject: Boolean = false): SubC
     }
 
     override val newProjectBeforeInitSelector get() = true
-
     class Provider: ZigProjectConfigurationProvider {
-        override fun create(project: Project?): SubConfigurable<Project>? {
-            return ZigToolchainEditor(project?.isDefault ?: false).also { it.reset(project) }
+        override fun create(project: Project?, sharedState: ZigProjectConfigurationProvider.IUserDataBridge): SubConfigurable<Project>? {
+            return ZigToolchainEditor(project, sharedState).also { it.reset(project) }
         }
 
         override val index: Int get() = 0
-
     }
 }
 
 
-private fun getModelList(): List<TCListElemIn> {
+private fun getModelList(project: Project?, direnv: DirenvState): List<TCListElemIn> {
     val modelList = ArrayList<TCListElemIn>()
     modelList.add(TCListElem.None)
     modelList.addAll(ZigToolchainListService.getInstance().toolchains.map { it.asActual() }.sortedBy { it.toolchain.name })
     modelList.add(Separator("", true))
     modelList.addAll(TCListElem.fetchGroup)
     modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))
-    modelList.addAll(suggestZigToolchains().map { it.asPending() })
+    modelList.add(suggestZigToolchains(project, direnv).asPending())
     return modelList
 }

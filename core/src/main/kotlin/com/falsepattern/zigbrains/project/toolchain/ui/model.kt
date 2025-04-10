@@ -22,7 +22,6 @@
 
 package com.falsepattern.zigbrains.project.toolchain.ui
 
-import ai.grazie.utils.attributes.value
 import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.toolchain.base.render
@@ -31,16 +30,12 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.asContextElement
-import com.intellij.openapi.application.impl.ModalityStateEx
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.ui.AnimatedIcon
 import com.intellij.ui.CellRendererPanel
-import com.intellij.ui.ClientProperty
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.ColoredListCellRenderer
-import com.intellij.ui.ComponentUtil
 import com.intellij.ui.GroupHeaderSeparator
 import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
@@ -51,17 +46,13 @@ import com.intellij.util.concurrency.annotations.RequiresEdt
 import com.intellij.util.ui.EmptyIcon
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
-import fleet.util.async.awaitResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.awt.BorderLayout
 import java.awt.Component
 import java.util.IdentityHashMap
 import java.util.UUID
-import java.util.concurrent.locks.ReentrantLock
 import javax.accessibility.AccessibleContext
-import javax.swing.CellRendererPane
-import javax.swing.JComponent
 import javax.swing.JList
 import javax.swing.border.Border
 
@@ -145,33 +136,43 @@ internal class TCModel private constructor(elements: List<TCListElem>, private v
                 if (elem !is TCListElem.Pending)
                     continue
                 zigCoroutineScope.launch(Dispatchers.EDT + ModalityState.any().asContextElement()) {
-                    val newElem = elem.elem.awaitResult().getOrNull()
-                    swap(elem, newElem, counter)
+                    elem.elems.collect { newElem ->
+                        insertBefore(elem, newElem, counter)
+                    }
+                    remove(elem, counter)
                 }
             }
         }
     }
 
     @RequiresEdt
-    private fun swap(old: TCListElem, new: TCListElem?, oldCounter: Int) {
+    private fun remove(old: TCListElem, oldCounter: Int) {
+        val newCounter = this@TCModel.counter
+        if (oldCounter != newCounter) {
+            return
+        }
+        val index = this@TCModel.getElementIndex(old)
+        this@TCModel.remove(index)
+        val sep = separators.remove(old)
+        if (sep != null && this@TCModel.size > index) {
+            this@TCModel.getElementAt(index)?.let { separators[it] = sep }
+        }
+    }
+
+    @RequiresEdt
+    private fun insertBefore(old: TCListElem, new: TCListElem?, oldCounter: Int) {
         val newCounter = this@TCModel.counter
         if (oldCounter != newCounter) {
             return
         }
         if (new == null) {
-            val index = this@TCModel.getElementIndex(old)
-            this@TCModel.remove(index)
-            val sep = separators.remove(old)
-            if (sep != null && this@TCModel.size > index) {
-                this@TCModel.getElementAt(index)?.let { separators[it] = sep }
-            }
             return
         }
         val currentIndex = this@TCModel.getElementIndex(old)
         separators.remove(old)?.let {
             separators.put(new, it)
         }
-        this@TCModel.setElementAt(new, currentIndex)
+        this@TCModel.add(currentIndex, new)
     }
 
     @RequiresEdt
