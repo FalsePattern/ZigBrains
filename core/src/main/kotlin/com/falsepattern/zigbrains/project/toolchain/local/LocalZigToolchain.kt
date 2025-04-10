@@ -40,7 +40,7 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, override
     }
 
     override suspend fun patchCommandLine(commandLine: GeneralCommandLine, project: Project?): GeneralCommandLine {
-        if (project != null && (commandLine.getUserData(DirenvService.STATE_KEY) ?: DirenvService.getInstance(project).isEnabled).isEnabled(project)) {
+        if (project != null && DirenvService.getStateFor(commandLine, project).isEnabled(project)) {
             commandLine.withEnvironment(DirenvService.getInstance(project).import().env)
         }
         return commandLine

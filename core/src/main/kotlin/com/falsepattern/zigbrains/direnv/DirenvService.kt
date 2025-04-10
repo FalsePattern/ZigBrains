@@ -33,6 +33,7 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.vfs.toNioPathOrNull
 import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.io.awaitExit
@@ -140,20 +141,14 @@ class DirenvService(val project: Project): SerializablePersistentStateComponent<
         private const val GROUP_DISPLAY_ID = "zigbrains-direnv"
         fun getInstance(project: Project): IDirenvService = project.service<DirenvService>()
 
-        val STATE_KEY = Key.create<DirenvState>("DIRENV_STATE")
-    }
-}
+        private val STATE_KEY = Key.create<DirenvState>("DIRENV_STATE")
 
-enum class DirenvState {
-    Auto,
-    Enabled,
-    Disabled;
+        fun getStateFor(data: UserDataHolder, project: Project?): DirenvState {
+            return data.getUserData(STATE_KEY) ?: project?.let { getInstance(project).isEnabled } ?: DirenvState.Disabled
+        }
 
-    fun isEnabled(project: Project?): Boolean {
-        return when(this) {
-            Enabled -> true
-            Disabled -> false
-            Auto -> project?.service<DirenvService>()?.hasDotEnv() == true
+        fun setStateFor(data: UserDataHolder, state: DirenvState) {
+            data.putUserData(STATE_KEY, state)
         }
     }
 }

@@ -24,24 +24,18 @@ package com.falsepattern.zigbrains.project.toolchain.base
 
 import com.falsepattern.zigbrains.direnv.DirenvState
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
-import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.ui.SimpleColoredComponent
-import com.intellij.util.text.SemVer
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import java.util.UUID
 
 private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainProvider>("com.falsepattern.zigbrains.toolchainProvider")
@@ -53,7 +47,7 @@ internal interface ZigToolchainProvider {
     fun serialize(toolchain: ZigToolchain): Map<String, String>
     fun matchesSuggestion(toolchain: ZigToolchain, suggestion: ZigToolchain): Boolean
     fun createConfigurable(uuid: UUID, toolchain: ZigToolchain): ZigToolchainConfigurable<*>
-    suspend fun suggestToolchains(project: Project?, direnv: DirenvState): Flow<ZigToolchain>
+    suspend fun suggestToolchains(project: Project?, data: UserDataHolder): Flow<ZigToolchain>
     fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean)
 }
 
@@ -75,11 +69,11 @@ fun ZigToolchain.createNamedConfigurable(uuid: UUID): ZigToolchainConfigurable<*
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-fun suggestZigToolchains(project: Project? = null, direnv: DirenvState = DirenvState.Disabled): Flow<ZigToolchain> {
+fun suggestZigToolchains(project: Project? = null, data: UserDataHolder = emptyData): Flow<ZigToolchain> {
     val existing = ZigToolchainListService.getInstance().toolchains.map { (_, tc) -> tc }.toList()
     return EXTENSION_POINT_NAME.extensionList.asFlow().flatMapConcat { ext ->
         val compatibleExisting = existing.filter { ext.isCompatible(it) }
-        val suggestions = ext.suggestToolchains(project, direnv)
+        val suggestions = ext.suggestToolchains(project, data)
         suggestions.filter { suggestion ->
             compatibleExisting.none { existing -> ext.matchesSuggestion(existing, suggestion) }
         }
@@ -89,4 +83,15 @@ fun suggestZigToolchains(project: Project? = null, direnv: DirenvState = DirenvS
 fun ZigToolchain.render(component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
     return provider.render(this, component, isSuggestion, isSelected)
+}
+
+private val emptyData = object: UserDataHolder {
+    override fun <T : Any?> getUserData(key: Key<T?>): T? {
+        return null
+    }
+
+    override fun <T : Any?> putUserData(key: Key<T?>, value: T?) {
+
+    }
+
 }

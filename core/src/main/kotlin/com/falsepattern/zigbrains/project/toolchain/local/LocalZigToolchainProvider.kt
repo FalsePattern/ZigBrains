@@ -28,7 +28,6 @@ import com.falsepattern.zigbrains.direnv.Env
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider
-import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.util.io.FileUtil
@@ -36,19 +35,15 @@ import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
-import com.intellij.util.EnvironmentUtil
 import com.intellij.util.system.OS
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.UUID
@@ -97,16 +92,14 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun suggestToolchains(project: Project?, direnv: DirenvState): Flow<ZigToolchain> {
-        val env = if (project != null && direnv.isEnabled(project)) {
+    override suspend fun suggestToolchains(project: Project?, data: UserDataHolder): Flow<ZigToolchain> {
+        val env = if (project != null && DirenvService.getStateFor(data, project).isEnabled(project)) {
             DirenvService.getInstance(project).import()
         } else {
             Env.empty
         }
         val pathToolchains = env.findAllExecutablesOnPATH("zig").mapNotNull { it.parent }
         val wellKnown = getWellKnown().asFlow().flatMapConcat { dir ->
-            if (!dir.isDirectory())
-                return@flatMapConcat emptyFlow<Path>()
             runCatching {
                 Files.newDirectoryStream(dir).use { stream ->
                     stream.toList().filterNotNull().asFlow()

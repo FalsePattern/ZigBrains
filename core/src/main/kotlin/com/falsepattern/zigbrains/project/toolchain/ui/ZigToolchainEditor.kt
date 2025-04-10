@@ -43,6 +43,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.UserDataHolder
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.util.concurrency.annotations.RequiresEdt
@@ -60,8 +61,7 @@ class ZigToolchainEditor(private var project: Project?, private val sharedState:
     private val model: TCModel
     private var editButton: JButton? = null
     init {
-        val direnv = sharedState.getUserData(DirenvService.STATE_KEY) ?: project?.let { DirenvService.getInstance(it).isEnabled } ?: DirenvState.Disabled
-        model = TCModel(getModelList(project, direnv))
+        model = TCModel(getModelList(project, sharedState))
         toolchainBox = TCComboBox(model)
         toolchainBox.addItemListener(::itemStateChanged)
         ZigToolchainListService.getInstance().addChangeListener(this)
@@ -97,8 +97,7 @@ class ZigToolchainEditor(private var project: Project?, private val sharedState:
 
     override suspend fun toolchainListChanged() {
         withContext(Dispatchers.EDT + toolchainBox.asContextElement()) {
-            val direnv = sharedState.getUserData(DirenvService.STATE_KEY) ?: project?.let { DirenvService.getInstance(it).isEnabled } ?: DirenvState.Disabled
-            val list = getModelList(project, direnv)
+            val list = getModelList(project, sharedState)
             model.updateContents(list)
             val onReload = selectOnNextReload
             selectOnNextReload = null
@@ -129,9 +128,7 @@ class ZigToolchainEditor(private var project: Project?, private val sharedState:
     }
 
     override fun onUserDataChanged(key: Key<*>) {
-        if (key == DirenvService.STATE_KEY) {
-            zigCoroutineScope.launch { toolchainListChanged() }
-        }
+        zigCoroutineScope.launch { toolchainListChanged() }
     }
 
 
@@ -199,13 +196,13 @@ class ZigToolchainEditor(private var project: Project?, private val sharedState:
 }
 
 
-private fun getModelList(project: Project?, direnv: DirenvState): List<TCListElemIn> {
+private fun getModelList(project: Project?, data: UserDataHolder): List<TCListElemIn> {
     val modelList = ArrayList<TCListElemIn>()
     modelList.add(TCListElem.None)
     modelList.addAll(ZigToolchainListService.getInstance().toolchains.map { it.asActual() }.sortedBy { it.toolchain.name })
     modelList.add(Separator("", true))
     modelList.addAll(TCListElem.fetchGroup)
     modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))
-    modelList.add(suggestZigToolchains(project, direnv).asPending())
+    modelList.add(suggestZigToolchains(project, data).asPending())
     return modelList
 }

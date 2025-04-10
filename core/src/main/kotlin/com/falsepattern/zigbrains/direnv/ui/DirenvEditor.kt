@@ -39,10 +39,12 @@ abstract class DirenvEditor<T>(private val sharedState: ZigProjectConfigurationP
         row(ZigBrainsBundle.message("settings.direnv.enable.label")) {
             comboBox(DirenvState.entries).component.let {
                 cb = it
-                it.addItemListener { e ->
-                    if (e.stateChange != ItemEvent.SELECTED)
-                        return@addItemListener
-                    sharedState
+                if (sharedState != null) {
+                    it.addItemListener { e ->
+                        if (e.stateChange != ItemEvent.SELECTED)
+                            return@addItemListener
+                        DirenvService.setStateFor(sharedState, DirenvState.Auto)
+                    }
                 }
             }
         }
@@ -72,7 +74,7 @@ abstract class DirenvEditor<T>(private val sharedState: ZigProjectConfigurationP
 
     class ForProject(sharedState: ZigProjectConfigurationProvider.IUserDataBridge) : DirenvEditor<Project>(sharedState) {
         override fun isEnabled(context: Project): DirenvState {
-            return context.service<DirenvService>().isEnabledRaw
+            return DirenvService.getInstance(context).isEnabled
         }
 
         override fun setEnabled(context: Project, value: DirenvState) {
@@ -85,7 +87,7 @@ abstract class DirenvEditor<T>(private val sharedState: ZigProjectConfigurationP
             if (project?.isDefault != false) {
                 return null
             }
-            sharedState.putUserData(DirenvService.STATE_KEY, DirenvState.Auto)
+            DirenvService.setStateFor(sharedState, DirenvState.Auto)
             return ForProject(sharedState)
         }
 
