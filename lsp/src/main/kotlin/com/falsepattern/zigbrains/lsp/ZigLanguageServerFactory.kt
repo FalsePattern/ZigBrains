@@ -22,7 +22,7 @@
 
 package com.falsepattern.zigbrains.lsp
 
-import com.falsepattern.zigbrains.lsp.settings.zlsSettings
+import com.falsepattern.zigbrains.lsp.zls.ZLSService
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -68,39 +68,29 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
         }
         features.inlayHintFeature = object: LSPInlayHintFeature() {
             override fun isEnabled(file: PsiFile): Boolean {
-                return features.project.zlsSettings.state.inlayHints
+                return ZLSService.getInstance(project).zls?.settings?.inlayHints == true
             }
         }
         return features
     }
 
-    override fun isEnabled(project: Project) = project.zlsEnabledSync()
+    override fun isEnabled(project: Project) = project.zlsEnabled()
 
     override fun setEnabled(enabled: Boolean, project: Project) {
         project.zlsEnabled(enabled)
     }
 }
 
-suspend fun Project.zlsEnabledAsync(): Boolean {
-    return (getUserData(ENABLED_KEY) != false) && zlsSettings.validateAsync()
-}
-
-fun Project.zlsEnabledSync(): Boolean {
-    return (getUserData(ENABLED_KEY) != false) && zlsSettings.validateSync()
+fun Project.zlsEnabled(): Boolean {
+    return (getUserData(ENABLED_KEY) != false) && ZLSService.getInstance(this).zls?.isValid() == true
 }
 
 fun Project.zlsEnabled(value: Boolean) {
     putUserData(ENABLED_KEY, value)
 }
 
-suspend fun Project.zlsRunningAsync(): Boolean {
-    if (!zlsEnabledAsync())
-        return false
-    return lsm.isRunning
-}
-
-fun Project.zlsRunningSync(): Boolean {
-    if (!zlsEnabledSync())
+fun Project.zlsRunning(): Boolean {
+    if (!zlsEnabled())
         return false
     return lsm.isRunning
 }
@@ -135,7 +125,7 @@ private suspend fun doStart(project: Project, restart: Boolean) {
         project.lsm.stop("ZigBrains")
         delay(250)
     }
-    if (project.zlsSettings.validateAsync()) {
+    if (ZLSService.getInstance(project).zls?.isValid() == true) {
         delay(250)
         project.lsm.start("ZigBrains")
     }

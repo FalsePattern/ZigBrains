@@ -23,7 +23,7 @@
 package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainPanelBase
+import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableNamedElementPanelBase
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.application.ModalityState
@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
-class LocalZigToolchainPanel() : ZigToolchainPanelBase<LocalZigToolchain>() {
+class LocalZigToolchainPanel() : ImmutableNamedElementPanelBase<LocalZigToolchain>() {
     private val pathToToolchain = textFieldWithBrowseButton(
         null,
         FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle(ZigBrainsBundle.message("dialog.title.zig-toolchain"))

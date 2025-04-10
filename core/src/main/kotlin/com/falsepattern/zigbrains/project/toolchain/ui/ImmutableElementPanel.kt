@@ -20,17 +20,17 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.base
+package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.intellij.openapi.Disposable
 import com.intellij.ui.dsl.builder.Panel
 
-interface ZigToolchainPanel<T: ZigToolchain>: Disposable {
+interface ImmutableElementPanel<T>: Disposable {
     fun attach(p: Panel)
-    fun isModified(toolchain: T): Boolean
+    fun isModified(elem: T): Boolean
     /**
      * Returned object must be the exact same class as the provided one.
      */
-    fun apply(toolchain: T): T?
-    fun reset(toolchain: T)
+    fun apply(elem: T): T?
+    fun reset(elem: T)
 }

@@ -20,16 +20,18 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.settings
+package com.falsepattern.zigbrains.shared.ui
 
-import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.shared.SubConfigurable
-import com.intellij.openapi.project.Project
+import com.falsepattern.zigbrains.shared.UUIDMapSerializable
+import com.intellij.openapi.ui.NamedConfigurable
+import java.awt.Component
+import java.util.UUID
 
-class ZigConfigurable(override val context: Project) : SubConfigurable.Adapter<Project>() {
-    override fun instantiate(): List<SubConfigurable<Project>> {
-        return ZigProjectConfigurationProvider.createPanels(context)
-    }
-
-    override fun getDisplayName() = ZigBrainsBundle.message("settings.project.display-name")
+interface UUIDComboBoxDriver<T> {
+    val theMap: UUIDMapSerializable.Converting<T, *, *>
+    fun constructModelList(): List<ListElemIn<T>>
+    fun createContext(model: ZBModel<T>): ZBContext<T>
+    fun createComboBox(model: ZBModel<T>): ZBComboBox<T>
+    suspend fun resolvePseudo(context: Component, elem: ListElem.Pseudo<T>): UUID?
+    fun createNamedConfigurable(uuid: UUID, elem: T): NamedConfigurable<UUID>
 }

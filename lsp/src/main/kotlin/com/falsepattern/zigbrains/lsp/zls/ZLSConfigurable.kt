@@ -20,41 +20,25 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.base
+package com.falsepattern.zigbrains.lsp.zls
 
-import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableElementPanel
-import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.NlsContexts
+import com.intellij.openapi.util.NlsSafe
 import com.intellij.ui.dsl.builder.panel
 import java.util.UUID
 import javax.swing.JComponent
 
-abstract class ZigToolchainConfigurable<T: ZigToolchain>(
-    val uuid: UUID,
-    tc: T
-): NamedConfigurable<UUID>() {
-    var toolchain: T = tc
+class ZLSConfigurable(val uuid: UUID, zls: ZLSVersion): NamedConfigurable<UUID>() {
+    var zls: ZLSVersion = zls
         set(value) {
-            zigToolchainList[uuid] = value
+            zlsInstallations[uuid] = value
             field = value
         }
-    private var myViews: List<ImmutableElementPanel<T>> = emptyList()
+    private var myView: ZLSPanel? = null
 
-    abstract fun createPanel(): ImmutableElementPanel<T>
-
-    override fun createOptionsPanel(): JComponent? {
-        var views = myViews
-        if (views.isEmpty()) {
-            views = ArrayList<ImmutableElementPanel<T>>()
-            views.add(createPanel())
-            views.addAll(createZigToolchainExtensionPanels())
-            views.forEach { it.reset(toolchain) }
-            myViews = views
-        }
-        return panel {
-            views.forEach { it.attach(this@panel) }
-        }.withMinimumWidth(20)
+    override fun setDisplayName(name: String?) {
+        zls = zls.copy(name = name)
     }
 
     override fun getEditableObject(): UUID? {
@@ -65,25 +49,37 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
         return displayName
     }
 
+    override fun createOptionsPanel(): JComponent? {
+        var view = myView
+        if (view == null) {
+            view = ZLSPanel()
+            view.reset(zls)
+            myView = view
+        }
+        return panel {
+            view.attach(this@panel)
+        }.withMaximumWidth(20)
+    }
+
     override fun getDisplayName(): @NlsContexts.ConfigurableName String? {
-        return toolchain.name
+        return zls.name
     }
 
     override fun isModified(): Boolean {
-        return myViews.any { it.isModified(toolchain) }
+        return myView?.isModified(zls) == true
     }
 
     override fun apply() {
-        toolchain = myViews.fold(toolchain) { tc, view -> view.apply(tc) ?: tc }
+        myView?.apply(zls)?.let { zls = it }
     }
 
     override fun reset() {
-        myViews.forEach { it.reset(toolchain) }
+        myView?.reset(zls)
     }
 
     override fun disposeUIResources() {
-        myViews.forEach { it.dispose() }
-        myViews = emptyList()
+        myView?.dispose()
+        myView = null
         super.disposeUIResources()
     }
 }

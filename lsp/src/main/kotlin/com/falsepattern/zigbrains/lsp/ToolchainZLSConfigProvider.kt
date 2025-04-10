@@ -24,20 +24,18 @@ package com.falsepattern.zigbrains.lsp
 
 import com.falsepattern.zigbrains.lsp.config.SuspendingZLSConfigProvider
 import com.falsepattern.zigbrains.lsp.config.ZLSConfig
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
-import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
+import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.util.io.toNioPathOrNull
 import kotlin.io.path.pathString
 
 class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
     override suspend fun getEnvironment(project: Project, previous: ZLSConfig): ZLSConfig {
-        val svc = project.zigProjectSettings
-        var state = svc.state
-        val toolchain = state.toolchain ?: project.suggestZigToolchain(UserDataHolderBase()) ?: return previous
+        val svc = ZigToolchainService.getInstance(project)
+        val toolchain = svc.toolchain ?: return previous
 
         val env = toolchain.zig.getEnv(project).getOrElse { throwable ->
             throwable.printStackTrace()
@@ -65,16 +63,10 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
             ).notify(project)
             return previous
         }
-        var lib = if (state.overrideStdPath && state.explicitPathToStd != null) {
-            state.explicitPathToStd?.toNioPathOrNull() ?: run {
-                Notification(
-                    "zigbrains-lsp",
-                    "Invalid zig standard library path override: ${state.explicitPathToStd}",
-                    NotificationType.ERROR
-                ).notify(project)
-                null
-            }
-        } else null
+        var lib = if (toolchain is LocalZigToolchain)
+            toolchain.std
+        else
+            null
 
         if (lib == null) {
             lib = env.libDirectory.toNioPathOrNull() ?: run {

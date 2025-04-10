@@ -22,11 +22,8 @@
 
 package com.falsepattern.zigbrains.lsp
 
-import com.falsepattern.zigbrains.direnv.emptyEnv
-import com.falsepattern.zigbrains.direnv.getDirenv
 import com.falsepattern.zigbrains.lsp.config.ZLSConfigProviderBase
-import com.falsepattern.zigbrains.lsp.settings.zlsSettings
-import com.falsepattern.zigbrains.project.settings.zigProjectSettings
+import com.falsepattern.zigbrains.lsp.zls.ZLSService
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -55,30 +52,9 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
 
         @OptIn(ExperimentalSerializationApi::class)
         suspend fun getCommand(project: Project): List<String>? {
-            val svc = project.zlsSettings
-            val state = svc.state
-            val zlsPath: Path = state.zlsPath.let { zlsPath ->
-                if (zlsPath.isEmpty()) {
-                    val env = if (project.zigProjectSettings.state.direnv) project.getDirenv() else emptyEnv
-                    env.findExecutableOnPATH("zls") ?: run {
-                        Notification(
-                            "zigbrains-lsp",
-                            ZLSBundle.message("notification.message.could-not-detect.content"),
-                            NotificationType.ERROR
-                        ).notify(project)
-                        return null
-                    }
-                } else {
-                    zlsPath.toNioPathOrNull() ?: run {
-                        Notification(
-                            "zigbrains-lsp",
-                            ZLSBundle.message("notification.message.zls-exe-path-invalid.content", zlsPath),
-                            NotificationType.ERROR
-                        ).notify(project)
-                        return null
-                    }
-                }
-            }
+            val svc = ZLSService.getInstance(project)
+            val zls = svc.zls ?: return null
+            val zlsPath: Path = zls.path
             if (!zlsPath.toFile().exists()) {
                 Notification(
                     "zigbrains-lsp",
@@ -95,7 +71,7 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
                 ).notify(project)
                 return null
             }
-            val configPath: Path? = state.zlsConfigPath.let { configPath ->
+            val configPath: Path? = "".let { configPath ->
                 if (configPath.isNotBlank()) {
                     configPath.toNioPathOrNull()?.let { nioPath ->
                         if (!nioPath.toFile().exists()) {

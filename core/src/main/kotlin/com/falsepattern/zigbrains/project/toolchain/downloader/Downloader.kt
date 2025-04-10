@@ -49,7 +49,6 @@ import com.intellij.util.asSafely
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import java.awt.Component
 import java.nio.file.Path
-import java.util.*
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JList
 import javax.swing.event.DocumentEvent

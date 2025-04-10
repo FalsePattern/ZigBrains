@@ -23,7 +23,6 @@
 package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.direnv.DirenvService
-import com.falsepattern.zigbrains.direnv.DirenvState
 import com.falsepattern.zigbrains.direnv.Env
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable

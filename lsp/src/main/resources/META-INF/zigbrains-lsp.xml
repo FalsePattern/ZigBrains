@@ -49,6 +49,13 @@
         <editorNotificationProvider
                 implementation="com.falsepattern.zigbrains.lsp.notification.ZigEditorNotificationProvider"
         />
+        <applicationConfigurable
+                parentId="ZigConfigurable"
+                instance="com.falsepattern.zigbrains.lsp.zls.ui.ZLSListEditor"
+                id="ZLSListEditor"
+                bundle="zigbrains.lsp.Bundle"
+                key="settings.list.title"
+        />
     </extensions>
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
@@ -59,7 +66,7 @@
                 implementation="com.falsepattern.zigbrains.lsp.ToolchainZLSConfigProvider"
         />
         <projectConfigProvider
-                implementation="com.falsepattern.zigbrains.lsp.ZLSProjectConfigurationProvider"
+                implementation="com.falsepattern.zigbrains.lsp.zls.ui.ZLSEditor$Provider"
         />
     </extensions>
 

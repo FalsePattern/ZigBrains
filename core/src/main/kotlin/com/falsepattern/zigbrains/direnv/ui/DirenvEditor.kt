@@ -92,6 +92,6 @@ abstract class DirenvEditor<T>(private val sharedState: ZigProjectConfigurationP
         }
 
         override val index: Int
-            get() = 1
+            get() = 100
     }
 }

@@ -35,7 +35,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.NlsActions.ActionText
 import com.intellij.openapi.vfs.toNioPathOrNull
-import com.intellij.platform.util.progress.reportRawProgress
 import org.jdom.Element
 import org.jetbrains.annotations.Nls
 

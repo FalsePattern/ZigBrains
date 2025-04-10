@@ -20,16 +20,25 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.settings
+package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.shared.SubConfigurable
-import com.intellij.openapi.project.Project
+import com.falsepattern.zigbrains.shared.NamedObject
+import com.intellij.ui.components.JBTextField
+import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.Panel
 
-class ZigConfigurable(override val context: Project) : SubConfigurable.Adapter<Project>() {
-    override fun instantiate(): List<SubConfigurable<Project>> {
-        return ZigProjectConfigurationProvider.createPanels(context)
+abstract class ImmutableNamedElementPanelBase<T>: ImmutableElementPanel<T> {
+    private val nameField = JBTextField(25)
+
+    protected var nameFieldValue: String?
+        get() = nameField.text.ifBlank { null }
+        set(value) {nameField.text = value ?: ""}
+
+    override fun attach(p: Panel): Unit = with(p) {
+        row(ZigBrainsBundle.message("settings.toolchain.base.name.label")) {
+            cell(nameField).resizableColumn().align(AlignX.FILL)
+        }
+        separator()
     }
-
-    override fun getDisplayName() = ZigBrainsBundle.message("settings.project.display-name")
 }

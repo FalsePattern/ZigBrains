@@ -20,27 +20,20 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.base
+package com.falsepattern.zigbrains.lsp.zls.ui
 
-import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.intellij.openapi.Disposable
-import com.intellij.ui.components.JBTextField
-import com.intellij.ui.dsl.builder.AlignX
-import com.intellij.ui.dsl.builder.Panel
-import com.intellij.ui.util.preferredHeight
-import java.awt.Dimension
+import com.falsepattern.zigbrains.lsp.ZLSBundle
+import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
+import com.falsepattern.zigbrains.shared.ui.UUIDMapEditor
+import com.intellij.openapi.ui.MasterDetailsComponent
+import com.intellij.openapi.util.NlsContexts
 
-abstract class ZigToolchainPanelBase<T: ZigToolchain>: ZigToolchainPanel<T> {
-    private val nameField = JBTextField(25)
+class ZLSListEditor : UUIDMapEditor<ZLSVersion>(ZLSDriver) {
+    override fun getEmptySelectionString(): String {
+        return ZLSBundle.message("settings.list.empty")
+    }
 
-    protected var nameFieldValue: String?
-        get() = nameField.text.ifBlank { null }
-        set(value) {nameField.text = value ?: ""}
-
-    override fun attach(p: Panel): Unit = with(p) {
-        row(ZigBrainsBundle.message("settings.toolchain.base.name.label")) {
-            cell(nameField).resizableColumn().align(AlignX.FILL)
-        }
-        separator()
+    override fun getDisplayName(): @NlsContexts.ConfigurableName String? {
+        return ZLSBundle.message("settings.list.title")
     }
 }

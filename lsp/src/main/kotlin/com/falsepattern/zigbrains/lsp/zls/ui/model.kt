@@ -20,11 +20,11 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.ui
+package com.falsepattern.zigbrains.lsp.zls.ui
 
 import com.falsepattern.zigbrains.Icons
-import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.lsp.ZLSBundle
+import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
 import com.falsepattern.zigbrains.project.toolchain.base.render
 import com.falsepattern.zigbrains.shared.ui.ListElem
 import com.falsepattern.zigbrains.shared.ui.ZBCellRenderer
@@ -36,15 +36,17 @@ import com.intellij.openapi.project.Project
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.icons.EMPTY_ICON
 import javax.swing.JList
+import kotlin.io.path.pathString
 
-class TCComboBox(model: ZBModel<ZigToolchain>): ZBComboBox<ZigToolchain>(model, ::TCCellRenderer)
 
-class TCContext(project: Project?, model: ZBModel<ZigToolchain>): ZBContext<ZigToolchain>(project, model, ::TCCellRenderer)
+class ZLSComboBox(model: ZBModel<ZLSVersion>): ZBComboBox<ZLSVersion>(model, ::ZLSCellRenderer)
 
-class TCCellRenderer(getModel: () -> ZBModel<ZigToolchain>): ZBCellRenderer<ZigToolchain>(getModel) {
+class ZLSContext(project: Project?, model: ZBModel<ZLSVersion>): ZBContext<ZLSVersion>(project, model, ::ZLSCellRenderer)
+
+class ZLSCellRenderer(getModel: () -> ZBModel<ZLSVersion>): ZBCellRenderer<ZLSVersion>(getModel) {
     override fun customizeCellRenderer(
-        list: JList<out ListElem<ZigToolchain>?>,
-        value: ListElem<ZigToolchain>?,
+        list: JList<out ListElem<ZLSVersion>?>,
+        value: ListElem<ZLSVersion>?,
         index: Int,
         selected: Boolean,
         hasFocus: Boolean
@@ -58,25 +60,31 @@ class TCCellRenderer(getModel: () -> ZBModel<ZigToolchain>): ZBCellRenderer<ZigT
                 }
                 this.icon = icon
                 val item = value.instance
-                item.render(this, isSuggestion, index == -1)
+                //TODO proper renderer
+                if (item.name != null) {
+                    append(item.name)
+                    append(item.path.pathString, SimpleTextAttributes.GRAYED_ATTRIBUTES)
+                } else {
+                    append(item.path.pathString)
+                }
             }
 
             is ListElem.Download -> {
                 icon = AllIcons.Actions.Download
-                append(ZigBrainsBundle.message("settings.toolchain.model.download.text"))
+                append(ZLSBundle.message("settings.model.download.text"))
             }
 
             is ListElem.FromDisk -> {
                 icon = AllIcons.General.OpenDisk
-                append(ZigBrainsBundle.message("settings.toolchain.model.from-disk.text"))
+                append(ZLSBundle.message("settings.model.from-disk.text"))
             }
             is ListElem.Pending -> {
                 icon = AllIcons.Empty
-                append(ZigBrainsBundle.message("settings.toolchain.model.loading.text"), SimpleTextAttributes.GRAYED_ATTRIBUTES)
+                append(ZLSBundle.message("settings.model.loading.text"), SimpleTextAttributes.GRAYED_ATTRIBUTES)
             }
             is ListElem.None, null -> {
                 icon = AllIcons.General.BalloonError
-                append(ZigBrainsBundle.message("settings.toolchain.model.none.text"), SimpleTextAttributes.ERROR_ATTRIBUTES)
+                append(ZLSBundle.message("settings.model.none.text"), SimpleTextAttributes.ERROR_ATTRIBUTES)
             }
         }
     }

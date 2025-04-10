@@ -20,13 +20,13 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.ui
+package com.falsepattern.zigbrains.lsp.zls.ui
 
-import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.lsp.zls.ZLSService
+import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
-import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.SubConfigurable
+import com.falsepattern.zigbrains.shared.ui.UUIDMapEditor
 import com.falsepattern.zigbrains.shared.ui.UUIDMapSelector
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.project.Project
@@ -35,9 +35,9 @@ import com.intellij.openapi.util.Key
 import com.intellij.ui.dsl.builder.Panel
 import kotlinx.coroutines.launch
 
-class ZigToolchainEditor(private var project: Project?,
-                         private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge):
-    UUIDMapSelector<ZigToolchain>(ZigToolchainDriver.ForSelector(project, sharedState)),
+class ZLSEditor(private var project: Project?,
+                private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge):
+    UUIDMapSelector<ZLSVersion>(ZLSDriver),
     SubConfigurable<Project>,
     ZigProjectConfigurationProvider.UserDataListener
 {
@@ -49,29 +49,23 @@ class ZigToolchainEditor(private var project: Project?,
         zigCoroutineScope.launch { listChanged() }
     }
 
-
-    override fun attach(p: Panel): Unit = with(p) {
-        row(ZigBrainsBundle.message(
-            if (project?.isDefault == true)
-                "settings.toolchain.editor.toolchain-default.label"
-            else
-                "settings.toolchain.editor.toolchain.label")
-        ) {
+    override fun attach(panel: Panel): Unit = with(panel) {
+        row("ZLS") {
             attachComboBoxRow(this)
         }
     }
 
     override fun isModified(context: Project): Boolean {
-        return ZigToolchainService.getInstance(context).toolchainUUID != selectedUUID
+        return ZLSService.getInstance(context).zlsUUID != selectedUUID
     }
 
     override fun apply(context: Project) {
-        ZigToolchainService.getInstance(context).toolchainUUID = selectedUUID
+        ZLSService.getInstance(context).zlsUUID = selectedUUID
     }
 
     override fun reset(context: Project?) {
         val project = context ?: ProjectManager.getInstance().defaultProject
-        selectedUUID = ZigToolchainService.getInstance(project).toolchainUUID
+        selectedUUID = ZLSService.getInstance(project).zlsUUID
     }
 
     override fun dispose() {
@@ -79,12 +73,17 @@ class ZigToolchainEditor(private var project: Project?,
         sharedState.removeUserDataChangeListener(this)
     }
 
-    override val newProjectBeforeInitSelector get() = true
+    override val newProjectBeforeInitSelector: Boolean get() = true
     class Provider: ZigProjectConfigurationProvider {
-        override fun create(project: Project?, sharedState: ZigProjectConfigurationProvider.IUserDataBridge): SubConfigurable<Project>? {
-            return ZigToolchainEditor(project, sharedState).also { it.reset(project) }
+        override fun create(
+            project: Project?,
+            sharedState: ZigProjectConfigurationProvider.IUserDataBridge
+        ): SubConfigurable<Project>? {
+            return ZLSEditor(project, sharedState)
         }
 
-        override val index: Int get() = 0
+        override val index: Int
+            get() = 50
+
     }
 }

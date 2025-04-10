@@ -22,16 +22,17 @@
 
 package com.falsepattern.zigbrains.project.toolchain.base
 
+import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableElementPanel
 import com.intellij.openapi.extensions.ExtensionPointName
 
 private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainExtensionsProvider>("com.falsepattern.zigbrains.toolchainExtensionsProvider")
 
 internal interface ZigToolchainExtensionsProvider {
-    fun <T : ZigToolchain> createExtensionPanel(): ZigToolchainPanel<T>?
+    fun <T : ZigToolchain> createExtensionPanel(): ImmutableElementPanel<T>?
     val index: Int
 }
 
-fun <T: ZigToolchain> createZigToolchainExtensionPanels(): List<ZigToolchainPanel<T>> {
+fun <T: ZigToolchain> createZigToolchainExtensionPanels(): List<ImmutableElementPanel<T>> {
     return EXTENSION_POINT_NAME.extensionList.sortedBy{ it.index }.mapNotNull {
         it.createExtensionPanel()
     }
