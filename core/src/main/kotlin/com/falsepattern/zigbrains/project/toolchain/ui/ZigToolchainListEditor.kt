@@ -23,11 +23,12 @@
 package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.project.toolchain.ToolchainListChangeListener
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.createNamedConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchains
+import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
+import com.falsepattern.zigbrains.shared.StorageChangeListener
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
@@ -39,14 +40,17 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.ui.MasterDetailsComponent
 import com.intellij.util.IconUtil
 import com.intellij.util.asSafely
+import com.intellij.util.concurrency.annotations.RequiresEdt
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.swing.JComponent
 import javax.swing.tree.DefaultTreeModel
 
-class ZigToolchainListEditor : MasterDetailsComponent(), ToolchainListChangeListener {
+class ZigToolchainListEditor : MasterDetailsComponent() {
     private var isTreeInitialized = false
     private var registered: Boolean = false
+    private var selectOnNextReload: UUID? = null
+    private val changeListener: StorageChangeListener = { this@ZigToolchainListEditor.toolchainListChanged() }
 
     override fun createComponent(): JComponent {
         if (!isTreeInitialized) {
@@ -54,7 +58,7 @@ class ZigToolchainListEditor : MasterDetailsComponent(), ToolchainListChangeList
             isTreeInitialized = true
         }
         if (!registered) {
-            ZigToolchainListService.getInstance().addChangeListener(this)
+            zigToolchainList.addChangeListener(changeListener)
             registered = true
         }
         return super.createComponent()
@@ -81,7 +85,7 @@ class ZigToolchainListEditor : MasterDetailsComponent(), ToolchainListChangeList
 
     override fun onItemDeleted(item: Any?) {
         if (item is UUID) {
-            ZigToolchainListService.getInstance().removeToolchain(item)
+            zigToolchainList.remove(item)
         }
         super.onItemDeleted(item)
     }
@@ -93,7 +97,7 @@ class ZigToolchainListEditor : MasterDetailsComponent(), ToolchainListChangeList
             val uuid = ZigToolchainComboBoxHandler.onItemSelected(myWholePanel, elem)
             if (uuid != null) {
                 withEDTContext(myWholePanel.asContextElement()) {
-                    selectNodeInTree(uuid)
+                    applyUUIDNowOrOnReload(uuid)
                 }
             }
         }
@@ -108,6 +112,13 @@ class ZigToolchainListEditor : MasterDetailsComponent(), ToolchainListChangeList
 
     override fun getDisplayName() = ZigBrainsBundle.message("settings.toolchain.list.title")
 
+    override fun disposeUIResources() {
+        super.disposeUIResources()
+        if (registered) {
+            zigToolchainList.removeChangeListener(changeListener)
+        }
+    }
+
     private fun addToolchain(uuid: UUID, toolchain: ZigToolchain) {
         val node = MyNode(toolchain.createNamedConfigurable(uuid))
         addNode(node, myRoot)
@@ -116,23 +127,37 @@ class ZigToolchainListEditor : MasterDetailsComponent(), ToolchainListChangeList
     private fun reloadTree() {
         val currentSelection = selectedObject?.asSafely<UUID>()
         myRoot.removeAllChildren()
-        ZigToolchainListService.getInstance().toolchains.forEach { (uuid, toolchain) ->
+        val onReload = selectOnNextReload
+        selectOnNextReload = null
+        var hasOnReload = false
+        zigToolchainList.forEach { (uuid, toolchain) ->
             addToolchain(uuid, toolchain)
+            if (uuid == onReload) {
+                hasOnReload = true
+            }
         }
         (myTree.model as DefaultTreeModel).reload()
+        if (hasOnReload) {
+            selectNodeInTree(onReload)
+            return
+        }
         currentSelection?.let {
             selectNodeInTree(it)
         }
     }
 
-    override fun disposeUIResources() {
-        super.disposeUIResources()
-        if (registered) {
-            ZigToolchainListService.getInstance().removeChangeListener(this)
+    @RequiresEdt
+    private fun applyUUIDNowOrOnReload(uuid: UUID?) {
+        selectNodeInTree(uuid)
+        val currentSelection = selectedObject?.asSafely<UUID>()
+        if (uuid != null && uuid != currentSelection) {
+            selectOnNextReload = uuid
+        } else {
+            selectOnNextReload = null
         }
     }
 
-    override suspend fun toolchainListChanged() {
+    private suspend fun toolchainListChanged() {
         withEDTContext(myWholePanel.asContextElement()) {
             reloadTree()
         }

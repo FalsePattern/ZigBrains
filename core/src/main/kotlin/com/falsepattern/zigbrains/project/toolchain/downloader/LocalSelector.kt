@@ -27,10 +27,12 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.runInterruptibleEDT
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
+import com.falsepattern.zigbrains.shared.withUniqueName
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.application.ModalityState
@@ -78,9 +80,7 @@ object LocalSelector {
                 errorMessageBox.text = ZigBrainsBundle.message("settings.toolchain.local-selector.state.invalid")
                 dialog.setOkActionEnabled(false)
             } else {
-                val existingToolchain = ZigToolchainListService
-                    .getInstance()
-                    .toolchains
+                val existingToolchain = zigToolchainList
                     .mapNotNull { it.second as? LocalZigToolchain }
                     .firstOrNull { it.location == tc.location }
                 if (existingToolchain != null) {
@@ -95,7 +95,7 @@ object LocalSelector {
                 }
             }
             if (tc != null) {
-                tc = ZigToolchainListService.getInstance().withUniqueName(tc)
+                tc = zigToolchainList.withUniqueName(tc)
             }
             val prevNameDefault = name.emptyText.text.trim() == name.text.trim() || name.text.isBlank()
             name.emptyText.text = tc?.name ?: ""

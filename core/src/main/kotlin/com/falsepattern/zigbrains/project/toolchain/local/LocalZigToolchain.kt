@@ -28,13 +28,23 @@ import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.toNioPathOrNull
+import com.intellij.util.keyFMap.KeyFMap
 import java.nio.file.Path
 
 @JvmRecord
-data class LocalZigToolchain(val location: Path, val std: Path? = null, override val name: String? = null): ZigToolchain {
+data class LocalZigToolchain(val location: Path, val std: Path? = null, override val name: String? = null, private val userData: KeyFMap = KeyFMap.EMPTY_MAP): ZigToolchain {
+    override fun <T> getUserData(key: Key<T>): T? {
+        return userData.get(key)
+    }
+
+    override fun <T> withUserData(key: Key<T>, value: T?): LocalZigToolchain {
+        return copy(userData = if (value == null) userData.minus(key) else userData.plus(key, value))
+    }
+
     override fun workingDirectory(project: Project?): Path? {
         return project?.guessProjectDir()?.toNioPathOrNull()
     }

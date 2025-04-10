@@ -22,8 +22,7 @@
 
 package com.falsepattern.zigbrains.project.toolchain.base
 
-import com.falsepattern.zigbrains.direnv.DirenvState
-import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
+import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
@@ -37,6 +36,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOn
 import java.util.UUID
+import kotlin.collections.none
 
 private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainProvider>("com.falsepattern.zigbrains.toolchainProvider")
 
@@ -70,7 +70,7 @@ fun ZigToolchain.createNamedConfigurable(uuid: UUID): ZigToolchainConfigurable<*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 fun suggestZigToolchains(project: Project? = null, data: UserDataHolder = emptyData): Flow<ZigToolchain> {
-    val existing = ZigToolchainListService.getInstance().toolchains.map { (_, tc) -> tc }.toList()
+    val existing = zigToolchainList.map { (_, tc) -> tc }
     return EXTENSION_POINT_NAME.extensionList.asFlow().flatMapConcat { ext ->
         val compatibleExisting = existing.filter { ext.isCompatible(it) }
         val suggestions = ext.suggestToolchains(project, data)

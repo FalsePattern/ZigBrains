@@ -23,10 +23,10 @@
 package com.falsepattern.zigbrains.project.toolchain.base
 
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
+import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.util.minimumWidth
 import java.util.UUID
 import javax.swing.JComponent
 
@@ -36,7 +36,7 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
 ): NamedConfigurable<UUID>() {
     var toolchain: T = tc
         set(value) {
-            ZigToolchainListService.getInstance().setToolchain(uuid, value)
+            zigToolchainList[uuid] = value
             field = value
         }
     private var myView: ZigToolchainPanel<T>? = null

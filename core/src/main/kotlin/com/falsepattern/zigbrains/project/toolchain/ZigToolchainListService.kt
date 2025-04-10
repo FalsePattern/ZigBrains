@@ -22,125 +22,31 @@
 
 package com.falsepattern.zigbrains.project.toolchain
 
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService.MyState
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.resolve
 import com.falsepattern.zigbrains.project.toolchain.base.toRef
-import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.falsepattern.zigbrains.shared.AccessibleStorage
+import com.falsepattern.zigbrains.shared.ChangeTrackingStorage
+import com.falsepattern.zigbrains.shared.IterableStorage
+import com.falsepattern.zigbrains.shared.UUIDMapSerializable
+import com.falsepattern.zigbrains.shared.UUIDStorage
 import com.intellij.openapi.components.*
-import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
-import java.util.UUID
 
 @Service(Service.Level.APP)
 @State(
     name = "ZigToolchainList",
     storages = [Storage("zigbrains.xml")]
 )
-class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchainListService.State>(State()), IZigToolchainListService {
-    private val changeListeners = ArrayList<WeakReference<ToolchainListChangeListener>>()
+class ZigToolchainListService: UUIDMapSerializable.Converting<ZigToolchain, ZigToolchain.Ref, MyState>(MyState()), IZigToolchainListService {
+    override fun serialize(value: ZigToolchain) = value.toRef()
+    override fun deserialize(value: ZigToolchain.Ref) = value.resolve()
+    override fun getStorage(state: MyState) = state.toolchains
+    override fun updateStorage(state: MyState, storage: ToolchainStorage) = state.copy(toolchains = storage)
 
-    override val toolchains: Sequence<Pair<UUID, ZigToolchain>>
-        get() = state.toolchains
-            .asSequence()
-            .mapNotNull {
-                val uuid = UUID.fromString(it.key) ?: return@mapNotNull null
-                val tc = it.value.resolve() ?: return@mapNotNull null
-                uuid to tc
-            }
-
-    override fun setToolchain(uuid: UUID, toolchain: ZigToolchain) {
-        val str = uuid.toString()
-        val ref = toolchain.toRef()
-        updateState {
-            val newMap = HashMap<String, ZigToolchain.Ref>()
-            newMap.putAll(it.toolchains)
-            newMap[str] = ref
-            it.copy(toolchains = newMap)
-        }
-        notifyChanged()
-    }
-
-    override fun registerNewToolchain(toolchain: ZigToolchain): UUID {
-        val ref = toolchain.toRef()
-        var uuid = UUID.randomUUID()
-        updateState {
-            val newMap = HashMap<String, ZigToolchain.Ref>()
-            newMap.putAll(it.toolchains)
-            var uuidStr = uuid.toString()
-            while (newMap.containsKey(uuidStr)) {
-                uuid = UUID.randomUUID()
-                uuidStr = uuid.toString()
-            }
-            newMap[uuidStr] = ref
-            it.copy(toolchains = newMap)
-        }
-        notifyChanged()
-        return uuid
-    }
-
-    override fun getToolchain(uuid: UUID): ZigToolchain? {
-        return state.toolchains[uuid.toString()]?.resolve()
-    }
-
-    override fun hasToolchain(uuid: UUID): Boolean {
-        return state.toolchains.containsKey(uuid.toString())
-    }
-
-    override fun removeToolchain(uuid: UUID) {
-        val str = uuid.toString()
-        updateState {
-            it.copy(toolchains = it.toolchains.filter { it.key != str })
-        }
-        notifyChanged()
-    }
-
-    override fun addChangeListener(listener: ToolchainListChangeListener) {
-        synchronized(changeListeners) {
-            changeListeners.add(WeakReference(listener))
-        }
-    }
-
-    override fun removeChangeListener(listener: ToolchainListChangeListener) {
-        synchronized(changeListeners) {
-            changeListeners.removeIf {
-                val v = it.get()
-                v == null || v === listener
-            }
-        }
-    }
-
-    override fun <T: ZigToolchain> withUniqueName(toolchain: T): T {
-        val baseName = toolchain.name ?: ""
-        var index = 0
-        var currentName = baseName
-        while (toolchains.any { (_, existing) -> existing.name == currentName }) {
-            index++
-            currentName = "$baseName ($index)"
-        }
-        @Suppress("UNCHECKED_CAST")
-        return toolchain.withName(currentName) as T
-    }
-
-    private fun notifyChanged() {
-        synchronized(changeListeners) {
-            var i = 0
-            while (i < changeListeners.size) {
-                val v = changeListeners[i].get()
-                if (v == null) {
-                    changeListeners.removeAt(i)
-                    continue
-                }
-                zigCoroutineScope.launch {
-                    v.toolchainListChanged()
-                }
-                i++
-            }
-        }
-    }
-
-    data class State(
+    data class MyState(
         @JvmField
-        val toolchains: Map<String, ZigToolchain.Ref> = emptyMap(),
+        val toolchains: ToolchainStorage = emptyMap(),
     )
 
     companion object {
@@ -149,19 +55,8 @@ class ZigToolchainListService: SerializablePersistentStateComponent<ZigToolchain
     }
 }
 
-@FunctionalInterface
-interface ToolchainListChangeListener {
-    suspend fun toolchainListChanged()
-}
+inline val zigToolchainList: IZigToolchainListService get() = ZigToolchainListService.getInstance()
 
-sealed interface IZigToolchainListService {
-    val toolchains: Sequence<Pair<UUID, ZigToolchain>>
-    fun setToolchain(uuid: UUID, toolchain: ZigToolchain)
-    fun registerNewToolchain(toolchain: ZigToolchain): UUID
-    fun getToolchain(uuid: UUID): ZigToolchain?
-    fun hasToolchain(uuid: UUID): Boolean
-    fun removeToolchain(uuid: UUID)
-    fun addChangeListener(listener: ToolchainListChangeListener)
-    fun removeChangeListener(listener: ToolchainListChangeListener)
-    fun <T: ZigToolchain> withUniqueName(toolchain: T): T
-}
+sealed interface IZigToolchainListService: ChangeTrackingStorage, AccessibleStorage<ZigToolchain>, IterableStorage<ZigToolchain>
+
+private typealias ToolchainStorage = UUIDStorage<ZigToolchain.Ref>

@@ -23,14 +23,13 @@
 package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.direnv.DirenvService
-import com.falsepattern.zigbrains.direnv.DirenvState
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
-import com.falsepattern.zigbrains.project.toolchain.ToolchainListChangeListener
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.project.toolchain.base.createNamedConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchains
+import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
+import com.falsepattern.zigbrains.shared.StorageChangeListener
 import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
@@ -48,6 +47,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.event.ItemEvent
@@ -55,16 +55,17 @@ import java.util.UUID
 import javax.swing.JButton
 import kotlin.collections.addAll
 
-class ZigToolchainEditor(private var project: Project?, private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge): SubConfigurable<Project>, ToolchainListChangeListener, ZigProjectConfigurationProvider.UserDataListener {
+class ZigToolchainEditor(private var project: Project?, private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge): SubConfigurable<Project>, ZigProjectConfigurationProvider.UserDataListener {
     private val toolchainBox: TCComboBox
     private var selectOnNextReload: UUID? = null
     private val model: TCModel
     private var editButton: JButton? = null
+    private val changeListener: StorageChangeListener = { this@ZigToolchainEditor.toolchainListChanged() }
     init {
         model = TCModel(getModelList(project, sharedState))
         toolchainBox = TCComboBox(model)
         toolchainBox.addItemListener(::itemStateChanged)
-        ZigToolchainListService.getInstance().addChangeListener(this)
+        zigToolchainList.addChangeListener(changeListener)
         sharedState.addUserDataChangeListener(this)
         model.whenListChanged {
             if (toolchainBox.isPopupVisible) {
@@ -89,13 +90,14 @@ class ZigToolchainEditor(private var project: Project?, private val sharedState:
             return
         zigCoroutineScope.launch(toolchainBox.asContextElement()) {
             val uuid = runCatching { ZigToolchainComboBoxHandler.onItemSelected(toolchainBox, item) }.getOrNull()
+            delay(100)
             withEDTContext(toolchainBox.asContextElement()) {
                 applyUUIDNowOrOnReload(uuid)
             }
         }
     }
 
-    override suspend fun toolchainListChanged() {
+    private suspend fun toolchainListChanged() {
         withContext(Dispatchers.EDT + toolchainBox.asContextElement()) {
             val list = getModelList(project, sharedState)
             model.updateContents(list)
@@ -143,7 +145,7 @@ class ZigToolchainEditor(private var project: Project?, private val sharedState:
             button(ZigBrainsBundle.message("settings.toolchain.editor.toolchain.edit-button.name")) { e ->
                 zigCoroutineScope.launchWithEDT(toolchainBox.asContextElement()) {
                     var selectedUUID = toolchainBox.selectedToolchain ?: return@launchWithEDT
-                    val toolchain = ZigToolchainListService.getInstance().getToolchain(selectedUUID) ?: return@launchWithEDT
+                    val toolchain = zigToolchainList[selectedUUID] ?: return@launchWithEDT
                     val config = toolchain.createNamedConfigurable(selectedUUID)
                     val apply = ShowSettingsUtil.getInstance().editConfigurable(DialogWrapper.findInstance(toolchainBox)?.contentPane, config)
                     if (apply) {
@@ -182,7 +184,7 @@ class ZigToolchainEditor(private var project: Project?, private val sharedState:
     }
 
     override fun dispose() {
-        ZigToolchainListService.getInstance().removeChangeListener(this)
+        zigToolchainList.removeChangeListener(changeListener)
     }
 
     override val newProjectBeforeInitSelector get() = true
@@ -199,7 +201,7 @@ class ZigToolchainEditor(private var project: Project?, private val sharedState:
 private fun getModelList(project: Project?, data: UserDataHolder): List<TCListElemIn> {
     val modelList = ArrayList<TCListElemIn>()
     modelList.add(TCListElem.None)
-    modelList.addAll(ZigToolchainListService.getInstance().toolchains.map { it.asActual() }.sortedBy { it.toolchain.name })
+    modelList.addAll(zigToolchainList.map { it.asActual() }.sortedBy { it.toolchain.name })
     modelList.add(Separator("", true))
     modelList.addAll(TCListElem.fetchGroup)
     modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))

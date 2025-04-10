@@ -25,6 +25,8 @@ package com.falsepattern.zigbrains.project.toolchain.ui
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainListService
 import com.falsepattern.zigbrains.project.toolchain.downloader.Downloader
 import com.falsepattern.zigbrains.project.toolchain.downloader.LocalSelector
+import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
+import com.falsepattern.zigbrains.shared.withUniqueName
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
 import java.awt.Component
 import java.util.UUID
@@ -32,8 +34,8 @@ import java.util.UUID
 internal object ZigToolchainComboBoxHandler {
     @RequiresBackgroundThread
     suspend fun onItemSelected(context: Component, elem: TCListElem.Pseudo): UUID? = when(elem) {
-        is TCListElem.Toolchain.Suggested -> ZigToolchainListService.getInstance().withUniqueName(elem.toolchain)
+        is TCListElem.Toolchain.Suggested -> zigToolchainList.withUniqueName(elem.toolchain)
         is TCListElem.Download -> Downloader.downloadToolchain(context)
         is TCListElem.FromDisk -> LocalSelector.browseFromDisk(context)
-    }?.let { ZigToolchainListService.getInstance().registerNewToolchain(it) }
+    }?.let { zigToolchainList.registerNew(it) }
 }

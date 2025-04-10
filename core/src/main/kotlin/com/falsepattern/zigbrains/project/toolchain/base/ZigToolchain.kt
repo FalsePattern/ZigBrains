@@ -23,8 +23,10 @@
 package com.falsepattern.zigbrains.project.toolchain.base
 
 import com.falsepattern.zigbrains.project.toolchain.tools.ZigCompilerTool
+import com.falsepattern.zigbrains.shared.NamedObject
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.MapAnnotation
 import java.nio.file.Path
@@ -32,21 +34,21 @@ import java.nio.file.Path
 /**
  * These MUST be stateless and interchangeable! (e.g., immutable data class)
  */
-interface ZigToolchain {
+interface ZigToolchain: NamedObject<ZigToolchain> {
     val zig: ZigCompilerTool get() = ZigCompilerTool(this)
 
-    val name: String?
+    fun <T> getUserData(key: Key<T>): T?
+
+    /**
+     * Returned type must be the same class
+     */
+    fun <T> withUserData(key: Key<T>, value: T?): ZigToolchain
 
     fun workingDirectory(project: Project? = null): Path?
 
     suspend fun patchCommandLine(commandLine: GeneralCommandLine, project: Project? = null): GeneralCommandLine
 
     fun pathToExecutable(toolName: String, project: Project? = null): Path
-
-    /**
-     * Returned object must be the same class.
-     */
-    fun withName(newName: String?): ZigToolchain
 
     data class Ref(
         @JvmField

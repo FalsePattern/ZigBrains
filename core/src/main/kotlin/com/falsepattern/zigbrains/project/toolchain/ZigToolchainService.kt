@@ -45,7 +45,7 @@ import java.util.UUID
 class ZigToolchainService(val project: Project): SerializablePersistentStateComponent<ZigToolchainService.State>(State()), IZigToolchainService {
     override var toolchainUUID: UUID?
         get() = state.toolchain.ifBlank { null }?.let { UUID.fromString(it) }?.takeIf {
-            if (ZigToolchainListService.getInstance().hasToolchain(it)) {
+            if (it in zigToolchainList) {
                 true
             } else {
                 updateState {
@@ -64,7 +64,7 @@ class ZigToolchainService(val project: Project): SerializablePersistentStateComp
         }
 
     override val toolchain: ZigToolchain?
-        get() = toolchainUUID?.let { ZigToolchainListService.getInstance().getToolchain(it) }
+        get() = toolchainUUID?.let { zigToolchainList[it] }
 
     data class State(
         @JvmField
