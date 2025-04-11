@@ -17,6 +17,14 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- Project
+  - BREAKING MAJOR UPDATE: Fully reworked toolchain and language server management 
+  The configuration menu is now very similar to the intellij java toolchain management,
+  with proper toolchain selection, detection, downloading, etc. This change will require
+  you to re-configure your toolchains!
+
 ## [24.0.1]
 
 ### Added
