@@ -23,7 +23,8 @@
 package com.falsepattern.zigbrains.lsp
 
 import com.falsepattern.zigbrains.lsp.config.ZLSConfigProviderBase
-import com.falsepattern.zigbrains.lsp.zls.ZLSService
+import com.falsepattern.zigbrains.lsp.zls.zls
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -52,8 +53,7 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
 
         @OptIn(ExperimentalSerializationApi::class)
         suspend fun getCommand(project: Project): List<String>? {
-            val svc = ZLSService.getInstance(project)
-            val zls = svc.zls ?: return null
+            val zls = project.zls ?: return null
             val zlsPath: Path = zls.path
             if (!zlsPath.toFile().exists()) {
                 Notification(

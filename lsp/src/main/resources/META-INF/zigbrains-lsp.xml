@@ -65,7 +65,7 @@
         <zlsConfigProvider
                 implementation="com.falsepattern.zigbrains.lsp.ToolchainZLSConfigProvider"
         />
-        <projectConfigProvider
+        <toolchainExtensionsProvider
                 implementation="com.falsepattern.zigbrains.lsp.zls.ui.ZLSEditor$Provider"
         />
     </extensions>

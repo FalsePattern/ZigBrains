@@ -22,7 +22,7 @@
 
 package com.falsepattern.zigbrains.lsp
 
-import com.falsepattern.zigbrains.lsp.zls.ZLSService
+import com.falsepattern.zigbrains.lsp.zls.zls
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -68,7 +68,7 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
         }
         features.inlayHintFeature = object: LSPInlayHintFeature() {
             override fun isEnabled(file: PsiFile): Boolean {
-                return ZLSService.getInstance(project).zls?.settings?.inlayHints == true
+                return project.zls?.settings?.inlayHints == true
             }
         }
         return features
@@ -82,7 +82,7 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
 }
 
 fun Project.zlsEnabled(): Boolean {
-    return (getUserData(ENABLED_KEY) != false) && ZLSService.getInstance(this).zls?.isValid() == true
+    return (getUserData(ENABLED_KEY) != false) && zls?.isValid() == true
 }
 
 fun Project.zlsEnabled(value: Boolean) {
@@ -125,7 +125,7 @@ private suspend fun doStart(project: Project, restart: Boolean) {
         project.lsm.stop("ZigBrains")
         delay(250)
     }
-    if (ZLSService.getInstance(project).zls?.isValid() == true) {
+    if (project.zls?.isValid() == true) {
         delay(250)
         project.lsm.start("ZigBrains")
     }

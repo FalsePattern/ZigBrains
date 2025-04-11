@@ -22,13 +22,15 @@
 
 package com.falsepattern.zigbrains.project.toolchain.local
 
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
 import java.util.UUID
 
 class LocalZigToolchainConfigurable(
     uuid: UUID,
-    toolchain: LocalZigToolchain
-): ZigToolchainConfigurable<LocalZigToolchain>(uuid, toolchain) {
+    toolchain: LocalZigToolchain,
+    data: ZigProjectConfigurationProvider.IUserDataBridge?
+): ZigToolchainConfigurable<LocalZigToolchain>(uuid, toolchain, data) {
     override fun createPanel() = LocalZigToolchainPanel()
 
     override fun setDisplayName(name: String?) {

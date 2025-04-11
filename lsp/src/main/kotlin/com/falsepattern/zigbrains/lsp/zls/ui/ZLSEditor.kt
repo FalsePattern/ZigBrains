@@ -22,27 +22,28 @@
 
 package com.falsepattern.zigbrains.lsp.zls.ui
 
-import com.falsepattern.zigbrains.lsp.zls.ZLSService
+import com.falsepattern.zigbrains.lsp.ZLSStarter
+import com.falsepattern.zigbrains.lsp.startLSP
 import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
+import com.falsepattern.zigbrains.lsp.zls.withZLS
+import com.falsepattern.zigbrains.lsp.zls.zlsUUID
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
-import com.falsepattern.zigbrains.shared.SubConfigurable
-import com.falsepattern.zigbrains.shared.ui.UUIDMapEditor
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainExtensionsProvider
+import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableElementPanel
 import com.falsepattern.zigbrains.shared.ui.UUIDMapSelector
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Key
 import com.intellij.ui.dsl.builder.Panel
 import kotlinx.coroutines.launch
 
-class ZLSEditor(private var project: Project?,
-                private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge):
-    UUIDMapSelector<ZLSVersion>(ZLSDriver),
-    SubConfigurable<Project>,
+class ZLSEditor<T: ZigToolchain>(private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge?):
+    UUIDMapSelector<ZLSVersion>(ZLSDriver.ForSelector(sharedState)),
+    ImmutableElementPanel<T>,
     ZigProjectConfigurationProvider.UserDataListener
 {
     init {
-        sharedState.addUserDataChangeListener(this)
+        sharedState?.addUserDataChangeListener(this)
     }
 
     override fun onUserDataChanged(key: Key<*>) {
@@ -55,35 +56,30 @@ class ZLSEditor(private var project: Project?,
         }
     }
 
-    override fun isModified(context: Project): Boolean {
-        return ZLSService.getInstance(context).zlsUUID != selectedUUID
+    override fun isModified(toolchain: T): Boolean {
+        return toolchain.zlsUUID != selectedUUID
     }
 
-    override fun apply(context: Project) {
-        ZLSService.getInstance(context).zlsUUID = selectedUUID
+    override fun apply(toolchain: T): T {
+        return toolchain.withZLS(selectedUUID)
     }
 
-    override fun reset(context: Project?) {
-        val project = context ?: ProjectManager.getInstance().defaultProject
-        selectedUUID = ZLSService.getInstance(project).zlsUUID
+    override fun reset(toolchain: T) {
+        selectedUUID = toolchain.zlsUUID
     }
 
     override fun dispose() {
         super.dispose()
-        sharedState.removeUserDataChangeListener(this)
+        sharedState?.removeUserDataChangeListener(this)
     }
 
-    override val newProjectBeforeInitSelector: Boolean get() = true
-    class Provider: ZigProjectConfigurationProvider {
-        override fun create(
-            project: Project?,
-            sharedState: ZigProjectConfigurationProvider.IUserDataBridge
-        ): SubConfigurable<Project>? {
-            return ZLSEditor(project, sharedState)
+    class Provider: ZigToolchainExtensionsProvider {
+        override fun <T : ZigToolchain> createExtensionPanel(sharedState: ZigProjectConfigurationProvider.IUserDataBridge?): ImmutableElementPanel<T>? {
+            return ZLSEditor(sharedState)
         }
 
         override val index: Int
-            get() = 50
+            get() = 100
 
     }
 }

@@ -30,13 +30,15 @@ import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.util.UserDataHolderBase
 
 interface ZigProjectConfigurationProvider {
-    fun create(project: Project?, sharedState: IUserDataBridge): SubConfigurable<Project>?
+    fun create(sharedState: IUserDataBridge): SubConfigurable<Project>?
     val index: Int
     companion object {
         private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigProjectConfigurationProvider>("com.falsepattern.zigbrains.projectConfigProvider")
+        val PROJECT_KEY: Key<Project> = Key.create("Project")
         fun createPanels(project: Project?): List<SubConfigurable<Project>> {
             val sharedState = UserDataBridge()
-            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.index }.mapNotNull { it.create(project, sharedState) }
+            sharedState.putUserData(PROJECT_KEY, project)
+            return EXTENSION_POINT_NAME.extensionList.sortedBy { it.index }.mapNotNull { it.create(sharedState) }
         }
     }
 
@@ -51,7 +53,7 @@ interface ZigProjectConfigurationProvider {
 
     class UserDataBridge: UserDataHolderBase(), IUserDataBridge {
         private val listeners = ArrayList<UserDataListener>()
-        override fun <T : Any?> putUserData(key: Key<T?>, value: T?) {
+        override fun <T : Any?> putUserData(key: Key<T>, value: T?) {
             super.putUserData(key, value)
             synchronized(listeners) {
                 listeners.forEach { listener ->

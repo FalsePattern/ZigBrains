@@ -37,12 +37,12 @@ import java.nio.file.Path
 interface ZigToolchain: NamedObject<ZigToolchain> {
     val zig: ZigCompilerTool get() = ZigCompilerTool(this)
 
-    fun <T> getUserData(key: Key<T>): T?
+    val extraData: Map<String, String>
 
     /**
      * Returned type must be the same class
      */
-    fun <T> withUserData(key: Key<T>, value: T?): ZigToolchain
+    fun withExtraData(map: Map<String, String>): ZigToolchain
 
     fun workingDirectory(project: Project? = null): Path?
 
@@ -55,7 +55,18 @@ interface ZigToolchain: NamedObject<ZigToolchain> {
         @Attribute
         val marker: String? = null,
         @JvmField
-        @MapAnnotation(surroundWithTag = false)
         val data: Map<String, String>? = null,
+        @JvmField
+        val extraData: Map<String, String>? = null,
     )
+}
+
+fun <T: ZigToolchain> T.withExtraData(key: String, value: String?): T {
+    val newMap = HashMap<String, String>()
+    newMap.putAll(extraData.filter { (theKey, _) -> theKey != key})
+    if (value != null) {
+        newMap[key] = value
+    }
+    @Suppress("UNCHECKED_CAST")
+    return withExtraData(newMap) as T
 }

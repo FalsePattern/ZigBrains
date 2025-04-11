@@ -20,20 +20,17 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.downloader
+package com.falsepattern.zigbrains.shared.downloader
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.local.getSuggestedLocalToolchainPath
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
 import com.falsepattern.zigbrains.shared.coroutine.runInterruptibleEDT
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.observable.util.whenFocusGained
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.NlsContexts
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
@@ -45,45 +42,53 @@ import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Cell
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.util.asSafely
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import java.awt.Component
 import java.nio.file.Path
+import java.util.Vector
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JList
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
-object Downloader {
-    suspend fun downloadToolchain(component: Component): ZigToolchain? {
+abstract class Downloader<T, V: VersionInfo>(val component: Component) {
+    suspend fun download(): T? {
         val info = withModalProgress(
             ModalTaskOwner.component(component),
-            ZigBrainsBundle.message("settings.toolchain.downloader.progress.fetch"),
+            versionInfoFetchTitle,
             TaskCancellation.cancellable()
         ) {
-            ZigVersionInfo.downloadVersionList()
+            downloadVersionList()
         }
+        val selector = localSelector()
         val (downloadPath, version) = runInterruptibleEDT(component.asContextElement()) {
-            selectToolchain(info)
+            selectVersion(info, selector)
         } ?: return null
         withModalProgress(
             ModalTaskOwner.component(component),
-            ZigBrainsBundle.message("settings.toolchain.downloader.progress.install", version.version.rawVersion),
+            downloadProgressTitle(version),
             TaskCancellation.cancellable()
         ) {
             version.downloadAndUnpack(downloadPath)
         }
-        return LocalZigToolchain.tryFromPath(downloadPath)?.let { LocalSelector.browseFromDisk(component, it) }
+        return selector.browse(downloadPath)
     }
 
+    protected abstract val windowTitle: String
+    protected abstract val versionInfoFetchTitle: @NlsContexts.ProgressTitle String
+    protected abstract fun downloadProgressTitle(version: V): @NlsContexts.ProgressTitle String
+    protected abstract fun localSelector(): LocalSelector<T>
+    protected abstract suspend fun downloadVersionList(): List<V>
+    protected abstract fun getSuggestedPath(): Path?
+
     @RequiresEdt
-    private fun selectToolchain(info: List<ZigVersionInfo>): Pair<Path, ZigVersionInfo>? {
+    private fun selectVersion(info: List<V>, selector: LocalSelector<T>): Pair<Path, V>? {
         val dialog = DialogBuilder()
-        val theList = ComboBox(DefaultComboBoxModel(info.toTypedArray()))
-        theList.renderer = object: ColoredListCellRenderer<ZigVersionInfo>() {
+        val theList = ComboBox(DefaultComboBoxModel(Vector(info)))
+        theList.renderer = object: ColoredListCellRenderer<V>() {
             override fun customizeCellRenderer(
-                list: JList<out ZigVersionInfo>,
-                value: ZigVersionInfo?,
+                list: JList<out V>,
+                value: V?,
                 index: Int,
                 selected: Boolean,
                 hasFocus: Boolean
@@ -91,18 +96,14 @@ object Downloader {
                 value?.let { append(it.version.rawVersion) }
             }
         }
-        val outputPath = textFieldWithBrowseButton(
-            null,
-            FileChooserDescriptorFactory.createSingleFolderDescriptor()
-                .withTitle(ZigBrainsBundle.message("settings.toolchain.downloader.chooser.title"))
-        )
+        val outputPath = textFieldWithBrowseButton(null, selector.descriptor)
         Disposer.register(dialog, outputPath)
         outputPath.textField.columns = 50
 
         lateinit var errorMessageBox: JBLabel
         fun onChanged() {
             val path = outputPath.text.ifBlank { null }?.toNioPathOrNull()
-            val state = DirectoryState.determine(path)
+            val state = DirectoryState.Companion.determine(path)
             if (state.isValid()) {
                 errorMessageBox.icon = AllIcons.General.Information
                 dialog.setOkActionEnabled(true)
@@ -111,12 +112,12 @@ object Downloader {
                 dialog.setOkActionEnabled(false)
             }
             errorMessageBox.text = ZigBrainsBundle.message(when(state) {
-                DirectoryState.Invalid -> "settings.toolchain.downloader.state.invalid"
-                DirectoryState.NotAbsolute -> "settings.toolchain.downloader.state.not-absolute"
-                DirectoryState.NotDirectory -> "settings.toolchain.downloader.state.not-directory"
-                DirectoryState.NotEmpty -> "settings.toolchain.downloader.state.not-empty"
-                DirectoryState.CreateNew -> "settings.toolchain.downloader.state.create-new"
-                DirectoryState.Ok -> "settings.toolchain.downloader.state.ok"
+                DirectoryState.Invalid -> "settings.shared.downloader.state.invalid"
+                DirectoryState.NotAbsolute -> "settings.shared.downloader.state.not-absolute"
+                DirectoryState.NotDirectory -> "settings.shared.downloader.state.not-directory"
+                DirectoryState.NotEmpty -> "settings.shared.downloader.state.not-empty"
+                DirectoryState.CreateNew -> "settings.shared.downloader.state.create-new"
+                DirectoryState.Ok -> "settings.shared.downloader.state.ok"
             })
             dialog.window.repaint()
         }
@@ -129,20 +130,21 @@ object Downloader {
             }
         })
         var archiveSizeCell: Cell<*>? = null
-        fun detect(item: ZigVersionInfo) {
-            outputPath.text = getSuggestedLocalToolchainPath()?.resolve(item.version.rawVersion)?.pathString ?: ""
+        fun detect(item: V) {
+            outputPath.text = getSuggestedPath()?.resolve(item.version.rawVersion)?.pathString ?: ""
             val size = item.dist.size
             val sizeMb = size / (1024f * 1024f)
-            archiveSizeCell?.comment?.text = ZigBrainsBundle.message("settings.toolchain.downloader.archive-size.text", "%.2fMB".format(sizeMb))
+            archiveSizeCell?.comment?.text = ZigBrainsBundle.message("settings.shared.downloader.archive-size.text", "%.2fMB".format(sizeMb))
         }
         theList.addItemListener {
-            detect(it.item as ZigVersionInfo)
+            @Suppress("UNCHECKED_CAST")
+            detect(it.item as V)
         }
         val center = panel {
-            row(ZigBrainsBundle.message("settings.toolchain.downloader.version.label")) {
+            row(ZigBrainsBundle.message("settings.shared.downloader.version.label")) {
                 cell(theList).resizableColumn().align(AlignX.FILL)
             }
-            row(ZigBrainsBundle.message("settings.toolchain.downloader.location.label")) {
+            row(ZigBrainsBundle.message("settings.shared.downloader.location.label")) {
                 cell(outputPath).resizableColumn().align(AlignX.FILL).apply { archiveSizeCell = comment("") }
             }
             row {
@@ -152,19 +154,18 @@ object Downloader {
         }
         detect(info[0])
         dialog.centerPanel(center)
-        dialog.setTitle(ZigBrainsBundle.message("settings.toolchain.downloader.title"))
+        dialog.setTitle(windowTitle)
         dialog.addCancelAction()
-        dialog.addOkAction().also { it.setText(ZigBrainsBundle.message("settings.toolchain.downloader.ok-action")) }
+        dialog.addOkAction().also { it.setText(ZigBrainsBundle.message("settings.shared.downloader.ok-action")) }
         if (!dialog.showAndGet()) {
             return null
         }
         val path = outputPath.text.ifBlank { null }?.toNioPathOrNull()
                    ?: return null
-        if (!DirectoryState.determine(path).isValid()) {
+        if (!DirectoryState.Companion.determine(path).isValid()) {
             return null
         }
-        val version = theList.selectedItem?.asSafely<ZigVersionInfo>()
-                      ?: return null
+        val version = theList.item ?: return null
 
         return path to version
     }

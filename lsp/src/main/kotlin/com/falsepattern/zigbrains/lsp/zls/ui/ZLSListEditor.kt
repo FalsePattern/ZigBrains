@@ -28,7 +28,7 @@ import com.falsepattern.zigbrains.shared.ui.UUIDMapEditor
 import com.intellij.openapi.ui.MasterDetailsComponent
 import com.intellij.openapi.util.NlsContexts
 
-class ZLSListEditor : UUIDMapEditor<ZLSVersion>(ZLSDriver) {
+class ZLSListEditor : UUIDMapEditor<ZLSVersion>(ZLSDriver.ForList) {
     override fun getEmptySelectionString(): String {
         return ZLSBundle.message("settings.list.empty")
     }

@@ -58,10 +58,10 @@ abstract class UUIDMapSerializable<T, S: Any>(init: S): SerializablePersistentSt
         updateState {
             val newMap = HashMap<String, T>()
             newMap.putAll(getStorage(it))
-            var uuidStr = uuid.toString()
+            var uuidStr = uuid.asString()
             while (newMap.containsKey(uuidStr)) {
                 uuid = UUID.randomUUID()
-                uuidStr = uuid.toString()
+                uuidStr = uuid.asString()
             }
             newMap[uuidStr] = value
             updateStorage(it, newMap)
@@ -71,7 +71,7 @@ abstract class UUIDMapSerializable<T, S: Any>(init: S): SerializablePersistentSt
     }
     
     protected fun setStateUUID(uuid: UUID, value: T) {
-        val str = uuid.toString()
+        val str = uuid.asString()
         updateState {
             val newMap = HashMap<String, T>()
             newMap.putAll(getStorage(it))
@@ -82,15 +82,15 @@ abstract class UUIDMapSerializable<T, S: Any>(init: S): SerializablePersistentSt
     }
     
     protected fun getStateUUID(uuid: UUID): T? {
-        return getStorage(state)[uuid.toString()]
+        return getStorage(state)[uuid.asString()]
     }
     
     protected fun hasStateUUID(uuid: UUID): Boolean {
-        return getStorage(state).containsKey(uuid.toString())
+        return getStorage(state).containsKey(uuid.asString())
     }
     
     protected fun removeStateUUID(uuid: UUID) {
-        val str = uuid.toString()
+        val str = uuid.asString()
         updateState { 
             updateStorage(state, getStorage(state).filter { it.key != str })
         }
@@ -143,7 +143,7 @@ abstract class UUIDMapSerializable<T, S: Any>(init: S): SerializablePersistentSt
             return getStorage(state)
                 .asSequence()
                 .mapNotNull {
-                    val uuid = UUID.fromString(it.key) ?: return@mapNotNull null
+                    val uuid = it.key.asUUID() ?: return@mapNotNull null
                     val tc = deserialize(it.value) ?: return@mapNotNull null
                     uuid to tc
                 }.iterator()

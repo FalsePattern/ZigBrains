@@ -23,6 +23,8 @@
 package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider.Companion.PROJECT_KEY
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.createNamedConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.suggestZigToolchains
@@ -60,13 +62,6 @@ sealed interface ZigToolchainDriver: UUIDComboBoxDriver<ZigToolchain> {
         return ZigToolchainComboBoxHandler.onItemSelected(context, elem)
     }
 
-    override fun createNamedConfigurable(
-        uuid: UUID,
-        elem: ZigToolchain
-    ): NamedConfigurable<UUID> {
-        return elem.createNamedConfigurable(uuid)
-    }
-
     object ForList: ZigToolchainDriver {
         override fun constructModelList(): List<ListElemIn<ZigToolchain>> {
             val modelList = ArrayList<ListElemIn<ZigToolchain>>()
@@ -75,9 +70,16 @@ sealed interface ZigToolchainDriver: UUIDComboBoxDriver<ZigToolchain> {
             modelList.add(suggestZigToolchains().asPending())
             return modelList
         }
+
+        override fun createNamedConfigurable(
+            uuid: UUID,
+            elem: ZigToolchain
+        ): NamedConfigurable<UUID> {
+            return elem.createNamedConfigurable(uuid, ZigProjectConfigurationProvider.UserDataBridge())
+        }
     }
 
-    class ForSelector(val project: Project?, val data: UserDataHolder): ZigToolchainDriver {
+    class ForSelector(val data: ZigProjectConfigurationProvider.IUserDataBridge): ZigToolchainDriver {
         override fun constructModelList(): List<ListElemIn<ZigToolchain>> {
             val modelList = ArrayList<ListElemIn<ZigToolchain>>()
             modelList.add(ListElem.None())
@@ -85,8 +87,15 @@ sealed interface ZigToolchainDriver: UUIDComboBoxDriver<ZigToolchain> {
             modelList.add(Separator("", true))
             modelList.addAll(ListElem.fetchGroup())
             modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))
-            modelList.add(suggestZigToolchains(project, data).asPending())
+            modelList.add(suggestZigToolchains(data.getUserData(PROJECT_KEY), data).asPending())
             return modelList
+        }
+
+        override fun createNamedConfigurable(
+            uuid: UUID,
+            elem: ZigToolchain
+        ): NamedConfigurable<UUID> {
+            return elem.createNamedConfigurable(uuid, data)
         }
     }
 }

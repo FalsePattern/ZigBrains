@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.toolchain
 
 import com.falsepattern.zigbrains.project.stdlib.ZigSyntheticLibrary
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.shared.asUUID
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.SerializablePersistentStateComponent
@@ -44,7 +45,7 @@ import java.util.UUID
 )
 class ZigToolchainService(private val project: Project): SerializablePersistentStateComponent<ZigToolchainService.State>(State()) {
     var toolchainUUID: UUID?
-        get() = state.toolchain.ifBlank { null }?.let { UUID.fromString(it) }?.takeIf {
+        get() = state.toolchain.ifBlank { null }?.asUUID()?.takeIf {
             if (it in zigToolchainList) {
                 true
             } else {

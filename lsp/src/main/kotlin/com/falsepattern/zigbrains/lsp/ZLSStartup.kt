@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.lsp
 
+import com.falsepattern.zigbrains.lsp.zls.zls
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
@@ -33,7 +34,13 @@ class ZLSStartup: ProjectActivity {
     override suspend fun execute(project: Project) {
         project.zigCoroutineScope.launch {
             var currentState = project.zlsRunning()
+            var currentZLS = project.zls
             while (!project.isDisposed) {
+                val zls = project.zls
+                if (currentZLS != zls) {
+                    startLSP(project, true)
+                }
+                currentZLS = zls
                 val running = project.zlsRunning()
                 if (currentState != running) {
                     EditorNotifications.getInstance(project).updateAllNotifications()

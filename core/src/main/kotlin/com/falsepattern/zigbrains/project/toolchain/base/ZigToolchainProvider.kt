@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.project.toolchain.base
 
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.project.Project
@@ -46,7 +47,7 @@ internal interface ZigToolchainProvider {
     fun deserialize(data: Map<String, String>): ZigToolchain?
     fun serialize(toolchain: ZigToolchain): Map<String, String>
     fun matchesSuggestion(toolchain: ZigToolchain, suggestion: ZigToolchain): Boolean
-    fun createConfigurable(uuid: UUID, toolchain: ZigToolchain): ZigToolchainConfigurable<*>
+    fun createConfigurable(uuid: UUID, toolchain: ZigToolchain, data: ZigProjectConfigurationProvider.IUserDataBridge?): ZigToolchainConfigurable<*>
     suspend fun suggestToolchains(project: Project?, data: UserDataHolder): Flow<ZigToolchain>
     fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean)
 }
@@ -55,17 +56,17 @@ fun ZigToolchain.Ref.resolve(): ZigToolchain? {
     val marker = this.marker ?: return null
     val data = this.data ?: return null
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.serialMarker == marker } ?: return null
-    return provider.deserialize(data)
+    return provider.deserialize(data)?.let { tc -> this.extraData?.let { extraData -> tc.withExtraData(extraData) }}
 }
 
 fun ZigToolchain.toRef(): ZigToolchain.Ref {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
-    return ZigToolchain.Ref(provider.serialMarker, provider.serialize(this))
+    return ZigToolchain.Ref(provider.serialMarker, provider.serialize(this), this.extraData)
 }
 
-fun ZigToolchain.createNamedConfigurable(uuid: UUID): ZigToolchainConfigurable<*> {
+fun ZigToolchain.createNamedConfigurable(uuid: UUID, data: ZigProjectConfigurationProvider.IUserDataBridge?): ZigToolchainConfigurable<*> {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
-    return provider.createConfigurable(uuid, this)
+    return provider.createConfigurable(uuid, this, data)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

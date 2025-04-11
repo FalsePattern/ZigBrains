@@ -67,7 +67,7 @@ sealed interface ListElem<T> : ListElemIn<T> {
     data class Pending<T>(val elems: Flow<ListElem<T>>): ListElem<T>
 
     companion object {
-        private val fetchGroup = listOf<ListElem<Any>>(Download(), FromDisk())
+        private val fetchGroup: List<ListElem<Any>> = listOf(Download(), FromDisk())
         fun <T> fetchGroup() = fetchGroup as List<ListElem<T>>
     }
 }
@@ -79,4 +79,8 @@ fun <T> Pair<UUID, T>.asActual() = ListElem.One.Actual(first, second)
 
 fun <T> T.asSuggested() = ListElem.One.Suggested(this)
 
-fun <T> Flow<T>.asPending() = ListElem.Pending(map { it.asSuggested() })
+@JvmName("listElemFlowAsPending")
+fun <T> Flow<ListElem<T>>.asPending() = ListElem.Pending(this)
+
+fun <T> Flow<T>.asPending() = map { it.asSuggested() }.asPending()
+

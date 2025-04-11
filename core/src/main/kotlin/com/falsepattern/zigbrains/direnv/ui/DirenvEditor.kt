@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.direnv.DirenvService
 import com.falsepattern.zigbrains.direnv.DirenvState
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider.Companion.PROJECT_KEY
 import com.falsepattern.zigbrains.shared.SubConfigurable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -83,8 +84,8 @@ abstract class DirenvEditor<T>(private val sharedState: ZigProjectConfigurationP
     }
 
     class Provider: ZigProjectConfigurationProvider {
-        override fun create(project: Project?, sharedState: ZigProjectConfigurationProvider.IUserDataBridge): SubConfigurable<Project>? {
-            if (project?.isDefault != false) {
+        override fun create(sharedState: ZigProjectConfigurationProvider.IUserDataBridge): SubConfigurable<Project>? {
+            if (sharedState.getUserData(PROJECT_KEY)?.isDefault != false) {
                 return null
             }
             DirenvService.setStateFor(sharedState, DirenvState.Auto)

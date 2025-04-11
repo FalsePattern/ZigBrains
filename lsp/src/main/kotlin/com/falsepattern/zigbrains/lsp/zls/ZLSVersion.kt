@@ -24,14 +24,19 @@ package com.falsepattern.zigbrains.lsp.zls
 
 import com.falsepattern.zigbrains.lsp.settings.ZLSSettings
 import com.falsepattern.zigbrains.shared.NamedObject
+import com.falsepattern.zigbrains.shared.cli.call
+import com.falsepattern.zigbrains.shared.cli.createCommandLineSafe
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.util.text.SemVer
 import java.nio.file.Path
 import com.intellij.util.xmlb.annotations.Attribute
+import kotlin.io.path.isDirectory
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.pathString
 
-data class ZLSVersion(val path: Path, override val name: String?, val settings: ZLSSettings): NamedObject<ZLSVersion> {
+data class ZLSVersion(val path: Path, override val name: String? = null, val settings: ZLSSettings = ZLSSettings()): NamedObject<ZLSVersion> {
     override fun withName(newName: String?): ZLSVersion {
         return copy(name = newName)
     }
@@ -46,6 +51,31 @@ data class ZLSVersion(val path: Path, override val name: String?, val settings: 
         if (!path.isRegularFile() || !path.isExecutable())
             return false
         return true
+    }
+
+    suspend fun version(): SemVer? {
+        if (!isValid())
+            return null
+        val cli = createCommandLineSafe(null, path, "--version").getOrElse { return null }
+        val info = cli.call(5000).getOrElse { return null }
+        return SemVer.parseFromText(info.stdout.trim())
+    }
+
+    companion object {
+        suspend fun tryFromPath(path: Path): ZLSVersion? {
+            if (path.isDirectory()) {
+                val exeName = if (SystemInfo.isWindows) "zls.exe" else "zls"
+                return tryFromPath(path.resolve(exeName))
+            }
+            var zls = ZLSVersion(path)
+            if (!zls.isValid())
+                return null
+            val version = zls.version()?.rawVersion
+            if (version != null) {
+                zls = zls.copy(name = "ZLS $version")
+            }
+            return zls
+        }
     }
 
     data class Ref(

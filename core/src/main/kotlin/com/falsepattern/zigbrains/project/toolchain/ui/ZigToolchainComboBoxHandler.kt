@@ -23,8 +23,8 @@
 package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.downloader.Downloader
-import com.falsepattern.zigbrains.project.toolchain.downloader.LocalSelector
+import com.falsepattern.zigbrains.project.toolchain.downloader.LocalToolchainDownloader
+import com.falsepattern.zigbrains.project.toolchain.downloader.LocalToolchainSelector
 import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
 import com.falsepattern.zigbrains.shared.ui.ListElem
 import com.falsepattern.zigbrains.shared.withUniqueName
@@ -36,7 +36,7 @@ internal object ZigToolchainComboBoxHandler {
     @RequiresBackgroundThread
     suspend fun onItemSelected(context: Component, elem: ListElem.Pseudo<ZigToolchain>): UUID? = when(elem) {
         is ListElem.One.Suggested -> zigToolchainList.withUniqueName(elem.instance)
-        is ListElem.Download -> Downloader.downloadToolchain(context)
-        is ListElem.FromDisk -> LocalSelector.browseFromDisk(context)
+        is ListElem.Download -> LocalToolchainDownloader(context).download()
+        is ListElem.FromDisk -> LocalToolchainSelector(context).browse()
     }?.let { zigToolchainList.registerNew(it) }
 }

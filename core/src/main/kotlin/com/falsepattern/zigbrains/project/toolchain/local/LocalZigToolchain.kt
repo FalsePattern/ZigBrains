@@ -36,15 +36,7 @@ import com.intellij.util.keyFMap.KeyFMap
 import java.nio.file.Path
 
 @JvmRecord
-data class LocalZigToolchain(val location: Path, val std: Path? = null, override val name: String? = null, private val userData: KeyFMap = KeyFMap.EMPTY_MAP): ZigToolchain {
-    override fun <T> getUserData(key: Key<T>): T? {
-        return userData.get(key)
-    }
-
-    override fun <T> withUserData(key: Key<T>, value: T?): LocalZigToolchain {
-        return copy(userData = if (value == null) userData.minus(key) else userData.plus(key, value))
-    }
-
+data class LocalZigToolchain(val location: Path, val std: Path? = null, override val name: String? = null, override val extraData: Map<String, String> = emptyMap()): ZigToolchain {
     override fun workingDirectory(project: Project?): Path? {
         return project?.guessProjectDir()?.toNioPathOrNull()
     }
@@ -61,6 +53,10 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, override
         return location.resolve(exeName)
     }
 
+    override fun withExtraData(map: Map<String, String>): ZigToolchain {
+        return this.copy(extraData = map)
+    }
+
     override fun withName(newName: String?): LocalZigToolchain {
         return this.copy(name = newName)
     }
@@ -74,10 +70,6 @@ data class LocalZigToolchain(val location: Path, val std: Path? = null, override
                 // TODO
                 throw ExecutionException("The debugger only supports local zig toolchain")
             }
-        }
-
-        suspend fun tryFromPathString(pathStr: String?): LocalZigToolchain? {
-            return pathStr?.ifBlank { null }?.toNioPathOrNull()?.let { tryFromPath(it) }
         }
 
         suspend fun tryFromPath(path: Path): LocalZigToolchain? {

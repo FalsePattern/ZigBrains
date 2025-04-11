@@ -20,26 +20,9 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.lsp.zls
+package com.falsepattern.zigbrains.shared
 
-import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.base.withExtraData
-import com.falsepattern.zigbrains.shared.asString
-import com.falsepattern.zigbrains.shared.asUUID
-import com.intellij.openapi.project.Project
 import java.util.UUID
 
-fun <T: ZigToolchain> T.withZLS(uuid: UUID?): T {
-    return withExtraData("zls_uuid", uuid?.asString())
-}
-
-val ZigToolchain.zlsUUID: UUID? get() {
-    return extraData["zls_uuid"]?.asUUID()
-}
-
-val ZigToolchain.zls: ZLSVersion? get() {
-    return zlsUUID?.let { zlsInstallations[it] }
-}
-
-val Project.zls: ZLSVersion? get() = ZigToolchainService.getInstance(this).toolchain?.zls
+fun String.asUUID(): UUID? = UUID.fromString(this)
+fun UUID.asString(): String = toString()

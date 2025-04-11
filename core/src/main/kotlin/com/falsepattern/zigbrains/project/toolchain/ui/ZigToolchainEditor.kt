@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.toolchain.ui
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider.Companion.PROJECT_KEY
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.SubConfigurable
@@ -35,9 +36,8 @@ import com.intellij.openapi.util.Key
 import com.intellij.ui.dsl.builder.Panel
 import kotlinx.coroutines.launch
 
-class ZigToolchainEditor(private var project: Project?,
-                         private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge):
-    UUIDMapSelector<ZigToolchain>(ZigToolchainDriver.ForSelector(project, sharedState)),
+class ZigToolchainEditor(private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge):
+    UUIDMapSelector<ZigToolchain>(ZigToolchainDriver.ForSelector(sharedState)),
     SubConfigurable<Project>,
     ZigProjectConfigurationProvider.UserDataListener
 {
@@ -52,7 +52,7 @@ class ZigToolchainEditor(private var project: Project?,
 
     override fun attach(p: Panel): Unit = with(p) {
         row(ZigBrainsBundle.message(
-            if (project?.isDefault == true)
+            if (sharedState.getUserData(PROJECT_KEY)?.isDefault == true)
                 "settings.toolchain.editor.toolchain-default.label"
             else
                 "settings.toolchain.editor.toolchain.label")
@@ -81,8 +81,8 @@ class ZigToolchainEditor(private var project: Project?,
 
     override val newProjectBeforeInitSelector get() = true
     class Provider: ZigProjectConfigurationProvider {
-        override fun create(project: Project?, sharedState: ZigProjectConfigurationProvider.IUserDataBridge): SubConfigurable<Project>? {
-            return ZigToolchainEditor(project, sharedState).also { it.reset(project) }
+        override fun create(sharedState: ZigProjectConfigurationProvider.IUserDataBridge): SubConfigurable<Project>? {
+            return ZigToolchainEditor(sharedState).also { it.reset(sharedState.getUserData(PROJECT_KEY)) }
         }
 
         override val index: Int get() = 0

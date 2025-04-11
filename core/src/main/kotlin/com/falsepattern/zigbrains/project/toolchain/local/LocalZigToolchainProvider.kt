@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.direnv.DirenvService
 import com.falsepattern.zigbrains.direnv.Env
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider
@@ -84,10 +85,11 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
 
     override fun createConfigurable(
         uuid: UUID,
-        toolchain: ZigToolchain
+        toolchain: ZigToolchain,
+        data: ZigProjectConfigurationProvider.IUserDataBridge?
     ): ZigToolchainConfigurable<*> {
         toolchain as LocalZigToolchain
-        return LocalZigToolchainConfigurable(uuid, toolchain)
+        return LocalZigToolchainConfigurable(uuid, toolchain, data)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

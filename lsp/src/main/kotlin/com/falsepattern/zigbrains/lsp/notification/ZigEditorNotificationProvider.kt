@@ -23,7 +23,7 @@
 package com.falsepattern.zigbrains.lsp.notification
 
 import com.falsepattern.zigbrains.lsp.ZLSBundle
-import com.falsepattern.zigbrains.lsp.zls.ZLSService
+import com.falsepattern.zigbrains.lsp.zls.zls
 import com.falsepattern.zigbrains.lsp.zlsRunning
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.falsepattern.zigbrains.zig.ZigFileType
@@ -52,7 +52,7 @@ class ZigEditorNotificationProvider: EditorNotificationProvider, DumbAware {
             if (project.zlsRunning()) {
                 return@async null
             } else {
-                return@async ZLSService.getInstance(project).zls?.isValid() == true
+                return@async project.zls?.isValid() == true
             }
         }
         return Function { editor ->

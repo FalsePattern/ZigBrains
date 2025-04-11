@@ -22,23 +22,34 @@
 
 package com.falsepattern.zigbrains.project.toolchain.base
 
+import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableElementPanel
 import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.ui.dsl.builder.panel
 import java.util.UUID
+import java.util.function.Supplier
 import javax.swing.JComponent
 
 abstract class ZigToolchainConfigurable<T: ZigToolchain>(
     val uuid: UUID,
-    tc: T
+    tc: T,
+    val data: ZigProjectConfigurationProvider.IUserDataBridge?
 ): NamedConfigurable<UUID>() {
     var toolchain: T = tc
         set(value) {
             zigToolchainList[uuid] = value
             field = value
         }
+
+    init {
+        data?.putUserData(TOOLCHAIN_KEY, Supplier{
+            myViews.fold(toolchain) { tc, view -> view.apply(tc) ?: tc }
+        })
+    }
     private var myViews: List<ImmutableElementPanel<T>> = emptyList()
 
     abstract fun createPanel(): ImmutableElementPanel<T>
@@ -48,7 +59,7 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
         if (views.isEmpty()) {
             views = ArrayList<ImmutableElementPanel<T>>()
             views.add(createPanel())
-            views.addAll(createZigToolchainExtensionPanels())
+            views.addAll(createZigToolchainExtensionPanels(data))
             views.forEach { it.reset(toolchain) }
             myViews = views
         }
@@ -85,5 +96,9 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
         myViews.forEach { it.dispose() }
         myViews = emptyList()
         super.disposeUIResources()
+    }
+
+    companion object {
+        val TOOLCHAIN_KEY: Key<Supplier<ZigToolchain>> = Key.create("TOOLCHAIN")
     }
 }
