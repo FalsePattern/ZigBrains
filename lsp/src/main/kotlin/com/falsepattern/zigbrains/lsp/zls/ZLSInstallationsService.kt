@@ -25,7 +25,10 @@ package com.falsepattern.zigbrains.lsp.zls
 import com.falsepattern.zigbrains.lsp.zls.ZLSInstallationsService.MyState
 import com.falsepattern.zigbrains.shared.UUIDMapSerializable
 import com.falsepattern.zigbrains.shared.UUIDStorage
-import com.intellij.openapi.components.*
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.service
 
 @Service(Service.Level.APP)
 @State(

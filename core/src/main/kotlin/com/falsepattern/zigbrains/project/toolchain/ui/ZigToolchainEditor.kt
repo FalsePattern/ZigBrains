@@ -39,7 +39,7 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Key
 import com.intellij.ui.dsl.builder.Panel
 import kotlinx.coroutines.launch
-import java.util.UUID
+import java.util.*
 import java.util.function.Supplier
 
 class ZigToolchainEditor(private val sharedState: ZigProjectConfigurationProvider.IUserDataBridge):

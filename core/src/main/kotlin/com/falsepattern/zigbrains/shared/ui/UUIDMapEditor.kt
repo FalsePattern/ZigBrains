@@ -39,7 +39,7 @@ import com.intellij.util.IconUtil
 import com.intellij.util.asSafely
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import kotlinx.coroutines.launch
-import java.util.UUID
+import java.util.*
 import javax.swing.JComponent
 import javax.swing.tree.DefaultTreeModel
 

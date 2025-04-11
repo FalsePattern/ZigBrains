@@ -26,8 +26,7 @@ import com.intellij.openapi.components.SerializablePersistentStateComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
-import java.util.UUID
-import kotlin.collections.any
+import java.util.*
 
 typealias UUIDStorage<T> = Map<String, T>
 

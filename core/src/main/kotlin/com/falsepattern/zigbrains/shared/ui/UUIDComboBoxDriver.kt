@@ -25,7 +25,7 @@ package com.falsepattern.zigbrains.shared.ui
 import com.falsepattern.zigbrains.shared.UUIDMapSerializable
 import com.intellij.openapi.ui.NamedConfigurable
 import java.awt.Component
-import java.util.UUID
+import java.util.*
 
 interface UUIDComboBoxDriver<T> {
     val theMap: UUIDMapSerializable.Converting<T, *, *>

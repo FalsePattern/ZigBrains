@@ -23,8 +23,6 @@
 package com.falsepattern.zigbrains.lsp.settings
 
 import com.falsepattern.zigbrains.lsp.config.SemanticTokens
-import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
-import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.annotations.Attribute
 import org.jetbrains.annotations.NonNls
 

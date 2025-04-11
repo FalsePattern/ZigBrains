@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.lsp.zls
 
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsPanel
-import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableNamedElementPanelBase
 import com.falsepattern.zigbrains.shared.cli.call
 import com.falsepattern.zigbrains.shared.cli.createCommandLineSafe

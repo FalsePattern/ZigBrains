@@ -23,10 +23,8 @@
 package com.falsepattern.zigbrains.project.newproject
 
 import com.intellij.ide.util.projectWizard.SettingsStep
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.ui.ValidationInfo
-import com.intellij.openapi.util.Disposer
 import com.intellij.platform.ProjectGeneratorPeer
 import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent

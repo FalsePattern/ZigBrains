@@ -24,10 +24,9 @@ package com.falsepattern.zigbrains.lsp.zls
 
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.NlsContexts
-import com.intellij.openapi.util.NlsSafe
 import com.intellij.ui.dsl.builder.panel
 import java.awt.Dimension
-import java.util.UUID
+import java.util.*
 import javax.swing.JComponent
 
 class ZLSConfigurable(val uuid: UUID, zls: ZLSVersion): NamedConfigurable<UUID>() {

@@ -22,7 +22,7 @@
 
 package com.falsepattern.zigbrains.shared
 
-import java.util.UUID
+import java.util.*
 
 fun String.asUUID(): UUID? = UUID.fromString(this)
 fun UUID.asString(): String = toString()

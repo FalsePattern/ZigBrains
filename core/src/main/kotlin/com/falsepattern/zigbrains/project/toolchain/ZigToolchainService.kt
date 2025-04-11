@@ -27,16 +27,12 @@ import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.asUUID
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.application.EDT
-import com.intellij.openapi.components.SerializablePersistentStateComponent
-import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.State
-import com.intellij.openapi.components.Storage
-import com.intellij.openapi.components.service
+import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.annotations.Attribute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.UUID
+import java.util.*
 
 @Service(Service.Level.PROJECT)
 @State(

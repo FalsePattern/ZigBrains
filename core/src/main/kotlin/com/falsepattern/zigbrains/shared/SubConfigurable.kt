@@ -27,7 +27,6 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
-import java.util.ArrayList
 import javax.swing.JComponent
 
 interface SubConfigurable<T>: Disposable {

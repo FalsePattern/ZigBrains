@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.lsp.zls.downloader
 
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.downloader.ZigVersionInfo
 import com.falsepattern.zigbrains.shared.downloader.VersionInfo
 import com.falsepattern.zigbrains.shared.downloader.VersionInfo.Tarball
 import com.falsepattern.zigbrains.shared.downloader.getTarballIfCompatible
@@ -38,12 +37,7 @@ import com.intellij.util.text.SemVer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.json.*
 import java.net.URLEncoder
 
 @JvmRecord

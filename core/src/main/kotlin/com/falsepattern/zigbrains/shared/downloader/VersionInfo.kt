@@ -23,7 +23,6 @@
 package com.falsepattern.zigbrains.shared.downloader
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.project.toolchain.downloader.ZigVersionInfo
 import com.falsepattern.zigbrains.shared.Unarchiver
 import com.falsepattern.zigbrains.shared.downloader.VersionInfo.Tarball
 import com.intellij.openapi.application.PathManager

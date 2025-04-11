@@ -28,9 +28,9 @@ import com.falsepattern.zigbrains.shared.cli.call
 import com.falsepattern.zigbrains.shared.cli.createCommandLineSafe
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.util.text.SemVer
-import java.nio.file.Path
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.Tag
+import java.nio.file.Path
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.pathString

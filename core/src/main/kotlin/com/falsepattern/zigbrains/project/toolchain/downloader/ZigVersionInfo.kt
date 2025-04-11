@@ -23,46 +23,19 @@
 package com.falsepattern.zigbrains.project.toolchain.downloader
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.shared.Unarchiver
 import com.falsepattern.zigbrains.shared.downloader.VersionInfo
 import com.falsepattern.zigbrains.shared.downloader.VersionInfo.Tarball
-import com.falsepattern.zigbrains.shared.downloader.downloadTarball
-import com.falsepattern.zigbrains.shared.downloader.flattenDownloadDir
 import com.falsepattern.zigbrains.shared.downloader.getTarballIfCompatible
 import com.falsepattern.zigbrains.shared.downloader.tempPluginDir
-import com.falsepattern.zigbrains.shared.downloader.unpackTarball
-import com.intellij.openapi.application.PathManager
-import com.intellij.openapi.progress.EmptyProgressIndicator
-import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.util.io.toNioPathOrNull
-import com.intellij.platform.util.progress.*
 import com.intellij.util.asSafely
 import com.intellij.util.download.DownloadableFileService
-import com.intellij.util.io.createDirectories
-import com.intellij.util.io.delete
-import com.intellij.util.io.move
-import com.intellij.util.system.CpuArch
-import com.intellij.util.system.OS
 import com.intellij.util.text.SemVer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.decodeFromStream
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.deleteRecursively
-import kotlin.io.path.isDirectory
-import kotlin.io.path.name
+import kotlinx.serialization.json.*
 
 @JvmRecord
 data class ZigVersionInfo(

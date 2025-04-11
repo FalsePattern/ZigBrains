@@ -23,37 +23,18 @@
 package com.falsepattern.zigbrains.project.toolchain.downloader
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
-import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
-import com.falsepattern.zigbrains.shared.coroutine.asContextElement
-import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
-import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.downloader.LocalSelector
 import com.falsepattern.zigbrains.shared.withUniqueName
-import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.ui.DialogBuilder
-import com.intellij.openapi.util.Disposer
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.withModalProgress
-import com.intellij.ui.DocumentAdapter
-import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBTextField
-import com.intellij.ui.components.textFieldWithBrowseButton
-import com.intellij.ui.dsl.builder.AlignX
-import com.intellij.ui.dsl.builder.panel
-import com.intellij.util.concurrency.annotations.RequiresEdt
 import java.awt.Component
 import java.nio.file.Path
-import java.util.concurrent.atomic.AtomicBoolean
-import javax.swing.event.DocumentEvent
-import kotlin.io.path.pathString
 
 class LocalToolchainSelector(component: Component): LocalSelector<LocalZigToolchain>(component) {
     override val windowTitle: String

@@ -25,12 +25,11 @@ package com.falsepattern.zigbrains.project.toolchain.base
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableElementPanel
 import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.ui.dsl.builder.panel
-import java.util.UUID
+import java.util.*
 import java.util.function.Supplier
 import javax.swing.JComponent
 

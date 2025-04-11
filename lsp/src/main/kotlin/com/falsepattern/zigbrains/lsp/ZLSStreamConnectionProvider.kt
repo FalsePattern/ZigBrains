@@ -24,7 +24,6 @@ package com.falsepattern.zigbrains.lsp
 
 import com.falsepattern.zigbrains.lsp.config.ZLSConfigProviderBase
 import com.falsepattern.zigbrains.lsp.zls.zls
-import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType

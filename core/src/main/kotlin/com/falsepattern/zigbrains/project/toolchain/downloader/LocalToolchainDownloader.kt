@@ -26,10 +26,7 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.local.getSuggestedLocalToolchainPath
 import com.falsepattern.zigbrains.shared.downloader.Downloader
-import com.falsepattern.zigbrains.shared.downloader.LocalSelector
-import com.intellij.openapi.util.NlsContexts
 import java.awt.Component
-import java.nio.file.Path
 
 class LocalToolchainDownloader(component: Component) : Downloader<LocalZigToolchain, ZigVersionInfo>(component) {
     override val windowTitle get() = ZigBrainsBundle.message("settings.toolchain.downloader.title")

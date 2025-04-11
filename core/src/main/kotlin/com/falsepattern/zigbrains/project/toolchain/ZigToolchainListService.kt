@@ -28,7 +28,10 @@ import com.falsepattern.zigbrains.project.toolchain.base.resolve
 import com.falsepattern.zigbrains.project.toolchain.base.toRef
 import com.falsepattern.zigbrains.shared.UUIDMapSerializable
 import com.falsepattern.zigbrains.shared.UUIDStorage
-import com.intellij.openapi.components.*
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.service
 
 @Service(Service.Level.APP)
 @State(

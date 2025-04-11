@@ -24,7 +24,7 @@ package com.falsepattern.zigbrains.project.toolchain.local
 
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
-import java.util.UUID
+import java.util.*
 
 class LocalZigToolchainConfigurable(
     uuid: UUID,

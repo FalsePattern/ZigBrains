@@ -30,7 +30,7 @@ import com.falsepattern.zigbrains.shared.ui.ListElem
 import com.falsepattern.zigbrains.shared.withUniqueName
 import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
 import java.awt.Component
-import java.util.UUID
+import java.util.*
 
 internal object ZigToolchainComboBoxHandler {
     @RequiresBackgroundThread

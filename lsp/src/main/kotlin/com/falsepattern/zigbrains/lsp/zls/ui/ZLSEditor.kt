@@ -22,8 +22,6 @@
 
 package com.falsepattern.zigbrains.lsp.zls.ui
 
-import com.falsepattern.zigbrains.lsp.ZLSStarter
-import com.falsepattern.zigbrains.lsp.startLSP
 import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
 import com.falsepattern.zigbrains.lsp.zls.withZLS
 import com.falsepattern.zigbrains.lsp.zls.zlsUUID
