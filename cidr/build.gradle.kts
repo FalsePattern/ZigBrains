@@ -14,6 +14,8 @@ sourceSets["main"].resources.srcDir(genOutputDir)
 
 tasks {
     register<Download>("downloadProps") {
+        onlyIfModified(true)
+        useETag(true)
         src("https://falsepattern.com/zigbrains/msvc.properties")
         dest(genOutputDir.map { it.file("msvc.properties") })
     }
