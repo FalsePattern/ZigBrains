@@ -75,16 +75,40 @@ class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresen
         return roots
     }
 
+    override fun isShowInExternalLibrariesNode(): Boolean {
+        return !roots.isEmpty()
+    }
+
     companion object {
         private const val ZIG_LIBRARY_ID = "Zig SDK"
         private const val ZIG_MODULE_ID = "ZigBrains"
+        private val libraryTableId = LibraryTableId.ProjectLibraryTableId
+        private val libraryId = LibraryId(ZIG_LIBRARY_ID, libraryTableId)
+        private val moduleId = ModuleId(ZIG_MODULE_ID)
         suspend fun reload(project: Project, toolchain: ZigToolchain?) {
-            val moduleId = ModuleId(ZIG_MODULE_ID)
+            val root = getRoot(toolchain, project)
+            if (root != null) {
+                add(project, root)
+            } else {
+                remove(project)
+            }
+        }
+
+        private suspend fun remove(project: Project) {
             val workspaceModel = WorkspaceModel.getInstance(project)
-            val root = getRoot(toolchain, project) ?: return
+            workspaceModel.update("Update Zig std") { builder ->
+                builder.resolve(moduleId)?.let { moduleEntity ->
+                    builder.removeEntity(moduleEntity)
+                }
+                builder.resolve(libraryId)?.let { libraryEntity ->
+                    builder.removeEntity(libraryEntity)
+                }
+            }
+        }
+
+        private suspend fun add(project: Project, root: VirtualFile) {
+            val workspaceModel = WorkspaceModel.getInstance(project)
             val libRoot = LibraryRoot(root.toVirtualFileUrl(workspaceModel.getVirtualFileUrlManager()), LibraryRootTypeId.SOURCES)
-            val libraryTableId = LibraryTableId.ProjectLibraryTableId
-            val libraryId = LibraryId(ZIG_LIBRARY_ID, libraryTableId)
 
             var baseModuleDirFile: VirtualFile? = null
             if (project.isDirectoryBased) {
