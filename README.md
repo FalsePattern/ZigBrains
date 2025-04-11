@@ -71,11 +71,7 @@ excellent example on how to write debugger support that doesn't depend on CLion.
 <!-- Plugin description -->
 Adds support for the Zig Language, utilizing the ZLS language server for advanced coding assistance.
 
-## Quick setup guide for Zig and ZLS
-
-1. Download the latest version of Zig from https://ziglang.org/download
-2. Download and compile the ZLS language server, available at https://github.com/zigtools/zls
-3. Go to `Settings` -> `Languages & Frameworks` -> `Zig`, and point the `Toolchain Location` and `ZLS path` to the correct places
+Before you can properly use the plugin, you need to select or download the Zig toolchain and language server in `Settings` -> `Languages & Frameworks` -> `Zig`.
 
 ## Debugging
 
@@ -89,6 +85,7 @@ Debugging Zig code is supported in any native debugging capable IDE. The followi
 - RustRover (including the non-commercial free version too)
 - GoLand
 - PyCharm Professional
+- Android Studio
 
 Additionally, in CLion, the plugin uses the C++ Toolchains for sourcing the debugger (this can be toggled off in the settings).
 
