@@ -89,6 +89,8 @@ class ZigToolchainEditor(private val sharedState: ZigProjectConfigurationProvide
     }
 
     override fun isModified(context: Project): Boolean {
+        if (isEmpty)
+            return false
         val uuid = selectedUUID
         if (ZigToolchainService.getInstance(context).toolchainUUID != selectedUUID) {
             return true

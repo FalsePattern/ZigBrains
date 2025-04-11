@@ -58,6 +58,8 @@ class ZLSEditor<T: ZigToolchain>(private val sharedState: ZigProjectConfiguratio
     }
 
     override fun isModified(toolchain: T): Boolean {
+        if (isEmpty)
+            return false
         return toolchain.zlsUUID != selectedUUID
     }
 

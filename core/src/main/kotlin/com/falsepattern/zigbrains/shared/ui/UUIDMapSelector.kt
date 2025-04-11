@@ -82,6 +82,8 @@ abstract class UUIDMapSelector<T>(val driver: UUIDComboBoxDriver<T>): Disposable
             }
         }
 
+    protected val isEmpty: Boolean get() = model.isEmpty
+
     protected open fun onSelection(uuid: UUID?) {}
 
     private fun refreshButtonState(item: ListElem<*>) {
