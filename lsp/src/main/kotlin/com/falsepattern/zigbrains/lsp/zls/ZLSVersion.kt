@@ -26,12 +26,11 @@ import com.falsepattern.zigbrains.lsp.settings.ZLSSettings
 import com.falsepattern.zigbrains.shared.NamedObject
 import com.falsepattern.zigbrains.shared.cli.call
 import com.falsepattern.zigbrains.shared.cli.createCommandLineSafe
-import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.util.text.SemVer
 import java.nio.file.Path
 import com.intellij.util.xmlb.annotations.Attribute
-import kotlin.io.path.isDirectory
+import com.intellij.util.xmlb.annotations.Tag
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.pathString
@@ -82,6 +81,7 @@ data class ZLSVersion(val path: Path, override val name: String? = null, val set
         @Attribute
         val name: String? = "",
         @JvmField
+        @Tag
         val settings: ZLSSettings = ZLSSettings()
     ) {
         fun resolve(): ZLSVersion? {
