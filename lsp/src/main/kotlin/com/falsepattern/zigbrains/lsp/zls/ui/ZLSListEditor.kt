@@ -25,7 +25,6 @@ package com.falsepattern.zigbrains.lsp.zls.ui
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
 import com.falsepattern.zigbrains.shared.ui.UUIDMapEditor
-import com.intellij.openapi.ui.MasterDetailsComponent
 import com.intellij.openapi.util.NlsContexts
 
 class ZLSListEditor : UUIDMapEditor<ZLSVersion>(ZLSDriver.ForList) {

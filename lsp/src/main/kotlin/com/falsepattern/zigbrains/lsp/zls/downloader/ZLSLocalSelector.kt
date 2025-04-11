@@ -29,14 +29,23 @@ import com.falsepattern.zigbrains.shared.withUniqueName
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.util.SystemInfo
 import java.awt.Component
 import java.nio.file.Path
+import kotlin.io.path.isDirectory
 
 class ZLSLocalSelector(component: Component) : LocalSelector<ZLSVersion>(component) {
     override val windowTitle: String
         get() = "Select ZLS from disk"
     override val descriptor: FileChooserDescriptor
         get() = FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor().withTitle("ZLS binary")
+
+    override suspend fun browse(preSelected: Path?): ZLSVersion? {
+        if (preSelected?.isDirectory() == true) {
+            return super.browse(preSelected.resolve(if (SystemInfo.isWindows) "zls.exe" else "zls"))
+        }
+        return super.browse(preSelected)
+    }
 
     override suspend fun verify(path: Path): VerifyResult {
         var zls = resolve(path, null)

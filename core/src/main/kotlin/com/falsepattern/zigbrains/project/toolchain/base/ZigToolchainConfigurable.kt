@@ -37,7 +37,8 @@ import javax.swing.JComponent
 abstract class ZigToolchainConfigurable<T: ZigToolchain>(
     val uuid: UUID,
     tc: T,
-    val data: ZigProjectConfigurationProvider.IUserDataBridge?
+    val data: ZigProjectConfigurationProvider.IUserDataBridge?,
+    val modal: Boolean
 ): NamedConfigurable<UUID>() {
     var toolchain: T = tc
         set(value) {
@@ -46,9 +47,7 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
         }
 
     init {
-        data?.putUserData(TOOLCHAIN_KEY, Supplier{
-            myViews.fold(toolchain) { tc, view -> view.apply(tc) ?: tc }
-        })
+        data?.putUserData(TOOLCHAIN_KEY, Supplier{toolchain})
     }
     private var myViews: List<ImmutableElementPanel<T>> = emptyList()
 
@@ -59,13 +58,14 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
         if (views.isEmpty()) {
             views = ArrayList<ImmutableElementPanel<T>>()
             views.add(createPanel())
-            views.addAll(createZigToolchainExtensionPanels(data))
-            views.forEach { it.reset(toolchain) }
+            views.addAll(createZigToolchainExtensionPanels(data, if (modal) PanelState.ModalEditor else PanelState.ListEditor))
             myViews = views
         }
-        return panel {
+        val p = panel {
             views.forEach { it.attach(this@panel) }
         }.withMinimumWidth(20)
+        views.forEach { it.reset(toolchain) }
+        return p
     }
 
     override fun getEditableObject(): UUID? {
@@ -99,6 +99,6 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
     }
 
     companion object {
-        val TOOLCHAIN_KEY: Key<Supplier<ZigToolchain>> = Key.create("TOOLCHAIN")
+        val TOOLCHAIN_KEY: Key<Supplier<ZigToolchain?>> = Key.create("TOOLCHAIN")
     }
 }

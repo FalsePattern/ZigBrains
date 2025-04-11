@@ -26,6 +26,7 @@ import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.openapi.util.NlsSafe
 import com.intellij.ui.dsl.builder.panel
+import java.awt.Dimension
 import java.util.UUID
 import javax.swing.JComponent
 
@@ -56,9 +57,11 @@ class ZLSConfigurable(val uuid: UUID, zls: ZLSVersion): NamedConfigurable<UUID>(
             view.reset(zls)
             myView = view
         }
-        return panel {
+        val p = panel {
             view.attach(this@panel)
-        }.withMaximumWidth(20)
+        }
+        p.preferredSize = Dimension(640, 480)
+        return p
     }
 
     override fun getDisplayName(): @NlsContexts.ConfigurableName String? {

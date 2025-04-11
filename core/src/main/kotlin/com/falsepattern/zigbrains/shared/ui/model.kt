@@ -29,11 +29,14 @@ import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.CellRendererPanel
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.GroupHeaderSeparator
 import com.intellij.ui.SimpleColoredComponent
+import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.panels.OpaquePanel
 import com.intellij.ui.popup.list.ComboBoxPopup
 import com.intellij.util.concurrency.annotations.RequiresEdt
@@ -50,6 +53,7 @@ import java.util.function.Consumer
 import javax.accessibility.AccessibleContext
 import javax.swing.JList
 import javax.swing.border.Border
+import kotlin.io.path.pathString
 
 class ZBComboBoxPopup<T>(
     context: ZBContext<T>,
@@ -65,7 +69,7 @@ open class ZBComboBox<T>(model: ZBModel<T>, renderer: (() -> ZBModel<T>)-> ZBCel
     var selectedUUID: UUID?
         set(value) {
             if (value == null) {
-                selectedItem = ListElem.None
+                selectedItem = ListElem.None<Any>()
                 return
             }
             for (i in 0..<model.size) {
@@ -77,7 +81,7 @@ open class ZBComboBox<T>(model: ZBModel<T>, renderer: (() -> ZBModel<T>)-> ZBCel
                     }
                 }
             }
-            selectedItem = ListElem.None
+            selectedItem = ListElem.None<Any>()
         }
         get() {
             val item = selectedItem
@@ -250,6 +254,42 @@ abstract class ZBCellRenderer<T>(val getModel: () -> ZBModel<T>) : ColoredListCe
         selected: Boolean,
         hasFocus: Boolean
     )
+}
+
+fun renderPathNameComponent(path: String, name: String?, nameFallback: String, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {
+    val path = presentDetectedPath(path)
+    val primary: String
+    var secondary: String?
+    val tooltip: String?
+    if (isSuggestion) {
+        primary = path
+        secondary = name
+    } else {
+        primary = name ?: nameFallback
+        secondary = path
+    }
+    if (isSelected) {
+        tooltip = secondary
+        secondary = null
+    } else {
+        tooltip = null
+    }
+    component.append(primary)
+    if (secondary != null) {
+        component.append(" ")
+        component.append(secondary, SimpleTextAttributes.GRAYED_ATTRIBUTES)
+    }
+    component.toolTipText = tooltip
+}
+
+fun presentDetectedPath(home: String, maxLength: Int = 50, suffixLength: Int = 30): String {
+    //for macOS, let's try removing Bundle internals
+    var home = home
+    home = StringUtil.trimEnd(home, "/Contents/Home") //NON-NLS
+    home = StringUtil.trimEnd(home, "/Contents/MacOS") //NON-NLS
+    home = FileUtil.getLocationRelativeToUserHome(home, false)
+    home = StringUtil.shortenTextWithEllipsis(home, maxLength, suffixLength)
+    return home
 }
 
 private val EMPTY_ICON = EmptyIcon.create(1, 16)

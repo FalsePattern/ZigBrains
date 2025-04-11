@@ -100,10 +100,10 @@ class LocalZigToolchainPanel() : ImmutableNamedElementPanelBase<LocalZigToolchai
         return toolchain.copy(location = location, std = std, name = nameFieldValue ?: "")
     }
 
-    override fun reset(toolchain: LocalZigToolchain) {
-        nameFieldValue = toolchain.name
-        this.pathToToolchain.text = toolchain.location.pathString
-        val std = toolchain.std
+    override fun reset(toolchain: LocalZigToolchain?) {
+        nameFieldValue = toolchain?.name ?: ""
+        this.pathToToolchain.text = toolchain?.location?.pathString ?: ""
+        val std = toolchain?.std
         if (std != null) {
             stdFieldOverride.isSelected = true
             pathToStd.text = std.pathString

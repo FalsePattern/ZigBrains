@@ -28,6 +28,7 @@ import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
 import com.falsepattern.zigbrains.lsp.zls.withZLS
 import com.falsepattern.zigbrains.lsp.zls.zlsUUID
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
+import com.falsepattern.zigbrains.project.toolchain.base.PanelState
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainExtensionsProvider
 import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableElementPanel
@@ -51,7 +52,7 @@ class ZLSEditor<T: ZigToolchain>(private val sharedState: ZigProjectConfiguratio
     }
 
     override fun attach(panel: Panel): Unit = with(panel) {
-        row("ZLS") {
+        row("Language Server") {
             attachComboBoxRow(this)
         }
     }
@@ -64,8 +65,12 @@ class ZLSEditor<T: ZigToolchain>(private val sharedState: ZigProjectConfiguratio
         return toolchain.withZLS(selectedUUID)
     }
 
-    override fun reset(toolchain: T) {
-        selectedUUID = toolchain.zlsUUID
+    override fun reset(toolchain: T?) {
+        selectedUUID = toolchain?.zlsUUID
+        zigCoroutineScope.launch {
+            listChanged()
+            selectedUUID = toolchain?.zlsUUID
+        }
     }
 
     override fun dispose() {
@@ -74,7 +79,10 @@ class ZLSEditor<T: ZigToolchain>(private val sharedState: ZigProjectConfiguratio
     }
 
     class Provider: ZigToolchainExtensionsProvider {
-        override fun <T : ZigToolchain> createExtensionPanel(sharedState: ZigProjectConfigurationProvider.IUserDataBridge?): ImmutableElementPanel<T>? {
+        override fun <T : ZigToolchain> createExtensionPanel(sharedState: ZigProjectConfigurationProvider.IUserDataBridge?, state: PanelState): ImmutableElementPanel<T>? {
+            if (state == PanelState.ModalEditor) {
+                return null
+            }
             return ZLSEditor(sharedState)
         }
 

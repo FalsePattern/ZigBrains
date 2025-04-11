@@ -63,7 +63,7 @@ sealed interface ZigToolchainDriver: UUIDComboBoxDriver<ZigToolchain> {
     }
 
     object ForList: ZigToolchainDriver {
-        override fun constructModelList(): List<ListElemIn<ZigToolchain>> {
+        override suspend fun constructModelList(): List<ListElemIn<ZigToolchain>> {
             val modelList = ArrayList<ListElemIn<ZigToolchain>>()
             modelList.addAll(ListElem.fetchGroup())
             modelList.add(Separator(ZigBrainsBundle.message("settings.toolchain.model.detected.separator"), true))
@@ -75,12 +75,12 @@ sealed interface ZigToolchainDriver: UUIDComboBoxDriver<ZigToolchain> {
             uuid: UUID,
             elem: ZigToolchain
         ): NamedConfigurable<UUID> {
-            return elem.createNamedConfigurable(uuid, ZigProjectConfigurationProvider.UserDataBridge())
+            return elem.createNamedConfigurable(uuid, ZigProjectConfigurationProvider.UserDataBridge(), false)
         }
     }
 
     class ForSelector(val data: ZigProjectConfigurationProvider.IUserDataBridge): ZigToolchainDriver {
-        override fun constructModelList(): List<ListElemIn<ZigToolchain>> {
+        override suspend fun constructModelList(): List<ListElemIn<ZigToolchain>> {
             val modelList = ArrayList<ListElemIn<ZigToolchain>>()
             modelList.add(ListElem.None())
             modelList.addAll(zigToolchainList.map { it.asActual() }.sortedBy { it.instance.name })
@@ -95,7 +95,7 @@ sealed interface ZigToolchainDriver: UUIDComboBoxDriver<ZigToolchain> {
             uuid: UUID,
             elem: ZigToolchain
         ): NamedConfigurable<UUID> {
-            return elem.createNamedConfigurable(uuid, data)
+            return elem.createNamedConfigurable(uuid, data, true)
         }
     }
 }

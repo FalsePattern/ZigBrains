@@ -22,15 +22,15 @@
 
 package com.falsepattern.zigbrains.lsp.zls.ui
 
-import com.falsepattern.zigbrains.Icons
+import com.falsepattern.zigbrains.lsp.LSPIcons
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
-import com.falsepattern.zigbrains.project.toolchain.base.render
 import com.falsepattern.zigbrains.shared.ui.ListElem
 import com.falsepattern.zigbrains.shared.ui.ZBCellRenderer
 import com.falsepattern.zigbrains.shared.ui.ZBComboBox
 import com.falsepattern.zigbrains.shared.ui.ZBContext
 import com.falsepattern.zigbrains.shared.ui.ZBModel
+import com.falsepattern.zigbrains.shared.ui.renderPathNameComponent
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
 import com.intellij.ui.SimpleTextAttributes
@@ -56,17 +56,13 @@ class ZLSCellRenderer(getModel: () -> ZBModel<ZLSVersion>): ZBCellRenderer<ZLSVe
             is ListElem.One -> {
                 val (icon, isSuggestion) = when(value) {
                     is ListElem.One.Suggested -> AllIcons.General.Information to true
-                    is ListElem.One.Actual -> Icons.Zig to false
+                    is ListElem.One.Actual -> LSPIcons.ZLS to false
                 }
                 this.icon = icon
                 val item = value.instance
-                //TODO proper renderer
-                if (item.name != null) {
-                    append(item.name)
-                    append(item.path.pathString, SimpleTextAttributes.GRAYED_ATTRIBUTES)
-                } else {
-                    append(item.path.pathString)
-                }
+                val name = item.name
+                val path = item.path.pathString
+                renderPathNameComponent(path, name, "ZLS", this, isSuggestion, index == -1)
             }
 
             is ListElem.Download -> {

@@ -47,7 +47,7 @@ internal interface ZigToolchainProvider {
     fun deserialize(data: Map<String, String>): ZigToolchain?
     fun serialize(toolchain: ZigToolchain): Map<String, String>
     fun matchesSuggestion(toolchain: ZigToolchain, suggestion: ZigToolchain): Boolean
-    fun createConfigurable(uuid: UUID, toolchain: ZigToolchain, data: ZigProjectConfigurationProvider.IUserDataBridge?): ZigToolchainConfigurable<*>
+    fun createConfigurable(uuid: UUID, toolchain: ZigToolchain, data: ZigProjectConfigurationProvider.IUserDataBridge?, modal: Boolean): ZigToolchainConfigurable<*>
     suspend fun suggestToolchains(project: Project?, data: UserDataHolder): Flow<ZigToolchain>
     fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean)
 }
@@ -64,9 +64,9 @@ fun ZigToolchain.toRef(): ZigToolchain.Ref {
     return ZigToolchain.Ref(provider.serialMarker, provider.serialize(this), this.extraData)
 }
 
-fun ZigToolchain.createNamedConfigurable(uuid: UUID, data: ZigProjectConfigurationProvider.IUserDataBridge?): ZigToolchainConfigurable<*> {
+fun ZigToolchain.createNamedConfigurable(uuid: UUID, data: ZigProjectConfigurationProvider.IUserDataBridge?, modal: Boolean): ZigToolchainConfigurable<*> {
     val provider = EXTENSION_POINT_NAME.extensionList.find { it.isCompatible(this) } ?: throw IllegalStateException()
-    return provider.createConfigurable(uuid, this, data)
+    return provider.createConfigurable(uuid, this, data, modal)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -143,8 +143,8 @@ class DirenvService(val project: Project): SerializablePersistentStateComponent<
 
         private val STATE_KEY = Key.create<DirenvState>("DIRENV_STATE")
 
-        fun getStateFor(data: UserDataHolder, project: Project?): DirenvState {
-            return data.getUserData(STATE_KEY) ?: project?.let { getInstance(project).isEnabled } ?: DirenvState.Disabled
+        fun getStateFor(data: UserDataHolder?, project: Project?): DirenvState {
+            return data?.getUserData(STATE_KEY) ?: project?.let { getInstance(project).isEnabled } ?: DirenvState.Disabled
         }
 
         fun setStateFor(data: UserDataHolder, state: DirenvState) {

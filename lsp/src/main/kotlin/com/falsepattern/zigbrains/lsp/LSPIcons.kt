@@ -20,17 +20,13 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.toolchain.ui
+package com.falsepattern.zigbrains.lsp
 
-import com.intellij.openapi.Disposable
-import com.intellij.ui.dsl.builder.Panel
+import com.intellij.openapi.util.IconLoader
+import org.jetbrains.annotations.NonNls
 
-interface ImmutableElementPanel<T>: Disposable {
-    fun attach(p: Panel)
-    fun isModified(elem: T): Boolean
-    /**
-     * Returned object must be the exact same class as the provided one.
-     */
-    fun apply(elem: T): T?
-    fun reset(elem: T?)
+@NonNls
+object LSPIcons {
+    @JvmField
+    val ZLS = IconLoader.getIcon("/icons/zls.svg", LSPIcons::class.java)
 }

@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.lsp.zls
 
+import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsPanel
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableNamedElementPanelBase
 import com.falsepattern.zigbrains.shared.cli.call
@@ -58,6 +59,7 @@ class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
         Disposer.register(this, it)
     }
     private val zlsVersion = JBTextArea().also { it.isEditable = false }
+    private var settingsPanel: ZLSSettingsPanel? = null
     private var debounce: Job? = null
 
     override fun attach(p: Panel): Unit = with(p) {
@@ -68,22 +70,28 @@ class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
         row("Version:") {
             cell(zlsVersion)
         }
+        val sp = ZLSSettingsPanel()
+        p.collapsibleGroup("Settings", indent = false) {
+            sp.attach(this@collapsibleGroup)
+        }
+        settingsPanel = sp
     }
 
     override fun isModified(version: ZLSVersion): Boolean {
         val name = nameFieldValue ?: return false
         val path = this.pathToZLS.text.ifBlank { null }?.toNioPathOrNull() ?: return false
-        return name != version.name || version.path != path
+        return name != version.name || version.path != path || settingsPanel?.isModified(version.settings) == true
     }
 
     override fun apply(version: ZLSVersion): ZLSVersion? {
         val path = this.pathToZLS.text.ifBlank { null }?.toNioPathOrNull() ?: return null
-        return version.copy(path = path, name = nameFieldValue ?: "")
+        return version.copy(path = path, name = nameFieldValue ?: "", settings = settingsPanel?.apply(version.settings) ?: version.settings)
     }
 
-    override fun reset(version: ZLSVersion) {
-        nameFieldValue = version.name
-        this.pathToZLS.text = version.path.pathString
+    override fun reset(version: ZLSVersion?) {
+        nameFieldValue = version?.name ?: ""
+        this.pathToZLS.text = version?.path?.pathString ?: ""
+        settingsPanel?.reset(version?.settings)
         dispatchUpdateUI()
     }
 
@@ -127,5 +135,7 @@ class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
 
     override fun dispose() {
         debounce?.cancel("Disposed")
+        settingsPanel?.dispose()
+        settingsPanel = null
     }
 }

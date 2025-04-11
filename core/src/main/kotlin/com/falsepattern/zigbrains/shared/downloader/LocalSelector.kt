@@ -49,7 +49,7 @@ import javax.swing.event.DocumentEvent
 import kotlin.io.path.pathString
 
 abstract class LocalSelector<T>(val component: Component) {
-    suspend fun browse(preSelected: Path? = null): T? {
+    suspend open fun browse(preSelected: Path? = null): T? {
         return withEDTContext(component.asContextElement()) {
             doBrowseFromDisk(preSelected)
         }

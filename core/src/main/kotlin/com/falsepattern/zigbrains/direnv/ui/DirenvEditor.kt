@@ -44,7 +44,10 @@ abstract class DirenvEditor<T>(private val sharedState: ZigProjectConfigurationP
                     it.addItemListener { e ->
                         if (e.stateChange != ItemEvent.SELECTED)
                             return@addItemListener
-                        DirenvService.setStateFor(sharedState, DirenvState.Auto)
+                        val item = e.item
+                        if (item !is DirenvState)
+                            return@addItemListener
+                        DirenvService.setStateFor(sharedState, item)
                     }
                 }
             }

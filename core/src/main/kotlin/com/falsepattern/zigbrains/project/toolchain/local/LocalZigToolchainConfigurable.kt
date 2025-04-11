@@ -29,8 +29,9 @@ import java.util.UUID
 class LocalZigToolchainConfigurable(
     uuid: UUID,
     toolchain: LocalZigToolchain,
-    data: ZigProjectConfigurationProvider.IUserDataBridge?
-): ZigToolchainConfigurable<LocalZigToolchain>(uuid, toolchain, data) {
+    data: ZigProjectConfigurationProvider.IUserDataBridge?,
+    modal: Boolean
+): ZigToolchainConfigurable<LocalZigToolchain>(uuid, toolchain, data, modal) {
     override fun createPanel() = LocalZigToolchainPanel()
 
     override fun setDisplayName(name: String?) {

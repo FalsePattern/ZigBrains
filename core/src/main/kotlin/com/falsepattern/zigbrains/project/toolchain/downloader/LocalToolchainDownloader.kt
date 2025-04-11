@@ -32,19 +32,10 @@ import java.awt.Component
 import java.nio.file.Path
 
 class LocalToolchainDownloader(component: Component) : Downloader<LocalZigToolchain, ZigVersionInfo>(component) {
-    override val windowTitle: String get() = ZigBrainsBundle.message("settings.toolchain.downloader.title")
-    override val versionInfoFetchTitle: @NlsContexts.ProgressTitle String get() = ZigBrainsBundle.message("settings.toolchain.downloader.progress.fetch")
-    override fun downloadProgressTitle(version: ZigVersionInfo): @NlsContexts.ProgressTitle String {
-        return ZigBrainsBundle.message("settings.toolchain.downloader.progress.install", version.version.rawVersion)
-    }
-    override fun localSelector(): LocalSelector<LocalZigToolchain> {
-        return LocalToolchainSelector(component)
-    }
-    override suspend fun downloadVersionList(): List<ZigVersionInfo> {
-        return ZigVersionInfo.downloadVersionList()
-    }
-
-    override fun getSuggestedPath(): Path? {
-        return getSuggestedLocalToolchainPath()
-    }
+    override val windowTitle get() = ZigBrainsBundle.message("settings.toolchain.downloader.title")
+    override val versionInfoFetchTitle get() = ZigBrainsBundle.message("settings.toolchain.downloader.progress.fetch")
+    override fun downloadProgressTitle(version: ZigVersionInfo) = ZigBrainsBundle.message("settings.toolchain.downloader.progress.install", version.version.rawVersion)
+    override fun localSelector() = LocalToolchainSelector(component)
+    override suspend fun downloadVersionList() = ZigVersionInfo.downloadVersionList()
+    override fun getSuggestedPath() = getSuggestedLocalToolchainPath()
 }

@@ -32,6 +32,7 @@ import com.falsepattern.zigbrains.shared.ui.ListElem
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.EDT
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.observable.util.whenListChanged
 import com.intellij.openapi.options.ShowSettingsUtil
@@ -40,6 +41,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Row
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -54,7 +56,7 @@ abstract class UUIDMapSelector<T>(val driver: UUIDComboBoxDriver<T>): Disposable
     private var editButton: JButton? = null
     private val changeListener: StorageChangeListener = { this@UUIDMapSelector.listChanged() }
     init {
-        model = ZBModel(driver.constructModelList())
+        model = ZBModel(emptyList())
         comboBox = driver.createComboBox(model)
         comboBox.addItemListener(::itemStateChanged)
         driver.theMap.addChangeListener(changeListener)
@@ -67,19 +69,26 @@ abstract class UUIDMapSelector<T>(val driver: UUIDComboBoxDriver<T>): Disposable
                 comboBox.isPopupVisible = true
             }
         }
+        zigCoroutineScope.launchWithEDT(ModalityState.any()) {
+            model.updateContents(driver.constructModelList())
+        }
     }
 
     protected var selectedUUID: UUID?
         get() = comboBox.selectedUUID
         set(value) {
-            runInEdt {
+            zigCoroutineScope.launchWithEDT(ModalityState.any()) {
                 applyUUIDNowOrOnReload(value)
             }
         }
 
+    protected open fun onSelection(uuid: UUID?) {}
+
     private fun refreshButtonState(item: ListElem<*>) {
-        editButton?.isEnabled = item is ListElem.One.Actual<*>
+        val actual = item is ListElem.One.Actual<*>
+        editButton?.isEnabled = actual
         editButton?.repaint()
+        onSelection(if (actual) item.uuid else null)
     }
 
     private fun itemStateChanged(event: ItemEvent) {
@@ -106,6 +115,12 @@ abstract class UUIDMapSelector<T>(val driver: UUIDComboBoxDriver<T>): Disposable
     @RequiresEdt
     private fun tryReloadSelection() {
         val list = model.toList()
+        if (list.size == 1) {
+            comboBox.selectedItem = list[0]
+            comboBox.isEnabled = false
+            return
+        }
+        comboBox.isEnabled = true
         val onReload = selectOnNextReload
         selectOnNextReload = null
         if (onReload != null) {
@@ -116,13 +131,13 @@ abstract class UUIDMapSelector<T>(val driver: UUIDComboBoxDriver<T>): Disposable
             if (element == null) {
                 selectOnNextReload = onReload
             } else {
-                model.selectedItem = element
+                comboBox.selectedItem = element
                 return
             }
         }
         val selected = model.selected
         if (selected != null && list.contains(selected)) {
-            model.selectedItem = selected
+            comboBox.selectedItem = selected
             return
         }
         if (selected is ListElem.One.Actual<*>) {
@@ -131,10 +146,10 @@ abstract class UUIDMapSelector<T>(val driver: UUIDComboBoxDriver<T>): Disposable
                 is ListElem.One.Actual -> it.uuid == uuid
                 else -> false
             } }
-            model.selectedItem = element
+            comboBox.selectedItem = element
             return
         }
-        model.selectedItem = ListElem.None<Any>()
+        comboBox.selectedItem = ListElem.None<Any>()
     }
 
     protected suspend fun listChanged() {

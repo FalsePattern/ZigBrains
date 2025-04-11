@@ -25,17 +25,22 @@ package com.falsepattern.zigbrains.project.toolchain.base
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableElementPanel
 import com.intellij.openapi.extensions.ExtensionPointName
-import com.intellij.openapi.util.UserDataHolder
 
 private val EXTENSION_POINT_NAME = ExtensionPointName.create<ZigToolchainExtensionsProvider>("com.falsepattern.zigbrains.toolchainExtensionsProvider")
 
 interface ZigToolchainExtensionsProvider {
-    fun <T : ZigToolchain> createExtensionPanel(sharedState: ZigProjectConfigurationProvider.IUserDataBridge?): ImmutableElementPanel<T>?
+    fun <T : ZigToolchain> createExtensionPanel(sharedState: ZigProjectConfigurationProvider.IUserDataBridge?, state: PanelState): ImmutableElementPanel<T>?
     val index: Int
 }
 
-fun <T: ZigToolchain> createZigToolchainExtensionPanels(sharedState: ZigProjectConfigurationProvider.IUserDataBridge?): List<ImmutableElementPanel<T>> {
+fun <T: ZigToolchain> createZigToolchainExtensionPanels(sharedState: ZigProjectConfigurationProvider.IUserDataBridge?, state: PanelState): List<ImmutableElementPanel<T>> {
     return EXTENSION_POINT_NAME.extensionList.sortedBy{ it.index }.mapNotNull {
-        it.createExtensionPanel(sharedState)
+        it.createExtensionPanel(sharedState, state)
     }
+}
+
+enum class PanelState {
+    ProjectEditor,
+    ListEditor,
+    ModalEditor
 }

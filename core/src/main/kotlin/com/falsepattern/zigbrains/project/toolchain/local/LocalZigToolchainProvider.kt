@@ -28,6 +28,7 @@ import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvid
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider
+import com.falsepattern.zigbrains.shared.ui.renderPathNameComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.util.io.FileUtil
@@ -86,10 +87,11 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     override fun createConfigurable(
         uuid: UUID,
         toolchain: ZigToolchain,
-        data: ZigProjectConfigurationProvider.IUserDataBridge?
+        data: ZigProjectConfigurationProvider.IUserDataBridge?,
+        modal: Boolean
     ): ZigToolchainConfigurable<*> {
         toolchain as LocalZigToolchain
-        return LocalZigToolchainConfigurable(uuid, toolchain, data)
+        return LocalZigToolchainConfigurable(uuid, toolchain, data, modal)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -114,29 +116,8 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     override fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {
         toolchain as LocalZigToolchain
         val name = toolchain.name
-        val path = presentDetectedPath(toolchain.location.pathString)
-        val primary: String
-        var secondary: String?
-        val tooltip: String?
-        if (isSuggestion) {
-            primary = path
-            secondary = name
-        } else {
-            primary = name ?: "Zig"
-            secondary = path
-        }
-        if (isSelected) {
-            tooltip = secondary
-            secondary = null
-        } else {
-            tooltip = null
-        }
-        component.append(primary)
-        if (secondary != null) {
-            component.append(" ")
-            component.append(secondary, SimpleTextAttributes.GRAYED_ATTRIBUTES)
-        }
-        component.toolTipText = tooltip
+        val path = toolchain.location.pathString
+        renderPathNameComponent(path, name, "Zig", component, isSuggestion, isSelected)
     }
 }
 
@@ -172,14 +153,4 @@ private fun getWellKnown(): List<Path> {
     }
     res.add(home.resolve(".zig"))
     return res
-}
-
-private fun presentDetectedPath(home: String, maxLength: Int = 50, suffixLength: Int = 30): String {
-    //for macOS, let's try removing Bundle internals
-    var home = home
-    home = StringUtil.trimEnd(home, "/Contents/Home") //NON-NLS
-    home = StringUtil.trimEnd(home, "/Contents/MacOS") //NON-NLS
-    home = FileUtil.getLocationRelativeToUserHome(home, false)
-    home = StringUtil.shortenTextWithEllipsis(home, maxLength, suffixLength)
-    return home
 }

@@ -25,11 +25,13 @@ package com.falsepattern.zigbrains.shared.ui
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.shared.StorageChangeListener
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
+import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.Presentation
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.observable.util.whenListChanged
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.ui.MasterDetailsComponent
@@ -45,6 +47,7 @@ abstract class UUIDMapEditor<T>(val driver: UUIDComboBoxDriver<T>): MasterDetail
     private var isTreeInitialized = false
     private var registered: Boolean = false
     private var selectOnNextReload: UUID? = null
+    private var disposed: Boolean = false
     private val changeListener: StorageChangeListener = { this@UUIDMapEditor.listChanged() }
 
     override fun createComponent(): JComponent {
@@ -62,14 +65,18 @@ abstract class UUIDMapEditor<T>(val driver: UUIDComboBoxDriver<T>): MasterDetail
     override fun createActions(fromPopup: Boolean): List<AnAction> {
         val add = object : DumbAwareAction({ ZigBrainsBundle.message("settings.shared.list.add-action.name") }, Presentation.NULL_STRING, IconUtil.addIcon) {
             override fun actionPerformed(e: AnActionEvent) {
-                val modelList = driver.constructModelList()
-                val model = ZBModel(modelList)
-                val context = driver.createContext(model)
-                val popup = ZBComboBoxPopup(context, null, ::onItemSelected)
-                model.whenListChanged {
-                    popup.syncWithModelChange()
+                zigCoroutineScope.launchWithEDT(ModalityState.current()) {
+                    if (disposed)
+                        return@launchWithEDT
+                    val modelList = driver.constructModelList()
+                    val model = ZBModel(modelList)
+                    val context = driver.createContext(model)
+                    val popup = ZBComboBoxPopup(context, null, ::onItemSelected)
+                    model.whenListChanged {
+                        popup.syncWithModelChange()
+                    }
+                    popup.showInBestPositionFor(e.dataContext)
                 }
-                popup.showInBestPositionFor(e.dataContext)
             }
         }
         return listOf(add, MyDeleteAction())
@@ -86,6 +93,8 @@ abstract class UUIDMapEditor<T>(val driver: UUIDComboBoxDriver<T>): MasterDetail
         if (elem !is ListElem.Pseudo)
             return
         zigCoroutineScope.launch(myWholePanel.asContextElement()) {
+            if (disposed)
+                return@launch
             val uuid = driver.resolvePseudo(myWholePanel, elem)
             if (uuid != null) {
                 withEDTContext(myWholePanel.asContextElement()) {
@@ -103,6 +112,7 @@ abstract class UUIDMapEditor<T>(val driver: UUIDComboBoxDriver<T>): MasterDetail
     override fun getEmptySelectionString() = ZigBrainsBundle.message("settings.shared.list.empty")
 
     override fun disposeUIResources() {
+        disposed = true
         super.disposeUIResources()
         if (registered) {
             driver.theMap.removeChangeListener(changeListener)
@@ -115,8 +125,12 @@ abstract class UUIDMapEditor<T>(val driver: UUIDComboBoxDriver<T>): MasterDetail
     }
 
     private fun reloadTree() {
+        if (disposed)
+            return
         val currentSelection = selectedObject?.asSafely<UUID>()
+        selectedNode = null
         myRoot.removeAllChildren()
+        (myTree.model as DefaultTreeModel).reload()
         val onReload = selectOnNextReload
         selectOnNextReload = null
         var hasOnReload = false
@@ -128,12 +142,10 @@ abstract class UUIDMapEditor<T>(val driver: UUIDComboBoxDriver<T>): MasterDetail
         }
         (myTree.model as DefaultTreeModel).reload()
         if (hasOnReload) {
-            selectNodeInTree(onReload)
+            selectedNode = findNodeByObject(myRoot, onReload)
             return
         }
-        currentSelection?.let {
-            selectNodeInTree(it)
-        }
+        selectedNode = currentSelection?.let { findNodeByObject(myRoot, it) }
     }
 
     @RequiresEdt
@@ -148,6 +160,8 @@ abstract class UUIDMapEditor<T>(val driver: UUIDComboBoxDriver<T>): MasterDetail
     }
 
     private suspend fun listChanged() {
+        if (disposed)
+            return
         withEDTContext(myWholePanel.asContextElement()) {
             reloadTree()
         }

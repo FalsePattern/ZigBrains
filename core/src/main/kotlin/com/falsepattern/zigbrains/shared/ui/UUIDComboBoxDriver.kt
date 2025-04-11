@@ -29,7 +29,7 @@ import java.util.UUID
 
 interface UUIDComboBoxDriver<T> {
     val theMap: UUIDMapSerializable.Converting<T, *, *>
-    fun constructModelList(): List<ListElemIn<T>>
+    suspend fun constructModelList(): List<ListElemIn<T>>
     fun createContext(model: ZBModel<T>): ZBContext<T>
     fun createComboBox(model: ZBModel<T>): ZBComboBox<T>
     suspend fun resolvePseudo(context: Component, elem: ListElem.Pseudo<T>): UUID?

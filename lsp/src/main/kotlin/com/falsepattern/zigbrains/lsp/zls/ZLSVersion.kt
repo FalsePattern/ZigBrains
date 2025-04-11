@@ -63,10 +63,6 @@ data class ZLSVersion(val path: Path, override val name: String? = null, val set
 
     companion object {
         suspend fun tryFromPath(path: Path): ZLSVersion? {
-            if (path.isDirectory()) {
-                val exeName = if (SystemInfo.isWindows) "zls.exe" else "zls"
-                return tryFromPath(path.resolve(exeName))
-            }
             var zls = ZLSVersion(path)
             if (!zls.isValid())
                 return null
