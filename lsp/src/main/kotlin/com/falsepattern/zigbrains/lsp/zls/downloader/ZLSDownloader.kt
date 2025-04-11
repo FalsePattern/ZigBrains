@@ -22,22 +22,19 @@
 
 package com.falsepattern.zigbrains.lsp.zls.downloader
 
+import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
 import com.falsepattern.zigbrains.lsp.zls.ui.getSuggestedZLSPath
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider.IUserDataBridge
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
 import com.falsepattern.zigbrains.shared.downloader.Downloader
-import com.intellij.openapi.util.io.toNioPathOrNull
-import com.intellij.util.system.OS
 import java.awt.Component
-import java.nio.file.Path
-import kotlin.io.path.isDirectory
 
 class ZLSDownloader(component: Component, private val data: IUserDataBridge?) : Downloader<ZLSVersion, ZLSVersionInfo>(component) {
-    override val windowTitle get() = "Install ZLS"
-    override val versionInfoFetchTitle get() = "Fetching zls version information"
-    override fun downloadProgressTitle(version: ZLSVersionInfo) = "Installing ZLS ${version.version.rawVersion}"
+    override val windowTitle get() = ZLSBundle.message("settings.downloader.title")
+    override val versionInfoFetchTitle get() = ZLSBundle.message("settings.downloader.progress.fetch")
+    override fun downloadProgressTitle(version: ZLSVersionInfo) = ZLSBundle.message("settings.downloader.progress.install", version.version.rawVersion)
     override fun localSelector() = ZLSLocalSelector(component)
     override suspend fun downloadVersionList(): List<ZLSVersionInfo> {
         val toolchain = data?.getUserData(ZigToolchainConfigurable.TOOLCHAIN_KEY)?.get()

@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.lsp.zls.downloader
 
+import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.downloader.ZigVersionInfo
 import com.falsepattern.zigbrains.shared.downloader.VersionInfo
@@ -64,7 +65,7 @@ data class ZLSVersionInfo(
                 val service = DownloadableFileService.getInstance()
                 val tempFile = FileUtil.createTempFile(tempPluginDir, "zls_version_info", ".json", false, false)
                 val desc = service.createFileDescription(url, tempFile.name)
-                val downloader = service.createDownloader(listOf(desc), "ZLS version information")
+                val downloader = service.createDownloader(listOf(desc), ZLSBundle.message("settings.downloader.service.index"))
                 val downloadResults = coroutineToIndicator {
                     downloader.download(tempPluginDir)
                 }

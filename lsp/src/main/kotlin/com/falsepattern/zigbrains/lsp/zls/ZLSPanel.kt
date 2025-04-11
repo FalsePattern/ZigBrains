@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.lsp.zls
 
+import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.settings.ZLSSettingsPanel
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableNamedElementPanelBase
@@ -49,7 +50,7 @@ import kotlin.io.path.pathString
 class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
     private val pathToZLS = textFieldWithBrowseButton(
         null,
-        FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor().withTitle("Path to the zls executable")
+        FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor().withTitle(ZLSBundle.message("dialog.title.zls"))
     ).also {
         it.textField.document.addDocumentListener(object : DocumentAdapter() {
             override fun textChanged(e: DocumentEvent) {
@@ -64,14 +65,14 @@ class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
 
     override fun attach(p: Panel): Unit = with(p) {
         super.attach(p)
-        row("Path:") {
+        row(ZLSBundle.message("settings.panel.path.label")) {
             cell(pathToZLS).resizableColumn().align(AlignX.FILL)
         }
-        row("Version:") {
+        row(ZLSBundle.message("settings.panel.version.label")) {
             cell(zlsVersion)
         }
         val sp = ZLSSettingsPanel()
-        p.collapsibleGroup("Settings", indent = false) {
+        p.collapsibleGroup(ZLSBundle.message("settings.panel.settings.group.label"), indent = false) {
             sp.attach(this@collapsibleGroup)
         }
         settingsPanel = sp

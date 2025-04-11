@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.lsp.zls.downloader
 
+import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
 import com.falsepattern.zigbrains.lsp.zls.zlsInstallations
 import com.falsepattern.zigbrains.shared.downloader.LocalSelector
@@ -36,9 +37,9 @@ import kotlin.io.path.isDirectory
 
 class ZLSLocalSelector(component: Component) : LocalSelector<ZLSVersion>(component) {
     override val windowTitle: String
-        get() = "Select ZLS from disk"
+        get() = ZLSBundle.message("settings.local-selector.title")
     override val descriptor: FileChooserDescriptor
-        get() = FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor().withTitle("ZLS binary")
+        get() = FileChooserDescriptorFactory.createSingleFileNoJarsDescriptor().withTitle(ZLSBundle.message("settings.local-selector.chooser.title"))
 
     override suspend fun browse(preSelected: Path?): ZLSVersion? {
         if (preSelected?.isDirectory() == true) {
@@ -54,12 +55,12 @@ class ZLSLocalSelector(component: Component) : LocalSelector<ZLSVersion>(compone
             null,
             false,
             AllIcons.General.Error,
-            "Invalid ZLS path",
+            ZLSBundle.message("settings.local-selector.state.invalid"),
         ) else VerifyResult(
             null,
             true,
             AllIcons.General.Information,
-            "ZLS path OK"
+            ZLSBundle.message("settings.local-selector.state.ok")
         )
         if (zls != null) {
             zls = zlsInstallations.withUniqueName(zls)
