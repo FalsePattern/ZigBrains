@@ -24,12 +24,13 @@ package com.falsepattern.zigbrains.lsp.settings
 
 import com.falsepattern.zigbrains.lsp.config.ZLSConfig
 import com.falsepattern.zigbrains.lsp.config.ZLSConfigProvider
+import com.falsepattern.zigbrains.lsp.zls.zls
 import com.falsepattern.zigbrains.shared.cli.translateCommandline
 import com.intellij.openapi.project.Project
 
 class ZLSSettingsConfigProvider: ZLSConfigProvider {
     override fun getEnvironment(project: Project, previous: ZLSConfig): ZLSConfig {
-        val state = project.zlsSettings.state
+        val state = project.zls?.settings ?: return previous
         return previous.copy(
             enable_snippets = state.enable_snippets,
             enable_argument_placeholders = state.enable_argument_placeholders,

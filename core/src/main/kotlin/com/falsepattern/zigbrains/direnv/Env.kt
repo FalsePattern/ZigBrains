@@ -25,8 +25,10 @@ package com.falsepattern.zigbrains.direnv
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.util.EnvironmentUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import org.jetbrains.annotations.NonNls
 import java.io.File
 import kotlin.io.path.absolute
@@ -34,13 +36,12 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
 
+@JvmRecord
 data class Env(val env: Map<String, String>) {
     private val path get() = getVariable("PATH")?.split(File.pathSeparatorChar)
 
     private fun getVariable(name: @NonNls String) =
         env.getOrElse(name) { EnvironmentUtil.getValue(name) }
-
-    suspend fun findExecutableOnPATH(exe: @NonNls String) = findAllExecutablesOnPATH(exe).firstOrNull()
 
     fun findAllExecutablesOnPATH(exe: @NonNls String) = flow {
         val exeName = if (SystemInfo.isWindows) "$exe.exe" else exe
@@ -54,7 +55,9 @@ data class Env(val env: Map<String, String>) {
                 continue
             emit(exePath)
         }
+    }.flowOn(Dispatchers.IO)
+
+    companion object {
+        val empty = Env(emptyMap())
     }
 }
-
-val emptyEnv = Env(emptyMap())

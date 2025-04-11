@@ -24,7 +24,7 @@ package com.falsepattern.zigbrains.project.run
 
 import com.falsepattern.zigbrains.project.execution.base.ZigExecConfig
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.executors.DefaultRunExecutor
@@ -32,10 +32,13 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.RunContentBuilder
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.progress.blockingContext
 
 class ZigRegularRunner: ZigProgramRunner<ZigProfileState<*>>(DefaultRunExecutor.EXECUTOR_ID) {
-    override suspend fun execute(state: ZigProfileState<*>, toolchain: AbstractZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor? {
-        val exec = state.execute(environment.executor, this)
+    override suspend fun execute(state: ZigProfileState<*>, toolchain: ZigToolchain, environment: ExecutionEnvironment): RunContentDescriptor? {
+        val exec = blockingContext {
+            state.execute(environment.executor, this)
+        }
         return withEDTContext(ModalityState.any()) {
             val runContentBuilder = RunContentBuilder(exec, environment)
             runContentBuilder.showRunContent(null)

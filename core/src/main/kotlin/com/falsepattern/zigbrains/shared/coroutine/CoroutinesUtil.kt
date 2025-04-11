@@ -30,6 +30,8 @@ import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.util.application
 import kotlinx.coroutines.*
+import java.awt.Component
+import kotlin.coroutines.CoroutineContext
 
 inline fun <T> runModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleFactory: () -> String, cancellationFactory: () -> TaskCancellation = {TaskCancellation.cancellable()}, noinline action: suspend CoroutineScope.() -> T): T {
     return if (application.isDispatchThread) {
@@ -40,7 +42,11 @@ inline fun <T> runModalOrBlocking(taskOwnerFactory: () -> ModalTaskOwner, titleF
 }
 
 suspend inline fun <T> withEDTContext(state: ModalityState, noinline block: suspend CoroutineScope.() -> T): T {
-    return withContext(Dispatchers.EDT + state.asContextElement(), block = block)
+    return withEDTContext(state.asContextElement(), block = block)
+}
+
+suspend inline fun <T> withEDTContext(context: CoroutineContext, noinline block: suspend CoroutineScope.() -> T): T {
+    return withContext(Dispatchers.EDT + context, block = block)
 }
 
 suspend inline fun <T> withCurrentEDTModalityContext(noinline block: suspend CoroutineScope.() -> T): T {
@@ -50,9 +56,19 @@ suspend inline fun <T> withCurrentEDTModalityContext(noinline block: suspend Cor
 }
 
 suspend inline fun <T> runInterruptibleEDT(state: ModalityState, noinline targetAction: () -> T): T {
-    return runInterruptible(Dispatchers.EDT + state.asContextElement(), block = targetAction)
+    return runInterruptibleEDT(state.asContextElement(), targetAction = targetAction)
+}
+suspend inline fun <T> runInterruptibleEDT(context: CoroutineContext, noinline targetAction: () -> T): T {
+    return runInterruptible(Dispatchers.EDT + context, block = targetAction)
 }
 
 fun CoroutineScope.launchWithEDT(state: ModalityState, block: suspend CoroutineScope.() -> Unit): Job {
-    return launch(Dispatchers.EDT + state.asContextElement(), block = block)
+    return launchWithEDT(state.asContextElement(), block = block)
+}
+fun CoroutineScope.launchWithEDT(context: CoroutineContext, block: suspend CoroutineScope.() -> Unit): Job {
+    return launch(Dispatchers.EDT + context, block = block)
+}
+
+fun Component.asContextElement(): CoroutineContext {
+    return ModalityState.stateForComponent(this).asContextElement()
 }

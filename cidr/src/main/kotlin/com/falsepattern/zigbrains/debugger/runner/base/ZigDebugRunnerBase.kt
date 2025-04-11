@@ -26,7 +26,7 @@ import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProv
 import com.falsepattern.zigbrains.debugger.ZigLocalDebugProcess
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.run.ZigProgramRunner
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.runInterruptibleEDT
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.intellij.execution.DefaultExecutionResult
@@ -52,7 +52,7 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
     @Throws(ExecutionException::class)
     override suspend fun execute(
         state: ProfileState,
-        toolchain: AbstractZigToolchain,
+        toolchain: ZigToolchain,
         environment: ExecutionEnvironment
     ): RunContentDescriptor? {
         val project = environment.project
@@ -67,7 +67,7 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
     @Throws(ExecutionException::class)
     private suspend fun executeWithDriver(
         state: ProfileState,
-        toolchain: AbstractZigToolchain,
+        toolchain: ZigToolchain,
         environment: ExecutionEnvironment,
         debuggerDriver: DebuggerDriverConfiguration
     ): RunContentDescriptor? {
@@ -113,7 +113,7 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
     protected abstract fun getDebugParameters(
         state: ProfileState,
         debuggerDriver: DebuggerDriverConfiguration,
-        toolchain: AbstractZigToolchain
+        toolchain: ZigToolchain
     ): ZigDebugParametersBase<ProfileState>
 
     private class SharedConsoleBuilder(private val console: ConsoleView) : TextConsoleBuilder() {

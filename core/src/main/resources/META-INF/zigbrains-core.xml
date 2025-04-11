@@ -142,7 +142,15 @@
                 parentId="language"
                 instance="com.falsepattern.zigbrains.project.settings.ZigConfigurable"
                 id="ZigConfigurable"
-                displayName="Zig"
+                bundle="zigbrains.Bundle"
+                key="settings.project.display-name"
+        />
+        <applicationConfigurable
+                parentId="ZigConfigurable"
+                instance="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainListEditor"
+                id="ZigToolchainConfigurable"
+                bundle="zigbrains.Bundle"
+                key="settings.toolchain.list.title"
         />
 
         <programRunner
@@ -158,7 +166,7 @@
         />
 
         <additionalLibraryRootsProvider
-                implementation="com.falsepattern.zigbrains.project.toolchain.stdlib.ZigLibraryRootProvider"
+                implementation="com.falsepattern.zigbrains.project.stdlib.ZigLibraryRootProvider"
         />
 
         <!--suppress PluginXmlValidity -->
@@ -177,10 +185,13 @@
 
     <extensions defaultExtensionNs="com.falsepattern.zigbrains">
         <toolchainProvider
-                implementation="com.falsepattern.zigbrains.project.toolchain.LocalZigToolchainProvider"
+                implementation="com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchainProvider"
         />
         <projectConfigProvider
-                implementation="com.falsepattern.zigbrains.project.settings.ZigCoreProjectConfigurationProvider"
+                implementation="com.falsepattern.zigbrains.project.toolchain.ui.ZigToolchainEditor$Provider"
+        />
+        <projectConfigProvider
+                implementation="com.falsepattern.zigbrains.direnv.ui.DirenvEditor$Provider"
         />
     </extensions>
 

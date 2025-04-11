@@ -27,8 +27,8 @@ import com.falsepattern.zigbrains.debugger.execution.binary.ZigProfileStateBinar
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase
 import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugRunnerBase
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.LocalZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
 import com.intellij.execution.configurations.RunProfile
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
 
@@ -36,7 +36,7 @@ class ZigDebugRunnerBinary: ZigDebugRunnerBase<ZigProfileStateBinary>() {
     override fun getDebugParameters(
         state: ZigProfileStateBinary,
         debuggerDriver: DebuggerDriverConfiguration,
-        toolchain: AbstractZigToolchain
+        toolchain: ZigToolchain
     ): ZigDebugParametersBase<ZigProfileStateBinary> {
         return ZigDebugParametersBinary(debuggerDriver, LocalZigToolchain.ensureLocal(toolchain), state)
     }

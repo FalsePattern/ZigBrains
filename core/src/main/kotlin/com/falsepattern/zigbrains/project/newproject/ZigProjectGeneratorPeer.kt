@@ -31,9 +31,9 @@ import com.intellij.platform.ProjectGeneratorPeer
 import com.intellij.ui.dsl.builder.panel
 import javax.swing.JComponent
 
-class ZigProjectGeneratorPeer(var handleGit: Boolean): ProjectGeneratorPeer<ZigProjectConfigurationData>, Disposable {
-    private val newProjectPanel by lazy {
-        ZigNewProjectPanel(handleGit).also { Disposer.register(this, it) }
+class ZigProjectGeneratorPeer(var handleGit: Boolean): ProjectGeneratorPeer<ZigProjectConfigurationData> {
+    val newProjectPanel by lazy {
+        ZigNewProjectPanel(handleGit)
     }
     val myComponent: JComponent by lazy {
         panel {
@@ -61,6 +61,7 @@ class ZigProjectGeneratorPeer(var handleGit: Boolean): ProjectGeneratorPeer<ZigP
         return false
     }
 
-    override fun dispose() {
+    fun dispose() {
+        newProjectPanel.dispose()
     }
 }

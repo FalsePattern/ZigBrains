@@ -23,7 +23,7 @@
 package com.falsepattern.zigbrains.debugger.runner.base
 
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
-import com.falsepattern.zigbrains.project.toolchain.AbstractZigToolchain
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.intellij.util.system.CpuArch
 import com.jetbrains.cidr.ArchitectureType
 import com.jetbrains.cidr.execution.RunParameters
@@ -31,7 +31,7 @@ import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
 
 abstract class ZigDebugParametersBase<ProfileState: ZigProfileState<*>>(
     private val driverConfiguration: DebuggerDriverConfiguration,
-    protected val toolchain: AbstractZigToolchain,
+    protected val toolchain: ZigToolchain,
     protected val profileState: ProfileState
 ): RunParameters() {
     override fun getDebuggerDriverConfiguration(): DebuggerDriverConfiguration {
