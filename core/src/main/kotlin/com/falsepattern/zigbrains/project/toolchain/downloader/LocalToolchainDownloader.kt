@@ -24,15 +24,15 @@ package com.falsepattern.zigbrains.project.toolchain.downloader
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
-import com.falsepattern.zigbrains.project.toolchain.local.getSuggestedLocalToolchainPath
+import com.falsepattern.zigbrains.project.toolchain.local.suggestedLocalToolchainPath
 import com.falsepattern.zigbrains.shared.downloader.Downloader
 import java.awt.Component
 
 class LocalToolchainDownloader(component: Component) : Downloader<LocalZigToolchain, ZigVersionInfo>(component) {
     override val windowTitle get() = ZigBrainsBundle.message("settings.toolchain.downloader.title")
     override val versionInfoFetchTitle get() = ZigBrainsBundle.message("settings.toolchain.downloader.progress.fetch")
+    override val suggestedPath get() = suggestedLocalToolchainPath
     override fun downloadProgressTitle(version: ZigVersionInfo) = ZigBrainsBundle.message("settings.toolchain.downloader.progress.install", version.version.rawVersion)
     override fun localSelector() = LocalToolchainSelector(component)
     override suspend fun downloadVersionList() = ZigVersionInfo.downloadVersionList()
-    override fun getSuggestedPath() = getSuggestedLocalToolchainPath()
 }

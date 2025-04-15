@@ -34,7 +34,7 @@ abstract class ImmutableNamedElementPanelBase<T>: ImmutableElementPanel<T> {
         get() = nameField.text.ifBlank { null }
         set(value) {nameField.text = value ?: ""}
 
-    override fun attach(p: Panel): Unit = with(p) {
+    override fun attach(panel: Panel): Unit = with(panel) {
         row(ZigBrainsBundle.message("settings.toolchain.base.name.label")) {
             cell(nameField).resizableColumn().align(AlignX.FILL)
         }

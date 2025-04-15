@@ -65,7 +65,7 @@ class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
     private val build_runner_path = ExtendableTextField()
     private val global_cache_path = ExtendableTextField()
 
-    override fun attach(p: Panel): Unit = with(p) {
+    override fun attach(panel: Panel): Unit = with(panel) {
         fancyRow(
             "settings.zls-config-path.label",
             "settings.zls-config-path.tooltip"

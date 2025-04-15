@@ -28,18 +28,18 @@ import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvid
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider
+import com.falsepattern.zigbrains.shared.downloader.homePath
+import com.falsepattern.zigbrains.shared.downloader.xdgDataHome
 import com.falsepattern.zigbrains.shared.ui.renderPathNameComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.ui.SimpleColoredComponent
-import com.intellij.util.system.OS
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
-import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString
 
 class LocalZigToolchainProvider: ZigToolchainProvider {
@@ -93,7 +93,7 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
             Env.empty
         }
         val pathToolchains = env.findAllExecutablesOnPATH("zig").mapNotNull { it.parent }
-        val wellKnown = getWellKnown().asFlow().flatMapConcat { dir ->
+        val wellKnown = wellKnown.asFlow().flatMapConcat { dir ->
             runCatching {
                 Files.newDirectoryStream(dir).use { stream ->
                     stream.toList().filterNotNull().asFlow()
@@ -112,8 +112,8 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     }
 }
 
-fun getSuggestedLocalToolchainPath(): Path? {
-    return getWellKnown().getOrNull(0)
+val suggestedLocalToolchainPath: Path? by lazy {
+    wellKnown.getOrNull(0)
 }
 
 /**
@@ -130,18 +130,12 @@ fun getSuggestedLocalToolchainPath(): Path? {
  *
  * and HOME is the user home path
  */
-private fun getWellKnown(): List<Path> {
-    val home = System.getProperty("user.home")?.toNioPathOrNull() ?: return emptyList()
-    val xdgDataHome = when(OS.CURRENT) {
-        OS.macOS -> home.resolve("Library")
-        OS.Windows -> System.getenv("LOCALAPPDATA")?.toNioPathOrNull()
-        else -> System.getenv("XDG_DATA_HOME")?.toNioPathOrNull() ?: home.resolve(Path.of(".local", "share"))
-    }
+private val wellKnown: List<Path> by lazy {
     val res = ArrayList<Path>()
-    if (xdgDataHome != null && xdgDataHome.isDirectory()) {
-        res.add(xdgDataHome.resolve("zig"))
-        res.add(xdgDataHome.resolve("zigup"))
+    xdgDataHome?.let {
+        res.add(it.resolve("zig"))
+        res.add(it.resolve("zigup"))
     }
-    res.add(home.resolve(".zig"))
-    return res
+    homePath?.let { res.add(it.resolve(".zig")) }
+    res
 }

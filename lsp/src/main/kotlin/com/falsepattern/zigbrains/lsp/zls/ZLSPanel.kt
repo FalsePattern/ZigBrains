@@ -63,8 +63,8 @@ class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
     private var settingsPanel: ZLSSettingsPanel? = null
     private var debounce: Job? = null
 
-    override fun attach(p: Panel): Unit = with(p) {
-        super.attach(p)
+    override fun attach(panel: Panel): Unit = with(panel) {
+        super.attach(panel)
         row(ZLSBundle.message("settings.panel.path.label")) {
             cell(pathToZLS).resizableColumn().align(AlignX.FILL)
         }
@@ -72,27 +72,27 @@ class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
             cell(zlsVersion)
         }
         val sp = ZLSSettingsPanel()
-        p.collapsibleGroup(ZLSBundle.message("settings.panel.settings.group.label"), indent = false) {
+        panel.collapsibleGroup(ZLSBundle.message("settings.panel.settings.group.label"), indent = false) {
             sp.attach(this@collapsibleGroup)
         }
         settingsPanel = sp
     }
 
-    override fun isModified(version: ZLSVersion): Boolean {
+    override fun isModified(elem: ZLSVersion): Boolean {
         val name = nameFieldValue ?: return false
         val path = this.pathToZLS.text.ifBlank { null }?.toNioPathOrNull() ?: return false
-        return name != version.name || version.path != path || settingsPanel?.isModified(version.settings) == true
+        return name != elem.name || elem.path != path || settingsPanel?.isModified(elem.settings) == true
     }
 
-    override fun apply(version: ZLSVersion): ZLSVersion? {
+    override fun apply(elem: ZLSVersion): ZLSVersion? {
         val path = this.pathToZLS.text.ifBlank { null }?.toNioPathOrNull() ?: return null
-        return version.copy(path = path, name = nameFieldValue ?: "", settings = settingsPanel?.apply(version.settings) ?: version.settings)
+        return elem.copy(path = path, name = nameFieldValue ?: "", settings = settingsPanel?.apply(elem.settings) ?: elem.settings)
     }
 
-    override fun reset(version: ZLSVersion?) {
-        nameFieldValue = version?.name ?: ""
-        this.pathToZLS.text = version?.path?.pathString ?: ""
-        settingsPanel?.reset(version?.settings)
+    override fun reset(elem: ZLSVersion?) {
+        nameFieldValue = elem?.name ?: ""
+        this.pathToZLS.text = elem?.path?.pathString ?: ""
+        settingsPanel?.reset(elem?.settings)
         dispatchUpdateUI()
     }
 
