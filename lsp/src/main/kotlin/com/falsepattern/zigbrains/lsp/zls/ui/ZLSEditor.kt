@@ -55,21 +55,21 @@ class ZLSEditor<T: ZigToolchain>(private val sharedState: ZigProjectConfiguratio
         }
     }
 
-    override fun isModified(toolchain: T): Boolean {
+    override fun isModified(elem: T): Boolean {
         if (isEmpty)
             return false
-        return toolchain.zlsUUID != selectedUUID
+        return elem.zlsUUID != selectedUUID
     }
 
-    override fun apply(toolchain: T): T {
-        return toolchain.withZLS(selectedUUID)
+    override fun apply(elem: T): T {
+        return elem.withZLS(selectedUUID)
     }
 
-    override fun reset(toolchain: T?) {
-        selectedUUID = toolchain?.zlsUUID
+    override fun reset(elem: T?) {
+        selectedUUID = elem?.zlsUUID
         zigCoroutineScope.launch {
             listChanged()
-            selectedUUID = toolchain?.zlsUUID
+            selectedUUID = elem?.zlsUUID
         }
     }
 

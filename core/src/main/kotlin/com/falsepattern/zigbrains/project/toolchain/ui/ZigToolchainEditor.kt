@@ -60,7 +60,7 @@ class ZigToolchainEditor(private val sharedState: ZigProjectConfigurationProvide
     }
 
 
-    override fun attach(p: Panel): Unit = with(p) {
+    override fun attach(panel: Panel): Unit = with(panel) {
         row(ZigBrainsBundle.message(
             if (sharedState.getUserData(PROJECT_KEY)?.isDefault == true)
                 "settings.toolchain.editor.toolchain-default.label"
@@ -75,7 +75,7 @@ class ZigToolchainEditor(private val sharedState: ZigProjectConfigurationProvide
             views.addAll(createZigToolchainExtensionPanels(sharedState, PanelState.ProjectEditor))
             myViews = views
         }
-        views.forEach { it.attach(p) }
+        views.forEach { it.attach(panel) }
     }
 
     override fun onSelection(uuid: UUID?) {

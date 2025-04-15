@@ -26,7 +26,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.ui.dsl.builder.Panel
 
 interface ImmutableElementPanel<T>: Disposable {
-    fun attach(p: Panel)
+    fun attach(panel: Panel)
     fun isModified(elem: T): Boolean
     /**
      * Returned object must be the exact same class as the provided one.

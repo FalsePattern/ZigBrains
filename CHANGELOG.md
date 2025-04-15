@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [25.0.2]
+
+### Fixed
+
+- Project
+  - ZLS settings not scrollable in the language server list
+
 ## [25.0.1]
 
 ### Fixed

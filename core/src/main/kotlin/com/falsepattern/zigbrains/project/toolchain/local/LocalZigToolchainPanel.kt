@@ -75,8 +75,8 @@ class LocalZigToolchainPanel() : ImmutableNamedElementPanelBase<LocalZigToolchai
     ).also { Disposer.register(this, it) }
     private var debounce: Job? = null
 
-    override fun attach(p: Panel): Unit = with(p) {
-        super.attach(p)
+    override fun attach(panel: Panel): Unit = with(panel) {
+        super.attach(panel)
         row(ZigBrainsBundle.message("settings.toolchain.local.path.label")) {
             cell(pathToToolchain).resizableColumn().align(AlignX.FILL)
         }
@@ -89,23 +89,23 @@ class LocalZigToolchainPanel() : ImmutableNamedElementPanelBase<LocalZigToolchai
         }
     }
 
-    override fun isModified(toolchain: LocalZigToolchain): Boolean {
+    override fun isModified(elem: LocalZigToolchain): Boolean {
         val name = nameFieldValue ?: return false
         val location = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull() ?: return false
         val std = if (stdFieldOverride.isSelected) pathToStd.text.ifBlank { null }?.toNioPathOrNull() else null
-        return name != toolchain.name || toolchain.location != location || toolchain.std != std
+        return name != elem.name || elem.location != location || elem.std != std
     }
 
-    override fun apply(toolchain: LocalZigToolchain): LocalZigToolchain? {
+    override fun apply(elem: LocalZigToolchain): LocalZigToolchain? {
         val location = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull() ?: return null
         val std = if (stdFieldOverride.isSelected) pathToStd.text.ifBlank { null }?.toNioPathOrNull() else null
-        return toolchain.copy(location = location, std = std, name = nameFieldValue ?: "")
+        return elem.copy(location = location, std = std, name = nameFieldValue ?: "")
     }
 
-    override fun reset(toolchain: LocalZigToolchain?) {
-        nameFieldValue = toolchain?.name ?: ""
-        this.pathToToolchain.text = toolchain?.location?.pathString ?: ""
-        val std = toolchain?.std
+    override fun reset(elem: LocalZigToolchain?) {
+        nameFieldValue = elem?.name ?: ""
+        this.pathToToolchain.text = elem?.location?.pathString ?: ""
+        val std = elem?.std
         if (std != null) {
             stdFieldOverride.isSelected = true
             pathToStd.text = std.pathString

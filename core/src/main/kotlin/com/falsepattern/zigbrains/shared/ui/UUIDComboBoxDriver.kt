@@ -24,8 +24,11 @@ package com.falsepattern.zigbrains.shared.ui
 
 import com.falsepattern.zigbrains.shared.UUIDMapSerializable
 import com.intellij.openapi.ui.NamedConfigurable
+import com.intellij.ui.components.JBScrollPane
 import java.awt.Component
+import java.awt.Dimension
 import java.util.*
+import javax.swing.JComponent
 
 interface UUIDComboBoxDriver<T> {
     val theMap: UUIDMapSerializable.Converting<T, *, *>
@@ -34,4 +37,15 @@ interface UUIDComboBoxDriver<T> {
     fun createComboBox(model: ZBModel<T>): ZBComboBox<T>
     suspend fun resolvePseudo(context: Component, elem: ListElem.Pseudo<T>): UUID?
     fun createNamedConfigurable(uuid: UUID, elem: T): NamedConfigurable<UUID>
+
+    companion object {
+        fun wrapModal(component: JComponent, modal: Boolean): JComponent {
+            if (modal) {
+                component.preferredSize = Dimension(640, 480)
+                return component
+            } else {
+                return JBScrollPane(component)
+            }
+        }
+    }
 }

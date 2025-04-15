@@ -24,7 +24,7 @@ package com.falsepattern.zigbrains.lsp.zls.downloader
 
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
-import com.falsepattern.zigbrains.lsp.zls.ui.getSuggestedZLSPath
+import com.falsepattern.zigbrains.lsp.zls.ui.suggestedZLSPath
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider.IUserDataBridge
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable
@@ -34,6 +34,7 @@ import java.awt.Component
 class ZLSDownloader(component: Component, private val data: IUserDataBridge?) : Downloader<ZLSVersion, ZLSVersionInfo>(component) {
     override val windowTitle get() = ZLSBundle.message("settings.downloader.title")
     override val versionInfoFetchTitle get() = ZLSBundle.message("settings.downloader.progress.fetch")
+    override val suggestedPath get() = suggestedZLSPath
     override fun downloadProgressTitle(version: ZLSVersionInfo) = ZLSBundle.message("settings.downloader.progress.install", version.version.rawVersion)
     override fun localSelector() = ZLSLocalSelector(component)
     override suspend fun downloadVersionList(): List<ZLSVersionInfo> {
@@ -41,5 +42,4 @@ class ZLSDownloader(component: Component, private val data: IUserDataBridge?) : 
         val project = data?.getUserData(ZigProjectConfigurationProvider.PROJECT_KEY)
         return ZLSVersionInfo.downloadVersionInfoFor(toolchain, project)
     }
-    override fun getSuggestedPath() = getSuggestedZLSPath()
 }

@@ -25,6 +25,7 @@ package com.falsepattern.zigbrains.project.toolchain.base
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableElementPanel
 import com.falsepattern.zigbrains.project.toolchain.zigToolchainList
+import com.falsepattern.zigbrains.shared.ui.UUIDComboBoxDriver.Companion.wrapModal
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.NlsContexts
@@ -37,7 +38,7 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
     val uuid: UUID,
     tc: T,
     val data: ZigProjectConfigurationProvider.IUserDataBridge?,
-    val modal: Boolean
+    private val modal: Boolean
 ): NamedConfigurable<UUID>() {
     var toolchain: T = tc
         set(value) {
@@ -64,7 +65,7 @@ abstract class ZigToolchainConfigurable<T: ZigToolchain>(
             views.forEach { it.attach(this@panel) }
         }.withMinimumWidth(20)
         views.forEach { it.reset(toolchain) }
-        return p
+        return wrapModal(p, modal)
     }
 
     override fun getEditableObject(): UUID? {
