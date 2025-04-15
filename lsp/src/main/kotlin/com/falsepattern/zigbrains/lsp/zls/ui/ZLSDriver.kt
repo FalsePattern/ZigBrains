@@ -149,13 +149,13 @@ private fun suggestZLSVersions(project: Project? = null, data: ZigProjectConfigu
     wellKnownZLS.forEach { wellKnown ->
         runCatching {
             Files.newDirectoryStream(wellKnown).use { stream ->
-                stream.asSequence().filterNotNull().forEach { dir ->
+                stream.asSequence().filterNotNull().forEach streamForEach@{ dir ->
                     val path = dir.resolve(exe)
                     if (!path.isRegularFile() || !path.isExecutable()) {
-                        return@forEach
+                        return@streamForEach
                     }
                     if (existing.any { it.path == path }) {
-                        return@forEach
+                        return@streamForEach
                     }
                     emitIfCompatible(path, toolchainVersion)
                 }

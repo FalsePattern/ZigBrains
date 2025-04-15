@@ -250,16 +250,16 @@ abstract class ZBCellRenderer<T>(val getModel: () -> ZBModel<T>) : ColoredListCe
 }
 
 fun renderPathNameComponent(path: String, name: String?, nameFallback: String, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {
-    val path = presentDetectedPath(path)
+    val thePath = presentDetectedPath(path)
     val primary: String
     var secondary: String?
     val tooltip: String?
     if (isSuggestion) {
-        primary = path
+        primary = thePath
         secondary = name
     } else {
         primary = name ?: nameFallback
-        secondary = path
+        secondary = thePath
     }
     if (isSelected) {
         tooltip = secondary
@@ -277,12 +277,12 @@ fun renderPathNameComponent(path: String, name: String?, nameFallback: String, c
 
 fun presentDetectedPath(home: String, maxLength: Int = 50, suffixLength: Int = 30): String {
     //for macOS, let's try removing Bundle internals
-    var home = home
-    home = StringUtil.trimEnd(home, "/Contents/Home") //NON-NLS
-    home = StringUtil.trimEnd(home, "/Contents/MacOS") //NON-NLS
-    home = FileUtil.getLocationRelativeToUserHome(home, false)
-    home = StringUtil.shortenTextWithEllipsis(home, maxLength, suffixLength)
-    return home
+    var theHome = home
+    theHome = StringUtil.trimEnd(theHome, "/Contents/Home") //NON-NLS
+    theHome = StringUtil.trimEnd(theHome, "/Contents/MacOS") //NON-NLS
+    theHome = FileUtil.getLocationRelativeToUserHome(theHome, false)
+    theHome = StringUtil.shortenTextWithEllipsis(theHome, maxLength, suffixLength)
+    return theHome
 }
 
 private val EMPTY_ICON = EmptyIcon.create(1, 16)

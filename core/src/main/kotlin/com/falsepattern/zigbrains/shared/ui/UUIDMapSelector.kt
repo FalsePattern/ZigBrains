@@ -161,7 +161,7 @@ abstract class UUIDMapSelector<T>(val driver: UUIDComboBoxDriver<T>): Disposable
 
     protected fun attachComboBoxRow(row: Row): Unit = with(row) {
         cell(comboBox).resizableColumn().align(AlignX.FILL)
-        button(ZigBrainsBundle.message("settings.toolchain.editor.toolchain.edit-button.name")) { e ->
+        button(ZigBrainsBundle.message("settings.toolchain.editor.toolchain.edit-button.name")) {
             zigCoroutineScope.launchWithEDT(comboBox.asContextElement()) {
                 var selectedUUID = comboBox.selectedUUID ?: return@launchWithEDT
                 val elem = driver.theMap[selectedUUID] ?: return@launchWithEDT
