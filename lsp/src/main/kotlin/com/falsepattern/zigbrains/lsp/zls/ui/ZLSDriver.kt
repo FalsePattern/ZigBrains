@@ -33,14 +33,14 @@ import com.falsepattern.zigbrains.lsp.zls.zlsInstallations
 import com.falsepattern.zigbrains.project.settings.ZigProjectConfigurationProvider
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurable.Companion.TOOLCHAIN_KEY
 import com.falsepattern.zigbrains.shared.UUIDMapSerializable
+import com.falsepattern.zigbrains.shared.downloader.homePath
+import com.falsepattern.zigbrains.shared.downloader.xdgDataHome
 import com.falsepattern.zigbrains.shared.ui.*
 import com.falsepattern.zigbrains.shared.ui.ListElem.One.Actual
 import com.falsepattern.zigbrains.shared.withUniqueName
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.SystemInfo
-import com.intellij.openapi.util.io.toNioPathOrNull
-import com.intellij.util.system.OS
 import com.intellij.util.text.SemVer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -146,7 +146,7 @@ private fun suggestZLSVersions(project: Project? = null, data: ZigProjectConfigu
         emitIfCompatible(path, toolchainVersion)
     }
     val exe = if (SystemInfo.isWindows) "zls.exe" else "zls"
-    getWellKnownZLS().forEach { wellKnown ->
+    wellKnownZLS.forEach { wellKnown ->
         runCatching {
             Files.newDirectoryStream(wellKnown).use { stream ->
                 stream.asSequence().filterNotNull().forEach { dir ->
@@ -192,8 +192,8 @@ private fun numericVersionEquals(a: SemVer, b: SemVer): Boolean {
 }
 
 
-fun getSuggestedZLSPath(): Path? {
-    return getWellKnownZLS().getOrNull(0)
+val suggestedZLSPath: Path? by lazy {
+    wellKnownZLS.getOrNull(0)
 }
 
 /**
@@ -209,17 +209,9 @@ fun getSuggestedZLSPath(): Path? {
  *
  * and HOME is the user home path
  */
-private fun getWellKnownZLS(): List<Path> {
-    val home = System.getProperty("user.home")?.toNioPathOrNull() ?: return emptyList()
-    val xdgDataHome = when(OS.CURRENT) {
-        OS.macOS -> home.resolve("Library")
-        OS.Windows -> System.getenv("LOCALAPPDATA")?.toNioPathOrNull()
-        else -> System.getenv("XDG_DATA_HOME")?.toNioPathOrNull() ?: home.resolve(Path.of(".local", "share"))
-    }
+private val wellKnownZLS: List<Path> by lazy {
     val res = ArrayList<Path>()
-    if (xdgDataHome != null && xdgDataHome.isDirectory()) {
-        res.add(xdgDataHome.resolve("zls"))
-    }
-    res.add(home.resolve(".zls"))
-    return res
+    xdgDataHome?.let { res.add(it.resolve("zls")) }
+    homePath?.let { res.add(it.resolve(".zls")) }
+    res
 }

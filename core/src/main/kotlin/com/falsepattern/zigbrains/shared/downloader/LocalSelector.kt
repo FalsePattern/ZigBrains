@@ -41,11 +41,13 @@ import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.concurrency.annotations.RequiresEdt
+import com.intellij.util.system.OS
 import java.awt.Component
 import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.Icon
 import javax.swing.event.DocumentEvent
+import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString
 
 abstract class LocalSelector<T>(val component: Component) {
@@ -135,4 +137,16 @@ abstract class LocalSelector<T>(val component: Component) {
         val errorIcon: Icon,
         val errorText: String,
     )
+}
+
+val homePath: Path? by lazy {
+    System.getProperty("user.home")?.toNioPathOrNull()?.takeIf { it.isDirectory() }
+}
+
+val xdgDataHome: Path? by lazy {
+    when(OS.CURRENT) {
+        OS.macOS -> homePath?.resolve("Library")
+        OS.Windows -> System.getenv("LOCALAPPDATA")?.toNioPathOrNull()
+        else -> System.getenv("XDG_DATA_HOME")?.toNioPathOrNull() ?: homePath?.resolve(Path.of(".local", "share"))
+    }?.takeIf { it.isDirectory() }
 }

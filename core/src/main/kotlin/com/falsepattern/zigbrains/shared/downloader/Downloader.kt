@@ -76,10 +76,10 @@ abstract class Downloader<T, V: VersionInfo>(val component: Component) {
 
     protected abstract val windowTitle: String
     protected abstract val versionInfoFetchTitle: @NlsContexts.ProgressTitle String
+    protected abstract val suggestedPath: Path?
     protected abstract fun downloadProgressTitle(version: V): @NlsContexts.ProgressTitle String
     protected abstract fun localSelector(): LocalSelector<T>
     protected abstract suspend fun downloadVersionList(): List<V>
-    protected abstract fun getSuggestedPath(): Path?
 
     @RequiresEdt
     private fun selectVersion(info: List<V>, selector: LocalSelector<T>): Pair<Path, V>? {
@@ -131,7 +131,7 @@ abstract class Downloader<T, V: VersionInfo>(val component: Component) {
         })
         var archiveSizeCell: Cell<*>? = null
         fun detect(item: V) {
-            outputPath.text = getSuggestedPath()?.resolve(item.version.rawVersion)?.pathString ?: ""
+            outputPath.text = suggestedPath?.resolve(item.version.rawVersion)?.pathString ?: ""
             val size = item.dist.size
             val sizeMb = size / (1024f * 1024f)
             archiveSizeCell?.comment?.text = ZigBrainsBundle.message("settings.shared.downloader.archive-size.text", "%.2fMB".format(sizeMb))
