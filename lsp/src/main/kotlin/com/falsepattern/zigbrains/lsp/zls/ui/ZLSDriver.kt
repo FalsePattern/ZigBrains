@@ -67,10 +67,6 @@ sealed interface ZLSDriver: UUIDComboBoxDriver<ZLSVersion> {
         return ZLSComboBox(model)
     }
 
-    override fun createNamedConfigurable(uuid: UUID, elem: ZLSVersion): NamedConfigurable<UUID> {
-        return ZLSConfigurable(uuid, elem)
-    }
-
     override suspend fun resolvePseudo(
         context: Component,
         elem: ListElem.Pseudo<ZLSVersion>
@@ -93,6 +89,10 @@ sealed interface ZLSDriver: UUIDComboBoxDriver<ZLSVersion> {
             return res
         }
 
+        override fun createNamedConfigurable(uuid: UUID, elem: ZLSVersion): NamedConfigurable<UUID> {
+            return ZLSConfigurable(uuid, elem, false)
+        }
+
         override val data: ZigProjectConfigurationProvider.IUserDataBridge?
             get() = null
     }
@@ -112,6 +112,10 @@ sealed interface ZLSDriver: UUIDComboBoxDriver<ZLSVersion> {
             res.add(Separator(ZLSBundle.message("settings.model.detected.separator"), true))
             res.add(suggestZLSVersions(project, data, toolchainVersion).asPending())
             return res
+        }
+
+        override fun createNamedConfigurable(uuid: UUID, elem: ZLSVersion): NamedConfigurable<UUID> {
+            return ZLSConfigurable(uuid, elem, true)
         }
     }
 }
