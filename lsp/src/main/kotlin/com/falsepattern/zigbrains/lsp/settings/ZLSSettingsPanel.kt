@@ -35,6 +35,9 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.Row
 import org.jetbrains.annotations.PropertyKey
+import javax.swing.text.AttributeSet
+import javax.swing.text.DocumentFilter
+import javax.swing.text.PlainDocument
 
 @Suppress("PrivatePropertyName")
 class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
@@ -44,6 +47,27 @@ class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
             .withTitle(ZLSBundle.message("settings.zls-config-path.browse.title"))
     ).also { Disposer.register(this, it) }
     private val inlayHints = JBCheckBox()
+    private val inlayHintsMaxFileSize = ExtendableTextField(5).also { (it.document as PlainDocument).documentFilter = object: DocumentFilter() {
+        override fun insertString(fb: FilterBypass?, offset: Int, string: String?, attr: AttributeSet?) {
+            if (string != null && !string.isEmpty() && string.toIntOrNull() == null) {
+                return
+            }
+            super.insertString(fb, offset, string, attr)
+        }
+
+        override fun replace(
+            fb: FilterBypass?,
+            offset: Int,
+            length: Int,
+            text: String?,
+            attrs: AttributeSet?
+        ) {
+            if (text != null && !text.isEmpty() && text.toIntOrNull() == null) {
+                return
+            }
+            super.replace(fb, offset, length, text, attrs)
+        }
+    } }
     private val enable_snippets = JBCheckBox()
     private val enable_argument_placeholders = JBCheckBox()
     private val completion_label_details = JBCheckBox()
@@ -99,6 +123,13 @@ class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
                 "settings.inlay-hints-enable.label",
                 "settings.inlay-hints-enable.tooltip"
             ) { cell(inlayHints) }
+            fancyRow(
+                "settings.inlay-hints-max-size.label",
+                "settings.inlay-hints-max-size.tooltip",
+            ) {
+                cell(inlayHintsMaxFileSize)
+                text(ZLSBundle.message("settings.inlay-hints-max-size.unit"))
+            }
             fancyRow(
                 "settings.inlay_hints_show_variable_type_hints.label",
                 "settings.inlay_hints_show_variable_type_hints.tooltip"
@@ -174,6 +205,7 @@ class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
         get() = ZLSSettings(
             zlsConfigPath.text,
             inlayHints.isSelected,
+            inlayHintsMaxFileSize.text.toIntOrNull() ?: 128,
             enable_snippets.isSelected,
             enable_argument_placeholders.isSelected,
             completion_label_details.isSelected,
@@ -198,6 +230,7 @@ class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
         set(value) {
             zlsConfigPath.text = value.zlsConfigPath
             inlayHints.isSelected = value.inlayHints
+            inlayHintsMaxFileSize.text = value.inlayHintsMaxFileSizeKb.toString()
             enable_snippets.isSelected = value.enable_snippets
             enable_argument_placeholders.isSelected = value.enable_argument_placeholders
             completion_label_details.isSelected = value.completion_label_details

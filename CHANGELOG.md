@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- LSP
+  - Configurable inlay hints file size limit to reduce IDE lag
+
 ## [25.0.2]
 
 ### Fixed
