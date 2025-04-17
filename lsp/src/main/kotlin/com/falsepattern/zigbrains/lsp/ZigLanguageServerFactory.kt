@@ -68,7 +68,14 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
         }
         features.inlayHintFeature = object: LSPInlayHintFeature() {
             override fun isEnabled(file: PsiFile): Boolean {
-                return project.zls?.settings?.inlayHints == true
+                val settings = project.zls?.settings ?: return false
+                if (!settings.inlayHints)
+                    return false
+                val maxFileSizeKb = settings.inlayHintsMaxFileSizeKb
+                if (maxFileSizeKb == 0)
+                    return true
+                val fileSizeKb = file.fileDocument.textLength / 1024
+                return fileSizeKb <= maxFileSizeKb
             }
         }
         return features

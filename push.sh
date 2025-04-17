@@ -23,8 +23,6 @@
 
 set -e
 
-declare -a branches=("dev" "master" "242" "241")
-
 die () {
     echo >&2 "$@"
     exit 1
@@ -32,8 +30,4 @@ die () {
 
 [ "$#" -eq 1 ] || die "1 argument required, $# provided"
 
-for i in "${branches[@]}"
-do
-  echo "Pushing branch $i"
-  git push "$1" "$i"
-done
+git push --atomic "$1" "dev" "master" "243" "242" "241"

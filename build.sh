@@ -23,7 +23,7 @@
 
 set -e
 
-declare -a branches=("master" "242" "241")
+declare -a branches=("master" "243" "242" "241")
 
 DEFAULT_BRANCH="${branches[0]}"
 
