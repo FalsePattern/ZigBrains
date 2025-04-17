@@ -23,7 +23,7 @@
 
 set -e
 
-declare -a branches=("dev" "master" "242" "241")
+declare -a branches=("dev" "master" "243" "242" "241")
 
 die () {
     echo >&2 "$@"

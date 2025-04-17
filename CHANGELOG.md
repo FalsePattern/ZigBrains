@@ -19,6 +19,8 @@ Changelog structure reference:
 
 ### Added
 
+- IDEA 2025.1 support
+
 - LSP
   - Configurable inlay hints file size limit to reduce IDE lag
 
