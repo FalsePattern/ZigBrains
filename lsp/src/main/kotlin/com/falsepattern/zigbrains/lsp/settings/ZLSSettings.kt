@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NonNls
 data class ZLSSettings(
     @JvmField @Attribute val zlsConfigPath: @NonNls String = "",
     @JvmField @Attribute val inlayHints: Boolean = true,
+    @JvmField @Attribute val inlayHintsMaxFileSizeKb: Int = 128,
     @JvmField @Attribute val enable_snippets: Boolean = true,
     @JvmField @Attribute val enable_argument_placeholders: Boolean = true,
     @JvmField @Attribute val completion_label_details: Boolean = true,

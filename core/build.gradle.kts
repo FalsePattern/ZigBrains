@@ -9,12 +9,15 @@ plugins {
 
 val ideaCommunityVersion: String by project
 val useInstaller = property("useInstaller").toString().toBoolean()
+val serializationVersion: String by project
 
 dependencies {
     intellijPlatform {
         create(IntelliJPlatformType.IntellijIdeaCommunity, ideaCommunityVersion, useInstaller = useInstaller)
     }
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$serializationVersion") {
+        isTransitive = false
+    }
 }
 
 //region grammars
