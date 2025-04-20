@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.debugger.runner.base
 
+import com.falsepattern.zigbrains.project.run.ZigProcessHandler
 import com.falsepattern.zigbrains.shared.cli.startIPCAwareProcess
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
@@ -40,7 +41,7 @@ import kotlinx.coroutines.withContext
 class PreLaunchProcessListener(val console: ConsoleView) : ProcessListener {
     var isBuildFailed: Boolean = false
         private set
-    lateinit var processHandler: ProcessHandler
+    lateinit var processHandler: ZigProcessHandler.IPCAware
         private set
 
     @Throws(ExecutionException::class)
@@ -50,7 +51,7 @@ class PreLaunchProcessListener(val console: ConsoleView) : ProcessListener {
             this@PreLaunchProcessListener.processHandler = processHandler
             hook(processHandler)
             processHandler.startNotify()
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 processHandler.process.awaitExit()
             }
             runInterruptible {

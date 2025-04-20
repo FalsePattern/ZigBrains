@@ -17,6 +17,23 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [25.2.0]
+
+### Added
+
+- Debugger
+  - Notify the user if zig run / zig test debugging starts, but a build.zig is present
+
+### Changed
+
+- Project
+  - Line marker task suggestions for main/test now defer to Zig Build if build.zig file is detected.
+
+### Fixed
+
+- Debugger
+  - Compilation failures did not open the terminal properly and suppressed the error message
+
 ## [25.1.0]
 
 ### Added

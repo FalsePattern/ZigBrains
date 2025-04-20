@@ -130,13 +130,14 @@ fun createCommandLineSafe(
 }
 
 @Throws(ExecutionException::class)
-suspend fun GeneralCommandLine.startIPCAwareProcess(project: Project?, emulateTerminal: Boolean = false): ZigProcessHandler {
+suspend fun GeneralCommandLine.startIPCAwareProcess(project: Project?, emulateTerminal: Boolean = false): ZigProcessHandler.IPCAware {
+    val original = this.commandLineString
     val ipc = if (project != null && !emulateTerminal) IPCUtil.wrapWithIPC(this) else null
     val cli = ipc?.cli ?: this
     if (emulateTerminal && OS.CURRENT != OS.Windows && !cli.environment.contains("TERM")) {
         cli.withEnvironment("TERM", "xterm-256color")
     }
-    val handler = ZigProcessHandler(cli)
+    val handler = ZigProcessHandler.IPCAware(original, cli)
     ProcessTerminatedListener.attach(handler)
 
     if (ipc != null) {
