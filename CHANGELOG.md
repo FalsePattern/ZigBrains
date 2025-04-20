@@ -17,6 +17,16 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Debugger
+  - Notify the user if zig run / zig test debugging starts, but a build.zig is present
+
+### Fixed
+
+- Debugger
+  - Compilation failures did not open the terminal properly and suppressed the error message
+
 ## [25.1.0]
 
 ### Added
