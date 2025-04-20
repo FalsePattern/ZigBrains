@@ -24,12 +24,16 @@ package com.falsepattern.zigbrains.project.execution.build
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigProducer
+import com.falsepattern.zigbrains.project.execution.base.findBuildZig
+import com.falsepattern.zigbrains.project.execution.base.isBuildZig
 import com.falsepattern.zigbrains.project.execution.firstConfigFactory
 import com.falsepattern.zigbrains.zig.psi.ZigFile
+import com.falsepattern.zigbrains.zig.psi.ZigTypes
 import com.intellij.execution.actions.ConfigurationFromContext
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.elementType
 import java.nio.file.Path
 
 class ZigConfigProducerBuild: ZigConfigProducer<ZigExecConfigBuild>() {
@@ -38,14 +42,39 @@ class ZigConfigProducerBuild: ZigConfigProducer<ZigExecConfigBuild>() {
     }
 
     override fun setupConfigurationFromContext(configuration: ZigExecConfigBuild, element: PsiElement, psiFile: ZigFile, filePath: Path, theFile: VirtualFile): Boolean {
-        if (theFile.name != "build.zig")
-            return false
-        configuration.name = ZigBrainsBundle.message("configuration.build.marker-name")
-        return true
+        if (theFile.isBuildZig()) {
+            configuration.name = ZigBrainsBundle.message("configuration.build.marker-run")
+            configuration.buildSteps.args = "run"
+            configuration.debugBuildSteps.args = "install"
+            return true
+        }
+        val buildZig = theFile.findBuildZig() ?: return false
+        configuration.workingDirectory.path = buildZig.parent.toNioPath()
+        if (element.elementType == ZigTypes.KEYWORD_TEST) {
+            configuration.name = ZigBrainsBundle.message("configuration.build.marker-test")
+            configuration.buildSteps.args = "test"
+            configuration.debugBuildSteps.args = "install_test"
+            return true
+        } else {
+            configuration.name = ZigBrainsBundle.message("configuration.build.marker-run")
+            configuration.buildSteps.args = "run"
+            configuration.debugBuildSteps.args = "install"
+            return true
+        }
     }
 
     override fun isConfigurationFromContext(configuration: ZigExecConfigBuild, element: PsiElement, psiFile: ZigFile, filePath: Path, theFile: VirtualFile): Boolean {
-        return filePath.parent == (configuration.workingDirectory.path ?: return false)
+        val dir = configuration.workingDirectory.path ?: return false
+        if (theFile.isBuildZig()) {
+            return filePath.parent == dir
+        } else {
+            if (element.elementType == ZigTypes.KEYWORD_TEST) {
+                if (configuration.buildSteps.args != "test")
+                    return false
+            }
+            val buildZig = theFile.findBuildZig() ?: return false
+            return buildZig.parent.toNioPath() == dir
+        }
     }
 
     override fun shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean {

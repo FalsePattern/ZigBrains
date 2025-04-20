@@ -22,6 +22,11 @@ Changelog structure reference:
 - Debugger
   - Notify the user if zig run / zig test debugging starts, but a build.zig is present
 
+### Changed
+
+- Project
+  - Line marker task suggestions for main/test now defer to Zig Build if build.zig file is detected.
+
 ### Fixed
 
 - Debugger

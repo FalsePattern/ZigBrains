@@ -23,14 +23,14 @@
 package com.falsepattern.zigbrains.project.execution.run
 
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigProducer
+import com.falsepattern.zigbrains.project.execution.base.findBuildZig
+import com.falsepattern.zigbrains.project.execution.base.hasMainFunction
 import com.falsepattern.zigbrains.project.execution.firstConfigFactory
-import com.falsepattern.zigbrains.zig.psi.ZigContainerMembers
 import com.falsepattern.zigbrains.zig.psi.ZigFile
 import com.intellij.execution.actions.ConfigurationFromContext
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.childrenOfType
 import java.nio.file.Path
 
 class ZigConfigProducerRun: ZigConfigProducer<ZigExecConfigRun>() {
@@ -39,8 +39,10 @@ class ZigConfigProducerRun: ZigConfigProducer<ZigExecConfigRun>() {
     }
 
     override fun setupConfigurationFromContext(configuration: ZigExecConfigRun, element: PsiElement, psiFile: ZigFile, filePath: Path, theFile: VirtualFile): Boolean {
-        val members = psiFile.childrenOfType<ZigContainerMembers>().firstOrNull() ?: return false
-        if (members.containerDeclarationList.none { it.decl?.fnProto?.identifier?.textMatches("main") == true }) {
+        if (!psiFile.hasMainFunction()) {
+            return false
+        }
+        if (theFile.findBuildZig() != null) {
             return false
         }
         configuration.filePath.path = filePath
@@ -56,5 +58,3 @@ class ZigConfigProducerRun: ZigConfigProducer<ZigExecConfigRun>() {
         return self.configurationType is ZigConfigTypeRun
     }
 }
-
-private val LINE_MARKER = ZigLineMarkerRun()
