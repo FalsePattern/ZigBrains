@@ -28,14 +28,25 @@ import com.intellij.execution.process.KillableProcessHandler
 import com.pty4j.PtyProcess
 import java.nio.charset.Charset
 
-class ZigProcessHandler : KillableProcessHandler {
+open class ZigProcessHandler : KillableProcessHandler {
     constructor(commandLine: GeneralCommandLine) : super(commandLine) {
         setHasPty(commandLine is PtyCommandLine)
         setShouldDestroyProcessRecursively(!hasPty())
     }
 
-    constructor (process: Process, commandLine: String, charset: Charset) : super(process, commandLine, charset) {
+    protected constructor (process: Process, commandLine: String, charset: Charset) : super(process, commandLine, charset) {
         setHasPty(process is PtyProcess)
         setShouldDestroyProcessRecursively(!hasPty())
+    }
+
+    class IPCAware : ZigProcessHandler {
+        val originalCommandLine: String
+        constructor(originalCommandLine: String, commandLine: GeneralCommandLine) : super(commandLine) {
+            this.originalCommandLine = originalCommandLine
+        }
+
+        fun unwrap(): ZigProcessHandler {
+            return ZigProcessHandler(this.process, this.originalCommandLine, this.charset ?: Charsets.UTF_8)
+        }
     }
 }

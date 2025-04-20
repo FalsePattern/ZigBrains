@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.debugger.runner.base
 
 import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProviderBase
 import com.falsepattern.zigbrains.debugger.ZigLocalDebugProcess
+import com.falsepattern.zigbrains.debugger.runner.build.ZigDebugRunnerBuild
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.run.ZigProgramRunner
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
@@ -41,6 +42,7 @@ import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.platform.util.progress.reportProgress
 import com.intellij.xdebugger.XDebugProcess
 import com.intellij.xdebugger.XDebugProcessStarter
@@ -82,11 +84,13 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
                     }
                 } catch (e: ExecutionException) {
                     console.print("\n", ConsoleViewContentType.ERROR_OUTPUT)
-                    e.message?.let { listener.console.print(it, ConsoleViewContentType.SYSTEM_OUTPUT) }
-                    throw e;
+                    e.message?.let { listener.console.print(it, ConsoleViewContentType.ERROR_OUTPUT) }
+                    if (this !is ZigDebugRunnerBuild && environment.project.guessProjectDir()?.children?.any { it.name == "build.zig" } == true) {
+                        console.print("\n  Warning: build.zig file detected in project.\n  Did you want to use a Zig Build task instead?", ConsoleViewContentType.ERROR_OUTPUT)
+                    }
                 }
                 if (listener.isBuildFailed) {
-                    val executionResult = DefaultExecutionResult(console, listener.processHandler)
+                    val executionResult = DefaultExecutionResult(console, listener.processHandler.unwrap())
                     return@reportProgress withEDTContext(ModalityState.any()) {
                         val runContentBuilder = RunContentBuilder(executionResult, environment)
                         runContentBuilder.showRunContent(null)
