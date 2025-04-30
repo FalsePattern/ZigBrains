@@ -56,7 +56,7 @@ dec_int={dec} {dec_}*
 hex_int={hex} {hex_}*
 
 char_char= \\ .
-         | [^\'\r\n\u0085\u2028\u2029]
+         | [^\'\\\r\n\u0085\u2028\u2029]
 
 string_char= \\ .
            | [^\"\r\n\u0085\u2028\u2029]
