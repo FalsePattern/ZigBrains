@@ -144,9 +144,10 @@ val homePath: Path? by lazy {
 }
 
 val xdgDataHome: Path? by lazy {
+    System.getenv("XDG_DATA_HOME")?.toNioPathOrNull()?.takeIf { it.isDirectory() } ?:
     when(OS.CURRENT) {
         OS.macOS -> homePath?.resolve("Library")
         OS.Windows -> System.getenv("LOCALAPPDATA")?.toNioPathOrNull()
-        else -> System.getenv("XDG_DATA_HOME")?.toNioPathOrNull() ?: homePath?.resolve(Path.of(".local", "share"))
+        else -> homePath?.resolve(Path.of(".local", "share"))
     }?.takeIf { it.isDirectory() }
 }

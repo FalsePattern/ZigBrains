@@ -45,7 +45,7 @@ class ZigConfigProducerBuild: ZigConfigProducer<ZigExecConfigBuild>() {
         if (theFile.isBuildZig()) {
             configuration.name = ZigBrainsBundle.message("configuration.build.marker-run")
             configuration.buildSteps.args = "run"
-            configuration.debugBuildSteps.args = "install"
+            configuration.debugBuildSteps.args = ""
             return true
         }
         val buildZig = theFile.findBuildZig() ?: return false
@@ -53,12 +53,12 @@ class ZigConfigProducerBuild: ZigConfigProducer<ZigExecConfigBuild>() {
         if (element.elementType == ZigTypes.KEYWORD_TEST) {
             configuration.name = ZigBrainsBundle.message("configuration.build.marker-test")
             configuration.buildSteps.args = "test"
-            configuration.debugBuildSteps.args = "install_test"
+            configuration.debugBuildSteps.args = ""
             return true
         } else {
             configuration.name = ZigBrainsBundle.message("configuration.build.marker-run")
             configuration.buildSteps.args = "run"
-            configuration.debugBuildSteps.args = "install"
+            configuration.debugBuildSteps.args = ""
             return true
         }
     }
