@@ -17,6 +17,26 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [25.3.0]
+
+### Added
+
+- Debugger
+  - Hint message for setting up zig build test debugging
+
+### Fixed
+
+- Debugger
+  - Internal error when compilation fails
+
+- Zig, Zon
+  - Escaped backslashes in strings broke the parser
+
+### Removed
+
+- Debugger
+  - Output executable autodetection. It was too unreliable and people kept making bug reports.
+
 ## [25.2.0]
 
 ### Added

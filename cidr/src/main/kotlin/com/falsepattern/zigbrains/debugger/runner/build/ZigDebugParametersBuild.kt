@@ -43,6 +43,7 @@ import java.nio.file.Path
 import java.util.stream.Stream
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
+import kotlin.io.path.pathString
 
 class ZigDebugParametersBuild(
     driverConfiguration: DebuggerDriverConfiguration,
@@ -61,28 +62,14 @@ class ZigDebugParametersBuild(
         withProgressText("Building zig project") {
             withContext(Dispatchers.IO) {
                 val commandLine = profileState.getCommandLine(toolchain, true)
+                val cliStr = commandLine.commandLineString
                 if (listener.executeCommandLineWithHook(profileState.environment.project, commandLine))
                     return@withContext
-                val cfg = profileState.configuration
-                val workingDir = cfg.workingDirectory.path
-                val exe = profileState.configuration.exePath.path ?: run {
-                    //Attempt autodetect, should work for trivial cases, and make most users happy, while advanced
-                    // users can use manual executable paths.
-                    if (workingDir == null) {
-                        fail("debug.build.compile.failed.no-workdir")
-                    }
-                    val expectedOutputDir = workingDir.resolve(Path.of("zig-out", "bin"))
-                    if (!expectedOutputDir.toFile().exists()) {
-                        fail("debug.build.compile.failed.autodetect")
-                    }
 
-                    withContext(Dispatchers.IO) {
-                        Files.list(expectedOutputDir).use { getExe(it) }
-                    }
-                }
+                val exe = profileState.configuration.exePath.path ?: fail(ZigDebugBundle.message("debug.build.compile.failed.no-exe-path"))
 
                 if (!exe.toFile().exists())
-                    fail("debug.build.compile.failed.no-file", exe)
+                    fail("debug.build.compile.failed.no-file", exe.pathString, cliStr)
                 else if (!exe.isExecutable())
                     fail("debug.build.compile.failed.non-exec-file", exe)
 
@@ -94,22 +81,6 @@ class ZigDebugParametersBuild(
 }
 
 @Throws(ExecutionException::class)
-private fun getExe(files: Stream<Path>): Path {
-    var fileStream = files.filter { it.isRegularFile() }
-    if (SystemInfo.isWindows) {
-        fileStream = fileStream.filter { it.fileName.endsWith(".exe") }
-    } else {
-        fileStream = fileStream.filter { it.isExecutable() }
-    }
-    val executables = fileStream.toList()
-    return when(executables.size) {
-        0 -> fail("debug.base.compile.failed.no-exe")
-        1 -> executables[0]
-        else -> fail("debug.build.compile.failed.multiple-exe")
-    }
-}
-
-@Throws(ExecutionException::class)
 private fun fail(@PropertyKey(resourceBundle = ZigDebugBundle.BUNDLE) messageKey: String, vararg params: Any): Nothing {
-    throw ExecutionException(ZigDebugBundle.message("debug.build.compile.failed.boilerplate", ZigDebugBundle.message(messageKey, params)))
+    throw ExecutionException(ZigDebugBundle.message(messageKey, *params))
 }
