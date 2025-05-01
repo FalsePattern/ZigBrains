@@ -61,12 +61,16 @@ class ZigDebugParametersBuild(
     override suspend fun preLaunch(listener: PreLaunchProcessListener) {
         withProgressText("Building zig project") {
             withContext(Dispatchers.IO) {
+                //TODO populate the listener process handler before throwing
+                if (profileState.configuration.debugBuildSteps.args.isBlank()) {
+                    fail("debug.build.compile.failed.no-exe-path-or-step")
+                }
                 val commandLine = profileState.getCommandLine(toolchain, true)
                 val cliStr = commandLine.commandLineString
                 if (listener.executeCommandLineWithHook(profileState.environment.project, commandLine))
                     return@withContext
 
-                val exe = profileState.configuration.exePath.path ?: fail("debug.build.compile.failed.no-exe-path")
+                val exe = profileState.configuration.exePath.path ?: fail("debug.build.compile.failed.no-exe-path-or-step")
 
                 if (!exe.toFile().exists())
                     fail("debug.build.compile.failed.no-file", exe.pathString, cliStr)

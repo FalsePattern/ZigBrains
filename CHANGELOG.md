@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Changed
+
+- Debugger
+  - Not specifying a build step for debugging zig build tasks is now an error
+
 ## [25.3.0]
 
 ### Added
