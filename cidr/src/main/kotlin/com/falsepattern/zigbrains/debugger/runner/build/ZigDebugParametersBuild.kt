@@ -66,7 +66,7 @@ class ZigDebugParametersBuild(
                 if (listener.executeCommandLineWithHook(profileState.environment.project, commandLine))
                     return@withContext
 
-                val exe = profileState.configuration.exePath.path ?: fail(ZigDebugBundle.message("debug.build.compile.failed.no-exe-path"))
+                val exe = profileState.configuration.exePath.path ?: fail("debug.build.compile.failed.no-exe-path")
 
                 if (!exe.toFile().exists())
                     fail("debug.build.compile.failed.no-file", exe.pathString, cliStr)
