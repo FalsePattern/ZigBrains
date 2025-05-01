@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.debugbridge.ZigDebuggerDriverConfigurationProv
 import com.falsepattern.zigbrains.debugger.ZigLocalDebugProcess
 import com.falsepattern.zigbrains.debugger.runner.build.ZigDebugRunnerBuild
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
+import com.falsepattern.zigbrains.project.run.ZigProcessHandler
 import com.falsepattern.zigbrains.project.run.ZigProgramRunner
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.runInterruptibleEDT
@@ -78,19 +79,25 @@ abstract class ZigDebugRunnerBase<ProfileState : ZigProfileState<*>> : ZigProgra
             val console = state.consoleBuilder.console
             if (runParameters is PreLaunchAware) {
                 val listener = PreLaunchProcessListener(console)
+                var failed: Boolean
+                var handler: ZigProcessHandler.IPCAware
                 try {
                     reporter.indeterminateStep {
                         runParameters.preLaunch(listener)
                     }
+                    handler = listener.processHandler ?: throw ExecutionException("Unknown error while trying to compile executable.")
+                    failed = listener.isBuildFailed
                 } catch (e: ExecutionException) {
+                    handler = listener.processHandler ?: throw e
+                    failed = true
                     console.print("\n", ConsoleViewContentType.ERROR_OUTPUT)
                     e.message?.let { listener.console.print(it, ConsoleViewContentType.ERROR_OUTPUT) }
                     if (this !is ZigDebugRunnerBuild && environment.project.guessProjectDir()?.children?.any { it.name == "build.zig" } == true) {
                         console.print("\n  Warning: build.zig file detected in project.\n  Did you want to use a Zig Build task instead?", ConsoleViewContentType.ERROR_OUTPUT)
                     }
                 }
-                if (listener.isBuildFailed) {
-                    val executionResult = DefaultExecutionResult(console, listener.processHandler.unwrap())
+                if (failed) {
+                    val executionResult = DefaultExecutionResult(console, handler.unwrap())
                     return@reportProgress withEDTContext(ModalityState.any()) {
                         val runContentBuilder = RunContentBuilder(executionResult, environment)
                         runContentBuilder.showRunContent(null)
