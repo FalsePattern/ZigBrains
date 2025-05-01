@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig, Zon
+  - Escaped backslashes in strings broke the parser
+
 ## [25.2.0]
 
 ### Added

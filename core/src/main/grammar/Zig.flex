@@ -55,10 +55,14 @@ oct_int={oct} {oct_}*
 dec_int={dec} {dec_}*
 hex_int={hex} {hex_}*
 
-char_char= \\ .
+char_escape= "\\x" {hex} {hex}
+           | "\\u{" {hex}+ "}"
+           | "\\" [nr\\t\'\"];
+
+char_char= {char_escape}
          | [^\'\r\n\u0085\u2028\u2029]
 
-string_char= \\ .
+string_char= {char_escape}
            | [^\"\r\n\u0085\u2028\u2029]
 
 nl_wrap={LF} (\s|{LF})*
