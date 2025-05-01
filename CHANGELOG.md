@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [25.3.0]
+
 ### Added
 
 - Debugger
