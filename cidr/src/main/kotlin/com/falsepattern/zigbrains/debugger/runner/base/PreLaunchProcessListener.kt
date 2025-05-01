@@ -41,7 +41,7 @@ import kotlinx.coroutines.withContext
 class PreLaunchProcessListener(val console: ConsoleView) : ProcessListener {
     var isBuildFailed: Boolean = false
         private set
-    lateinit var processHandler: ZigProcessHandler.IPCAware
+    var processHandler: ZigProcessHandler.IPCAware? = null
         private set
 
     @Throws(ExecutionException::class)
