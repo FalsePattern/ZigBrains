@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString
 
 class LocalZigToolchainProvider: ZigToolchainProvider {
@@ -96,7 +97,11 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
         val wellKnown = wellKnown.asFlow().flatMapConcat { dir ->
             runCatching {
                 Files.newDirectoryStream(dir).use { stream ->
-                    stream.toList().filterNotNull().asFlow()
+                    stream.asSequence().mapNotNull { path ->
+                        if (path == null || !path.isDirectory())
+                            return@mapNotNull null
+                        return@mapNotNull tryDetermineStructure(path)
+                    }.toList().asFlow()
                 }
             }.getOrElse { emptyFlow() }
         }
@@ -137,5 +142,25 @@ private val wellKnown: List<Path> by lazy {
         res.add(it.resolve("zigup"))
     }
     homePath?.let { res.add(it.resolve(".zig")) }
+    gradleUserHome?.let { res.add(it.resolve(Path.of("caches", "com.falsepattern.zigbuild", "toolchains-1"))) }
     res
+}
+
+private val gradleUserHome: Path? by lazy {
+    System.getenv("GRADLE_USER_HOME")?.toNioPathOrNull()?.takeIf { it.isDirectory() } ?: homePath?.resolve(".gradle")?.takeIf { it.isDirectory() }
+}
+
+private fun tryDetermineStructure(outputDir: Path): Path? {
+    //More efficient than reading the whole list
+    val filesInDirectory = runCatching { Files.newDirectoryStream(outputDir).use { it.take(2) } }.getOrNull()
+    if (filesInDirectory == null || filesInDirectory.isEmpty()) {
+        return null
+    }
+
+    // If there's one file, we go down one level. Otherwise, zig is here
+    return if (filesInDirectory.size > 1) {
+        outputDir
+    } else {
+        filesInDirectory[0]
+    }
 }
