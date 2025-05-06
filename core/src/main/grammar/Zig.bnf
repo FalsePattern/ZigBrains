@@ -581,4 +581,4 @@ ExprList ::= (ZB_ExprList_Expr COMMA)* ZB_ExprList_Expr?
 private ZB_ExprList_Expr ::= Expr {recoverWhile="ZB_ExprList_recover"}
 private ZB_ExprList_recover ::= !(RPAREN | COMMA)
 
-StringLiteral ::= STRING_LITERAL_SINGLE | STRING_LITERAL_MULTI
+StringLiteral ::= STRING_LITERAL_SINGLE | (STRING_LITERAL_MULTI)+

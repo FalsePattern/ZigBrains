@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.zig.injection
 
+import com.falsepattern.zigbrains.startOffsetInAncestor
 import com.falsepattern.zigbrains.zig.ZigFileType
 import com.falsepattern.zigbrains.zig.injection.InjectTriState.*
 import com.falsepattern.zigbrains.zig.psi.*
@@ -29,7 +30,9 @@ import com.falsepattern.zigbrains.zig.util.escape
 import com.falsepattern.zigbrains.zig.util.prefixWithTextBlockEscape
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.AbstractElementManipulator
-import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.util.childLeafs
+import com.intellij.util.asSafely
 import org.jetbrains.annotations.NonNls
 
 class ZigStringElementManipulator: AbstractElementManipulator<ZigStringLiteral>() {
@@ -38,35 +41,32 @@ class ZigStringElementManipulator: AbstractElementManipulator<ZigStringLiteral>(
         range: TextRange,
         newContent: String?
     ): ZigStringLiteral {
-        val originalContext = element.text!!
-        val isMultiline = element.isMultiline
-        @NonNls
-        val prefix = "const x = \n"
-        val suffix = "\n;"
-        val sbFactory: (Int) -> StringBuilder = {
-            val sb = StringBuilder(prefix.length + suffix.length + it)
-            sb.append(prefix)
-            sb
+        val child = element.findElementAt(range.startOffset)?.asSafely<LeafPsiElement>()?.takeIf { it.elementType == ZigTypes.STRING_LITERAL_MULTI || it.elementType == ZigTypes.STRING_LITERAL_SINGLE } ?: throw IllegalArgumentException()
+        val childElemOffset = child.startOffsetInAncestor(element)
+        val originalContext = child.text
+        val childElemLength = child.textLength
+        val childInParentRange = TextRange(childElemOffset, childElemOffset + childElemLength)
+        val contentRanges = element.contentRanges.mapNotNull { it.intersection(childInParentRange)?.shiftLeft(childElemOffset) }
+        if (contentRanges.isEmpty()) {
+            return element
         }
-        val replacement = if (isMultiline) {
-            replaceMultilineContent(element, newContent, range, originalContext, sbFactory)
+        val rangeInChild = range.shiftLeft(childElemOffset)
+        if (rangeInChild.endOffset > childElemLength) {
+            return element
+        }
+
+        val replacement = if (element.isMultiline) {
+            val last = element.childLeafs().lastOrNull { it is LeafPsiElement && it.elementType == ZigTypes.STRING_LITERAL_MULTI }
+            val sb = replaceMultilineContent(element.indentSize, contentRanges, newContent, rangeInChild, originalContext, child == last)
+            sb.append('\n')
         } else {
-            replaceQuotedContent(element, range, newContent, originalContext, sbFactory)
+            if (contentRanges.size != 1) {
+                return element
+            }
+            replaceQuotedContent(contentRanges[0], rangeInChild, newContent, originalContext)
         }
-        replacement.append(suffix)
-        val fileFactory = PsiFileFactory.getInstance(element.project)
-        val dummy = fileFactory.createFileFromText(fileName, ZigFileType, replacement)
-        val stringLiteral = dummy
-            .firstChild
-            .let {it as ZigContainerMembers}
-            .containerDeclarationList
-            .first()
-            .decl!!
-            .globalVarDecl!!
-            .expr
-            .let { it as ZigPrimaryTypeExpr }
-            .stringLiteral!!
-        return element.replace(stringLiteral) as ZigStringLiteral
+        child.replaceWithText(replacement.toString())
+        return element
     }
 
 
@@ -78,19 +78,17 @@ class ZigStringElementManipulator: AbstractElementManipulator<ZigStringLiteral>(
 private val fileName = "dummy." + ZigFileType.defaultExtension
 
 private fun ZigStringElementManipulator.replaceQuotedContent(
-    element: ZigStringLiteral,
+    contentRange: TextRange,
     range: TextRange,
     newContent: String?,
-    originalContext: String,
-    sbFactory: (Int) -> StringBuilder
+    originalContext: String
 ): StringBuilder {
-    val elementRange = getRangeInElement(element)
-    val prefixStart = elementRange.startOffset
+    val prefixStart = contentRange.startOffset
     val prefixEnd = range.startOffset
     val suffixStart = range.endOffset
-    val suffixEnd = elementRange.endOffset
+    val suffixEnd = contentRange.endOffset
     val escaped = newContent?.escape()
-    val result = sbFactory(2 + (prefixEnd - prefixStart) + (escaped?.length ?: 0) + (suffixEnd - suffixStart))
+    val result = StringBuilder(2 + (prefixEnd - prefixStart) + (escaped?.length ?: 0) + (suffixEnd - suffixStart))
     result.append('"')
     result.append(originalContext.subSequence(prefixStart, prefixEnd))
     if (escaped != null) {
@@ -108,13 +106,13 @@ private enum class InjectTriState {
 }
 
 private fun replaceMultilineContent(
-    element: ZigStringLiteral,
+    indent: Int,
+    contentRanges: List<TextRange>,
     newContent: String?,
     range: TextRange,
     originalContext: String,
-    sbFactory: (Int) -> StringBuilder
+    isLast: Boolean
 ): StringBuilder {
-    val contentRanges = element.contentRanges
     val contentBuilder = StringBuilder(contentRanges.sumOf { it.length } + (newContent?.length ?: 0))
     var injectState = NotYet
     val contentIter = contentRanges.iterator()
@@ -149,11 +147,11 @@ private fun replaceMultilineContent(
         contentBuilder.append(originalContext, contentRange.startOffset, contentRange.endOffset)
     }
     return contentBuilder.prefixWithTextBlockEscape(
-        indent = element.indentSize,
+        indent = indent,
         marker = "\\\\",
         indentFirst = false,
         prefixFirst = true,
         newLineAfter = false,
-        sbFactory
+        stripLastNewline = !isLast
     )
 }
