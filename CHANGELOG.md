@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [25.4.1]
+
+### Fixed
+
+- Zig
+  - Multiline strings with comments inside of them now get processed correctly
+
 ## [25.4.0]
 
 ### Added
