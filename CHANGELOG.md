@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- Toolchain
+  - Toolchains installed in the gradle cache by [Gradle ZigBuild](https://plugins.gradle.org/plugin/com.falsepattern.zigbuild) are now detected and shown in the toolchain suggestions.
+
 ### Changed
 
 - Debugger
