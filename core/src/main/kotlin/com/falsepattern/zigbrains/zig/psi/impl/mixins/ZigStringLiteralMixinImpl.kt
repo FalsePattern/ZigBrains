@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.zig.psi.impl.mixins
 
 import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral
+import com.falsepattern.zigbrains.zig.psi.ZigTypes
 import com.falsepattern.zigbrains.zig.psi.getMultilineContent
 import com.falsepattern.zigbrains.zig.psi.getTextRangeBounds
 import com.falsepattern.zigbrains.zig.util.decodeReplacements
@@ -31,13 +32,15 @@ import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.LiteralTextEscaper
-import com.intellij.psi.impl.source.tree.LeafElement
+import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.util.elementType
+import com.intellij.util.asSafely
 
 abstract class ZigStringLiteralMixinImpl(node: ASTNode): ASTWrapperPsiElement(node), ZigStringLiteral {
     override fun isValidHost() = true
 
     override val isMultiline: Boolean
-        get() = stringLiteralMulti != null
+        get() = children.all { it.elementType == ZigTypes.STRING_LITERAL_MULTI }
 
     override val contentRanges: List<TextRange>
         get() = if (!isMultiline) {
@@ -47,9 +50,23 @@ abstract class ZigStringLiteralMixinImpl(node: ASTNode): ASTWrapperPsiElement(no
         }
 
     override fun updateText(text: String): ZigStringLiteral {
-        (stringLiteralSingle ?: stringLiteralMulti)
-            ?.let { it as LeafElement }
-            ?.replaceWithText(text)
+        if (isMultiline) {
+            var replaced = false
+            for (child in children.copyOf()) {
+                if (child !is LeafPsiElement)
+                    continue
+                if (child.elementType == ZigTypes.STRING_LITERAL_MULTI) {
+                    if (replaced) {
+                        child.delete()
+                    } else {
+                        child.replaceWithText(text)
+                        replaced = true
+                    }
+                }
+            }
+        } else {
+            stringLiteralSingle?.asSafely<LeafPsiElement>()?.replaceWithText(text)
+        }
         return this
     }
 

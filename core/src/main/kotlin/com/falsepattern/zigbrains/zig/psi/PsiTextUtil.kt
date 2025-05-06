@@ -128,7 +128,8 @@ fun splitString(
             marker = "\\\\",
             indentFirst = newLine,
             prefixFirst = true,
-            newLineAfter = insertNewlineAtCaret
+            newLineAfter = insertNewlineAtCaret,
+            stripLastNewline = false
         )
     )
     caretOffset = stringRange.endOffset
@@ -139,7 +140,8 @@ fun splitString(
             marker = "\\\\",
             indentFirst = false,
             prefixFirst = false,
-            newLineAfter = false
+            newLineAfter = false,
+            stripLastNewline = false
         )
     )
     var end = stringRange.endOffset
