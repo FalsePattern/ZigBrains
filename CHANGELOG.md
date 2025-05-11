@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig, Zon
+  - Fixed escape sequence parsing in strings/character literals
+
 ## [25.4.1]
 
 ### Fixed
