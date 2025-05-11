@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [25.4.2]
+
 ### Fixed
 
 - Zig, Zon
