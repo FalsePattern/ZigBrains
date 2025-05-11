@@ -57,7 +57,7 @@ hex_int={hex} {hex_}*
 
 char_escape= "\\x" {hex} {hex}
            | "\\u{" {hex}+ "}"
-           | "\\" [nr\\t\'\"];
+           | "\\" [nr\\t\'\"]
 
 char_char= {char_escape}
          | [^\'\r\n\u0085\u2028\u2029]
