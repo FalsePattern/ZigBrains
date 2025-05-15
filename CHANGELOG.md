@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [25.5.0]
+
 ### Added
 
 - LSP
