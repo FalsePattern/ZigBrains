@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Added
+
+- LSP
+  - Custom selection ranges toggle in the ZLS settings, turned off by default.
+
 ## [25.4.2]
 
 ### Fixed

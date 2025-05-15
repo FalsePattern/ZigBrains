@@ -68,6 +68,7 @@ class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
             super.replace(fb, offset, length, text, attrs)
         }
     } }
+    private val selectionRanges = JBCheckBox()
     private val enable_snippets = JBCheckBox()
     private val enable_argument_placeholders = JBCheckBox()
     private val completion_label_details = JBCheckBox()
@@ -94,6 +95,10 @@ class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
             "settings.zls-config-path.label",
             "settings.zls-config-path.tooltip"
         ) { cell(zlsConfigPath).align(AlignX.FILL) }
+        fancyRow(
+            "settings.selection-ranges.label",
+            "settings.selection-ranges.tooltip"
+        ) { cell(selectionRanges) }
         fancyRow(
             "settings.enable_snippets.label",
             "settings.enable_snippets.tooltip"
@@ -206,6 +211,7 @@ class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
             zlsConfigPath.text,
             inlayHints.isSelected,
             inlayHintsMaxFileSize.text.toIntOrNull() ?: 128,
+            selectionRanges.isSelected,
             enable_snippets.isSelected,
             enable_argument_placeholders.isSelected,
             completion_label_details.isSelected,
@@ -231,6 +237,7 @@ class ZLSSettingsPanel() : ImmutableElementPanel<ZLSSettings> {
             zlsConfigPath.text = value.zlsConfigPath
             inlayHints.isSelected = value.inlayHints
             inlayHintsMaxFileSize.text = value.inlayHintsMaxFileSizeKb.toString()
+            selectionRanges.isSelected = value.selectionRanges
             enable_snippets.isSelected = value.enable_snippets
             enable_argument_placeholders.isSelected = value.enable_argument_placeholders
             completion_label_details.isSelected = value.completion_label_details
