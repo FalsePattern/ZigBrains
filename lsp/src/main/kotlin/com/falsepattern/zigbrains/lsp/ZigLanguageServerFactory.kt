@@ -38,6 +38,7 @@ import com.redhat.devtools.lsp4ij.ServerStatus
 import com.redhat.devtools.lsp4ij.client.features.LSPClientFeatures
 import com.redhat.devtools.lsp4ij.client.features.LSPFormattingFeature
 import com.redhat.devtools.lsp4ij.client.features.LSPInlayHintFeature
+import com.redhat.devtools.lsp4ij.client.features.LSPSelectionRangeFeature
 import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -76,6 +77,12 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
                     return true
                 val fileSizeKb = file.fileDocument.textLength / 1024
                 return fileSizeKb <= maxFileSizeKb
+            }
+        }
+        features.selectionRangeFeature = object: LSPSelectionRangeFeature() {
+            override fun isEnabled(file: PsiFile): Boolean {
+                val settings = project.zls?.settings ?: return false
+                return settings.selectionRanges
             }
         }
         return features
