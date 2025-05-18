@@ -25,13 +25,14 @@ package com.falsepattern.zigbrains.shared.downloader
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
 import com.falsepattern.zigbrains.shared.coroutine.runInterruptibleEDT
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.observable.util.whenFocusGained
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.NlsContexts
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.platform.ide.progress.ModalTaskOwner
 import com.intellij.platform.ide.progress.TaskCancellation
 import com.intellij.platform.ide.progress.withModalProgress
@@ -49,7 +50,6 @@ import java.util.*
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JList
 import javax.swing.event.DocumentEvent
-import kotlin.io.path.pathString
 
 abstract class Downloader<T, V: VersionInfo>(val component: Component) {
     suspend fun download(): T? {
@@ -102,7 +102,7 @@ abstract class Downloader<T, V: VersionInfo>(val component: Component) {
 
         lateinit var errorMessageBox: JBLabel
         fun onChanged() {
-            val path = outputPath.text.ifBlank { null }?.toNioPathOrNull()
+            val path = outputPath.text.sanitizedToNioPath()
             val state = DirectoryState.Companion.determine(path)
             if (state.isValid()) {
                 errorMessageBox.icon = AllIcons.General.Information
@@ -131,7 +131,7 @@ abstract class Downloader<T, V: VersionInfo>(val component: Component) {
         })
         var archiveSizeCell: Cell<*>? = null
         fun detect(item: V) {
-            outputPath.text = suggestedPath?.resolve(item.version.rawVersion)?.pathString ?: ""
+            outputPath.text = suggestedPath?.resolve(item.version.rawVersion)?.sanitizedPathString ?: ""
             val size = item.dist.size
             val sizeMb = size / (1024f * 1024f)
             archiveSizeCell?.comment?.text = ZigBrainsBundle.message("settings.shared.downloader.archive-size.text", "%.2fMB".format(sizeMb))
@@ -160,7 +160,7 @@ abstract class Downloader<T, V: VersionInfo>(val component: Component) {
         if (!dialog.showAndGet()) {
             return null
         }
-        val path = outputPath.text.ifBlank { null }?.toNioPathOrNull()
+        val path = outputPath.text.sanitizedToNioPath()
                    ?: return null
         if (!DirectoryState.Companion.determine(path).isValid()) {
             return null

@@ -25,17 +25,17 @@ package com.falsepattern.zigbrains.debugger.execution.binary
 import com.falsepattern.zigbrains.debugger.ZigDebugBundle
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.runners.ExecutionEnvironment
-import kotlin.io.path.pathString
 
 class ZigProfileStateBinary(environment: ExecutionEnvironment, configuration: ZigExecConfigBinary) : ZigProfileState<ZigExecConfigBinary>(environment, configuration) {
     override suspend fun getCommandLine(toolchain: ZigToolchain, debug: Boolean): GeneralCommandLine {
         val cli = GeneralCommandLine()
         val cfg = configuration
         cfg.workingDirectory.path?.let { cli.withWorkDirectory(it.toFile()) }
-        cli.withExePath(cfg.exePath.path?.pathString ?: throw ExecutionException(ZigDebugBundle.message("exception.missing-exe-path")))
+        cli.withExePath(cfg.exePath.path?.sanitizedPathString ?: throw ExecutionException(ZigDebugBundle.message("exception.missing-exe-path")))
         cli.withCharset(Charsets.UTF_8)
         cli.addParameters(cfg.args.args)
         return cli

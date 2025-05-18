@@ -28,6 +28,7 @@ import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.cli.startIPCAwareProcess
 import com.falsepattern.zigbrains.shared.coroutine.runModalOrBlocking
+import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.CommandLineState
 import com.intellij.execution.configurations.GeneralCommandLine
@@ -35,7 +36,6 @@ import com.intellij.execution.configurations.PtyCommandLine
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.platform.ide.progress.ModalTaskOwner
-import kotlin.io.path.pathString
 
 abstract class ZigProfileState<T: ZigExecConfig<T>> (
     environment: ExecutionEnvironment,
@@ -62,10 +62,10 @@ abstract class ZigProfileState<T: ZigExecConfig<T>> (
     @Throws(ExecutionException::class)
     open suspend fun getCommandLine(toolchain: ZigToolchain, debug: Boolean): GeneralCommandLine {
         val workingDir = configuration.workingDirectory
-        val zigExePath = toolchain.zig.path()
+        val zigExePath = toolchain.zig.path().sanitizedPathString ?: throw ExecutionException("Failed to parse executable path")
 
         val cli = PtyCommandLine().withConsoleMode(false)
-        cli.withExePath(zigExePath.pathString)
+        cli.withExePath(zigExePath)
         workingDir.path?.let { cli.withWorkDirectory(it.toFile()) }
         cli.withCharset(Charsets.UTF_8)
         cli.addParameters(configuration.buildCommandLineArgs(debug))

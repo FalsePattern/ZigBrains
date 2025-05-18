@@ -25,6 +25,7 @@ package com.falsepattern.zigbrains.lsp.zls.ui
 import com.falsepattern.zigbrains.lsp.LSPIcons
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
+import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.falsepattern.zigbrains.shared.ui.*
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
@@ -32,7 +33,6 @@ import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.icons.EMPTY_ICON
 import com.intellij.util.ui.EmptyIcon
 import javax.swing.JList
-import kotlin.io.path.pathString
 
 
 class ZLSComboBox(model: ZBModel<ZLSVersion>): ZBComboBox<ZLSVersion>(model, ::ZLSCellRenderer)
@@ -57,7 +57,7 @@ class ZLSCellRenderer(getModel: () -> ZBModel<ZLSVersion>): ZBCellRenderer<ZLSVe
                 this.icon = icon
                 val item = value.instance
                 val name = item.name
-                val path = item.path.pathString
+                val path = item.path.sanitizedPathString ?: "unknown path"
                 renderPathNameComponent(path, name, "ZLS", this, isSuggestion, index == -1)
             }
 

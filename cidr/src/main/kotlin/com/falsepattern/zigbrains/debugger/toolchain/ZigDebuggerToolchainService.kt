@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.debugger.toolchain
 
 import com.falsepattern.zigbrains.debugger.ZigDebugBundle
 import com.falsepattern.zigbrains.shared.Unarchiver
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.PathManager
@@ -34,7 +35,6 @@ import com.intellij.openapi.progress.blockingContext
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.SystemInfo
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.platform.util.progress.reportSequentialProgress
 import com.intellij.ui.BrowserHyperlinkListener
 import com.intellij.ui.HyperlinkLabel
@@ -326,7 +326,7 @@ class ZigDebuggerToolchainService {
 
         private val pluginDir get() = PathManager.getSystemDir().resolve("zigbrains")
 
-        private val tempPluginDir get(): Path = PathManager.getTempPath().toNioPathOrNull()!!.resolve("zigbrains")
+        private val tempPluginDir get(): Path = PathManager.getTempPath().sanitizedToNioPath()!!.resolve("zigbrains")
 
         private fun fileNameWithoutExtension(url: String): String {
             return url.substringAfterLast("/").removeSuffix(".zip").removeSuffix(".tar.gz")

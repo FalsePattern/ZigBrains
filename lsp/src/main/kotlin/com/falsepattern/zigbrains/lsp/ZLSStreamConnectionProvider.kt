@@ -24,6 +24,8 @@ package com.falsepattern.zigbrains.lsp
 
 import com.falsepattern.zigbrains.lsp.config.ZLSConfigProviderBase
 import com.falsepattern.zigbrains.lsp.zls.zls
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -31,7 +33,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.toNioPathOrNull
 import com.redhat.devtools.lsp4ij.server.OSProcessStreamConnectionProvider
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -40,7 +41,6 @@ import kotlinx.serialization.json.encodeToStream
 import java.nio.file.Path
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
-import kotlin.io.path.pathString
 
 class ZLSStreamConnectionProvider private constructor(private val project: Project, commandLine: GeneralCommandLine?) : OSProcessStreamConnectionProvider(commandLine) {
     companion object {
@@ -72,7 +72,7 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
             }
             val configPath: Path? = "".let { configPath ->
                 if (configPath.isNotBlank()) {
-                    configPath.toNioPathOrNull()?.let { nioPath ->
+                    configPath.sanitizedToNioPath()?.let { nioPath ->
                         if (!nioPath.toFile().exists()) {
                             Notification(
                                 "zigbrains-lsp",
@@ -117,10 +117,10 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
                 }
             }
             val cmd = ArrayList<String>()
-            cmd.add(zlsPath.pathString)
-            if (configPath != null) {
+            cmd.add(zlsPath.sanitizedPathString!!)
+            configPath?.sanitizedPathString?.let { cfgPath ->
                 cmd.add("--config-path")
-                cmd.add(configPath.pathString)
+                cmd.add(cfgPath)
             }
 
             if (SystemInfo.isWindows) {

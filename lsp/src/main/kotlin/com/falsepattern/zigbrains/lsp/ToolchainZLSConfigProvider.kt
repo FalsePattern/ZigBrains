@@ -26,11 +26,11 @@ import com.falsepattern.zigbrains.lsp.config.SuspendingZLSConfigProvider
 import com.falsepattern.zigbrains.lsp.config.ZLSConfig
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.project.toolchain.local.LocalZigToolchain
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.toNioPathOrNull
-import kotlin.io.path.pathString
 
 class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
     override suspend fun getEnvironment(project: Project, previous: ZLSConfig): ZLSConfig {
@@ -47,7 +47,7 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
             return previous
         }
 
-        val exe = env.zigExecutable.toNioPathOrNull() ?: run {
+        val exe = env.zigExecutable.sanitizedToNioPath() ?: run {
             Notification(
                 "zigbrains-lsp",
                 "Invalid zig executable path: ${env.zigExecutable}",
@@ -69,7 +69,7 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
             null
 
         if (lib == null) {
-            lib = env.libDirectory.toNioPathOrNull() ?: run {
+            lib = env.libDirectory.sanitizedToNioPath() ?: run {
                 Notification(
                     "zigbrains-lsp",
                     "Invalid zig standard library path: ${env.libDirectory}",
@@ -81,6 +81,6 @@ class ToolchainZLSConfigProvider: SuspendingZLSConfigProvider {
         if (lib == null)
             return previous
 
-        return previous.copy(zig_exe_path = exe.pathString, zig_lib_path = lib.pathString)
+        return previous.copy(zig_exe_path = exe.sanitizedPathString, zig_lib_path = lib.sanitizedPathString)
     }
 }

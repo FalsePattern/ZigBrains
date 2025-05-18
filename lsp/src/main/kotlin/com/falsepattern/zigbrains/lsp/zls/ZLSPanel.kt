@@ -28,11 +28,12 @@ import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableNamedElementPane
 import com.falsepattern.zigbrains.shared.cli.call
 import com.falsepattern.zigbrains.shared.cli.createCommandLineSafe
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBTextArea
@@ -44,7 +45,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
-import kotlin.io.path.pathString
 
 class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
     private val pathToZLS = textFieldWithBrowseButton(
@@ -80,18 +80,18 @@ class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
 
     override fun isModified(elem: ZLSVersion): Boolean {
         val name = nameFieldValue ?: return false
-        val path = this.pathToZLS.text.ifBlank { null }?.toNioPathOrNull() ?: return false
+        val path = this.pathToZLS.text.sanitizedToNioPath() ?: return false
         return name != elem.name || elem.path != path || settingsPanel?.isModified(elem.settings) == true
     }
 
     override fun apply(elem: ZLSVersion): ZLSVersion? {
-        val path = this.pathToZLS.text.ifBlank { null }?.toNioPathOrNull() ?: return null
+        val path = this.pathToZLS.text.sanitizedToNioPath() ?: return null
         return elem.copy(path = path, name = nameFieldValue ?: "", settings = settingsPanel?.apply(elem.settings) ?: elem.settings)
     }
 
     override fun reset(elem: ZLSVersion?) {
         nameFieldValue = elem?.name ?: ""
-        this.pathToZLS.text = elem?.path?.pathString ?: ""
+        this.pathToZLS.text = elem?.path?.sanitizedPathString ?: ""
         settingsPanel?.reset(elem?.settings)
         dispatchUpdateUI()
     }
@@ -105,7 +105,7 @@ class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
 
     private suspend fun updateUI() {
         delay(200)
-        val pathToZLS = this.pathToZLS.text.ifBlank { null }?.toNioPathOrNull()
+        val pathToZLS = this.pathToZLS.text.sanitizedToNioPath()
         if (pathToZLS == null) {
             withEDTContext(ModalityState.any()) {
                 zlsVersion.text = "[zls path empty or invalid]"
@@ -113,14 +113,12 @@ class ZLSPanel() : ImmutableNamedElementPanelBase<ZLSVersion>() {
             return
         }
         val versionCommand = createCommandLineSafe(null, pathToZLS, "--version").getOrElse {
-            it.printStackTrace()
             withEDTContext(ModalityState.any()) {
                 zlsVersion.text = "[could not create \"zls --version\" command]\n${it.message}"
             }
             return
         }
         val result = versionCommand.call().getOrElse {
-            it.printStackTrace()
             withEDTContext(ModalityState.any()) {
                 zlsVersion.text = "[failed to run \"zls --version\"]\n${it.message}"
             }
