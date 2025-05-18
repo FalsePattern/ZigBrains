@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [25.5.1]
+
+### Added
+
+- Toolchain, LSP
+  - User input sanitization for path configs
+
 ## [25.5.0]
 
 ### Added

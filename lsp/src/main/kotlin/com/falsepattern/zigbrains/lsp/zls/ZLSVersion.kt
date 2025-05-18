@@ -26,14 +26,14 @@ import com.falsepattern.zigbrains.lsp.settings.ZLSSettings
 import com.falsepattern.zigbrains.shared.NamedObject
 import com.falsepattern.zigbrains.shared.cli.call
 import com.falsepattern.zigbrains.shared.cli.createCommandLineSafe
-import com.intellij.openapi.util.io.toNioPathOrNull
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.intellij.util.text.SemVer
 import com.intellij.util.xmlb.annotations.Attribute
 import com.intellij.util.xmlb.annotations.Tag
 import java.nio.file.Path
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
-import kotlin.io.path.pathString
 
 data class ZLSVersion(val path: Path, override val name: String? = null, val settings: ZLSSettings = ZLSSettings()): NamedObject<ZLSVersion> {
     override fun withName(newName: String?): ZLSVersion {
@@ -41,7 +41,7 @@ data class ZLSVersion(val path: Path, override val name: String? = null, val set
     }
 
     fun toRef(): Ref {
-        return Ref(path.pathString, name, settings)
+        return Ref(path.sanitizedPathString, name, settings)
     }
 
     fun isValid(): Boolean {
@@ -85,7 +85,7 @@ data class ZLSVersion(val path: Path, override val name: String? = null, val set
         val settings: ZLSSettings = ZLSSettings()
     ) {
         fun resolve(): ZLSVersion? {
-            return path?.ifBlank { null }?.toNioPathOrNull()?.let { ZLSVersion(it, name, settings) }
+            return path?.sanitizedToNioPath()?.let { ZLSVersion(it, name, settings) }
         }
     }
 }

@@ -25,12 +25,12 @@ package com.falsepattern.zigbrains.shared.downloader
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.shared.Unarchiver
 import com.falsepattern.zigbrains.shared.downloader.VersionInfo.Tarball
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.coroutineToIndicator
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.platform.util.progress.ProgressReporter
 import com.intellij.platform.util.progress.reportProgress
 import com.intellij.util.download.DownloadableFileService
@@ -160,4 +160,4 @@ fun getTarballIfCompatible(dist: String, tb: JsonElement): Tarball? {
     return Json.decodeFromJsonElement<Tarball>(tb)
 }
 
-val tempPluginDir get(): File = PathManager.getTempPath().toNioPathOrNull()!!.resolve("zigbrains").toFile()
+val tempPluginDir get(): File = PathManager.getTempPath().sanitizedToNioPath()!!.resolve("zigbrains").toFile()

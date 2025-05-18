@@ -23,12 +23,12 @@
 package com.falsepattern.zigbrains.debugger.win
 
 import com.falsepattern.zigbrains.debugger.dap.DAPDebuggerDriverConfiguration
+import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.jetbrains.cidr.ArchitectureType
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriver
 import org.eclipse.lsp4j.debug.InitializeRequestArguments
 import java.nio.file.Path
-import kotlin.io.path.pathString
 
 abstract class MSVCDriverConfiguration: DAPDebuggerDriverConfiguration() {
     protected abstract val debuggerExecutable: Path
@@ -40,7 +40,7 @@ abstract class MSVCDriverConfiguration: DAPDebuggerDriverConfiguration() {
     override fun createDriverCommandLine(driver: DebuggerDriver, arch: ArchitectureType): GeneralCommandLine {
         val path = debuggerExecutable
         val cli = GeneralCommandLine()
-        cli.withExePath(path.pathString)
+        cli.withExePath(path.sanitizedPathString!!)
         cli.addParameters("--interpreter=vscode", "--extconfigdir=%USERPROFILE%\\.cppvsdbg\\extensions")
         cli.withWorkingDirectory(path.parent)
         return cli

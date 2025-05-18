@@ -25,9 +25,10 @@ package com.falsepattern.zigbrains.debugger.runner.base
 import com.falsepattern.zigbrains.debugger.ZigDebugBundle
 import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.intellij.execution.ExecutionException
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.platform.util.progress.withProgressText
 import com.intellij.util.containers.orNull
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
@@ -37,7 +38,6 @@ import java.io.File
 import java.nio.file.Files
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.isExecutable
-import kotlin.io.path.pathString
 
 abstract class ZigDebugParametersEmitBinaryBase<ProfileState: ZigProfileState<*>>(
     driverConfiguration: DebuggerDriverConfiguration,
@@ -51,7 +51,7 @@ abstract class ZigDebugParametersEmitBinaryBase<ProfileState: ZigProfileState<*>
     @Throws(ExecutionException::class)
     private suspend fun compileExe(listener: PreLaunchProcessListener): File {
         val commandLine = profileState.getCommandLine(toolchain, true)
-        val cliString = commandLine.getCommandLineString(commandLine.exePath.toNioPathOrNull()?.fileName?.pathString)
+        val cliString = commandLine.getCommandLineString(commandLine.exePath.sanitizedToNioPath()?.fileName?.sanitizedPathString)
         val tmpDir = FileUtil.createTempDirectory("zigbrains_debug", "", true).toPath()
 
         val exe = tmpDir.resolve("executable")
