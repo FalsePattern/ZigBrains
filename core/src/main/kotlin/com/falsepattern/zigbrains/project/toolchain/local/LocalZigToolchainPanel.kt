@@ -25,11 +25,12 @@ package com.falsepattern.zigbrains.project.toolchain.local
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.toolchain.ui.ImmutableNamedElementPanelBase
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBCheckBox
@@ -42,7 +43,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.swing.event.DocumentEvent
-import kotlin.io.path.pathString
 
 class LocalZigToolchainPanel() : ImmutableNamedElementPanelBase<LocalZigToolchain>() {
     private val pathToToolchain = textFieldWithBrowseButton(
@@ -91,24 +91,24 @@ class LocalZigToolchainPanel() : ImmutableNamedElementPanelBase<LocalZigToolchai
 
     override fun isModified(elem: LocalZigToolchain): Boolean {
         val name = nameFieldValue ?: return false
-        val location = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull() ?: return false
-        val std = if (stdFieldOverride.isSelected) pathToStd.text.ifBlank { null }?.toNioPathOrNull() else null
+        val location = this.pathToToolchain.text.sanitizedToNioPath() ?: return false
+        val std = if (stdFieldOverride.isSelected) pathToStd.text.sanitizedToNioPath() else null
         return name != elem.name || elem.location != location || elem.std != std
     }
 
     override fun apply(elem: LocalZigToolchain): LocalZigToolchain? {
-        val location = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull() ?: return null
-        val std = if (stdFieldOverride.isSelected) pathToStd.text.ifBlank { null }?.toNioPathOrNull() else null
+        val location = this.pathToToolchain.text.sanitizedToNioPath() ?: return null
+        val std = if (stdFieldOverride.isSelected) pathToStd.text.sanitizedToNioPath() else null
         return elem.copy(location = location, std = std, name = nameFieldValue ?: "")
     }
 
     override fun reset(elem: LocalZigToolchain?) {
         nameFieldValue = elem?.name ?: ""
-        this.pathToToolchain.text = elem?.location?.pathString ?: ""
+        this.pathToToolchain.text = elem?.location?.sanitizedPathString ?: ""
         val std = elem?.std
         if (std != null) {
             stdFieldOverride.isSelected = true
-            pathToStd.text = std.pathString
+            pathToStd.text = std.sanitizedPathString ?: ""
             pathToStd.isEnabled = true
         } else {
             stdFieldOverride.isSelected = false
@@ -127,7 +127,7 @@ class LocalZigToolchainPanel() : ImmutableNamedElementPanelBase<LocalZigToolchai
 
     private suspend fun updateUI() {
         delay(200)
-        val pathToToolchain = this.pathToToolchain.text.ifBlank { null }?.toNioPathOrNull()
+        val pathToToolchain = this.pathToToolchain.text.sanitizedToNioPath()
         if (pathToToolchain == null) {
             withEDTContext(ModalityState.any()) {
                 toolchainVersion.text = "[toolchain path empty or invalid]"
@@ -156,7 +156,7 @@ class LocalZigToolchainPanel() : ImmutableNamedElementPanelBase<LocalZigToolchai
             toolchainVersion.text = version
             toolchainVersion.foreground = JBColor.foreground()
             if (!stdFieldOverride.isSelected) {
-                pathToStd.text = stdPath?.pathString ?: ""
+                pathToStd.text = stdPath?.sanitizedPathString ?: ""
             }
         }
     }

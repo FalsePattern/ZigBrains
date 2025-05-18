@@ -22,8 +22,8 @@
 
 package com.falsepattern.zigbrains.direnv
 
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.intellij.openapi.util.SystemInfo
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.util.EnvironmentUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
@@ -46,7 +46,7 @@ data class Env(val env: Map<String, String>) {
         val exeName = if (SystemInfo.isWindows) "$exe.exe" else exe
         val paths = path ?: return@flow
         for (dir in paths) {
-            val path = dir.toNioPathOrNull()?.absolute() ?: continue
+            val path = dir.sanitizedToNioPath()?.absolute() ?: continue
             if (!path.toFile().exists() || !path.isDirectory())
                 continue
             val exePath = path.resolve(exeName).absolute()

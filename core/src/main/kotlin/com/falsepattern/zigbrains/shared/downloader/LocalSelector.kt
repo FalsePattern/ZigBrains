@@ -26,6 +26,8 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.shared.coroutine.asContextElement
 import com.falsepattern.zigbrains.shared.coroutine.launchWithEDT
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.application.ModalityState
@@ -33,7 +35,6 @@ import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.ui.DocumentAdapter
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
@@ -48,7 +49,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.Icon
 import javax.swing.event.DocumentEvent
 import kotlin.io.path.isDirectory
-import kotlin.io.path.pathString
 
 abstract class LocalSelector<T>(val component: Component) {
     suspend open fun browse(preSelected: Path? = null): T? {
@@ -91,7 +91,7 @@ abstract class LocalSelector<T>(val component: Component) {
                 if (!active.get())
                     return
                 zigCoroutineScope.launchWithEDT(ModalityState.current()) {
-                    verifyAndUpdate(path.text.ifBlank { null }?.toNioPathOrNull())
+                    verifyAndUpdate(path.text.sanitizedToNioPath())
                 }
             }
         })
@@ -119,7 +119,7 @@ abstract class LocalSelector<T>(val component: Component) {
             }
         } else {
             verifyAndUpdate(preSelected)
-            path.text = preSelected.pathString
+            path.text = preSelected.sanitizedPathString ?: ""
         }
         active.set(true)
         if (!dialog.showAndGet()) {
@@ -127,7 +127,7 @@ abstract class LocalSelector<T>(val component: Component) {
             return null
         }
         active.set(false)
-        return path.text.ifBlank { null }?.toNioPathOrNull()?.let { resolve(it, name.text.ifBlank { null }) }
+        return path.text.sanitizedToNioPath()?.let { resolve(it, name.text.ifBlank { null }) }
     }
 
     @JvmRecord
@@ -140,14 +140,14 @@ abstract class LocalSelector<T>(val component: Component) {
 }
 
 val homePath: Path? by lazy {
-    System.getProperty("user.home")?.toNioPathOrNull()?.takeIf { it.isDirectory() }
+    System.getProperty("user.home")?.sanitizedToNioPath()?.takeIf { it.isDirectory() }
 }
 
 val xdgDataHome: Path? by lazy {
-    System.getenv("XDG_DATA_HOME")?.toNioPathOrNull()?.takeIf { it.isDirectory() } ?:
+    System.getenv("XDG_DATA_HOME")?.sanitizedToNioPath()?.takeIf { it.isDirectory() } ?:
     when(OS.CURRENT) {
         OS.macOS -> homePath?.resolve("Library")
-        OS.Windows -> System.getenv("LOCALAPPDATA")?.toNioPathOrNull()
+        OS.Windows -> System.getenv("LOCALAPPDATA")?.sanitizedToNioPath()
         else -> homePath?.resolve(Path.of(".local", "share"))
     }?.takeIf { it.isDirectory() }
 }

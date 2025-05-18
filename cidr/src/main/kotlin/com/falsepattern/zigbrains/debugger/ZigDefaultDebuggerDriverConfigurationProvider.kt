@@ -26,6 +26,7 @@ import com.falsepattern.zigbrains.debugger.settings.ZigDebuggerSettings
 import com.falsepattern.zigbrains.debugger.toolchain.*
 import com.falsepattern.zigbrains.debugger.win.MSVCDriverConfiguration
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
+import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.falsepattern.zigbrains.zig.ZigLanguage
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.project.Project
@@ -37,7 +38,6 @@ import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
 import com.jetbrains.cidr.execution.debugger.backend.gdb.GDBDriverConfiguration
 import com.jetbrains.cidr.execution.debugger.backend.lldb.LLDBDriverConfiguration
 import java.io.File
-import kotlin.io.path.pathString
 
 class ZigDefaultDebuggerDriverConfigurationProvider: ZigDebuggerDriverConfigurationProvider() {
     override suspend fun getDebuggerConfiguration(project: Project, isElevated: Boolean, emulateTerminal: Boolean): DebuggerDriverConfiguration? {
@@ -141,7 +141,7 @@ private class ZigCustomBinariesGDBDriverConfiguration(
     isElevated: Boolean,
     emulateTerminal: Boolean
 ) : ZigGDBDriverConfiguration(isElevated, emulateTerminal) {
-    override fun getGDBExecutablePath() = binaries.gdbFile.pathString
+    override fun getGDBExecutablePath() = binaries.gdbFile.sanitizedPathString!!
 }
 
 private class ZigMSVCDriverConfiguration(
