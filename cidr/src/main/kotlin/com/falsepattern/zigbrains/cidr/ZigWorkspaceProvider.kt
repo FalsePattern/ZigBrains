@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.cidr
 
+import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.toNioPathOrNull
@@ -30,7 +31,6 @@ import com.jetbrains.cidr.project.workspace.CidrWorkspaceManager
 import com.jetbrains.cidr.project.workspace.CidrWorkspaceProvider
 import java.io.IOException
 import java.nio.file.Files
-import kotlin.io.path.pathString
 
 class ZigWorkspaceProvider: CidrWorkspaceProvider {
     override fun getWorkspace(project: Project): CidrWorkspace? {
@@ -39,7 +39,7 @@ class ZigWorkspaceProvider: CidrWorkspaceProvider {
         val projectDir = project.guessProjectDir()?.toNioPathOrNull() ?: return null
         try {
             Files.walk(projectDir).use { files ->
-                if (files.anyMatch { it.fileName.pathString.let { it2 -> it2.endsWith(".zig") || it2.endsWith(".zig.zon") } }) {
+                if (files.anyMatch { it.fileName.sanitizedPathString?.let { it2 -> it2.endsWith(".zig") || it2.endsWith(".zig.zon") } ?: false }) {
                     return ZigWorkspace(project)
                 }
             }

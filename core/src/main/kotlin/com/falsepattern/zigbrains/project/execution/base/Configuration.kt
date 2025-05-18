@@ -26,12 +26,13 @@ import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.falsepattern.zigbrains.project.execution.base.ZigConfigurable.ZigConfigModule
 import com.falsepattern.zigbrains.shared.cli.translateCommandline
 import com.falsepattern.zigbrains.shared.element.*
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.components.textFieldWithBrowseButton
@@ -43,7 +44,6 @@ import org.jetbrains.annotations.Nls
 import java.io.Serializable
 import java.nio.file.Path
 import javax.swing.JComponent
-import kotlin.io.path.pathString
 
 class ZigConfigEditor<T : ZigExecConfig<T>>(private val state: ZigExecConfig<T>) : SettingsEditor<T>() {
     private val configModules = ArrayList<ZigConfigModule<*>>()
@@ -120,11 +120,11 @@ abstract class PathConfigurable<T : PathConfigurable<T>> : ZigConfigurable<T> {
     var path: Path? = null
 
     override fun readExternal(element: Element) {
-        path = element.readString(serializedName)?.ifBlank { null }?.toNioPathOrNull() ?: return
+        path = element.readString(serializedName)?.sanitizedToNioPath() ?: return
     }
 
     override fun writeExternal(element: Element) {
-        element.writeString(serializedName, path?.pathString ?: "")
+        element.writeString(serializedName, path?.sanitizedPathString ?: "")
     }
 
     abstract val serializedName: String
@@ -135,13 +135,13 @@ abstract class PathConfigurable<T : PathConfigurable<T>> : ZigConfigurable<T> {
             if (str.isBlank()) {
                 configurable.path = null
             } else {
-                configurable.path = str.toNioPathOrNull() ?: return false
+                configurable.path = str.sanitizedToNioPath() ?: return false
             }
             return true
         }
 
         override fun reset(configurable: T) {
-            stringValue = configurable.path?.pathString ?: ""
+            stringValue = configurable.path?.sanitizedPathString ?: ""
         }
 
         protected abstract var stringValue: String

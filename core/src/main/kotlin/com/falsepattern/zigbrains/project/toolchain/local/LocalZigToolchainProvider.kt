@@ -30,10 +30,11 @@ import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainConfigurabl
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchainProvider
 import com.falsepattern.zigbrains.shared.downloader.homePath
 import com.falsepattern.zigbrains.shared.downloader.xdgDataHome
+import com.falsepattern.zigbrains.shared.sanitizedPathString
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.falsepattern.zigbrains.shared.ui.renderPathNameComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolder
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.ui.SimpleColoredComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -41,15 +42,14 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.isDirectory
-import kotlin.io.path.pathString
 
 class LocalZigToolchainProvider: ZigToolchainProvider {
     override val serialMarker: String
         get() = "local"
 
     override fun deserialize(data: Map<String, String>): ZigToolchain? {
-        val location = data["location"]?.toNioPathOrNull() ?: return null
-        val std = data["std"]?.toNioPathOrNull()
+        val location = data["location"]?.sanitizedToNioPath() ?: return null
+        val std = data["std"]?.sanitizedToNioPath()
         val name = data["name"]
         return LocalZigToolchain(location, std, name)
     }
@@ -61,8 +61,8 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     override fun serialize(toolchain: ZigToolchain): Map<String, String> {
         toolchain as LocalZigToolchain
         val map = HashMap<String, String>()
-        toolchain.location.pathString.let { map["location"] = it }
-        toolchain.std?.pathString?.let { map["std"] = it }
+        (toolchain.location.sanitizedPathString ?: "").let { map["location"] = it }
+        toolchain.std?.sanitizedPathString?.let { map["std"] = it }
         toolchain.name?.let { map["name"] = it }
         return map
     }
@@ -112,7 +112,7 @@ class LocalZigToolchainProvider: ZigToolchainProvider {
     override fun render(toolchain: ZigToolchain, component: SimpleColoredComponent, isSuggestion: Boolean, isSelected: Boolean) {
         toolchain as LocalZigToolchain
         val name = toolchain.name
-        val path = toolchain.location.pathString
+        val path = toolchain.location.sanitizedPathString ?: "unknown path"
         renderPathNameComponent(path, name, "Zig", component, isSuggestion, isSelected)
     }
 }
@@ -147,7 +147,7 @@ private val wellKnown: List<Path> by lazy {
 }
 
 private val gradleUserHome: Path? by lazy {
-    System.getenv("GRADLE_USER_HOME")?.toNioPathOrNull()?.takeIf { it.isDirectory() } ?: homePath?.resolve(".gradle")?.takeIf { it.isDirectory() }
+    System.getenv("GRADLE_USER_HOME")?.sanitizedToNioPath()?.takeIf { it.isDirectory() } ?: homePath?.resolve(".gradle")?.takeIf { it.isDirectory() }
 }
 
 private fun tryDetermineStructure(outputDir: Path): Path? {

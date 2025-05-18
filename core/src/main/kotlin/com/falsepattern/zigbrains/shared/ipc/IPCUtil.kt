@@ -23,6 +23,7 @@
 package com.falsepattern.zigbrains.shared.ipc
 
 import com.falsepattern.zigbrains.direnv.Env
+import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.io.FileUtil
@@ -30,13 +31,13 @@ import com.intellij.util.io.awaitExit
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import java.nio.charset.Charset
 import java.nio.file.Path
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.inputStream
-import kotlin.io.path.pathString
 
 /**
  * Zig build progress node IPC glue code
@@ -58,7 +59,7 @@ object IPCUtil {
         }
         val mkfifo = Env.empty
             .findAllExecutablesOnPATH("mkfifo")
-            .map { it.pathString }
+            .mapNotNull { it.sanitizedPathString }
             .map(::MKFifo)
             .toList()
             .find { mkfifo ->
@@ -69,12 +70,12 @@ object IPCUtil {
 
         val selectedBash = Env.empty
             .findAllExecutablesOnPATH("bash")
-            .map { it.pathString }
+            .mapNotNull { it.sanitizedPathString }
             .filter {
                 val cli = GeneralCommandLine(it)
                 val tmpFile = FileUtil.createTempFile("zigbrains-bash-detection", null, true).toPath()
                 try {
-                    cli.addParameters("-c", "exec {var}>${tmpFile.pathString}; echo foo >&\$var; ZB_EXIT=\$?; exec {var}>&-; exit \$ZB_EXIT")
+                    cli.addParameters("-c", "exec {var}>${tmpFile.sanitizedPathString!!}; echo foo >&\$var; ZB_EXIT=\$?; exec {var}>&-; exit \$ZB_EXIT")
                     val process = cli.createProcess()
                     val exitCode = process.awaitExit()
                     if (exitCode != 0) {
@@ -100,7 +101,7 @@ object IPCUtil {
         val (fifoFile, fifo) = info!!.mkfifo.createTemp() ?: return null
         //FIFO created, hack cli
         val exePath = cli.exePath
-        val args = "exec {var}>${fifoFile.pathString}; ZIG_PROGRESS=\$var $exePath ${cli.parametersList.parametersString}; ZB_EXIT=\$?; exec {var}>&-; exit \$ZB_EXIT"
+        val args = "exec {var}>${fifoFile.sanitizedPathString!!}; ZIG_PROGRESS=\$var $exePath ${cli.parametersList.parametersString}; ZB_EXIT=\$?; exec {var}>&-; exit \$ZB_EXIT"
         cli.withExePath(info!!.bash)
         cli.parametersList.clearAll()
         cli.addParameters("-c", args)
@@ -120,7 +121,7 @@ object IPCUtil {
             return Pair(fifoFile, fifo)
         }
         suspend fun create(path: Path): AutoCloseable? {
-            val cli = GeneralCommandLine(exe, path.pathString)
+            val cli = GeneralCommandLine(exe, path.sanitizedPathString!!)
             val process = cli.createProcess()
             val exitCode = process.awaitExit()
             return if (exitCode == 0) AutoCloseable {

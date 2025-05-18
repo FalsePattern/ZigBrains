@@ -23,13 +23,13 @@
 package com.falsepattern.zigbrains.debugger.dap
 
 import com.falsepattern.zigbrains.project.run.ZigProcessHandler
+import com.falsepattern.zigbrains.shared.sanitizedToNioPath
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.PtyCommandLine
 import com.intellij.execution.process.*
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.KeyWithDefaultValue
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.util.progress.getMaybeCancellable
 import com.intellij.util.system.CpuArch
 import com.jetbrains.cidr.ArchitectureType
@@ -952,7 +952,7 @@ abstract class DAPDriver<Server : IDebugProtocolServer, Client : IDebugProtocolC
         fun runInTerminalAsync(args: RunInTerminalRequestArguments): RunInTerminalResponse {
             val cli = PtyCommandLine(args.args.toList())
             cli.withCharset(Charsets.UTF_8)
-            val cwd = args.cwd?.ifBlank { null }?.toNioPathOrNull()
+            val cwd = args.cwd?.ifBlank { null }?.sanitizedToNioPath()
             if (cwd != null) {
                 cli.withWorkingDirectory(cwd)
             }
