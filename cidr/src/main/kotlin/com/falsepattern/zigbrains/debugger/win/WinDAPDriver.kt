@@ -40,7 +40,7 @@ import org.eclipse.lsp4j.jsonrpc.messages.Message
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import java.io.InputStream
 import java.security.MessageDigest
-import java.util.*
+import java.util.Base64
 import java.util.concurrent.CompletableFuture
 import java.util.zip.Inflater
 

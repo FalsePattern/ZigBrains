@@ -30,7 +30,7 @@ import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.ui.dsl.builder.panel
-import java.util.*
+import java.util.UUID
 import java.util.function.Supplier
 import javax.swing.JComponent
 

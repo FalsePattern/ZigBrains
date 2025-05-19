@@ -31,7 +31,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
-import com.intellij.ui.*
+import com.intellij.ui.CellRendererPanel
+import com.intellij.ui.CollectionComboBoxModel
+import com.intellij.ui.ColoredListCellRenderer
+import com.intellij.ui.GroupHeaderSeparator
+import com.intellij.ui.SimpleColoredComponent
+import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.components.panels.OpaquePanel
 import com.intellij.ui.popup.list.ComboBoxPopup
 import com.intellij.util.concurrency.annotations.RequiresEdt
@@ -42,7 +47,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.awt.BorderLayout
 import java.awt.Component
-import java.util.*
+import java.util.IdentityHashMap
+import java.util.UUID
 import java.util.function.Consumer
 import javax.accessibility.AccessibleContext
 import javax.swing.JList

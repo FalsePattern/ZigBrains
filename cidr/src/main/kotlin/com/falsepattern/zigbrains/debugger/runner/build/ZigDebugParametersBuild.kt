@@ -30,7 +30,6 @@ import com.falsepattern.zigbrains.debugger.runner.base.ZigDebugParametersBase
 import com.falsepattern.zigbrains.project.execution.build.ZigProfileStateBuild
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.intellij.execution.ExecutionException
-import com.intellij.openapi.util.SystemInfo
 import com.intellij.platform.util.progress.withProgressText
 import com.jetbrains.cidr.execution.Installer
 import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
@@ -38,11 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.PropertyKey
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.stream.Stream
 import kotlin.io.path.isExecutable
-import kotlin.io.path.isRegularFile
 import kotlin.io.path.pathString
 
 class ZigDebugParametersBuild(

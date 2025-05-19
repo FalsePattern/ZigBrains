@@ -26,7 +26,7 @@ import com.falsepattern.zigbrains.shared.ui.UUIDComboBoxDriver.Companion.wrapMod
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.openapi.util.NlsContexts
 import com.intellij.ui.dsl.builder.panel
-import java.util.*
+import java.util.UUID
 import javax.swing.JComponent
 
 class ZLSConfigurable(val uuid: UUID, zls: ZLSVersion, private val modal: Boolean): NamedConfigurable<UUID>() {
