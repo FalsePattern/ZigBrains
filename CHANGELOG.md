@@ -17,6 +17,12 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [26.0.0]
+
+### Added
+
+- IDEA 2025.2 support
+
 ## [25.5.1]
 
 ### Added
