@@ -23,7 +23,11 @@
 package com.falsepattern.zigbrains.zon.formatter
 
 import com.falsepattern.zigbrains.zon.psi.ZonTypes
-import com.intellij.formatting.*
+import com.intellij.formatting.Alignment
+import com.intellij.formatting.Block
+import com.intellij.formatting.Indent
+import com.intellij.formatting.SpacingBuilder
+import com.intellij.formatting.Wrap
 import com.intellij.lang.ASTNode
 import com.intellij.psi.TokenType
 import com.intellij.psi.formatter.common.AbstractBlock

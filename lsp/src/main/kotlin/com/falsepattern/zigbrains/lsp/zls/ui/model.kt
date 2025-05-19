@@ -26,7 +26,12 @@ import com.falsepattern.zigbrains.lsp.LSPIcons
 import com.falsepattern.zigbrains.lsp.ZLSBundle
 import com.falsepattern.zigbrains.lsp.zls.ZLSVersion
 import com.falsepattern.zigbrains.shared.sanitizedPathString
-import com.falsepattern.zigbrains.shared.ui.*
+import com.falsepattern.zigbrains.shared.ui.ListElem
+import com.falsepattern.zigbrains.shared.ui.ZBCellRenderer
+import com.falsepattern.zigbrains.shared.ui.ZBComboBox
+import com.falsepattern.zigbrains.shared.ui.ZBContext
+import com.falsepattern.zigbrains.shared.ui.ZBModel
+import com.falsepattern.zigbrains.shared.ui.renderPathNameComponent
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
 import com.intellij.ui.SimpleTextAttributes
