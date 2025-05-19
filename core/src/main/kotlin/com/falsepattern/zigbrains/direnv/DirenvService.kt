@@ -25,7 +25,7 @@ package com.falsepattern.zigbrains.direnv
 import com.falsepattern.zigbrains.ZigBrainsBundle
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
-import com.intellij.ide.impl.isTrusted
+import com.intellij.ide.trustedProjects.TrustedProjects
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -71,7 +71,7 @@ class DirenvService(val project: Project): SerializablePersistentStateComponent<
         get() = isEnabledRaw
 
     override suspend fun import(): Env {
-        if (!isInstalled || !project.isTrusted() || project.isDefault)
+        if (!isInstalled || !TrustedProjects.isProjectTrusted(project) || project.isDefault)
             return Env.empty
         val workDir = project.guessProjectDir()?.toNioPath() ?: return Env.empty
 
