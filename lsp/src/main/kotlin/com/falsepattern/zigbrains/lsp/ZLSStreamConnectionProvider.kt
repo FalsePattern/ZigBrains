@@ -125,7 +125,7 @@ class ZLSStreamConnectionProvider private constructor(private val project: Proje
 
             if (SystemInfo.isWindows) {
                 val sb: StringBuilder by lazy { StringBuilder() }
-                for (i in 0..<cmd.size) {
+                for (i in 1..<cmd.size) {
                     val s = cmd[i]
                     if (s.contains(' ')) {
                         sb.setLength(0)
