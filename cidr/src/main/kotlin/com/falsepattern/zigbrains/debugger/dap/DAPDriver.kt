@@ -121,7 +121,7 @@ abstract class DAPDriver<Server : IDebugProtocolServer, Client : IDebugProtocolC
 
         val pipeOutput = PipedOutputStream()
         val pipeInput = BlockingPipedInputStream(pipeOutput, 1024 * 1024)
-        processHandler.addProcessListener(object: ProcessAdapter() {
+        processHandler.addProcessListener(object: ProcessListener {
             override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                 if (ProcessOutputType.isStdout(outputType)) {
                     val text = event.text ?: return
