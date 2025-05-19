@@ -23,7 +23,11 @@
 package com.falsepattern.zigbrains.debugger.execution.binary
 
 import com.falsepattern.zigbrains.debugger.ZigDebugBundle
-import com.falsepattern.zigbrains.project.execution.base.*
+import com.falsepattern.zigbrains.project.execution.base.ArgsConfigurable
+import com.falsepattern.zigbrains.project.execution.base.FilePathConfigurable
+import com.falsepattern.zigbrains.project.execution.base.ZigConfigurable
+import com.falsepattern.zigbrains.project.execution.base.ZigExecConfig
+import com.falsepattern.zigbrains.project.execution.base.ZigProfileState
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.runners.ExecutionEnvironment

@@ -23,7 +23,11 @@
 package com.falsepattern.zigbrains.zig.formatter
 
 import com.falsepattern.zigbrains.zig.ZigLanguage
-import com.intellij.formatting.*
+import com.intellij.formatting.FormattingContext
+import com.intellij.formatting.FormattingModel
+import com.intellij.formatting.FormattingModelBuilder
+import com.intellij.formatting.FormattingModelProvider
+import com.intellij.formatting.SpacingBuilder
 
 class ZigFormattingModelBuilder: FormattingModelBuilder {
     override fun createModel(context: FormattingContext): FormattingModel {

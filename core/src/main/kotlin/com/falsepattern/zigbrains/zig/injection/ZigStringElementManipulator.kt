@@ -23,8 +23,13 @@
 package com.falsepattern.zigbrains.zig.injection
 
 import com.falsepattern.zigbrains.zig.ZigFileType
-import com.falsepattern.zigbrains.zig.injection.InjectTriState.*
-import com.falsepattern.zigbrains.zig.psi.*
+import com.falsepattern.zigbrains.zig.injection.InjectTriState.Complete
+import com.falsepattern.zigbrains.zig.injection.InjectTriState.Incomplete
+import com.falsepattern.zigbrains.zig.injection.InjectTriState.NotYet
+import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral
+import com.falsepattern.zigbrains.zig.psi.ZigTypes
+import com.falsepattern.zigbrains.zig.psi.getTextRangeBounds
+import com.falsepattern.zigbrains.zig.psi.indentSize
 import com.falsepattern.zigbrains.zig.util.escape
 import com.falsepattern.zigbrains.zig.util.prefixWithTextBlockEscape
 import com.intellij.openapi.util.TextRange

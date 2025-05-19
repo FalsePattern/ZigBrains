@@ -43,7 +43,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.event.ItemEvent
-import java.util.*
+import java.util.UUID
 import javax.swing.JButton
 
 abstract class UUIDMapSelector<T>(val driver: UUIDComboBoxDriver<T>): Disposable {

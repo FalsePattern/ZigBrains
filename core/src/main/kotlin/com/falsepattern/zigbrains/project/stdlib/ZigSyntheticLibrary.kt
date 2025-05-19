@@ -34,12 +34,21 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.refreshAndFindVirtualDirectory
 import com.intellij.platform.backend.workspace.WorkspaceModel
 import com.intellij.platform.backend.workspace.toVirtualFileUrl
-import com.intellij.platform.workspace.jps.entities.*
+import com.intellij.platform.workspace.jps.entities.DependencyScope
+import com.intellij.platform.workspace.jps.entities.LibraryDependency
+import com.intellij.platform.workspace.jps.entities.LibraryEntity
+import com.intellij.platform.workspace.jps.entities.LibraryId
+import com.intellij.platform.workspace.jps.entities.LibraryRoot
+import com.intellij.platform.workspace.jps.entities.LibraryRootTypeId
+import com.intellij.platform.workspace.jps.entities.LibraryTableId
+import com.intellij.platform.workspace.jps.entities.ModuleEntity
+import com.intellij.platform.workspace.jps.entities.ModuleId
+import com.intellij.platform.workspace.jps.entities.modifyModuleEntity
 import com.intellij.project.isDirectoryBased
 import com.intellij.project.stateStore
 import com.intellij.workspaceModel.ide.legacyBridge.LegacyBridgeJpsEntitySourceFactory
 import kotlinx.coroutines.runBlocking
-import java.util.*
+import java.util.Objects
 import javax.swing.Icon
 
 class ZigSyntheticLibrary(val project: Project) : SyntheticLibrary(), ItemPresentation {

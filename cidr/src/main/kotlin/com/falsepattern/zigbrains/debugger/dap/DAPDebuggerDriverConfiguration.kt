@@ -25,7 +25,13 @@ package com.falsepattern.zigbrains.debugger.dap
 import com.intellij.openapi.util.Expirable
 import com.intellij.openapi.util.Pair
 import com.intellij.openapi.util.UserDataHolderEx
-import com.jetbrains.cidr.execution.debugger.backend.*
+import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriver
+import com.jetbrains.cidr.execution.debugger.backend.DebuggerDriverConfiguration
+import com.jetbrains.cidr.execution.debugger.backend.EvaluationContext
+import com.jetbrains.cidr.execution.debugger.backend.LLFrame
+import com.jetbrains.cidr.execution.debugger.backend.LLThread
+import com.jetbrains.cidr.execution.debugger.backend.LLValue
+import com.jetbrains.cidr.execution.debugger.backend.LLValueData
 import org.eclipse.lsp4j.debug.InitializeRequestArguments
 
 abstract class DAPDebuggerDriverConfiguration: DebuggerDriverConfiguration() {
