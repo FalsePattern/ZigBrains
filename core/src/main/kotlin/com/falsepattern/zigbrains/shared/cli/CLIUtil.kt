@@ -39,7 +39,7 @@ import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.nio.file.Path
-import java.util.*
+import java.util.StringTokenizer
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString

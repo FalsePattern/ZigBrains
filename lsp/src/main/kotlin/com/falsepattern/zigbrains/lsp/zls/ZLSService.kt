@@ -28,7 +28,7 @@ import com.falsepattern.zigbrains.project.toolchain.base.withExtraData
 import com.falsepattern.zigbrains.shared.asString
 import com.falsepattern.zigbrains.shared.asUUID
 import com.intellij.openapi.project.Project
-import java.util.*
+import java.util.UUID
 
 fun <T: ZigToolchain> T.withZLS(uuid: UUID?): T {
     return withExtraData("zls_uuid", uuid?.asString())

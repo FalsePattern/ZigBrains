@@ -46,7 +46,7 @@ import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import java.awt.Component
 import java.nio.file.Path
-import java.util.*
+import java.util.Vector
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JList
 import javax.swing.event.DocumentEvent

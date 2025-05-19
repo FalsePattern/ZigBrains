@@ -27,7 +27,7 @@ import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.ui.components.JBScrollPane
 import java.awt.Component
 import java.awt.Dimension
-import java.util.*
+import java.util.UUID
 import javax.swing.JComponent
 
 interface UUIDComboBoxDriver<T> {
