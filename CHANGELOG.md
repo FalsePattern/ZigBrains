@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [26.0.1]
+
+### Fixed
+
+- LSP
+  - Language server not starting on Windows when there's a space in the binary path
+
 ## [26.0.0]
 
 ### Added
