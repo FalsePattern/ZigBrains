@@ -84,4 +84,4 @@ mkdir -p build/dist
 
 cp build/distributions/*-signed.zip build/dist/
 
-./gradlew publish
+./gradlew publish --no-configuration-cache --no-build-cache
