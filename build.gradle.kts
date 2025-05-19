@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 plugins {
     kotlin("jvm") version "2.1.10" apply false
     kotlin("plugin.serialization") version "2.1.10" apply false
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.intellij.platform") version "2.6.0"
     id("org.jetbrains.changelog") version "2.2.1"
     id("org.jetbrains.grammarkit") version "2022.3.2.2" apply false
     idea
