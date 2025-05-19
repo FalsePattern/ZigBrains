@@ -8,13 +8,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 plugins {
     kotlin("jvm") version "1.9.22" apply false
     kotlin("plugin.serialization") version "1.9.22" apply false
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.intellij.platform") version "2.6.0"
     id("org.jetbrains.changelog") version "2.2.1"
     id("org.jetbrains.grammarkit") version "2022.3.2.2" apply false
     idea
     `maven-publish`
 }
-val publishVersions = listOf("241", "242", "243", "251")
+val publishVersions = listOf("241", "242", "243", "251", "252")
 val pluginVersionFull get() = "$pluginVersion-$pluginSinceBuild"
 val pluginVersion: String by project
 val pluginSinceBuild: String by project
@@ -91,6 +91,10 @@ allprojects {
         intellijPlatform {
             defaultRepositories()
         }
+    }
+    tasks.withType<AbstractArchiveTask> {
+        isPreserveFileTimestamps = false
+        isReproducibleFileOrder = true
     }
 }
 
