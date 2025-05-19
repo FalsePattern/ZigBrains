@@ -93,6 +93,10 @@ allprojects {
             snapshots()
         }
     }
+    tasks.withType<AbstractArchiveTask> {
+        isPreserveFileTimestamps = false
+        isReproducibleFileOrder = true
+    }
 }
 
 dependencies {
