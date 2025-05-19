@@ -15,7 +15,8 @@ through the built-in plugin browser:
 1. Go to `Settings -> Plugins`
 2. To the right of the `Installed` button at the top, click on the `...` dropdown menu, then select `Manage Plugin Repositories...`
 3. Click the add button, and then enter the ZigBrains updater URL, based on your IDE version:
-   - `2025.1.*` or newer: https://falsepattern.com/zigbrains/updatePlugins-251.xml
+   - `2025.2.*` or newer: https://falsepattern.com/zigbrains/updatePlugins-252.xml
+   - `2025.1.*`: https://falsepattern.com/zigbrains/updatePlugins-251.xml
    - `2024.3.*`: https://falsepattern.com/zigbrains/updatePlugins-243.xml
    - `2024.2.*`: https://falsepattern.com/zigbrains/updatePlugins-242.xml
    - `2024.1.*`: https://falsepattern.com/zigbrains/updatePlugins-241.xml

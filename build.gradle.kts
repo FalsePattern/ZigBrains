@@ -14,7 +14,7 @@ plugins {
     idea
     `maven-publish`
 }
-val publishVersions = listOf("241", "242", "243", "251")
+val publishVersions = listOf("241", "242", "243", "251", "252")
 val pluginVersionFull get() = "$pluginVersion-$pluginSinceBuild"
 val pluginVersion: String by project
 val pluginSinceBuild: String by project
