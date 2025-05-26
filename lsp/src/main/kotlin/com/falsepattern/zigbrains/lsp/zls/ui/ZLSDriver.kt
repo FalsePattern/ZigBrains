@@ -190,11 +190,11 @@ private suspend fun isCompatible(version: ZLSVersion, toolchainVersion: SemVer?)
     if (toolchainVersion == null)
         return true
     val zlsVersion = version.version() ?: return false
-    return numericVersionEquals(zlsVersion, toolchainVersion)
+    return numericVersionCompatible(zlsVersion, toolchainVersion)
 }
 
-private fun numericVersionEquals(a: SemVer, b: SemVer): Boolean {
-    return a.major == b.major && a.minor == b.minor && a.patch == b.patch
+private fun numericVersionCompatible(a: SemVer, b: SemVer): Boolean {
+    return a.major == b.major && a.minor == b.minor
 }
 
 
