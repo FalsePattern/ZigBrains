@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [26.0.2]
+
+### Fixed
+
+- LSP
+  - Loosened version matching (ZLS 0.14.0 with Zig 0.14.1, etc.)
+
 ## [26.0.1]
 
 ### Fixed
