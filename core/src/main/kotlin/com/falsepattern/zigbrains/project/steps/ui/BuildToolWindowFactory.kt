@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.project.steps.ui
 
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
@@ -35,4 +36,8 @@ class BuildToolWindowFactory: ToolWindowFactory, DumbAware {
             BuildToolWindowContext.create(project, toolWindow)
         }
     }
+
+	override fun shouldBeAvailable(project: Project): Boolean {
+		return ZigToolchainService.getInstance( project ).toolchain != null
+	}
 }

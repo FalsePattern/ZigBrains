@@ -28,6 +28,7 @@ import com.falsepattern.zigbrains.project.execution.build.ZigExecConfigBuild
 import com.falsepattern.zigbrains.project.execution.firstConfigFactory
 import com.falsepattern.zigbrains.project.steps.discovery.ZigStepDiscoveryListener
 import com.falsepattern.zigbrains.project.steps.discovery.zigStepDiscovery
+import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.ipc.IPCUtil
 import com.falsepattern.zigbrains.shared.ipc.ZigIPCService
@@ -46,6 +47,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.AnimatedIcon
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
@@ -197,6 +199,8 @@ class BuildToolWindowContext(private val project: Project): Disposable {
     }
 
     companion object {
+		private const val BUILD_TOOL_WINDOW_ID = "zigbrains.build"
+
         suspend fun create(project: Project, window: ToolWindow) {
             withEDTContext(ModalityState.any()) {
                 val context = BuildToolWindowContext(project)
@@ -216,6 +220,12 @@ class BuildToolWindowContext(private val project: Project): Disposable {
                 (child as? ZigIPCService.IPCTreeNode)?.let { expandRecursively(box, it) }
             }
         }
+
+		fun reload(project: Project, toolchain: ZigToolchain?) {
+			ToolWindowManager.getInstance(project)
+				.getToolWindow(BUILD_TOOL_WINDOW_ID)
+				?.isAvailable = toolchain != null
+		}
     }
 
     inner class BuildReloadListener: ZigStepDiscoveryListener {
