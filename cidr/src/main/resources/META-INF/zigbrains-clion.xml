@@ -7,4 +7,9 @@
                 order="before DefaultProvider"
         />
     </extensions>
+    <extensions defaultExtensionNs="cidr.project">
+        <workspaceProvider
+                implementation="com.falsepattern.zigbrains.clion.ZigWorkspaceProvider"
+        />
+    </extensions>
 </idea-plugin>
