@@ -39,7 +39,7 @@ class LazyOpenFileHyperlinkInfo(myProject: Project, val path: Path, myDocumentLi
     override val virtualFile: VirtualFile?
         get() {
             val manager = VirtualFileManager.getInstance()
-            return if (application.holdsReadLock() && !application.isDispatchThread) {
+            return if (application.isReadAccessAllowed && !application.isDispatchThread) {
                 manager.findFileByNioPath(path) ?: return null
             } else {
                 manager.findFileByNioPath(path) ?: manager.refreshAndFindFileByNioPath(path) ?: return null
