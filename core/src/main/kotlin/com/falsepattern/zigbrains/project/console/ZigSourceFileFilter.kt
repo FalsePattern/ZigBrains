@@ -24,10 +24,8 @@ package com.falsepattern.zigbrains.project.console
 
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.filters.Filter.ResultItem
-import com.intellij.execution.filters.OpenFileHyperlinkInfo
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.openapi.vfs.refreshAndFindVirtualFile
 import com.intellij.openapi.vfs.toNioPathOrNull
 import java.io.File
 import java.nio.file.InvalidPathException
@@ -43,12 +41,11 @@ class ZigSourceFileFilter(private val project: Project): Filter {
         val matcher = LEN_REGEX.findAll(line)
         for (match in matcher) {
             val start = match.range.first
-            val pair = findLongestParsablePathFromOffset(line, start)
-            val path = pair?.first ?: return null
-            val file = path.refreshAndFindVirtualFile() ?: return null
+            val pair = findLongestParsablePathFromOffset(line, start) ?: return null
+            val path = pair.first
             val lineNumber = max(match.groups[1]!!.value.toInt() - 1, 0)
             val lineOffset = max(match.groups[2]!!.value.toInt() - 1, 0)
-            results.add(ResultItem(lineStart + pair.second, lineStart + match.range.last + 1, OpenFileHyperlinkInfo(project, file, lineNumber, lineOffset)))
+            results.add(ResultItem(lineStart + pair.second, lineStart + match.range.last + 1, LazyOpenFileHyperlinkInfo(project, path, lineNumber, lineOffset)))
         }
         return Filter.Result(results)
     }
