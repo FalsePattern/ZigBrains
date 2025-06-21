@@ -17,6 +17,19 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [26.1.0]
+
+### Added
+
+- Project
+  - Ability to directly open a project when opening a `build.zig` or `build.zig.zon` file via the `File > Open` menu (by ENDERZOMBI102)
+  - Hide tool window if no zig toolchains are configured for the current workspace, as it most probably means that it isn't a Zig project (by ENDERZOMBI102)
+
+### Fixed
+
+- Project
+  - Exception from zig terminal filter when running under read action
+
 ## [26.0.2]
 
 ### Fixed
