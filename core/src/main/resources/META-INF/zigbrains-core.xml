@@ -128,6 +128,10 @@
                 implementationClass="com.falsepattern.zigbrains.project.execution.build.ZigLineMarkerBuild"
         />
 
+        <projectOpenProcessor
+                implementation="com.falsepattern.zigbrains.project.ZigProjectOpenProcessor"
+                id="Zig"
+        />
         <directoryProjectGenerator
                 implementation="com.falsepattern.zigbrains.project.newproject.ZigDirectoryProjectGenerator"
         />
