@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - Exception from zig terminal filter when running under read action
+
 ## [26.0.2]
 
 ### Fixed
