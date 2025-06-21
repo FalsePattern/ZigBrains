@@ -50,6 +50,7 @@ and might as well utilize the full semver string for extra information.
 - [gatesn](https://github.com/gatesn)
 - [MarioAriasC](https://github.com/MarioAriasC)
 - [JensvandeWiel](https://github.com/JensvandeWiel)
+- [ENDERZOMBI102](https://github.com/ENDERZOMBI102)
 
 ## Additional Thanks
 
