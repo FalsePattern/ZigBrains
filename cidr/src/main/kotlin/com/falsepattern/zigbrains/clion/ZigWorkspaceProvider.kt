@@ -20,7 +20,7 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.cidr
+package com.falsepattern.zigbrains.clion
 
 import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.intellij.openapi.project.Project

@@ -27,7 +27,8 @@ tasks {
 dependencies {
     intellijPlatform {
         create(IntelliJPlatformType.CLion, clionVersion, useInstaller = useInstaller)
-        bundledPlugins("com.intellij.clion", "com.intellij.cidr.base", "com.intellij.nativeDebug")
+        bundledPlugins("com.intellij.nativeDebug")
+        bundledModules("intellij.clion.toolchains", "intellij.clion.execution", "intellij.cidr.workspaceModel")
     }
     implementation(project(":core")) {
         isTransitive = false

@@ -60,6 +60,7 @@ class ZigClionDebuggerDriverConfigurationProvider: ZigDebuggerDriverConfiguratio
             CPPDebugger.Kind.CUSTOM_GDB -> CLionGDBDriverConfiguration(project, toolchain, isEmulateTerminal = emulateTerminal)
             CPPDebugger.Kind.BUNDLED_LLDB,
             CPPDebugger.Kind.CUSTOM_LLDB -> CLionLLDBDriverConfiguration(project, toolchain, isEmulateTerminal = emulateTerminal)
+            CPPDebugger.Kind.CUSTOM_DEBUGGER -> null
         }
     }
 }

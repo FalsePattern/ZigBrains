@@ -20,7 +20,7 @@
  * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.cidr
+package com.falsepattern.zigbrains.clion
 
 import com.intellij.openapi.project.Project
 import com.jetbrains.cidr.project.workspace.CidrWorkspace
