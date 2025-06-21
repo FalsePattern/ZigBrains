@@ -17,6 +17,8 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [26.1.0]
+
 ### Added
 
 - Project
