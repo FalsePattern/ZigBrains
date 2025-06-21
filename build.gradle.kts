@@ -106,7 +106,7 @@ dependencies {
             "clion" -> create(IntelliJPlatformType.CLion, clionVersion, useInstaller = useInstaller)
         }
 
-        pluginVerifier()
+        pluginVerifier(version = "1.384")
         zipSigner()
         plugin(lsp4ijPluginString)
     }
@@ -171,6 +171,7 @@ intellijPlatform {
                 )
             }
         }
+        this.freeArgs.add("-offline")
     }
     buildSearchableOptions = false
     instrumentCode = false
