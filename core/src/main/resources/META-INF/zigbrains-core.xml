@@ -59,6 +59,9 @@
         <additionalTextAttributes
                 scheme="Darcula"
                 file="colors/ZigColorsConfiguration.xml"/>
+
+        <platform.backend.documentation.targetProvider
+                implementation="com.falsepattern.zigbrains.zig.documentation.ZigTopLevelDocumentationProvider"/>
     </extensions>
     <!-- endregion Zig -->
 
