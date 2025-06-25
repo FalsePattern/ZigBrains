@@ -17,6 +17,13 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+## [26.2.0]
+
+### Added
+
+- Zig
+  - Top level documentation comments can now be viewed as documentation popup/panel
+
 ## [26.1.0]
 
 ### Added
