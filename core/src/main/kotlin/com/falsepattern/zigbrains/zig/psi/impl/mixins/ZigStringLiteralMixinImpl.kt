@@ -33,6 +33,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.LiteralTextEscaper
 import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.util.childLeafs
 import com.intellij.psi.util.elementType
 import com.intellij.util.asSafely
 
@@ -40,7 +41,7 @@ abstract class ZigStringLiteralMixinImpl(node: ASTNode): ASTWrapperPsiElement(no
     override fun isValidHost() = true
 
     override val isMultiline: Boolean
-        get() = children.all { it.elementType == ZigTypes.STRING_LITERAL_MULTI }
+        get() = !childLeafs().all { it.elementType == ZigTypes.STRING_LITERAL_SINGLE }
 
     override val contentRanges: List<TextRange>
         get() = if (!isMultiline) {
