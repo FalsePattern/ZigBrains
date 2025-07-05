@@ -35,6 +35,9 @@ Note: before version 11, the version scheme used was 0.X.Y, without separate pat
 As this plugin will constantly be evolving together with the zig language, it makes no sense to keep the 0 prefix,
 and might as well utilize the full semver string for extra information.
 
+## Changelog
+The changelog file follows https://common-changelog.org/
+
 # Credits
 
 ## Supporters
