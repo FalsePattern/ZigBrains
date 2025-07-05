@@ -1,30 +1,23 @@
-<!--
-Changelog structure reference:
-<<
-## [Version]
-
-### Type
-
-#### Category
->>
-"Type" is one of [Added, Changed, Deprecated, Removed, Fixed, Security]
-"Category" should be something that can be quickly recognized by readers ("Highlighting", "Code Completion", "Folding", etc.)
-
-"Type" ALWAYS follows the order in the list above
--->
-
-# ZigBrains
+# Changelog
 
 ## [Unreleased]
 
-## [26.2.0]
+## [26.2.1] - 2025-07-06
+
+### Fixed
+
+- Zig
+  - Color settings code preview had a broken color tag (by ENDERZOMBI102)
+  - Quoted strings were being detected as multiline
+
+## [26.2.0] - 2025-06-25
 
 ### Added
 
 - Zig
   - Top level documentation comments can now be viewed as documentation popup/panel
 
-## [26.1.0]
+## [26.1.0] - 2025-06-21
 
 ### Added
 
@@ -37,55 +30,55 @@ Changelog structure reference:
 - Project
   - Exception from zig terminal filter when running under read action
 
-## [26.0.2]
+## [26.0.2] - 2025-05-26
 
 ### Fixed
 
 - LSP
   - Loosened version matching (ZLS 0.14.0 with Zig 0.14.1, etc.)
 
-## [26.0.1]
+## [26.0.1] - 2025-05-21
 
 ### Fixed
 
 - LSP
   - Language server not starting on Windows when there's a space in the binary path
 
-## [26.0.0]
+## [26.0.0] - 2025-05-19
 
 ### Added
 
 - IDEA 2025.2 support
 
-## [25.5.1]
+## [25.5.1] - 2025-05-18
 
 ### Added
 
 - Toolchain, LSP
   - User input sanitization for path configs
 
-## [25.5.0]
+## [25.5.0] - 2025-05-15
 
 ### Added
 
 - LSP
   - Custom selection ranges toggle in the ZLS settings, turned off by default.
 
-## [25.4.2]
+## [25.4.2] - 2025-05-11
 
 ### Fixed
 
 - Zig, Zon
   - Fixed escape sequence parsing in strings/character literals
 
-## [25.4.1]
+## [25.4.1] - 2025-05-06
 
 ### Fixed
 
 - Zig
   - Multiline strings with comments inside of them now get processed correctly
 
-## [25.4.0]
+## [25.4.0] - 2025-05-06
 
 ### Added
 
@@ -97,12 +90,17 @@ Changelog structure reference:
 - Debugger
   - Not specifying a build step for debugging zig build tasks is now an error
 
-## [25.3.0]
+## [25.3.0] - 2025-05-01
 
 ### Added
 
 - Debugger
   - Hint message for setting up zig build test debugging
+
+### Removed
+
+- Debugger
+  - Output executable autodetection. It was too unreliable and people kept making bug reports.
 
 ### Fixed
 
@@ -112,29 +110,24 @@ Changelog structure reference:
 - Zig, Zon
   - Escaped backslashes in strings broke the parser
 
-### Removed
-
-- Debugger
-  - Output executable autodetection. It was too unreliable and people kept making bug reports.
-
-## [25.2.0]
-
-### Added
-
-- Debugger
-  - Notify the user if zig run / zig test debugging starts, but a build.zig is present
+## [25.2.0] - 2025-04-20
 
 ### Changed
 
 - Project
   - Line marker task suggestions for main/test now defer to Zig Build if build.zig file is detected.
 
+### Added
+
+- Debugger
+  - Notify the user if zig run / zig test debugging starts, but a build.zig is present
+
 ### Fixed
 
 - Debugger
   - Compilation failures did not open the terminal properly and suppressed the error message
 
-## [25.1.0]
+## [25.1.0] - 2025-04-17
 
 ### Added
 
@@ -143,30 +136,30 @@ Changelog structure reference:
 - LSP
   - Configurable inlay hints file size limit to reduce IDE lag
 
-## [25.0.2]
+## [25.0.2] - 2025-04-15
 
 ### Fixed
 
 - Project
   - ZLS settings not scrollable in the language server list
 
-## [25.0.1]
+## [25.0.1] - 2025-04-11
+
+### Changed
+
+- Project
+  - BREAKING MAJOR UPDATE: Fully reworked toolchain and language server management
+    The configuration menu is now very similar to the intellij java toolchain management,
+    with proper toolchain selection, detection, downloading, etc. This change will require
+    you to re-configure your toolchains!
+  - Zig external library root is now no longer shown if zig is not configured
 
 ### Fixed
 
 - Project
   - Zig.iml file created in every project
 
-### Changed
-
-- Project
-  - BREAKING MAJOR UPDATE: Fully reworked toolchain and language server management 
-  The configuration menu is now very similar to the intellij java toolchain management,
-  with proper toolchain selection, detection, downloading, etc. This change will require
-  you to re-configure your toolchains!
-  - Zig external library root is now no longer shown if zig is not configured
-
-## [24.0.1]
+## [24.0.1] - 2025-03-27
 
 ### Added
 
@@ -190,40 +183,40 @@ Changelog structure reference:
 - Zig
   - IPC wrapper wasn't passing exit code
 
-## [23.1.2]
+## [23.1.2] - 2025-03-27
 
 ### Fixed
 
 - LSP
   - IDE warning when renaming symbols
 
-## [23.1.1]
+## [23.1.1] - 2025-03-26
 
 ### Fixed
 
 - Project
   - New project creation creates a blank ZLS config
 
-## [23.1.0]
-
-### Added
-
-- Project
-    - Support running file main/tests with hotkey (default: ctrl+shift+f10)
+## [23.1.0] - 2025-03-26
 
 ### Changed
 
 - Direnv
   - Centralized all direnv toggling into a single project-level option
 
-## [23.0.2]
+### Added
+
+- Project
+    - Support running file main/tests with hotkey (default: ctrl+shift+f10)
+
+## [23.0.2] - 2025-03-23
 
 ### Fixed
 
 - Zig
   - Documentation comment after regular comment was being highlighted as regular comment
 
-## [23.0.1]
+## [23.0.1] - 2025-03-19
 
 ### Fixed
 
@@ -231,7 +224,7 @@ Changelog structure reference:
   - mkfifo/bash for zig progress visualization is now detected more reliably (fixes error on macOS)
   - Deadlock when launching zig build tasks
 
-## [23.0.0]
+## [23.0.0] - 2025-03-15
 
 ### Added
 
@@ -243,7 +236,7 @@ Changelog structure reference:
 - Project
   - Executable / Library new project templates temporarily removed until zig stabilizes
 
-## [22.0.1]
+## [22.0.1] - 2025-03-13
 
 ### Fixed
 
@@ -253,7 +246,13 @@ Changelog structure reference:
 - Project
   - Occasional "AWT events are not allowed inside write action" error coming from LSP
 
-## [22.0.0]
+## [22.0.0] - 2025-03-13
+
+### Changed
+
+- Project
+  - !!BREAKING CHANGE!! Changed file format of zig tasks to store command line arguments as strings instead of string lists.
+    This (and newer) versions of the plugin will automatically upgrade tasks from 21.1.0 and before.
 
 ### Added
 
@@ -264,12 +263,6 @@ Changelog structure reference:
 - Toolchain
   - More descriptive error messages when toolchain detection fails
 
-### Changed
-
-- Project
-  - !!BREAKING CHANGE!! Changed file format of zig tasks to store command line arguments as strings instead of string lists.
-This (and newer) versions of the plugin will automatically upgrade tasks from 21.1.0 and before.
-
 ### Fixed
 
 - Debugging
@@ -278,29 +271,29 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
 - Project
   - Zig run/debug configuration command line arguments would lose quotes around arguments
 
-## [21.1.0]
-
-### Added
-
-- Zon
-  - ZLS integration
+## [21.1.0] - 2025-03-11
 
 ### Changed
 
 - Zon
   - Fully refactored the parser for parity with the zig parser
 
-## [21.0.0]
-
 ### Added
 
-- ZLS
-  - All of the config options are now exposed in the GUI
+- Zon
+  - ZLS integration
+
+## [21.0.0] - 2025-03-11
 
 ### Changed
 
 - Project
   - New project panel is now much more compact
+
+### Added
+
+- ZLS
+  - All of the config options are now exposed in the GUI
 
 ### Fixed
 
@@ -308,33 +301,33 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
   - `zig env` failure causes an IDE error
   - A local toolchain disappearing (std directory or zig exe deleted) is now handled properly
 
-## [20.3.0]
+## [20.3.0] - 2025-02-06
 
 - Zig
   - Improved default colors
 
-## [20.2.2]
+## [20.2.2] - 2025-01-30
 
 ### Fixed
 
 - Debugging
   - `zig build run` would run the process twice, one without, one with debugging
 
-## [20.2.1]
+## [20.2.1] - 2025-01-22
 
 ### Fixed
 
 - Zig
   - Lexer error when a zig file has a comment or multiline string at the end of file without trailing newline
 
-## [20.2.0]
+## [20.2.0] - 2025-01-21
 
 ### Added
 
 - Zig
   - Live template support
 
-## [20.1.3]
+## [20.1.3] - 2025-01-15
 
 ### Added
 
@@ -346,7 +339,7 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
 - Project
   - Zig Build tool window crashes when opening remote projects
 
-## [20.1.2]
+## [20.1.2] - 2025-01-12
 
 ### Fixed
 
@@ -354,7 +347,7 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
   - Source file path highlighter made the terminal lag with some files
   - Non-terminating rule in lexer could make the editor hang
 
-## [20.1.1]
+## [20.1.1] - 2024-12-24
 
 ### Fixed
 
@@ -362,7 +355,7 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
   - Unterminated string at the end of the file soft-locks the editor
   - Trailing commas in for loop parameters don't get parsed correctly
 
-## [20.1.0]
+## [20.1.0] - 2024-12-22
 
 ### Added
 
@@ -374,25 +367,20 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
 - Zon
   - Broken string quote handling
 
-## [20.0.4]
+## [20.0.4] - 2024-12-11
 
 ### Fixed
 
 - Renamed Zig new file task to "Zig File" and moved to the file creation group
 
-## [20.0.3]
+## [20.0.3] - 2024-11-28
 
 ### Fixed
 
 - Project
   - "Save all documents" hanging when trying to run a zig file
 
-## [20.0.2]
-
-### Added
-
-- Zig
-  - Escape sequence highlighting in char literals
+## [20.0.2] - 2024-11-11
 
 ### Changed
 
@@ -400,12 +388,17 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
   - Direnv now only runs automatically in trusted projects
   - Toolchain autodetection is now done in the background on project load
 
+### Added
+
+- Zig
+  - Escape sequence highlighting in char literals
+
 ### Fixed
 
 - Zig
   - Unicode characters in char literals triggered an error
 
-## [20.0.1]
+## [20.0.1] - 2024-11-09
 
 ### Fixed
 
@@ -416,22 +409,22 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
 - Zig
   - Struct fields being styled as static fields instead of instance fields
 
-## [20.0.0]
+## [20.0.0] - 2024-11-07
+
+### Changed
+
+- The entire plugin has been re-implemented in Kotlin
 
 ### Added
 
 - Debugging
   - Progress indicator while zig is compiling the debuggable exe
 
-### Changed
-
-- The entire plugin has been re-implemented in Kotlin
-
 ### Fixed
 
 - Most of the internals have been rewritten to be fully asynchronous, so freezes should happen way less
 
-## [19.3.0]
+## [19.3.0] - 2024-10-31
 
 ### Added
 
@@ -443,7 +436,7 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
 - Zig
   - Missing description for string conversion intentions
 
-## [19.2.0]
+## [19.2.0] - 2024-10-26
 
 ### Added
 
@@ -456,7 +449,13 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
 - Zig
   - Multiline string language injections broke when editing the injected text
 
-## [19.1.0]
+## [19.1.0] - 2024-10-25
+
+### Changed
+
+- Runner
+  - The process execution pipeline is now fully asynchronous
+  - Error output is no longer redirected to standard output
 
 ### Added
 
@@ -468,12 +467,6 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
   - Option to toggle inlay hints on/off
   - Compacted error{...} blocks in inlay hints
 
-### Changed
-
-- Runner
-  - The process execution pipeline is now fully asynchronous
-  - Error output is no longer redirected to standard output
-
 ### Fixed
 
 - Debugger
@@ -484,36 +477,36 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
   - Rare error when checking LSP presence
   - No more error spam when zig or zls binary is missing
 
-## [18.0.0]
-
-### Added
-
-- Zig
-  - Labeled switch statements
+## [18.0.0] - 2024-10-17
 
 ### Changed
 
 - LSP
   - Updated to LSP4IJ 0.7.0
 
-## [17.3.0]
-
 ### Added
 
 - Zig
-  - Structure view
+  - Labeled switch statements
+
+## [17.3.0] - 2024-10-03
 
 ### Changed
 
 - LSP
   - Updated to LSP4IJ 0.6.0
 
+### Added
+
+- Zig
+  - Structure view
+
 ### Fixed
 
 - Project
   - CLion will no longer prompt you to import zig projects as CMake
 
-## [17.2.0]
+## [17.2.0] - 2024-09-20
 
 ### Added
 
@@ -524,19 +517,25 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
 - Project
   - Safer standard library path resolution
 
-## [17.1.0]
-
-### Fixed
-
-- Project
-  - Relative paths in zig toolchain configuration would break the entire IDE
+## [17.1.0] - 2024-08-21
 
 ### Removed
 
 - ZLS
   - Obsolete config options which are no longer used since migrating to LSP4IJ
 
-## [17.0.0]
+### Fixed
+
+- Project
+  - Relative paths in zig toolchain configuration would break the entire IDE
+
+## [17.0.0] - 2024-08-06
+
+### Changed
+
+- Project
+  - Increased internal zig tool timeout to 10 seconds. Note that tasks don't have timeout, this is only used for
+    ZigBrains getting metadata about the compiler and the buildscript.
 
 ### Added
 
@@ -544,18 +543,12 @@ This (and newer) versions of the plugin will automatically upgrade tasks from 21
   - Zig Build integrated into an IDE tool window. Currently only supports running single steps, for more complex steps,
 create a custom build configuration as before.
 
-### Changed
-
-- Project
-  - Increased internal zig tool timeout to 10 seconds. Note that tasks don't have timeout, this is only used for
-ZigBrains getting metadata about the compiler and the buildscript.
-
 ### Fixed
 
 - Project
   - Toolchain working directory was not set when requesting compiler metadata
 
-## [16.1.3]
+## [16.1.3] - 2024-07-31
 
 ### Changed
 
@@ -564,14 +557,14 @@ ZigBrains getting metadata about the compiler and the buildscript.
   - Metadata download is now cached after the first fetch
   - Metadata download timeout has been set to 3 seconds, after which it reverts to the fallback file
 
-## [16.1.2]
+## [16.1.2] - 2024-07-26
 
 ### Fixed
 
 - Zig
   - Comptime struct fields not being parsed properly
 
-## [16.1.1]
+## [16.1.1] - 2024-07-26
 
 ### Fixed
 
@@ -582,7 +575,7 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - ZLS
   - Better language server autodetect
 
-## [16.1.0]
+## [16.1.0] - 2024-07-25
 
 ### Added
 
@@ -595,7 +588,12 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - Zon
   - More reliable autocomplete
 
-## [16.0.0]
+## [16.0.0] - 2024-07-20
+
+### Changed
+
+- LSP
+  - Migrated to Red Hat's LSP4IJ LSP adapter.
 
 ### Fixed
 
@@ -607,54 +605,49 @@ ZigBrains getting metadata about the compiler and the buildscript.
   - Color settings has more accurate color preview text.
   - Better builtin indentation
 
-### Changed
-
-- LSP
-  - Migrated to Red Hat's LSP4IJ LSP adapter.
-
-## [15.2.0]
+## [15.2.0] - 2024-06-13
 
 ### Added
 
 - Project
   - Modifying the standard library path now also applies to ZLS
 
-## [15.1.1]
+## [15.1.1] - 2024-06-06
 
 ### Fixed
 
 - Project
   - PTY emulation is now opt-in in run configurations
 
-## [15.1.0]
+## [15.1.0] - 2024-06-03
 
 ### Added
 
 - Project
   - PTY emulation for non-debug runs. Fixes colored output in Ziglings.
 
-## [15.0.3]
+## [15.0.3] - 2024-06-03
 
 ### Fixed
 
 - Zig
   - More autocomplete fixes
 
-## [15.0.2]
+## [15.0.2] - 2024-06-02
 
 ### Fixed
 
 - Zig
   - Autocomplete not working when the caret is placed right after a "("
 
-## [15.0.1]
+## [15.0.1] - 2024-06-01
 
 ### Fixed
 
 - Zig
   - Trailing commas in struct initializers showed an error
 
-## [15.0.0]
+## [15.0.0] - 2024-05-31
 
 ### Changed
 
@@ -666,6 +659,11 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - Project
   - Updated new project templates to the latest Zig 0.13.0 init files
 
+### Removed
+
+- LSP
+  - Notification spam about ZLS missing in non-zig projects
+
 ### Fixed
 
 - Zig
@@ -673,12 +671,7 @@ ZigBrains getting metadata about the compiler and the buildscript.
   - More robust highlighting when auto-formatting
   - Fixed multiple grammar errors
 
-### Removed
-
-- LSP
-  - Notification spam about ZLS missing in non-zig projects
-
-## [14.4.0]
+## [14.4.0] - 2024-05-28
 
 ### Fixed
 
@@ -686,7 +679,7 @@ ZigBrains getting metadata about the compiler and the buildscript.
   - Fixed indentation to be more consistent with zig fmt
   - Code completion now works correctly on the first line in a file too
 
-## [14.3.0]
+## [14.3.0] - 2024-05-15
 
 ### Added
 
@@ -701,7 +694,7 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - Project
   - Exe args for zig run not visible in the GUI
 
-## [14.2.0]
+## [14.2.0] - 2024-05-12
 
 ### Added
 
@@ -713,7 +706,7 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - Debugging (Windows)
   - Variables sometimes don't show up in the variable inspector when in breakpoint state
 
-## [14.1.0]
+## [14.1.0] - 2024-05-11
 
 ### Fixed
 
@@ -727,14 +720,24 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - Project
   - ZLS should now be detected more reliably when creating new projects
 
-## [14.0.1]
+## [14.0.1] - 2024-04-27
 
 ### Fixed
 
 - Zig
   - If statements without a block always showed an error
 
-## [14.0.0]
+## [14.0.0] - 2024-04-19
+
+### Changed
+
+- LSP
+  - The injection of the various language actions (Go to declaration/implementation, reformat, etc.) has been
+    reimplemented from the ground up to be much more reliable and compatible in the presence of other languages and plugins.
+
+- Zig, ZLS
+  - The configurations have been unified into a single cohesive interface
+  - Improved auto-detection for both Zig and ZLS
 
 ### Added
 
@@ -744,16 +747,6 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - Project
   - Completely overhauled the configuration system and the new project creation window. All the configs have been unified
   into a single screen, and project creation has been fully integrated as a mainline feature, instead of just a "nice to have".
-
-### Changed
-
-- LSP
-  - The injection of the various language actions (Go to declaration/implementation, reformat, etc.) has been
-  reimplemented from the ground up to be much more reliable and compatible in the presence of other languages and plugins.
-
-- Zig, ZLS
-  - The configurations have been unified into a single cohesive interface
-  - Improved auto-detection for both Zig and ZLS
 
 ### Fixed
 
@@ -766,7 +759,15 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - Zig
   - More robust indentation logic, also works with semi-invalid syntax now
 
-## [13.2.0]
+## [13.2.0] - 2024-04-05
+
+### Changed
+
+- Project
+  - `zig build` steps are now specified separately from miscellaneous command line arguments.
+    This is needed for the debugger to work properly.
+  - The zig build debug executable target configs are now hidden from Zig build tasks in IDEs without native debugging support.
+  - Native Application (Zig) is now hidden in IDEs without native debugging support.
 
 ### Added
 
@@ -778,20 +779,12 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - Project
   - The line marker generated `zig build` now defaults to the `run` step.
 
-### Changed
-
-- Project
-  - `zig build` steps are now specified separately from miscellaneous command line arguments.
-  This is needed for the debugger to work properly.
-  - The zig build debug executable target configs are now hidden from Zig build tasks in IDEs without native debugging support.
-  - Native Application (Zig) is now hidden in IDEs without native debugging support.
-
 ### Fixed
 
 - Debugging
   - Debugger locks up when trying to debug `zig build run` tasks.
 
-## [13.1.1]
+## [13.1.1] - 2024-03-23
 
 ### Fixed
 
@@ -801,7 +794,7 @@ ZigBrains getting metadata about the compiler and the buildscript.
 - Zig
   - Accidental regression while renaming the action IDs that broke "find usages"
 
-## [13.1.0]
+## [13.1.0] - 2024-03-15
 
 ### Added
 
@@ -819,13 +812,7 @@ ZigBrains getting metadata about the compiler and the buildscript.
   - Indent support for function parameters and struct initializers
   - Updated to latest grammar spec (https://github.com/ziglang/zig-spec/commit/78c2e2e5cfa7090965deaf631cb8ca6f405b7c42)
 
-## [13.0.1]
-
-### HOTFIX CHANGES
-- Fixed multiple critical null safety problems that caused plugin crashes on some systems
-- Splitting the editor now no longer breaks semantic highlighting
-
-The rest of the 13.0.0 changes are available below:
+## [13.0.1] - 2024-03-12
 
 ### Added
 
@@ -843,6 +830,11 @@ The rest of the 13.0.0 changes are available below:
 - ZLS
   - ZLS configuration is now partially editable through the GUI
 
+### Removed
+
+- Project
+  - !!!BREAKING CHANGE!!! There is now no arbitrary "zig execution" task, all zig tasks have been categorized into Zig run/build/test tasks respectively.
+
 ### Fixed
 
 - Project
@@ -854,12 +846,7 @@ The rest of the 13.0.0 changes are available below:
 - Zig
   - Error highlighting was breaking all the time
 
-### Removed
-
-- Project
-  - !!!BREAKING CHANGE!!! There is now no arbitrary "zig execution" task, all zig tasks have been categorized into Zig run/build/test tasks respectively.
-
-## [12.0.0]
+## [12.0.0] - 2024-02-29
 
 ### Added
 
@@ -883,14 +870,14 @@ The rest of the 13.0.0 changes are available below:
   - Syntax highlighting no longer breaks after refactoring or reformatting
   - Go to Usages no longer freezes the IDE
 
-## [11.1.0]
+## [11.1.0] - 2024-02-21
 
 ### Changed
 
 - Zig
   - Updated to latest language grammar (destructuring syntax)
 
-## [11.0.0]
+## [11.0.0] - 2024-02-01
 
 ### Changed
 
@@ -914,7 +901,7 @@ The rest of the 13.0.0 changes are available below:
   - Code style settings. The official zig formatter is not configurable either, and ZigBrains aims to minimize
     divergence from any official or ZLS-supplied features where possible.
 
-## [0.10.0]
+## [0.10.0] - 2024-01-25
 
 ### Added
 
@@ -926,7 +913,11 @@ The rest of the 13.0.0 changes are available below:
 - Project generation
   - Now actually populates the project directory with example files instead of just creating an empty directory
 
-## [0.9.0]
+## [0.9.0] - 2023-12-02
+
+### Changed
+
+- Maximum compatible IDE version 232.* -> 233.*
 
 ### Added
 
@@ -935,10 +926,6 @@ The rest of the 13.0.0 changes are available below:
 
 - Zon
   - Can now parse the .paths attribute properly
-
-### Changed
-
-- Maximum compatible IDE version 232.* -> 233.*
 
 ### Fixed
 
@@ -949,7 +936,7 @@ The rest of the 13.0.0 changes are available below:
   - Crash in huge projects
 
 
-## [0.8.1]
+## [0.8.1] - 2023-10-04
 
 ### Changed
 
@@ -971,7 +958,7 @@ The rest of the 13.0.0 changes are available below:
 - LSP
   - Occasional NullPointerException when LSP returns blank data for inlay hints
 
-## [0.8.0]
+## [0.8.0] - 2023-08-21
 
 ### Added
 
@@ -991,7 +978,15 @@ The rest of the 13.0.0 changes are available below:
 - Toolchain
   - Zig run configurations now save properly
 
-## [0.7.0]
+## [0.7.0] - 2023-08-19
+
+### Changed
+
+- Accessibility
+  - The LSP status icon now has symbols in it instead of just colors:
+    - Stopped(Red): X
+    - Starting(Yellow): Refresh arrow
+    - Started(Green): Empty
 
 ### Added
 
@@ -1005,14 +1000,6 @@ The rest of the 13.0.0 changes are available below:
   - ZLS is now auto-detected on project startup from PATH
     - (You can also manually auto-detect it in the config menu)
 
-### Changed
-
-- Accessibility
-  - The LSP status icon now has symbols in it instead of just colors:
-    - Stopped(Red): X
-    - Starting(Yellow): Refresh arrow
-    - Started(Green): Empty
-
 ### Fixed
 
 - LSP
@@ -1020,7 +1007,7 @@ The rest of the 13.0.0 changes are available below:
 - Config
   - Changes to the ZLS configuration no longer require an IDE restart
 
-## [0.6.0]
+## [0.6.0] - 2023-08-17
 
 ### Added
 
@@ -1045,12 +1032,12 @@ The rest of the 13.0.0 changes are available below:
 - Updated dependencies
 - Integrated LSP4IntelliJ directly into ZigBrains
 
-## [0.5.2]
+## [0.5.2] - 2023-08-14
 
 ### Fixed
 - NullPointerException when clicking the red circle when the LSP is not connected
 
-## [0.5.1] "Modernization"
+## [0.5.1] - 2023-08-12
 
 ### Added
 - Proper documentation view (CTRL+Q) instead of the janky hover thing
@@ -1061,7 +1048,10 @@ The rest of the 13.0.0 changes are available below:
 ### Fixed
 - Error highlighting now works on IDEA 2023
 
-## [0.5.0] "The *ZON*iverse"
+## [0.5.0] - 2023-08-10
+
+### Changed
+- Updated the LSP backend, it should be more resilient now
 
 ### Added
 
@@ -1074,10 +1064,7 @@ The rest of the 13.0.0 changes are available below:
 - Code Folding
 - Indentation
 
-### Changed
-- Updated the LSP backend, it should be more resilient now
-
-## [0.4.0]
+## [0.4.0] - 2023-08-02
 
 ### Added
 
@@ -1092,7 +1079,7 @@ The rest of the 13.0.0 changes are available below:
 #### Syntax Highlighting
 - Made the logic even more asynchronous, should lead to much less UI stuttering
 
-## [0.3.1]
+## [0.3.1] - 2023-08-01
 
 ### Added
 
@@ -1108,7 +1095,7 @@ The rest of the 13.0.0 changes are available below:
 - Folding ranges not appearing on Windows
 - Typo in the bounds checking code
 
-## [0.3.0]
+## [0.3.0] - 2023-07-31
 
 ### Added
 
@@ -1129,14 +1116,14 @@ The rest of the 13.0.0 changes are available below:
 #### LSP
 - (Windows) ZLS binary not executing if the file path has weird characters
 
-## [0.2.0]
+## [0.2.0] - 2023-07-29
 
 ### Added
 - Code completion
 - Code folding
 - More ZLS config options
 
-## [0.1.0]
+## [0.1.0] - 2023-07-29
 
 ### Added
 - Initial prototype. Lots of important stuff not yet implemented, but basic syntax highlighting and go to definition works.

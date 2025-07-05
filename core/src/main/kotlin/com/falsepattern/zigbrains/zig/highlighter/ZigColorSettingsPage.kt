@@ -104,6 +104,7 @@ private val ADD_HIGHLIGHT = HashMap<String, TextAttributesKey>().apply {
     this["function_decl"] = ZigSyntaxHighlighter.FUNCTION_DECL
     this["method"] = ZigSyntaxHighlighter.METHOD_REF
     this["method_gen"] = ZigSyntaxHighlighter.METHOD_REF_GEN
+    this["ns_decl"] = ZigSyntaxHighlighter.NAMESPACE_DECL
     this["namespace"] = ZigSyntaxHighlighter.NAMESPACE_REF
     this["property_decl"] = ZigSyntaxHighlighter.PROPERTY_DECL
     this["struct"] = ZigSyntaxHighlighter.STRUCT_REF
