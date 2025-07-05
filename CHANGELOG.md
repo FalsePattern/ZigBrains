@@ -17,6 +17,11 @@ Changelog structure reference:
 
 ## [Unreleased]
 
+### Fixed
+
+- Zig
+  - Color settings code preview had a broken color tag (by ENDERZOMBI102)
+
 ## [26.2.0]
 
 ### Added
