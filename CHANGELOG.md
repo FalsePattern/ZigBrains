@@ -21,6 +21,7 @@ Changelog structure reference:
 
 - Zig
   - Color settings code preview had a broken color tag (by ENDERZOMBI102)
+  - Quoted strings were being detected as multiline
 
 ## [26.2.0]
 
