@@ -44,3 +44,8 @@ configurations[Constants.Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS].depen
         this.isTransitive = false
     }
 }
+tasks {
+    compileJava {
+        enabled = false
+    }
+}

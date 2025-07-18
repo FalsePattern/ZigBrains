@@ -33,6 +33,7 @@
   elementTypeHolderClass="com.falsepattern.zigbrains.zon.psi.ZonTypes"
   elementTypeClass="com.falsepattern.zigbrains.zon.parser.ZonElementType"
   tokenTypeClass="com.falsepattern.zigbrains.zon.parser.ZonTokenType"
+  generateTokenAccessors = true
   tokens=[
     LINE_COMMENT='comment'
     DOT='.'
@@ -54,6 +55,10 @@
     BAD_SQUOT='unterminated quote'
     BAD_DQUOT='unterminated double quote'
   ]
+
+  //Mixins
+  mixin("StringLiteral")="com.falsepattern.zigbrains.zon.psi.impl.mixins.ZonStringLiteralMixinImpl"
+  implements("StringLiteral")="com.falsepattern.zigbrains.zon.psi.mixins.ZonStringLiteralMixin"
 }
 
 Root ::= Expr
@@ -87,4 +92,4 @@ Bool ::= KEYWORD_TRUE | KEYWORD_FALSE
 
 Number ::= FLOAT | INTEGER | NUM_NAN | NUM_INF
 
-StringLiteral ::= STRING_LITERAL_SINGLE | STRING_LITERAL_MULTI
+StringLiteral ::= STRING_LITERAL_SINGLE | (STRING_LITERAL_MULTI)+

@@ -23,7 +23,14 @@
 package com.falsepattern.zigbrains.project.toolchain.tools
 
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
+import com.falsepattern.zigbrains.shared.psi.decodeTextContent
+import com.falsepattern.zigbrains.zon.ZonLanguage
+import com.falsepattern.zigbrains.zon.psi.ZonExpr
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
+import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.util.childrenOfType
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.nio.file.Path
@@ -41,9 +48,39 @@ class ZigCompilerTool(toolchain: ZigToolchain) : ZigTool(toolchain) {
         return try {
             Result.success(envJson.decodeFromString<ZigToolchainEnvironmentSerializable>(stdout))
         } catch (e: SerializationException) {
-            Result.failure(IllegalStateException("could not deserialize zig env", e))
+            //Try parsing as zon
+            try {
+                val theMap = readAction {
+                    val psi = PsiFileFactory.getInstance(project ?: ProjectManager.getInstance().defaultProject).createFileFromText(ZonLanguage, stdout)
+                    val rootList = psi.childrenOfType<ZonExpr>().firstOrNull()?.initList?.fieldInitList ?: throw IllegalArgumentException()
+                    val theMap = HashMap<String, String>()
+                    for (field in rootList) {
+                        val value = field.expr.stringLiteral?.decodeTextContent() ?: continue
+                        val ident = field.identifier.text
+                        theMap[ident] = value
+                    }
+                    theMap
+                }
+                val deserialized = ZigToolchainEnvironmentSerializable(
+                    theMap.getZonOrThrow("zig_exe"),
+                    theMap.getZonOrThrow("std_dir"),
+                    theMap.getZonOrThrow("global_cache_dir"),
+                    theMap.getZonOrThrow("lib_dir"),
+                    theMap.getZonOrThrow("version"),
+                    theMap.getZonOrThrow("target")
+                )
+                Result.success(deserialized)
+            } catch (e2: Exception) {
+                val e3 = IllegalStateException("could not deserialize zig env", e2)
+                e3.addSuppressed(e)
+                Result.failure(e3)
+            }
         }
     }
+}
+
+private fun Map<String, String>.getZonOrThrow(index: String): String {
+    return this[index] ?: throw IllegalArgumentException("Missing ZON element \"$index\"")
 }
 
 private val envJson = Json {

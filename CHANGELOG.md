@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [26.3.0] - 2025-07-23
+
+### Added
+
+- Zig
+  - Support for ZON-returning `zig env` on zig 0.15+
+
 ## [26.2.1] - 2025-07-06
 
 ### Fixed
