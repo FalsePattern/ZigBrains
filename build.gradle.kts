@@ -1,5 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.gradle.ext.runConfigurations
+import org.jetbrains.gradle.ext.settings
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -11,6 +13,7 @@ plugins {
     id("org.jetbrains.intellij.platform") version "2.6.0"
     id("org.jetbrains.changelog") version "2.2.1"
     id("org.jetbrains.grammarkit") version "2022.3.2.2" apply false
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.2"
     idea
     `maven-publish`
 }
@@ -27,9 +30,30 @@ val useInstaller = property("useInstaller").toString().toBoolean()
 val lsp4ijPluginString = "com.redhat.devtools.lsp4ij:$lsp4ijVersion${if (lsp4ijNightly) "@nightly" else ""}"
 val ideaCommunityVersion: String by project
 val clionVersion: String by project
+val lspCompat = property("lspCompat").toString().toBoolean()
+val cidrCompat = property("cidrCompat").toString().toBoolean()
 
 group = "com.falsepattern"
 version = pluginVersionFull
+
+idea.project.settings.runConfigurations {
+    create("1. Run with LSP", org.jetbrains.gradle.ext.Gradle::class.java) {
+        taskNames = listOf("runIde")
+        scriptParameters = "-PlspCompat=true"
+    }
+    create("2. Run without LSP", org.jetbrains.gradle.ext.Gradle::class.java) {
+        taskNames = listOf("runIde")
+        scriptParameters = "-PlspCompat=false"
+    }
+    create("3. Run with LSP, no cidr", org.jetbrains.gradle.ext.Gradle::class.java) {
+        taskNames = listOf("runIde")
+        scriptParameters = "-PlspCompat=true -PcidrCompat=false -PrunIdeTarget=ideaCommunity"
+    }
+    create("4. Run without LSP, no cidr", org.jetbrains.gradle.ext.Gradle::class.java) {
+        taskNames = listOf("runIde")
+        scriptParameters = "-PlspCompat=false -PcidrCompat=false -PrunIdeTarget=ideaCommunity"
+    }
+}
 
 subprojects {
     apply(plugin = "java")
@@ -107,12 +131,18 @@ dependencies {
 
         pluginVerifier(version = "1.384")
         zipSigner()
-        plugin(lsp4ijPluginString)
+        if (lspCompat) {
+            plugin(lsp4ijPluginString)
+        }
     }
 
     runtimeOnly(project(":core"))
-    runtimeOnly(project(":cidr"))
-    runtimeOnly(project(":lsp"))
+    if (cidrCompat) {
+        runtimeOnly(project(":cidr"))
+    }
+    if (lspCompat) {
+        runtimeOnly(project(":lsp"))
+    }
 }
 
 intellijPlatform {

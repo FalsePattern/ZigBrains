@@ -30,3 +30,9 @@ dependencies {
         isTransitive = false
     }
 }
+
+tasks {
+    compileJava {
+        enabled = false
+    }
+}
