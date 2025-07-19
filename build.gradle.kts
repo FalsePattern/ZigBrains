@@ -31,18 +31,27 @@ val lsp4ijPluginString = "com.redhat.devtools.lsp4ij:$lsp4ijVersion${if (lsp4ijN
 val ideaCommunityVersion: String by project
 val clionVersion: String by project
 val lspCompat = property("lspCompat").toString().toBoolean()
+val cidrCompat = property("cidrCompat").toString().toBoolean()
 
 group = "com.falsepattern"
 version = pluginVersionFull
 
 idea.project.settings.runConfigurations {
-    create("Run with LSP", org.jetbrains.gradle.ext.Gradle::class.java) {
+    create("1. Run with LSP", org.jetbrains.gradle.ext.Gradle::class.java) {
         taskNames = listOf("runIde")
         scriptParameters = "-PlspCompat=true"
     }
-    create("Run without LSP", org.jetbrains.gradle.ext.Gradle::class.java) {
+    create("2. Run without LSP", org.jetbrains.gradle.ext.Gradle::class.java) {
         taskNames = listOf("runIde")
         scriptParameters = "-PlspCompat=false"
+    }
+    create("3. Run with LSP, no cidr", org.jetbrains.gradle.ext.Gradle::class.java) {
+        taskNames = listOf("runIde")
+        scriptParameters = "-PlspCompat=true -PcidrCompat=false -PrunIdeTarget=ideaCommunity"
+    }
+    create("4. Run without LSP, no cidr", org.jetbrains.gradle.ext.Gradle::class.java) {
+        taskNames = listOf("runIde")
+        scriptParameters = "-PlspCompat=false -PcidrCompat=false -PrunIdeTarget=ideaCommunity"
     }
 }
 
@@ -129,7 +138,9 @@ dependencies {
     }
 
     runtimeOnly(project(":core"))
-    runtimeOnly(project(":cidr"))
+    if (cidrCompat) {
+        runtimeOnly(project(":cidr"))
+    }
     if (lspCompat) {
         runtimeOnly(project(":lsp"))
     }
