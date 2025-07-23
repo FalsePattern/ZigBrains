@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [26.3.1] - 2025-07-23
+
+### Fixed
+
+- Zig
+  - IDE freeze when changing toolchains
+
 ## [26.3.0] - 2025-07-23
 
 ### Added
