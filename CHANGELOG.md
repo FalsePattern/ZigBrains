@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [26.3.2] - 2025-08-02
+
 ### Fixed
 
 - Zig, Zon
