@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [26.3.2] - 2025-08-02
+
+### Fixed
+
+- Zig, Zon
+  - Broken string escapes at ends of strings (e.g., `"\\"`)
+
 ## [26.3.1] - 2025-07-23
 
 ### Fixed
