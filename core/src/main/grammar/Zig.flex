@@ -241,12 +241,14 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 //Strings
 
 <YYINITIAL>      "'"                      { yybegin(CHAR_LIT); }
-<CHAR_LIT>       {char_char}*"'"          { yybegin(YYINITIAL); return CHAR_LITERAL; }
+<CHAR_LIT>       "'"                      { yybegin(YYINITIAL); return CHAR_LITERAL; }
+<CHAR_LIT>       {char_char}              { }
 <CHAR_LIT>       <<EOF>>                  { yybegin(YYINITIAL); return BAD_SQUOT; }
 <CHAR_LIT>       [^]                      { yypushback(1); yybegin(UNT_SQUOT); }
 
 <YYINITIAL>      "\""                     { yybegin(STR_LIT); }
-<STR_LIT>        {string_char}*"\""       { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
+<STR_LIT>        "\""                     { yybegin(YYINITIAL); return STRING_LITERAL_SINGLE; }
+<STR_LIT>        {string_char}            { }
 <STR_LIT>        <<EOF>>                  { yybegin(YYINITIAL); return BAD_DQUOT; }
 <STR_LIT>        [^]                      { yypushback(1); yybegin(UNT_DQUOT); }
 
