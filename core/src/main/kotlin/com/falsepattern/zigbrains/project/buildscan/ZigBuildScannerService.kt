@@ -38,9 +38,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.MessageDialogBuilder
 import com.intellij.openapi.vfs.toNioPathOrNull
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -103,15 +107,17 @@ class ZigBuildScannerService(private val project: Project) {
 
 		// start socket server
 		val server = ServerSocket(0)
-		val thread = Thread {
-			val conn = server.accept()
-			val projects = Json.decodeFromStream<List<Serialization.Project>>(conn.getInputStream())
-			conn.close()
-			// only update if we actually managed to get the data
-			this.projects.clear()
-			this.projects.addAll( projects )
-		}
-		thread.start()
+
+        val projectsFuture = zigCoroutineScope.async(newSingleThreadContext("ZigBrains network thread")) {
+            runInterruptible {
+                val conn = server.accept()
+                try {
+                    return@runInterruptible Json.decodeFromStream<List<Serialization.Project>>(conn.getInputStream())
+                } finally {
+                    conn.close()
+                }
+            }
+        }
 
 		val result = zig.callWithArgs(
 			project.guessProjectDir()?.toNioPathOrNull(),
@@ -123,6 +129,15 @@ class ZigBuildScannerService(private val project: Project) {
 			errorReload(ErrorType.MissingZigExe, throwable.message)
 			null
 		}
+
+        withTimeoutOrNull(2000) {
+            val newProjects = projectsFuture.await()
+            projects.clear()
+            projects.addAll(newProjects)
+        } ?: run {
+            projectsFuture.cancel()
+            //TODO handle failed reload
+        }
 
 		when {
 			result == null -> {}
