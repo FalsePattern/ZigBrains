@@ -38,13 +38,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.MessageDialogBuilder
 import com.intellij.openapi.vfs.toNioPathOrNull
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -94,7 +90,7 @@ class ZigBuildScannerService(private val project: Project) {
 		}
 	}
 
-	@OptIn(ExperimentalSerializationApi::class)
+	@OptIn(ExperimentalSerializationApi::class, ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 	suspend fun doReload() {
 		// TODO: Add copying the buildscan helper to project dir
 		preReload()
@@ -106,16 +102,12 @@ class ZigBuildScannerService(private val project: Project) {
 		val zig = toolchain.zig
 
 		// start socket server
-		val server = ServerSocket(0)
-
+		val server = withContext(Dispatchers.IO) { ServerSocket(0) }
         val projectsFuture = zigCoroutineScope.async(newSingleThreadContext("ZigBrains network thread")) {
             runInterruptible {
-                val conn = server.accept()
-                try {
-                    return@runInterruptible Json.decodeFromStream<List<Serialization.Project>>(conn.getInputStream())
-                } finally {
-                    conn.close()
-                }
+                server.accept().use {
+					Json.decodeFromStream<List<Serialization.Project>>( it.getInputStream() )
+				}
             }
         }
 
