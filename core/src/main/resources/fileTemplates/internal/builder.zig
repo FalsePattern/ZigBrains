@@ -69,6 +69,7 @@ const Storage = struct {
 	};
 };
 
+const post_writergate = @hasDecl(std, "Io");
 
 pub fn build( b: *std.Build ) !void {
 	// run the project's build.zig
@@ -157,7 +158,14 @@ pub fn build( b: *std.Build ) !void {
 	}
 
 	// serialize
-	try std.json.stringify( projects, .{ .whitespace = .indent_4 }, stream.writer() );
+	if (post_writergate) {
+		var writer_buf: [1024]u8 = undefined;
+		var stream_writer = stream.writer(&writer_buf);
+		try std.json.Stringify.value(projects, .{ .whitespace = .indent_4 }, &stream_writer.interface);
+		try stream_writer.interface.flush();
+	} else {
+		try std.json.stringify( projects, .{ .whitespace = .indent_4 }, stream.writer() );
+	}
 
 	// hook is done!
 	return res;
