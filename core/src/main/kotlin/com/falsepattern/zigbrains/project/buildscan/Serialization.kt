@@ -42,7 +42,7 @@ object Serialization {
 		/**
 		 * Contains the index of a project in the projects list
 		 */
-		val dependencies: List<Int>,
+		val dependencies: List<Dependency>,
 	)
 	@Serializable
 	data class Step(
@@ -88,5 +88,16 @@ object Serialization {
 		 * The imported module's idx
 		 */
 		val module: Int,
+	)
+	@Serializable
+	data class Dependency(
+		/**
+		 * The index of the project in the projects list
+ 		 */
+		val project: Int,
+		/**
+		 * Whether the dependency was delcared lazy
+ 		 */
+		val lazy: Boolean,
 	)
 }
