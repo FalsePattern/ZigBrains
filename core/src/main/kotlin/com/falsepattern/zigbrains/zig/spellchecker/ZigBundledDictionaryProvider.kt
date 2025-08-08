@@ -1,33 +1,29 @@
 /*
- * This file is part of ZigBrains.
- *
+ * ZigBrains
  * Copyright (C) 2023-2025 FalsePattern
  * All Rights Reserved
  *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Software.
  *
- * ZigBrains is free software: you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, only version 3 of the License.
  *
- * ZigBrains is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with ZigBrains. If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.project.steps.discovery
+package com.falsepattern.zigbrains.zig.spellchecker
 
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.spellchecker.BundledDictionaryProvider
 
-class ZigDiscoverStepsAction: AnAction() {
-    override fun actionPerformed(e: AnActionEvent) {
-        val project = e.project ?: return
-        project.zigStepDiscovery.triggerReload()
-    }
+class ZigBundledDictionaryProvider: BundledDictionaryProvider {
+	override fun getBundledDictionaries(): Array<String> =
+		arrayOf("/spellchecker/zig.dic")
 }

@@ -116,6 +116,7 @@ fun createCommandLineSafe(
     workingDirectory: Path?,
     exe: Path,
     vararg parameters: String,
+	env: Map<String, String> = mapOf()
 ): Result<GeneralCommandLine> {
     if (!exe.exists())
         return Result.failure(IllegalArgumentException("file does not exist: ${exe.pathString}"))
@@ -126,6 +127,7 @@ fun createCommandLineSafe(
         .withWorkingDirectory(workingDirectory)
         .withParameters(*parameters)
         .withCharset(Charsets.UTF_8)
+		.withEnvironment(env)
     return Result.success(cli)
 }
 

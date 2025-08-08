@@ -1,0 +1,16 @@
+usingnamespace
+orelse
+addrspace
+allowzero
+anyframe
+anytype
+callconv
+comptime
+errdefer
+fn
+linksection
+noalias
+noinline
+nosuspend
+pub
+threadlocal
