@@ -22,11 +22,14 @@
 
 package com.falsepattern.zigbrains.project.toolchain
 
+import com.falsepattern.zigbrains.project.buildscan.zigBuildScan
+import com.falsepattern.zigbrains.project.stdlib.ZigStandardLibraryRootService
 import com.falsepattern.zigbrains.project.steps.ui.BuildToolWindowContext
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.asUUID
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.openapi.application.EDT
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.SerializablePersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
@@ -59,8 +62,10 @@ class ZigToolchainService(private val project: Project): SerializablePersistentS
             updateState {
                 it.copy(toolchain = value?.toString() ?: "")
             }
-            zigCoroutineScope.launch(Dispatchers.EDT) {
+            zigCoroutineScope.launch {
+                project.service<ZigStandardLibraryRootService>().reset(toolchain)
                 BuildToolWindowContext.reload(project, toolchain)
+				project.zigBuildScan.triggerReload()
             }
         }
 
