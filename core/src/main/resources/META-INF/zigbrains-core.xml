@@ -62,6 +62,13 @@
 
         <platform.backend.documentation.targetProvider
                 implementation="com.falsepattern.zigbrains.zig.documentation.ZigTopLevelDocumentationProvider"/>
+
+        <!-- spellchecker -->
+        <spellchecker.support
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.spellchecker.ZigSpellcheckingStrategy"/>
+        <spellchecker.bundledDictionaryProvider
+                implementation="com.falsepattern.zigbrains.zig.spellchecker.ZigBundledDictionaryProvider"/>
     </extensions>
     <!-- endregion Zig -->
 
@@ -173,7 +180,7 @@
         />
 
         <additionalLibraryRootsProvider
-                implementation="com.falsepattern.zigbrains.project.stdlib.ZigLibraryRootProvider"
+                implementation="com.falsepattern.zigbrains.project.stdlib.ZigDependencyLibraryRootProvider"
         />
 
         <!--suppress PluginXmlValidity -->
@@ -187,6 +194,10 @@
         <liveTemplateContext
                 contextId="ZIG"
                 implementation="com.falsepattern.zigbrains.zig.codeInsight.ZigContext"
+        />
+
+        <postStartupActivity
+                implementation="com.falsepattern.zigbrains.project.buildscan.ZigScanBuildActivity"
         />
     </extensions>
 
@@ -203,12 +214,7 @@
     </extensions>
 
     <actions resource-bundle="zigbrains.ActionsBundle">
-        <action
-                id="zigbrains.discover.steps"
-                class="com.falsepattern.zigbrains.project.steps.discovery.ZigDiscoverStepsAction"
-                icon="AllIcons.Actions.Refresh"
-        />
-        <action
+       <action
                 id="zigbrains.file.new"
                 class="com.falsepattern.zigbrains.project.actions.ZigNewFileAction"
                 icon="com.falsepattern.zigbrains.Icons.Zig">
@@ -219,6 +225,12 @@
                 class="com.falsepattern.zigbrains.project.actions.ZigRunFileAction"
                 icon="AllIcons.RunConfigurations.TestState.Run"
                 use-shortcut-of="RunClass"/>
+        <action
+                id="zigbrains.buildscan.sync"
+                class="com.falsepattern.zigbrains.project.buildscan.ZigBuildScanSyncAction"
+                icon="AllIcons.Actions.Refresh">
+            <add-to-group group-id="ExternalSystem.Actions" anchor="after" relative-to-action="ReloadProjectAction"/>
+        </action>
     </actions>
     <!-- endregion Project -->
 

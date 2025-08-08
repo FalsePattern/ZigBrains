@@ -34,8 +34,8 @@ import kotlin.io.path.isRegularFile
 abstract class ZigTool(val toolchain: ZigToolchain) {
     abstract val toolName: String
 
-    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE, ipcProject: Project? = null): Result<ProcessOutput> {
-        val cli = createBaseCommandLine(workingDirectory, *parameters).let { it.getOrElse { return Result.failure(it) } }
+    suspend fun callWithArgs(workingDirectory: Path?, vararg parameters: String, timeoutMillis: Long = Long.MAX_VALUE, ipcProject: Project? = null, env: Map<String, String> = mapOf()): Result<ProcessOutput> {
+        val cli = createBaseCommandLine(workingDirectory, env, *parameters).let { it.getOrElse { return Result.failure(it) } }
         return cli.call(timeoutMillis, ipcProject = ipcProject)
     }
 
@@ -46,10 +46,11 @@ abstract class ZigTool(val toolchain: ZigToolchain) {
 
     private suspend fun createBaseCommandLine(
         workingDirectory: Path?,
-        vararg parameters: String
+		env: Map<String, String>,
+        vararg parameters: String,
     ): Result<GeneralCommandLine> {
         val exe = toolchain.pathToExecutable(toolName)
-        return createCommandLineSafe(workingDirectory, exe, *parameters)
+        return createCommandLineSafe(workingDirectory, exe, *parameters, env = env)
             .mapCatching { toolchain.patchCommandLine(it) }
     }
 }
