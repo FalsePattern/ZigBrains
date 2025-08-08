@@ -31,6 +31,7 @@ interface ZigBuildScanListener {
         MissingToolchain,
         MissingZigExe,
         MissingBuildZig,
-        GeneralError
-    }
+		FailedToCopyHelper,
+		GeneralError
+	}
 }

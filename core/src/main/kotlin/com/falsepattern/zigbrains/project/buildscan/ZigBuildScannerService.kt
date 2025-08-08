@@ -30,6 +30,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -45,7 +46,9 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.net.ServerSocket
+import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.io.path.writeBytes
 
 @Service(Service.Level.PROJECT)
 class ZigBuildScannerService(private val project: Project) {
@@ -90,9 +93,9 @@ class ZigBuildScannerService(private val project: Project) {
 		}
 	}
 
+	@Suppress("UnstableApiUsage")
 	@OptIn(ExperimentalSerializationApi::class, ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-	suspend fun doReload() {
-		// TODO: Add copying the buildscan helper to project dir
+	private tailrec suspend fun doReload() {
 		preReload()
 		// get the zig toolchain for this project
 		val toolchain = ZigToolchainService.getInstance(project).toolchain ?: run {
@@ -100,6 +103,24 @@ class ZigBuildScannerService(private val project: Project) {
 			return
 		}
 		val zig = toolchain.zig
+
+		// get project dir
+		val workDir = project.guessProjectDir()?.toNioPathOrNull() ?: run {
+			errorReload(ErrorType.GeneralError)
+			return
+		}
+
+		// copy the helper
+		writeAction {
+			runCatching {
+				ZigBuildScannerService::class.java.getResourceAsStream("/fileTemplates/internal/builder.zig")?.use {
+					workDir.resolve(HELPER_NAME).writeBytes(it.readAllBytes())
+				}
+			}
+		}.getOrElse { throwable ->
+			errorReload(ErrorType.FailedToCopyHelper, throwable.message)
+			return
+		}
 
 		// start socket server
 		val server = withContext(Dispatchers.IO) { ServerSocket(0) }
@@ -112,8 +133,8 @@ class ZigBuildScannerService(private val project: Project) {
         }
 
 		val result = zig.callWithArgs(
-			project.guessProjectDir()?.toNioPathOrNull(),
-			"build", "--build-file", "builder.zig", "-l",
+			workDir,
+			"build", "--build-file", HELPER_NAME, "-l",
 			timeoutMillis = currentTimeoutSec * 1000L,
 			ipcProject = project,
 			env = mapOf( "ZIGBRAINS_PORT" to "${server.localPort}" )
@@ -131,6 +152,11 @@ class ZigBuildScannerService(private val project: Project) {
             //TODO handle failed reload
         }
 
+		// delete the helper
+		withContext(Dispatchers.IO) {
+			Files.deleteIfExists(workDir.resolve(HELPER_NAME))
+		}
+
 		when {
 			result == null -> {}
 			result.checkSuccess(LOG) -> {
@@ -147,13 +173,14 @@ class ZigBuildScannerService(private val project: Project) {
 			else -> errorReload(ErrorType.GeneralError, result.stderr)
 		}
 
-		if (reloadMutex.withLock {
-				if (reloadScheduled.getAndSet(false)) {
-					return@withLock true
-				}
-				reloading.set(false)
-				return@withLock false
-			}) {
+		val needRepeat = reloadMutex.withLock {
+			if (reloadScheduled.getAndSet(false)) {
+				return@withLock true
+			}
+			reloading.set(false)
+			return@withLock false
+		}
+		if (needRepeat) {
 			doReload()
 		}
 	}
@@ -203,11 +230,10 @@ class ZigBuildScannerService(private val project: Project) {
 
 	companion object {
 		private const val GROUP_DISPLAY_ID = "zigbrains-buildscan"
+		private const val HELPER_NAME = ".zbscanhelper"
+		private const val DEFAULT_TIMEOUT_SEC = 32
+		private val LOG = Logger.getInstance(ZigBuildScannerService::class.java)
 	}
 }
 
 val Project.zigBuildScan get() = service<ZigBuildScannerService>()
-
-private const val DEFAULT_TIMEOUT_SEC = 32
-
-private val LOG = Logger.getInstance(ZigBuildScannerService::class.java)

@@ -51,7 +51,7 @@ const Storage = struct {
 	projects: std.ArrayList(Project),
 
 	const Project = struct {
-  		path: []const u8,
+		path: []const u8,
 		steps: []const Serialization.Step,
 		modules: []const Storage.Module,
 		dependencies: []const Dependency,
@@ -69,7 +69,7 @@ const Storage = struct {
 	};
 };
 
-const post_writergate = @hasDecl(std, "Io");
+const postWritergate = @hasDecl( std, "Io" );
 
 pub fn build( b: *std.Build ) !void {
 	// run the project's build.zig
@@ -90,7 +90,7 @@ pub fn build( b: *std.Build ) !void {
 	const port = try std.fmt.parseInt( u16, env.get( "ZIGBRAINS_PORT" ) orelse return error.NoPortGiven, 10 );
 	std.log.info( "[ZigBrains:BuildScan] IDE is listening on port {}", .{ port } );
 
-	// connect to the port
+	// connect to the IDE
 	var stream = try std.net.tcpConnectToAddress(.{ .in = try std.net.Ip4Address.resolveIp( "127.0.0.1", port ) });
 	defer stream.close();
 
@@ -158,11 +158,11 @@ pub fn build( b: *std.Build ) !void {
 	}
 
 	// serialize
-	if (post_writergate) {
-		var writer_buf: [1024]u8 = undefined;
-		var stream_writer = stream.writer(&writer_buf);
-		try std.json.Stringify.value(projects, .{ .whitespace = .indent_4 }, &stream_writer.interface);
-		try stream_writer.interface.flush();
+	if ( postWritergate ) {
+		var writerBuf: [1024]u8 = undefined;
+		var streamWriter = stream.writer( &writerBuf );
+		try std.json.Stringify.value( projects, .{ .whitespace = .indent_4 }, &streamWriter.interface );
+		try streamWriter.interface.flush();
 	} else {
 		try std.json.stringify( projects, .{ .whitespace = .indent_4 }, stream.writer() );
 	}
