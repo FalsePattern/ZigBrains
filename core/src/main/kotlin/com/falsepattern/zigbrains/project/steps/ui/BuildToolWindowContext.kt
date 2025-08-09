@@ -223,10 +223,12 @@ class BuildToolWindowContext(private val project: Project): Disposable {
             }
         }
 
-		fun reload(project: Project, toolchain: ZigToolchain?) {
-			ToolWindowManager.getInstance(project)
-				.getToolWindow(BUILD_TOOL_WINDOW_ID)
-				?.isAvailable = toolchain != null
+		suspend fun reload(project: Project, toolchain: ZigToolchain?) {
+            withEDTContext(ModalityState.any()) {
+                ToolWindowManager.getInstance(project)
+                    .getToolWindow(BUILD_TOOL_WINDOW_ID)
+                    ?.isAvailable = toolchain != null
+            }
 		}
     }
 
