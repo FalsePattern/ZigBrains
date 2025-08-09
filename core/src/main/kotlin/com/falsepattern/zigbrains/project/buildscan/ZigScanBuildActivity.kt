@@ -23,8 +23,9 @@ package com.falsepattern.zigbrains.project.buildscan
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 
-class ScanBuildActivity : ProjectActivity {
+class ZigScanBuildActivity : ProjectActivity {
 	override suspend fun execute(project: Project) {
-		project.zigBuildScan.triggerReload()
+		// initial loads may use the cached state, as long `build.zig` and `build.zig.zon` didn't change
+		project.zigBuildScan.triggerReload(true)
 	}
 }

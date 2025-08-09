@@ -190,7 +190,7 @@
         />
 
         <postStartupActivity
-                implementation="com.falsepattern.zigbrains.project.buildscan.ScanBuildActivity"
+                implementation="com.falsepattern.zigbrains.project.buildscan.ZigScanBuildActivity"
         />
     </extensions>
 

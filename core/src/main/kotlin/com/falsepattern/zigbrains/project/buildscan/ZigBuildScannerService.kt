@@ -25,19 +25,20 @@ import com.falsepattern.zigbrains.project.buildscan.ZigBuildScanListener.ErrorTy
 import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
+import com.intellij.ide.trustedProjects.TrustedProjects
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.writeAction
-import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.service
+import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.MessageDialogBuilder
+import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.toNioPathOrNull
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -46,12 +47,14 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.net.ServerSocket
-import java.nio.file.Files
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.io.path.writeBytes
 
 @Service(Service.Level.PROJECT)
-class ZigBuildScannerService(private val project: Project) {
+@State(
+	name = "BuildScanner",
+	storages = [Storage("zigbrains.xml")]
+)
+class ZigBuildScannerService(private val project: Project): SerializablePersistentStateComponent<ZigBuildScannerService.State>(State()) {
 	private val reloading = AtomicBoolean(false)
 	private val reloadScheduled = AtomicBoolean(false)
 	private val reloadMutex = Mutex()
@@ -59,9 +62,19 @@ class ZigBuildScannerService(private val project: Project) {
 	private val listeners = ArrayList<ZigBuildScanListener>()
 	private val listenerMutex = Mutex()
 
-	private val projects: MutableList<Serialization.Project> = ArrayList()
+	var projects: List<Serialization.Project>
+		get() = this.state.projects
+		private set(value) {
+			updateState { it.copy(projects = value) }
+		}
+	var enabled: Boolean
+		get() = this.state.enabled
+		set(value) {
+			updateState { it.copy(enabled = value) }
+		}
 
 	init {
+		// an initial listener to notify about scan errors
 		this.listeners += object : ZigBuildScanListener {
 			override suspend fun errorReload(type: ErrorType, details: String?) {
 				Notifications.Bus.notify(Notification(
@@ -70,12 +83,6 @@ class ZigBuildScannerService(private val project: Project) {
 					"Output:\n${details}",
 					NotificationType.ERROR
 				))
-			}
-
-			override suspend fun postReload(projects: List<Serialization.Project>) {
-				withEDTContext(ModalityState.defaultModalityState()) {
-					MessageDialogBuilder.okCancel( "notice", "Output:\n${projects}" ).ask( project )
-				}
 			}
 		}
 	}
@@ -95,7 +102,12 @@ class ZigBuildScannerService(private val project: Project) {
 
 	@Suppress("UnstableApiUsage")
 	@OptIn(ExperimentalSerializationApi::class, ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-	private tailrec suspend fun doReload() {
+	private tailrec suspend fun doReload(allowCache: Boolean) {
+		// be sure we're enabled and running in a trusted environment
+		if (!enabled || !TrustedProjects.isProjectTrusted(project) || project.isDefault) {
+			return
+		}
+
 		preReload()
 		// get the zig toolchain for this project
 		val toolchain = ZigToolchainService.getInstance(project).toolchain ?: run {
@@ -105,7 +117,7 @@ class ZigBuildScannerService(private val project: Project) {
 		val zig = toolchain.zig
 
 		// get project dir
-		val workDir = project.guessProjectDir()?.toNioPathOrNull() ?: run {
+		val workDir = project.guessProjectDir() ?: run {
 			errorReload(ErrorType.GeneralError)
 			return
 		}
@@ -114,7 +126,9 @@ class ZigBuildScannerService(private val project: Project) {
 		writeAction {
 			runCatching {
 				ZigBuildScannerService::class.java.getResourceAsStream("/fileTemplates/internal/builder.zig")?.use {
-					workDir.resolve(HELPER_NAME).writeBytes(it.readAllBytes())
+					val file = workDir.createChildData(this, HELPER_NAME)
+					file.charset = Charsets.UTF_8
+					file.setBinaryContent(it.readAllBytes())
 				}
 			}
 		}.getOrElse { throwable ->
@@ -133,7 +147,7 @@ class ZigBuildScannerService(private val project: Project) {
         }
 
 		val result = zig.callWithArgs(
-			workDir,
+			workDir.toNioPathOrNull(),
 			"build", "--build-file", HELPER_NAME, "-l",
 			timeoutMillis = currentTimeoutSec * 1000L,
 			ipcProject = project,
@@ -144,17 +158,15 @@ class ZigBuildScannerService(private val project: Project) {
 		}
 
         withTimeoutOrNull(2000) {
-            val newProjects = projectsFuture.await()
-            projects.clear()
-            projects.addAll(newProjects)
+            projects = projectsFuture.await()
         } ?: run {
             projectsFuture.cancel()
-            //TODO handle failed reload
+            // TODO: handle failed reload
         }
 
 		// delete the helper
-		withContext(Dispatchers.IO) {
-			Files.deleteIfExists(workDir.resolve(HELPER_NAME))
+		writeAction {
+			workDir.findFile(HELPER_NAME)?.delete(this)
 		}
 
 		when {
@@ -181,11 +193,11 @@ class ZigBuildScannerService(private val project: Project) {
 			return@withLock false
 		}
 		if (needRepeat) {
-			doReload()
+			doReload(allowCache)
 		}
 	}
 
-	fun triggerReload() {
+	fun triggerReload(allowCache: Boolean = false) {
 		project.zigCoroutineScope.launch {
 			reloadMutex.withLock {
 				if (reloading.getAndSet(true)) {
@@ -193,15 +205,15 @@ class ZigBuildScannerService(private val project: Project) {
 					return@launch
 				}
 			}
-			dispatchReload()
+			dispatchReload(allowCache)
 		}
 	}
 
-	private suspend fun dispatchReload() {
+	private suspend fun dispatchReload(allowCache: Boolean) {
 		withEDTContext(ModalityState.defaultModalityState()) {
 			FileDocumentManager.getInstance().saveAllDocuments()
 		}
-		doReload()
+		doReload(allowCache)
 	}
 
 	private suspend fun preReload() {
@@ -234,6 +246,11 @@ class ZigBuildScannerService(private val project: Project) {
 		private const val DEFAULT_TIMEOUT_SEC = 32
 		private val LOG = Logger.getInstance(ZigBuildScannerService::class.java)
 	}
+
+	data class State(
+		@JvmField val enabled: Boolean = true,
+		@JvmField val projects: List<Serialization.Project> = listOf()
+	)
 }
 
 val Project.zigBuildScan get() = service<ZigBuildScannerService>()
