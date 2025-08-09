@@ -62,6 +62,13 @@
 
         <platform.backend.documentation.targetProvider
                 implementation="com.falsepattern.zigbrains.zig.documentation.ZigTopLevelDocumentationProvider"/>
+
+        <!-- spellchecker -->
+        <spellchecker.support
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.spellchecker.ZigSpellcheckingStrategy"/>
+        <spellchecker.bundledDictionaryProvider
+                implementation="com.falsepattern.zigbrains.zig.spellchecker.ZigBundledDictionaryProvider"/>
     </extensions>
     <!-- endregion Zig -->
 

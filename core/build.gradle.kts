@@ -14,6 +14,7 @@ val serializationVersion: String by project
 dependencies {
     intellijPlatform {
         create(IntelliJPlatformType.IntellijIdeaCommunity, ideaCommunityVersion, useInstaller = useInstaller)
+		bundledModule("intellij.spellchecker")
     }
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$serializationVersion") {
         isTransitive = false
