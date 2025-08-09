@@ -210,12 +210,7 @@
     </extensions>
 
     <actions resource-bundle="zigbrains.ActionsBundle">
-        <action
-                id="zigbrains.discover.steps"
-                class="com.falsepattern.zigbrains.project.steps.discovery.ZigDiscoverStepsAction"
-                icon="AllIcons.Actions.Refresh"
-        />
-        <action
+       <action
                 id="zigbrains.file.new"
                 class="com.falsepattern.zigbrains.project.actions.ZigNewFileAction"
                 icon="com.falsepattern.zigbrains.Icons.Zig">

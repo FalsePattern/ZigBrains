@@ -23,11 +23,12 @@
 package com.falsepattern.zigbrains.project.steps.ui
 
 import com.falsepattern.zigbrains.ZigBrainsBundle
+import com.falsepattern.zigbrains.project.buildscan.Serialization
+import com.falsepattern.zigbrains.project.buildscan.ZigBuildScanListener
+import com.falsepattern.zigbrains.project.buildscan.zigBuildScan
 import com.falsepattern.zigbrains.project.execution.build.ZigConfigTypeBuild
 import com.falsepattern.zigbrains.project.execution.build.ZigExecConfigBuild
 import com.falsepattern.zigbrains.project.execution.firstConfigFactory
-import com.falsepattern.zigbrains.project.steps.discovery.ZigStepDiscoveryListener
-import com.falsepattern.zigbrains.project.steps.discovery.zigStepDiscovery
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
 import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.ipc.IPCUtil
@@ -86,10 +87,11 @@ class BuildToolWindowContext(private val project: Project): Disposable {
     private val stepsBox = TreeBox()
     private val buildBox = if (IPCUtil.haveIPC) TreeBox() else null
     private var live = AtomicBoolean(true)
+
     init {
         viewPanel.add(JBLabel(ZigBrainsBundle.message("build.tool.window.tree.steps.label")))
         viewPanel.add(stepsBox.panel)
-        stepsBox.panel.setNotScanned()
+        stepsBox.panel.setRunningBuildScan()
 
         stepsBox.tree.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
@@ -146,7 +148,7 @@ class BuildToolWindowContext(private val project: Project): Disposable {
                                 }
                             }
                             val newNodes = ArrayList<MutableTreeNode>(allNodes)
-                            newNodes.removeAll(existingNodes)
+                            newNodes.removeAll(existingNodes.toSet())
                             removedNodes.forEach { buildBox.root.remove(it) }
                             newNodes.forEach { buildBox.root.add(it) }
                             if (removedNodes.isNotEmpty() || newNodes.isNotEmpty()) {
@@ -180,7 +182,7 @@ class BuildToolWindowContext(private val project: Project): Disposable {
         c.anchor = GridBagConstraints.NORTHWEST
         c.weightx = 1.0
         c.weighty = 0.0
-        val toolbar = ActionManager.getInstance().createActionToolbar("ZigToolbar", DefaultActionGroup(ActionManager.getInstance().getAction("zigbrains.discover.steps")), true)
+        val toolbar = ActionManager.getInstance().createActionToolbar("ZigToolbar", DefaultActionGroup(ActionManager.getInstance().getAction("zigbrains.buildscan.sync")), true)
         toolbar.targetComponent = null
         body.add(toolbar.component, c)
         c.gridwidth = 1
@@ -204,7 +206,7 @@ class BuildToolWindowContext(private val project: Project): Disposable {
         suspend fun create(project: Project, window: ToolWindow) {
             withEDTContext(ModalityState.any()) {
                 val context = BuildToolWindowContext(project)
-                Disposer.register(context, project.zigStepDiscovery.register(context.BuildReloadListener()))
+                Disposer.register(context, project.zigBuildScan.register(context.BuildReloadListener()))
                 Disposer.register(window.disposable, context)
                 window.contentManager.addContent(context.createContentPanel())
             }
@@ -228,20 +230,20 @@ class BuildToolWindowContext(private val project: Project): Disposable {
 		}
     }
 
-    inner class BuildReloadListener: ZigStepDiscoveryListener {
+    inner class BuildReloadListener: ZigBuildScanListener {
         override suspend fun preReload() {
-            stepsBox.panel.setRunningZigBuild()
+            stepsBox.panel.setRunningBuildScan()
         }
 
-        override suspend fun postReload(steps: List<Pair<String, String?>>) {
+        override suspend fun postReload(projects: List<Serialization.Project>) {
             stepsBox.root.removeAllChildren()
-            for ((task, description) in steps) {
-                val icon = when(task) {
+            for (step in projects[0].steps) {
+                val icon = when(step.kind) {
                     "install" -> AllIcons.Actions.Install
                     "uninstall" -> AllIcons.Actions.Uninstall
                     else -> AllIcons.RunConfigurations.TestState.Run
                 }
-                stepsBox.root.add(DefaultMutableTreeNode(StepNodeDescriptor(project, task, icon, description)))
+                stepsBox.root.add(DefaultMutableTreeNode(StepNodeDescriptor(project, step.name, icon, step.description)))
             }
             withEDTContext(ModalityState.any()) {
                 stepsBox.model.reload(stepsBox.root)
@@ -249,14 +251,15 @@ class BuildToolWindowContext(private val project: Project): Disposable {
             }
         }
 
-        override suspend fun errorReload(type: ZigStepDiscoveryListener.ErrorType, details: String?) {
+        override suspend fun errorReload(type: ZigBuildScanListener.ErrorType, details: String?) {
             withEDTContext(ModalityState.any()) {
                 stepsBox.panel.setViewportError(ZigBrainsBundle.message(when(type) {
-                    ZigStepDiscoveryListener.ErrorType.MissingToolchain -> "build.tool.window.status.error.missing-toolchain"
-                    ZigStepDiscoveryListener.ErrorType.MissingZigExe -> "build.tool.window.status.error.missing-zig-exe"
-                    ZigStepDiscoveryListener.ErrorType.MissingBuildZig -> "build.tool.window.status.error.missing-build-zig"
-                    ZigStepDiscoveryListener.ErrorType.GeneralError -> "build.tool.window.status.error.general"
-                }), details)
+                    ZigBuildScanListener.ErrorType.MissingToolchain -> "build.tool.window.status.error.missing-toolchain"
+                    ZigBuildScanListener.ErrorType.MissingZigExe -> "build.tool.window.status.error.missing-zig-exe"
+                    ZigBuildScanListener.ErrorType.MissingBuildZig -> "build.tool.window.status.error.missing-build-zig"
+                    ZigBuildScanListener.ErrorType.GeneralError -> "build.tool.window.status.error.general"
+					ZigBuildScanListener.ErrorType.FailedToCopyHelper -> "build.tool.window.status.error.failed-copy-helper"
+				}), details)
             }
         }
 
@@ -274,12 +277,8 @@ private fun JPanel.setViewportBody(component: Component) {
     repaint()
 }
 
-private fun JPanel.setRunningZigBuild() {
+private fun JPanel.setRunningBuildScan() {
     setViewportBody(JBLabel(ZigBrainsBundle.message("build.tool.window.status.loading"), AnimatedIcon.Default(), SwingConstants.CENTER))
-}
-
-private fun JPanel.setNotScanned() {
-    setViewportBody(JBLabel(ZigBrainsBundle.message("build.tool.window.status.not-scanned"), AllIcons.General.Information, SwingConstants.CENTER))
 }
 
 private fun JPanel.setNoBuilds() {

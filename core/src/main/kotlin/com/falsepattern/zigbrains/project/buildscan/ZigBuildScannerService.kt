@@ -100,6 +100,10 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 	suspend fun register(listener: ZigBuildScanListener): Disposable {
 		return listenerMutex.withLock {
 			listeners.add(listener)
+			// HACK: if we already scanned, but the listener is registered too late, invoke its postReload
+			if (this.projects.isNotEmpty()) {
+				listener.postReload(this.projects)
+			}
 			Disposable {
 				zigCoroutineScope.launch {
 					listenerMutex.withLock {
