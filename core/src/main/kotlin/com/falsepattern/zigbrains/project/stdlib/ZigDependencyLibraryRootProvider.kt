@@ -51,8 +51,12 @@ class ZigDependencyLibraryRootProvider: AdditionalLibraryRootsProvider() {
 					.skip(1)  // first is always the root project
 					.map { it.path.toNioPathOrNull()!!.toVirtualFileUrl(urlManager).virtualFile!! }
 					.map {
-						val (name, version, _) = it.name.split("-", limit = 3)
-						ZigDependencyLibrary("$name $version", it)
+						if (it.name.startsWith("N-V-__")) {
+							ZigDependencyLibrary("[unnamed package]", it)
+						} else {
+							val (name, version, _) = it.name.split("-", limit = 3)
+							ZigDependencyLibrary("$name $version", it)
+						}
 					}
 					.toList()
 			)
