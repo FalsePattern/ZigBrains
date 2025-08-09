@@ -40,7 +40,6 @@ import com.intellij.openapi.project.RootsChangeRescanningInfo
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.roots.ex.ProjectRootManagerEx
 import com.intellij.openapi.util.EmptyRunnable
-import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.toNioPathOrNull
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -50,6 +49,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.net.ServerSocket
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.io.path.createFile
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.writeBytes
 
 @Service(Service.Level.PROJECT)
 @State(
@@ -115,7 +117,6 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 		}
 	}
 
-	@Suppress("UnstableApiUsage")
 	@OptIn(ExperimentalSerializationApi::class, ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
 	private suspend fun doReload(allowCache: Boolean): List<Serialization.Project> {
 		// be sure we're enabled and running in a trusted environment
@@ -132,19 +133,18 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 		val zig = toolchain.zig
 
 		// get project dir
-		val workDir = project.guessProjectDir() ?: run {
+		val workDir = project.guessProjectDir()?.toNioPathOrNull() ?: run {
 			errorReload(ErrorType.GeneralError)
 			return emptyList()
 		}
 
+		val helperPath = workDir.resolve(HELPER_NAME)
+
 		// copy the helper
-		writeAction {
-			runCatching {
-				ZigBuildScannerService::class.java.getResourceAsStream("/fileTemplates/internal/builder.zig")?.use {
-					val file = workDir.createChildData(this, HELPER_NAME)
-					file.charset = Charsets.UTF_8
-					file.setBinaryContent(it.readAllBytes())
-				}
+		runCatching {
+			ZigBuildScannerService::class.java.getResourceAsStream("/fileTemplates/internal/builder.zig")?.use {
+				val file = helperPath.createFile()
+				file.writeBytes(it.readAllBytes())
 			}
 		}.getOrElse { throwable ->
 			errorReload(ErrorType.FailedToCopyHelper, throwable.message)
@@ -164,7 +164,7 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
         }
 
 		val result = zig.callWithArgs(
-			workDir.toNioPathOrNull(),
+			workDir,
 			"build", "--build-file", HELPER_NAME, "-l",
 			timeoutMillis = currentTimeoutSec * 1000L,
 			ipcProject = project,
@@ -186,9 +186,7 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
         }
 
 		// delete the helper
-		writeAction {
-			workDir.findFile(HELPER_NAME)?.delete(this)
-		}
+		helperPath.deleteIfExists()
 
 		when {
 			result == null -> {}
