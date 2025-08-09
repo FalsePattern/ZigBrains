@@ -86,14 +86,14 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 					NotificationType.ERROR
 				))
 			}
+		}
+	}
 
-			override suspend fun postReload(projects: List<Serialization.Project>) {
-				@Suppress("UnstableApiUsage")
-				writeAction {
-					ProjectRootManagerEx.getInstanceEx(project)
-						.makeRootsChange(EmptyRunnable.getInstance(), RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED)
-				}
-			}
+	private suspend fun reloadProjectRoots() {
+		@Suppress("UnstableApiUsage")
+		writeAction {
+			ProjectRootManagerEx.getInstanceEx(project)
+				.makeRootsChange(EmptyRunnable.getInstance(), RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED)
 		}
 	}
 
@@ -116,24 +116,24 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 
 	@Suppress("UnstableApiUsage")
 	@OptIn(ExperimentalSerializationApi::class, ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-	private tailrec suspend fun doReload(allowCache: Boolean) {
+	private suspend fun doReload(allowCache: Boolean): List<Serialization.Project> {
 		// be sure we're enabled and running in a trusted environment
 		if (!enabled || !TrustedProjects.isProjectTrusted(project) || project.isDefault) {
-			return
+			return emptyList()
 		}
 
 		preReload()
 		// get the zig toolchain for this project
 		val toolchain = ZigToolchainService.getInstance(project).toolchain ?: run {
 			errorReload(ErrorType.MissingToolchain)
-			return
+			return emptyList()
 		}
 		val zig = toolchain.zig
 
 		// get project dir
 		val workDir = project.guessProjectDir() ?: run {
 			errorReload(ErrorType.GeneralError)
-			return
+			return emptyList()
 		}
 
 		// copy the helper
@@ -147,17 +147,19 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 			}
 		}.getOrElse { throwable ->
 			errorReload(ErrorType.FailedToCopyHelper, throwable.message)
-			return
+			return emptyList()
 		}
 
 		// start socket server
 		val server = withContext(Dispatchers.IO) { ServerSocket(0) }
         val projectsFuture = zigCoroutineScope.async(newSingleThreadContext("ZigBrains network thread")) {
-            runInterruptible {
-                server.accept().use {
-					Json.decodeFromStream<List<Serialization.Project>>( it.getInputStream() )
+			runCatching {
+				runInterruptible {
+					server.accept().use {
+						Json.decodeFromStream<List<Serialization.Project>>( it.getInputStream() )
+					}
 				}
-            }
+			}
         }
 
 		val result = zig.callWithArgs(
@@ -171,11 +173,15 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 			null
 		}
 
-        withTimeoutOrNull(2000) {
-            projects = projectsFuture.await()
+        val projects = withTimeoutOrNull(2000) {
+            projectsFuture.await().getOrElse { throwable ->
+				errorReload(ErrorType.GeneralError, throwable.message)
+				emptyList()
+			}
         } ?: run {
             projectsFuture.cancel()
             // TODO: handle failed reload
+			emptyList()
         }
 
 		// delete the helper
@@ -198,17 +204,7 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 			}
 			else -> errorReload(ErrorType.GeneralError, result.stderr)
 		}
-
-		val needRepeat = reloadMutex.withLock {
-			if (reloadScheduled.getAndSet(false)) {
-				return@withLock true
-			}
-			reloading.set(false)
-			return@withLock false
-		}
-		if (needRepeat) {
-			doReload(allowCache)
-		}
+		return projects
 	}
 
 	fun triggerReload(allowCache: Boolean = false) {
@@ -219,15 +215,31 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 					return@launch
 				}
 			}
-			dispatchReload(allowCache)
+			try {
+				dispatchReload(allowCache)
+			} finally {
+				reloadProjectRoots()
+			}
 		}
 	}
 
-	private suspend fun dispatchReload(allowCache: Boolean) {
+	private tailrec suspend fun dispatchReload(allowCache: Boolean) {
 		withEDTContext(ModalityState.defaultModalityState()) {
-			FileDocumentManager.getInstance().saveAllDocuments()
+			writeAction {
+				FileDocumentManager.getInstance().saveAllDocuments()
+			}
 		}
-		doReload(allowCache)
+		projects = doReload(allowCache)
+		val needRepeat = reloadMutex.withLock {
+			if (reloadScheduled.getAndSet(false)) {
+				return@withLock true
+			}
+			reloading.set(false)
+			return@withLock false
+		}
+		if (needRepeat) {
+			dispatchReload(allowCache)
+		}
 	}
 
 	private suspend fun preReload() {
