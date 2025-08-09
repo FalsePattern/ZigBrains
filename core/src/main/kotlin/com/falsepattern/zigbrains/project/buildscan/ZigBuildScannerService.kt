@@ -36,8 +36,10 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.RootsChangeRescanningInfo
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.openapi.ui.MessageDialogBuilder
+import com.intellij.openapi.roots.ex.ProjectRootManagerEx
+import com.intellij.openapi.util.EmptyRunnable
 import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.toNioPathOrNull
 import kotlinx.coroutines.*
@@ -83,6 +85,14 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 					"Output:\n${details}",
 					NotificationType.ERROR
 				))
+			}
+
+			override suspend fun postReload(projects: List<Serialization.Project>) {
+				@Suppress("UnstableApiUsage")
+				writeAction {
+					ProjectRootManagerEx.getInstanceEx(project)
+						.makeRootsChange(EmptyRunnable.getInstance(), RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED)
+				}
 			}
 		}
 	}

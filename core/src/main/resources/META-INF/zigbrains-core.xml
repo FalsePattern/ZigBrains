@@ -175,6 +175,9 @@
         <additionalLibraryRootsProvider
                 implementation="com.falsepattern.zigbrains.project.stdlib.ZigLibraryRootProvider"
         />
+        <additionalLibraryRootsProvider
+                implementation="com.falsepattern.zigbrains.project.stdlib.ZigDependencyLibraryRootProvider"
+        />
 
         <!--suppress PluginXmlValidity -->
         <toolWindow

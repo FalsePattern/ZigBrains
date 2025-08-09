@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.project.toolchain
 
+import com.falsepattern.zigbrains.project.buildscan.zigBuildScan
 import com.falsepattern.zigbrains.project.stdlib.ZigSyntheticLibrary
 import com.falsepattern.zigbrains.project.steps.ui.BuildToolWindowContext
 import com.falsepattern.zigbrains.project.toolchain.base.ZigToolchain
@@ -63,6 +64,7 @@ class ZigToolchainService(private val project: Project): SerializablePersistentS
             zigCoroutineScope.launch(Dispatchers.EDT) {
                 ZigSyntheticLibrary.reload(project, toolchain)
                 BuildToolWindowContext.reload(project, toolchain)
+				project.zigBuildScan.triggerReload()
             }
         }
 
