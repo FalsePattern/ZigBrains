@@ -24,6 +24,7 @@ package com.falsepattern.zigbrains.project.stdlib
 import com.falsepattern.zigbrains.Icons
 import com.falsepattern.zigbrains.project.buildscan.zigBuildScan
 import com.intellij.navigation.ItemPresentation
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.AdditionalLibraryRootsProvider
 import com.intellij.openapi.roots.SyntheticLibrary
@@ -36,20 +37,26 @@ import javax.swing.Icon
 
 class ZigDependencyLibraryRootProvider: AdditionalLibraryRootsProvider() {
 	override fun getAdditionalProjectLibraries(project: Project): Collection<SyntheticLibrary> {
-		if (!project.zigBuildScan.enabled) {
-			return listOf()
-		}
 		val urlManager = WorkspaceModel.getInstance(project).getVirtualFileUrlManager()
-		val libraries = project.zigBuildScan
-			.projects
-			.stream()
-			.skip(1)  // first is always the root project
-			.map { it.path.toNioPathOrNull()!!.toVirtualFileUrl(urlManager).virtualFile!! }
-			.map {
-				val (name, version, _) = it.name.split("-", limit = 3)
-				ZigDependencyLibrary("$name $version", it)
-			}
-			.toList()
+		val libraries = ArrayList<SyntheticLibrary>()
+		val std = project.service<ZigStandardLibraryRootService>()
+		std.root?.let { root ->
+			libraries.add(ZigDependencyLibrary(std.name, root))
+		}
+		if (project.zigBuildScan.enabled) {
+			libraries.addAll(
+				project.zigBuildScan
+					.projects
+					.stream()
+					.skip(1)  // first is always the root project
+					.map { it.path.toNioPathOrNull()!!.toVirtualFileUrl(urlManager).virtualFile!! }
+					.map {
+						val (name, version, _) = it.name.split("-", limit = 3)
+						ZigDependencyLibrary("$name $version", it)
+					}
+					.toList()
+			)
+		}
 
 		return libraries
 	}
