@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Project
+  - Top level build steps are now detected via a helper script instead of parsing `zig build -l` text output (by ENDERZOMBI102)
+
+### Added
+
+- Project
+  - External library detection for zig dependencies (by ENDERZOMBI102)
+
+- Zig
+  - Spell checking in multiline strings (by ENDERZOMBI102)
+
+### Fixed
+
+- Project
+  - Toolchain detection now works on IntelliJ 2024.1 (by ENDERZOMBI102)
+
 ## [26.3.2] - 2025-08-02
 
 ### Fixed
