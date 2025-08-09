@@ -256,7 +256,7 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 
 	companion object {
 		private const val GROUP_DISPLAY_ID = "zigbrains-buildscan"
-		private const val HELPER_NAME = ".zbscanhelper"
+		private const val HELPER_NAME = ".zbscanhelper.zig"
 		private const val DEFAULT_TIMEOUT_SEC = 32
 		private val LOG = Logger.getInstance(ZigBuildScannerService::class.java)
 	}
