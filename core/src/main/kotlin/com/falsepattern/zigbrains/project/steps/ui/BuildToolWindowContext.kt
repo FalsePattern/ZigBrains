@@ -237,13 +237,15 @@ class BuildToolWindowContext(private val project: Project): Disposable {
 
         override suspend fun postReload(projects: List<Serialization.Project>) {
             stepsBox.root.removeAllChildren()
-            for (step in projects[0].steps) {
-                val icon = when(step.kind) {
-                    "install" -> AllIcons.Actions.Install
-                    "uninstall" -> AllIcons.Actions.Uninstall
-                    else -> AllIcons.RunConfigurations.TestState.Run
+            projects.firstOrNull()?.let { proj ->
+                for (step in proj.steps) {
+                    val icon = when(step.kind) {
+                        "install" -> AllIcons.Actions.Install
+                        "uninstall" -> AllIcons.Actions.Uninstall
+                        else -> AllIcons.RunConfigurations.TestState.Run
+                    }
+                    stepsBox.root.add(DefaultMutableTreeNode(StepNodeDescriptor(project, step.name, icon, step.description)))
                 }
-                stepsBox.root.add(DefaultMutableTreeNode(StepNodeDescriptor(project, step.name, icon, step.description)))
             }
             withEDTContext(ModalityState.any()) {
                 stepsBox.model.reload(stepsBox.root)

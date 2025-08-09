@@ -101,8 +101,9 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 		return listenerMutex.withLock {
 			listeners.add(listener)
 			// HACK: if we already scanned, but the listener is registered too late, invoke its postReload
-			if (this.projects.isNotEmpty()) {
-				listener.postReload(this.projects)
+			val projects = this.projects
+			if (projects.isNotEmpty()) {
+				listener.postReload(projects)
 			}
 			Disposable {
 				zigCoroutineScope.launch {
@@ -193,7 +194,7 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 			result == null -> {}
 			result.checkSuccess(LOG) -> {
 				currentTimeoutSec = DEFAULT_TIMEOUT_SEC
-				postReload()
+				postReload(projects)
 			}
 			result.isTimeout -> {
 				timeoutReload(currentTimeoutSec)
@@ -248,7 +249,7 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 		}
 	}
 
-	private suspend fun postReload() {
+	private suspend fun postReload(projects: List<Serialization.Project>) {
 		listenerMutex.withLock {
 			listeners.forEach { it.postReload(projects) }
 		}
