@@ -48,10 +48,11 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import java.net.ServerSocket
+import java.nio.file.StandardOpenOption
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.io.path.createFile
 import kotlin.io.path.deleteIfExists
-import kotlin.io.path.writeBytes
+import kotlin.io.path.outputStream
 
 @Service(Service.Level.PROJECT)
 @State(
@@ -76,20 +77,6 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 		set(value) {
 			updateState { it.copy(enabled = value) }
 		}
-
-	init {
-		// an initial listener to notify about scan errors
-		this.listeners += object : ZigBuildScanListener {
-			override suspend fun errorReload(type: ErrorType, details: String?) {
-				Notifications.Bus.notify(Notification(
-					GROUP_DISPLAY_ID,
-					"Failed to run build scan",
-					"Output:\n${details}",
-					NotificationType.ERROR
-				))
-			}
-		}
-	}
 
 	private suspend fun reloadProjectRoots() {
 		@Suppress("UnstableApiUsage")
@@ -143,47 +130,51 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 		// copy the helper
 		runCatching {
 			ZigBuildScannerService::class.java.getResourceAsStream("/fileTemplates/internal/builder.zig")?.use {
-				val file = helperPath.createFile()
-				file.writeBytes(it.readAllBytes())
+				it.transferTo(helperPath.outputStream(StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE))
 			}
 		}.getOrElse { throwable ->
 			errorReload(ErrorType.FailedToCopyHelper, throwable.message)
 			return emptyList()
 		}
 
-		// start socket server
-		val server = withContext(Dispatchers.IO) { ServerSocket(0) }
-        val projectsFuture = zigCoroutineScope.async(newSingleThreadContext("ZigBrains network thread")) {
-			runCatching {
-				runInterruptible {
-					server.accept().use {
-						Json.decodeFromStream<List<Serialization.Project>>( it.getInputStream() )
+		//Virtual threads make NIO non-blocking
+		val (result, projects) = Executors.newVirtualThreadPerTaskExecutor().use { executor ->
+			val dispatcher = executor.asCoroutineDispatcher()
+			// start socket server
+			val server = withContext(dispatcher) { ServerSocket(0) }
+			val projectsFuture = project.zigCoroutineScope.async(dispatcher) {
+				runCatching {
+					runInterruptible {
+						server.accept().use {
+							Json.decodeFromStream<List<Serialization.Project>>( it.getInputStream() )
+						}
 					}
 				}
 			}
-        }
 
-		val result = zig.callWithArgs(
-			workDir,
-			"build", "--build-file", HELPER_NAME, "-l",
-			timeoutMillis = currentTimeoutSec * 1000L,
-			ipcProject = project,
-			env = mapOf( "ZIGBRAINS_PORT" to "${server.localPort}" )
-		).getOrElse { throwable ->
-			errorReload(ErrorType.MissingZigExe, throwable.message)
-			null
-		}
+			val result = zig.callWithArgs(
+				workDir,
+				"build", "--build-file", HELPER_NAME, "-l",
+				timeoutMillis = currentTimeoutSec * 1000L,
+				ipcProject = project,
+				env = mapOf( "ZIGBRAINS_PORT" to "${server.localPort}" )
+			).getOrElse { throwable ->
+				errorReload(ErrorType.MissingZigExe, throwable.message)
+				null
+			}
 
-        val projects = withTimeoutOrNull(2000) {
-            projectsFuture.await().getOrElse { throwable ->
-				errorReload(ErrorType.GeneralError, throwable.message)
+			val projects = withTimeoutOrNull(2000) {
+				projectsFuture.await().getOrElse { throwable ->
+					errorReload(ErrorType.GeneralError, throwable.message)
+					emptyList()
+				}
+			} ?: run {
+				projectsFuture.cancel()
+				errorReload(ErrorType.GeneralError, "Build scan data transfer socket timed out")
 				emptyList()
 			}
-        } ?: run {
-            projectsFuture.cancel()
-            // TODO: handle failed reload
-			emptyList()
-        }
+			result to projects
+		}
 
 		// delete the helper
 		helperPath.deleteIfExists()
