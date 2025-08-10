@@ -25,6 +25,7 @@ import com.falsepattern.zigbrains.zig.ZigLanguage
 import com.falsepattern.zigbrains.zig.psi.ZigStringLiteral
 import com.falsepattern.zigbrains.zon.ZonLanguage
 import com.falsepattern.zigbrains.zon.psi.ZonStringLiteral
+import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.spellchecker.inspections.PlainTextSplitter
@@ -39,11 +40,14 @@ class ZigSpellcheckingStrategy: SpellcheckingStrategy() {
 		return when (element) {
 			is ZonStringLiteral -> ZonStringLiteralTokenizer
 			is ZigStringLiteral -> ZigStringLiteralTokenizer
+			is PsiComment -> ZigCommentTokenizer
 			is PsiNameIdentifierOwner -> IdentifierOwnerTokenizer
 			else -> super.getTokenizer(element)
 		}
 	}
 }
+
+private object ZigCommentTokenizer: CommentTokenizer()
 
 private object IdentifierOwnerTokenizer : PsiIdentifierOwnerTokenizer() {
 	override fun tokenize(element: PsiNameIdentifierOwner, consumer: TokenConsumer) {
