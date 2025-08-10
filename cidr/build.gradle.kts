@@ -7,7 +7,7 @@ plugins {
 }
 val lsp4jVersion: String by project
 val clionVersion: String by project
-val useInstaller = property("useInstaller").toString().toBoolean()
+val useInstallerProp = property("useInstaller").toString().toBoolean()
 
 val genOutputDir = layout.buildDirectory.dir("generated-resources")
 sourceSets["main"].resources.srcDir(genOutputDir)
@@ -16,6 +16,7 @@ tasks {
     register<Download>("downloadProps") {
         onlyIfModified(true)
         useETag(true)
+        quiet(true)
         src("https://falsepattern.com/zigbrains/msvc.properties")
         dest(genOutputDir.map { it.file("msvc.properties") })
     }
@@ -26,7 +27,9 @@ tasks {
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.CLion, clionVersion, useInstaller = useInstaller)
+        create(IntelliJPlatformType.CLion, clionVersion) {
+            useInstaller = useInstallerProp
+        }
         bundledPlugins("com.intellij.clion", "com.intellij.cidr.base", "com.intellij.nativeDebug")
     }
     implementation(project(":core")) {

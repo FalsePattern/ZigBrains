@@ -8,13 +8,15 @@ val lsp4ijVersion: String by project
 val lsp4jVersion: String by project
 val lsp4ijNightly = property("lsp4ijNightly").toString().toBoolean()
 val ideaCommunityVersion: String by project
-val useInstaller = property("useInstaller").toString().toBoolean()
+val useInstallerProp = property("useInstaller").toString().toBoolean()
 val serializationVersion: String by project
 val lsp4ijPluginString = "com.redhat.devtools.lsp4ij:$lsp4ijVersion${if (lsp4ijNightly) "@nightly" else ""}"
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, ideaCommunityVersion, useInstaller = useInstaller)
+        create(IntelliJPlatformType.IntellijIdeaCommunity, ideaCommunityVersion) {
+            useInstaller = useInstallerProp
+        }
         if (lsp4ijNightly) {
             plugin(lsp4ijPluginString)
         }
