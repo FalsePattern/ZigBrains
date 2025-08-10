@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [27.1.0] - 2025-08-11
+
+### Added
+
+- Zig
+  - Spellchecking in comments
+
+### Fixed
+
+- Project
+  - Error popup when no zig toolchain is configured
+  - Stuck blocking IO operations after a failed build scan causing the IDE to shut down slowly
+
 ## [27.0.0] - 2025-08-10
 
 ### Changed
