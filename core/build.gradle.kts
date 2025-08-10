@@ -8,12 +8,14 @@ plugins {
 }
 
 val ideaCommunityVersion: String by project
-val useInstaller = property("useInstaller").toString().toBoolean()
+val useInstallerProp = property("useInstaller").toString().toBoolean()
 val serializationVersion: String by project
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaCommunity, ideaCommunityVersion, useInstaller = useInstaller)
+        create(IntelliJPlatformType.IntellijIdeaCommunity, ideaCommunityVersion) {
+            useInstaller = useInstallerProp
+        }
 		bundledModule("intellij.spellchecker")
     }
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$serializationVersion") {
