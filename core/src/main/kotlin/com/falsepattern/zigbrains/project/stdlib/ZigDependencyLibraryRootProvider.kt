@@ -47,9 +47,9 @@ class ZigDependencyLibraryRootProvider: AdditionalLibraryRootsProvider() {
 			libraries.addAll(
 				project.zigBuildScan
 					.projects
-					.stream()
-					.skip(1)  // first is always the root project
-					.map { it.path.toNioPathOrNull()!!.toVirtualFileUrl(urlManager).virtualFile!! }
+					.asSequence()
+					.drop(1) // first is always the root project
+					.mapNotNull { it.path.toNioPathOrNull()?.toVirtualFileUrl(urlManager)?.virtualFile }
 					.map {
 						if (it.name.startsWith("N-V-__")) {
 							ZigDependencyLibrary("[unnamed package]", it)
