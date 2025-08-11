@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [27.1.1] - 2025-08-11
+
+### Fixed
+
+- Project
+  - NullPointerException during build scan
+
 ## [27.1.0] - 2025-08-11
 
 ### Added
