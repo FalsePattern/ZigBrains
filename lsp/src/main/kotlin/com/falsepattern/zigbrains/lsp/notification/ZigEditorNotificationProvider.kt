@@ -72,8 +72,7 @@ class ZigEditorNotificationProvider: EditorNotificationProvider, DumbAware {
             } else {
                 status = EditorNotificationPanel.Status.Warning
                 text = ZLSBundle.message("notification.banner.zls-not-running")
-//				actionLabel = ZLSBundle.message("notification.banner.zls-bad-config")
-//				actionId =
+				// TODO: Does this need the same "open-action" treatment?
             }
             val panel = EditorNotificationPanel(editor, status)
 			panel.text = text
