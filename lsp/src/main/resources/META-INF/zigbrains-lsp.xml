@@ -101,4 +101,12 @@
                 topic="com.falsepattern.zigbrains.lsp.LanguageServerStarter"
         />
     </projectListeners>
+
+    <actions resource-bundle="zigbrains.lsp.ActionsBundle">
+        <!--suppress PluginXmlCapitalization -->
+        <action
+                id="zigbrains.open.configurable.toolchain"
+                class="com.falsepattern.zigbrains.lsp.action.OpenZigToolchainConfigurableAction"
+                icon="com.falsepattern.zigbrains.Icons.Zig"/>
+    </actions>
 </idea-plugin>

@@ -251,6 +251,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity
                 implementation="com.falsepattern.zigbrains.ZBStartup"/>
+        <errorHandler implementation="com.falsepattern.zigbrains.errorreporter.ErrorReporter"/>
     </extensions>
     <!-- endregion misc -->
 </idea-plugin>
