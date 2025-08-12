@@ -36,6 +36,9 @@ developed by HTGAzureX1212 (https://github.com/HTGAzureX1212), licensed under th
 Parts of the codebase are based on the intellij-rust plugin,
 developed by the intellij-rust team (https://github.com/intellij-rust), licensed under the intellij-rust MIT license.
 --------------------------------
+Parts of the codebase are based on the MinecraftDev plugin,
+developed by the minecraft-dev team (https://github.com/minecraft-dev/MinecraftDev), licensed under the LGPLv3.0-only license.
+--------------------------------
 
 All of the licenses listed here are available in the following files, bundled with the plugin:
 - licenses/APACHE_2.0.LICENSE

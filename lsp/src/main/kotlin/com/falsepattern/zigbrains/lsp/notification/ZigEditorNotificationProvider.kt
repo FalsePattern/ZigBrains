@@ -57,19 +57,30 @@ class ZigEditorNotificationProvider: EditorNotificationProvider, DumbAware {
         }
         return Function { editor ->
             val status: EditorNotificationPanel.Status
-            val message: String
+            val text: String
+            var actionLabel: String? = null
+            var actionId: String? = null
             val result = runBlocking { task.await() }
             if (result == null)
                 return@Function null
 
             if (!result) {
                 status = EditorNotificationPanel.Status.Error
-                message = ZLSBundle.message("notification.banner.zls-bad-config")
+                text = ZLSBundle.message("notification.banner.zls-bad-config")
+                actionLabel = ZLSBundle.message("notification.banner.zls-bad-config.action")
+                actionId = "zigbrains.open.configurable.toolchain"
             } else {
                 status = EditorNotificationPanel.Status.Warning
-                message = ZLSBundle.message("notification.banner.zls-not-running")
+                text = ZLSBundle.message("notification.banner.zls-not-running")
+				// TODO: Does this need the same "open-action" treatment?
             }
-            EditorNotificationPanel(editor, status).also { it.text = message }
+            val panel = EditorNotificationPanel(editor, status)
+			panel.text = text
+			if (actionId != null && actionLabel != null) {
+				panel.createActionLabel(actionLabel, actionId)
+			}
+
+			return@Function panel
         }
     }
 }
