@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [27.2.0] - 2025-08-13
+
+### Added
+
+- Project
+  - In-editor toolchain error banner now shows a hyperlink for opening the relevant configs (by ENDERZOMBI102)
+
+### Fixed
+
+- IDE
+  - Plugin errors can now be auto-reported from the popup
+- Project
+  - Improved the robustness of the external libraries tab for zig dependencies
+
 ## [27.1.1] - 2025-08-11
 
 ### Fixed
