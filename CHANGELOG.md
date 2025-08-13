@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Project
+  - In-editor toolchain error banner now shows a hyperlink for opening the relevant configs (by ENDERZOMBI102)
+
 ## [27.1.1] - 2025-08-11
 
 ### Fixed
