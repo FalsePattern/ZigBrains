@@ -7,6 +7,11 @@
 - Project
   - In-editor toolchain error banner now shows a hyperlink for opening the relevant configs (by ENDERZOMBI102)
 
+### Fixed
+
+- IDE
+  - Plugin errors can now be auto-reported from the popup
+
 ## [27.1.1] - 2025-08-11
 
 ### Fixed
