@@ -11,6 +11,8 @@
 
 - IDE
   - Plugin errors can now be auto-reported from the popup
+- Project
+  - Improved the robustness of the external libraries tab for zig dependencies
 
 ## [27.1.1] - 2025-08-11
 
