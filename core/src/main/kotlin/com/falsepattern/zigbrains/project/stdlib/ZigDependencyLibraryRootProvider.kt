@@ -53,14 +53,30 @@ class ZigDependencyLibraryRootProvider: AdditionalLibraryRootsProvider() {
 					.projects
 					.asSequence()
 					.drop(1) // first is always the root project
-					.mapNotNull { pathToVirtualFile(urlManager, vfsManager, it.path) }
-					.map {
-						if (it.name.startsWith("N-V-__")) {
-							ZigDependencyLibrary("[unnamed package]", it)
-						} else {
-							val (name, version, _) = it.name.split("-", limit = 3)
-							ZigDependencyLibrary("$name $version", it)
+					.mapNotNull { pathToVirtualFile(urlManager, vfsManager, it.path)?.let( it::to ) }
+					.map { (proj, vf) ->
+						val parts = vf.name.split("-", limit = 3)
+						val name = when {
+							proj.name != null -> proj.name
+							vf.name.startsWith("N-V-__") -> "[unnamed package]"
+							parts.size > 2 -> parts[0]  // $name-$version-$hash
+							parts.size == 1 -> parts[0] // a `.path` dependency, folder name is usually dep name
+							else -> {
+								logger.error("Failed to derive dependency name for directory ${vf.name}")
+								vf.name
+							}
 						}
+						val version = when {
+							proj.version != null -> proj.version
+							vf.name.startsWith("N-V-__") -> ""
+							parts.size > 2 -> parts[1]  // $name-$version-$hash
+							parts.size == 1 -> ""  // a `.path` dependency, if the project doesn't know the version then its empty
+							else -> {
+								logger.error("Failed to derive dependency version for directory ${vf.name}")
+								""
+							}
+						}
+						ZigDependencyLibrary("$name $version", vf)
 					}
 					.toList()
 			)
