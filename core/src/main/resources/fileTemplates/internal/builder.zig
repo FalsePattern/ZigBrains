@@ -172,7 +172,16 @@ pub fn build( b: *std.Build ) !void {
 }
 
 fn gatherProjects( b: *std.Build, storage: *Storage, alloc: std.mem.Allocator ) !void {
-	const root_path = b.build_root.path.?;
+	const root_path = blk: {
+		// check if we need to resolve the path
+		if ( std.fs.path.isAbsolute( b.build_root.path.? ) ) {
+			break :blk b.build_root.path.?;
+		}
+		// well, we need to, resolve that bad boy!
+		var dir = try std.fs.cwd().openDir( b.build_root.path.?, .{ } );
+		defer dir.close();
+		break :blk try dir.realpathAlloc( alloc, "." );
+	};
 	// ensure we don't traverse a project twice
 	for ( storage.projects.items ) |proj| {
 		if ( std.mem.eql( u8, proj.path, root_path ) ) {
