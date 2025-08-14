@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - `.path` dependencies breaking the scanner (by ENDERZOMBI102)
+
 ## [27.2.0] - 2025-08-13
 
 ### Added
