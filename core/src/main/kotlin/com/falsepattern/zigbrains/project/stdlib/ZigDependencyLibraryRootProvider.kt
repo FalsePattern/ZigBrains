@@ -61,14 +61,20 @@ class ZigDependencyLibraryRootProvider: AdditionalLibraryRootsProvider() {
 							vf.name.startsWith("N-V-__") -> "[unnamed package]"
 							parts.size > 2 -> parts[0]  // $name-$version-$hash
 							parts.size == 1 -> parts[0] // a `.path` dependency, folder name is usually dep name
-							else -> throw IllegalStateException("Failed to derive dependency name")
+							else -> {
+								logger.error("Failed to derive dependency name for directory ${vf.name}")
+								vf.name
+							}
 						}
 						val version = when {
 							proj.version != null -> proj.version
 							vf.name.startsWith("N-V-__") -> ""
 							parts.size > 2 -> parts[1]  // $name-$version-$hash
 							parts.size == 1 -> ""  // a `.path` dependency, if the project doesn't know the version then its empty
-							else -> throw IllegalStateException("Failed to derive dependency version")
+							else -> {
+								logger.error("Failed to derive dependency version for directory ${vf.name}")
+								""
+							}
 						}
 						ZigDependencyLibrary("$name $version", vf)
 					}
