@@ -53,14 +53,22 @@ class ZigDependencyLibraryRootProvider: AdditionalLibraryRootsProvider() {
 					.projects
 					.asSequence()
 					.drop(1) // first is always the root project
-					.mapNotNull { pathToVirtualFile(urlManager, vfsManager, it.path) }
-					.map {
-						if (it.name.startsWith("N-V-__")) {
-							ZigDependencyLibrary("[unnamed package]", it)
-						} else {
-							val (name, version, _) = it.name.split("-", limit = 3)
-							ZigDependencyLibrary("$name $version", it)
+					.mapNotNull { pathToVirtualFile(urlManager, vfsManager, it.path)?.let( it::to ) }
+					.map { (proj, vf) ->
+						val parts = vf.name.split("-", limit = 3)
+						val name = when {
+							proj.name != null -> proj.name
+							vf.name.startsWith("N-V-__") -> "[unnamed package]"
+							parts.size > 2 -> parts[0]  // $name-$version-$hash
+							else -> throw IllegalStateException("Failed to derive dependency name")
 						}
+						val version = when {
+							proj.version != null -> proj.version
+							vf.name.startsWith("N-V-__") -> ""
+							parts.size > 2 -> parts[1]  // $name-$version-$hash
+							else -> throw IllegalStateException("Failed to derive dependency version")
+						}
+						ZigDependencyLibrary("$name $version", vf)
 					}
 					.toList()
 			)

@@ -6,6 +6,10 @@ const RetType = @typeInfo(@TypeOf(builder.build)).@"fn".return_type.?;
 // serialization types, must be kept in sync with the ZB counterpart
 const Serialization = struct {
 	const Project = struct {
+		/// The name of the project
+  		name: ?[]const u8,
+		/// The version of the project
+  		version: ?[]const u8,
 		/// The root of the project
   		path: []const u8,
 		/// The (top-level) steps the project declares
@@ -150,6 +154,8 @@ pub fn build( b: *std.Build ) !void {
 
 		// save the mappings
 		projects[i] = .{
+			.name = null,
+			.version = null,
 			.path = proj.path,
 			.steps = proj.steps,
 			.modules = modules,
