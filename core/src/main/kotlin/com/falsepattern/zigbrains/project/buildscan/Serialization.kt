@@ -28,6 +28,14 @@ object Serialization {
 	@Serializable
 	data class Project(
 		/**
+		 * The name of the project
+		 */
+		val name: String?,
+		/**
+		 * The version of the project
+		 */
+		val version: String?,
+		/**
 		 * The root of the project
 		 */
 		val path: String,
