@@ -36,24 +36,27 @@ import kotlin.math.max
 class ZigSourceFileFilter(private val project: Project): Filter {
     private val projectPath = runCatching { project.guessProjectDir()?.toNioPathOrNull()?.toFile() }.getOrNull()
     override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
+        if (line.isEmpty())
+            return null
         val lineStart = entireLength - line.length
         val results = ArrayList<ResultItem>()
-        val matcher = LEN_REGEX.findAll(line)
-        for (match in matcher) {
-            val start = match.range.first
-            val pair = findLongestParsablePathFromOffset(line, start) ?: return null
+        var prevEnd = 0
+        for (match in findLengthMarkers(line)) {
+            val start = match.start
+            val pair = findLongestParsablePathFromOffset(line, prevEnd, start) ?: return null
+            prevEnd = match.end
             val path = pair.first
-            val lineNumber = max(match.groups[1]!!.value.toInt() - 1, 0)
-            val lineOffset = max(match.groups[2]!!.value.toInt() - 1, 0)
-            results.add(ResultItem(lineStart + pair.second, lineStart + match.range.last + 1, LazyOpenFileHyperlinkInfo(project, path, lineNumber, lineOffset)))
+            val lineNumber = max(match.line - 1, 0)
+            val lineOffset = max(match.offset - 1, 0)
+            results.add(ResultItem(lineStart + pair.second, lineStart + match.end, LazyOpenFileHyperlinkInfo(project, path, lineNumber, lineOffset)))
         }
+        if (results.isEmpty())
+            return null
         return Filter.Result(results)
     }
 
-    private fun findLongestParsablePathFromOffset(line: String, end: Int): Pair<Path, Int>? {
-        var longestStart = -1
-        var longest: File? = null
-        for (i in end - 1 downTo 0) {
+    private fun findLongestParsablePathFromOffset(line: String, start: Int, end: Int): Pair<Path, Int>? {
+        for (i in 0 ..< end) {
             try {
                 val pathStr = line.substring(i, end)
                 var file = File(pathStr)
@@ -66,14 +69,51 @@ class ZigSourceFileFilter(private val project: Project): Filter {
                         continue
                     }
                 }
-                longest = file
-                longestStart = i
-            } catch (ignored: InvalidPathException) {
+                return Pair(file.toPath(), i)
+            } catch (_: InvalidPathException) {
             }
         }
-        longest ?: return null
-        return Pair(longest.toPath(), longestStart)
+        return null
     }
 }
 
-private val LEN_REGEX = Regex(":(\\d+):(\\d+)")
+private data class LengthMarker(val start: Int, val end: Int, val line: Int, val offset: Int)
+
+private fun findLengthMarkers(line: String): Sequence<LengthMarker> = sequence {
+    val chars = line.toCharArray()
+    val len = chars.size
+    var i = 0
+    while (true) {
+        while (chars[i] != ':') {
+            i++
+            if (i == len)
+                return@sequence
+        }
+        val start = i
+        i++
+        if (i == len)
+            return@sequence
+        var line = 0
+        while (chars[i] in '0'..'9') {
+            line *= 10
+            line += chars[i] - '0'
+            i++
+            if (i == len)
+                return@sequence
+        }
+        if (chars[i] != ':')
+            continue
+        i++
+        if (i == len)
+            return@sequence
+        var offset = 0
+        while (chars[i] in '0'..'9') {
+            offset *= 10
+            offset += chars[i] - '0'
+            i++
+            if (i == len)
+                return@sequence
+        }
+        yield(LengthMarker(start, i, line, offset))
+    }
+}

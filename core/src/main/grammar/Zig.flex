@@ -195,8 +195,6 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <YYINITIAL>      "anyframe"               { return KEYWORD_ANYFRAME; }
 <YYINITIAL>      "anytype"                { return KEYWORD_ANYTYPE; }
 <YYINITIAL>      "asm"                    { return KEYWORD_ASM; }
-<YYINITIAL>      "async"                  { return KEYWORD_ASYNC; }
-<YYINITIAL>      "await"                  { return KEYWORD_AWAIT; }
 <YYINITIAL>      "break"                  { return KEYWORD_BREAK; }
 <YYINITIAL>      "callconv"               { return KEYWORD_CALLCONV; }
 <YYINITIAL>      "catch"                  { return KEYWORD_CATCH; }
@@ -233,7 +231,6 @@ BUILTINIDENTIFIER="@"[A-Za-z_][A-Za-z0-9_]*
 <YYINITIAL>      "try"                    { return KEYWORD_TRY; }
 <YYINITIAL>      "union"                  { return KEYWORD_UNION; }
 <YYINITIAL>      "unreachable"            { return KEYWORD_UNREACHABLE; }
-<YYINITIAL>      "usingnamespace"         { return KEYWORD_USINGNAMESPACE; }
 <YYINITIAL>      "var"                    { return KEYWORD_VAR; }
 <YYINITIAL>      "volatile"               { return KEYWORD_VOLATILE; }
 <YYINITIAL>      "while"                  { return KEYWORD_WHILE; }

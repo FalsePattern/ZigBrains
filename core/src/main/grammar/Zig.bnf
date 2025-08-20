@@ -111,8 +111,6 @@
     KEYWORD_ANYFRAME='anyframe'
     KEYWORD_ANYTYPE='anytype'
     KEYWORD_ASM='asm'
-    KEYWORD_ASYNC='async'
-    KEYWORD_AWAIT='await'
     KEYWORD_BREAK='break'
     KEYWORD_CALLCONV='callconv'
     KEYWORD_CATCH='catch'
@@ -149,7 +147,6 @@
     KEYWORD_TRY='try'
     KEYWORD_UNION='union'
     KEYWORD_UNREACHABLE='unreachable'
-    KEYWORD_USINGNAMESPACE='usingnamespace'
     KEYWORD_VAR='var'
     KEYWORD_VOLATILE='volatile'
     KEYWORD_WHILE='while'
@@ -191,7 +188,7 @@ ComptimeDecl ::= KEYWORD_COMPTIME Block
 Decl
 ::= (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE? | KEYWORD_INLINE | KEYWORD_NOINLINE)? FnProto (SEMICOLON | Block)
   | (KEYWORD_EXPORT | KEYWORD_EXTERN STRING_LITERAL_SINGLE?)? KEYWORD_THREADLOCAL? GlobalVarDecl
-  | KEYWORD_USINGNAMESPACE Expr SEMICOLON
+  | "usingnamespace" Expr SEMICOLON
 
 FnProto ::= KEYWORD_FN IDENTIFIER? LPAREN ParamDeclList RPAREN ByteAlign? AddrSpace? LinkSection? CallConv? EXCLAMATIONMARK? TypeExpr {pin=1}
 
@@ -326,7 +323,7 @@ TypeExpr ::= PrefixTypeOp* ErrorUnionExpr
 ErrorUnionExpr ::= SuffixExpr (EXCLAMATIONMARK TypeExpr)?
 
 SuffixExpr
-::= KEYWORD_ASYNC PrimaryTypeExpr SuffixOp* FnCallArguments
+::= "async" PrimaryTypeExpr SuffixOp* FnCallArguments
   | PrimaryTypeExpr (SuffixOp | FnCallArguments)*
 
 PrimaryTypeExpr
@@ -514,7 +511,7 @@ PrefixOp
   | MINUSPERCENT
   | AMPERSAND
   | KEYWORD_TRY
-  | KEYWORD_AWAIT
+  | "await"
 
 PrefixTypeOp
 ::= QUESTIONMARK
