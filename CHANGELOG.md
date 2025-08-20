@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Zig
+  - `async`, `await`, and `usingnamespace` as identifiers for Zig 0.15+
+
 ## [27.2.1] - 2025-08-14
 
 ### Fixed
