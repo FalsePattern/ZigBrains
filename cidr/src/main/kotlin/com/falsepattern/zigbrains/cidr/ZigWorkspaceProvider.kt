@@ -30,23 +30,52 @@ import com.jetbrains.cidr.project.workspace.CidrWorkspace
 import com.jetbrains.cidr.project.workspace.CidrWorkspaceManager
 import com.jetbrains.cidr.project.workspace.CidrWorkspaceProvider
 import java.io.IOException
+import java.io.UncheckedIOException
+import java.nio.file.FileVisitResult
+import java.nio.file.FileVisitor
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
 
 class ZigWorkspaceProvider: CidrWorkspaceProvider {
     override fun getWorkspace(project: Project): CidrWorkspace? {
         getExistingWorkspace(project)?.let { return it }
 
+        var foundZig = false
         val projectDir = project.guessProjectDir()?.toNioPathOrNull() ?: return null
         try {
-            Files.walk(projectDir).use { files ->
-                if (files.anyMatch { it.fileName.sanitizedPathString?.let { it2 -> it2.endsWith(".zig") || it2.endsWith(".zig.zon") } ?: false }) {
-                    return ZigWorkspace(project)
+            Files.walkFileTree(projectDir, object: FileVisitor<Path> {
+                override fun preVisitDirectory(dir: Path?, attrs: BasicFileAttributes): FileVisitResult {
+                    return FileVisitResult.CONTINUE
                 }
+
+                override fun visitFile(file: Path?, attrs: BasicFileAttributes): FileVisitResult {
+                    val isZig = file?.fileName?.sanitizedPathString?.let { it2 -> it2.endsWith(".zig") || it2.endsWith(".zig.zon") } ?: false
+                    if (isZig) {
+                        foundZig = true
+                        return FileVisitResult.TERMINATE
+                    }
+                    return FileVisitResult.CONTINUE
+                }
+
+                override fun visitFileFailed(file: Path?, exc: IOException): FileVisitResult {
+                    return FileVisitResult.CONTINUE
+                }
+
+                override fun postVisitDirectory(dir: Path?, exc: IOException?): FileVisitResult {
+                    return FileVisitResult.CONTINUE
+                }
+
+            })
+        } catch (e: Exception) {
+            when (e) {
+                is IOException, is UncheckedIOException -> {
+                    e.printStackTrace()
+                }
+                else -> throw e
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
-        return null
+        return if (foundZig) ZigWorkspace(project) else null
     }
 
     override fun loadWorkspace(project: Project) {
