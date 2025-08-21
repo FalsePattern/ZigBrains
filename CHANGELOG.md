@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [27.3.1] - 2025-08-21
+
 ### Fixed
 
 - Project
