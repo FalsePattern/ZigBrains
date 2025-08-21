@@ -73,7 +73,10 @@ const Storage = struct {
 	};
 };
 
+// 0.14 compat
+// Remove after IOGate becomes stable
 const postWritergate = @hasDecl( std, "Io" );
+const newArrayLists = @hasDecl(std, "array_list");
 
 pub fn build( b: *std.Build ) !void {
 	// run the project's build.zig
@@ -87,11 +90,14 @@ pub fn build( b: *std.Build ) !void {
 	const alloc = arena.allocator();
 	defer arena.deinit();
 
-	// get hold of the process's env vars
-	var env = try std.process.getEnvMap( b.allocator );
+	// get the port environment variable
+    const port_str = std.process.getEnvVarOwned(alloc, "ZIGBRAINS_PORT") catch |e| switch (e) {
+        error.EnvironmentVariableNotFound => return error.NoPortGiven,
+        else => return e,
+    };
 
-	// get the port the IDE is listening on
-	const port = try std.fmt.parseInt( u16, env.get( "ZIGBRAINS_PORT" ) orelse return error.NoPortGiven, 10 );
+    // translate it to an int
+    const port = try std.fmt.parseInt( u16, port_str, 10 );
 	std.log.info( "[ZigBrains:BuildScan] IDE is listening on port {}", .{ port } );
 
 	// connect to the IDE
@@ -99,7 +105,7 @@ pub fn build( b: *std.Build ) !void {
 	defer stream.close();
 
 	// gather data
-	var storage: Storage = .{ .projects = .init( alloc ) };
+	var storage: Storage = .{ .projects = if (newArrayLists) .empty else .init( alloc ) };
 	try gatherProjects( b, &storage, alloc );
 
 	const Util = struct {
@@ -245,12 +251,12 @@ fn gatherProjects( b: *std.Build, storage: *Storage, alloc: std.mem.Allocator ) 
 		// private modules
 		var iter = b.top_level_steps.iterator();
 		while ( iter.next() ) |it| {
-			try discoverStepModules( &it.value_ptr.*.*.step, &modules );
+			try discoverStepModules( &it.value_ptr.*.*.step, &modules, alloc );
 		}
 	}
 
 	// save the gathered data
-	(try storage.projects.addOne()).* = .{
+	(if (newArrayLists) try storage.projects.addOne(alloc) else try storage.projects.addOne()).* = .{
 		.path = root_path,
 		.modules = modules.items,
 		.steps = steps,
@@ -263,7 +269,7 @@ fn gatherProjects( b: *std.Build, storage: *Storage, alloc: std.mem.Allocator ) 
 	}
 }
 
-fn discoverStepModules( step: *std.Build.Step, modules: *std.ArrayList(Storage.Module) ) !void {
+fn discoverStepModules( step: *std.Build.Step, modules: *std.ArrayList(Storage.Module), alloc: std.mem.Allocator ) !void {
 	if ( step.id == .compile ) blk: {
 		const compile: *std.Build.Step.Compile = @fieldParentPtr( "step", step );
 		// check if a module was already added
@@ -272,13 +278,13 @@ fn discoverStepModules( step: *std.Build.Step, modules: *std.ArrayList(Storage.M
 				break :blk;
 			}
 		}
-		(try modules.addOne()).* = .{
+		(if (newArrayLists) try modules.addOne(alloc) else try modules.addOne()).* = .{
 			.module = compile.root_module,
 			.public = false,
 			.imports = &compile.root_module.import_table,
 		};
 	}
 	for ( step.dependencies.items ) |s| {
-		try discoverStepModules( s, modules );
+		try discoverStepModules( s, modules, alloc );
 	}
 }
