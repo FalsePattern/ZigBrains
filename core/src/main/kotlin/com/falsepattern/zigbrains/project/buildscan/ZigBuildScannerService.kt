@@ -27,6 +27,8 @@ import com.falsepattern.zigbrains.shared.coroutine.withEDTContext
 import com.falsepattern.zigbrains.shared.zigCoroutineScope
 import com.intellij.ide.trustedProjects.TrustedProjects
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.Application
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.components.*
@@ -44,6 +46,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import java.lang.invoke.LambdaMetafactory
+import java.lang.invoke.MethodHandle
+import java.lang.invoke.MethodHandles
+import java.lang.invoke.MethodType
 import java.net.ServerSocket
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.Executors
@@ -75,12 +81,17 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 			updateState { it.copy(enabled = value) }
 		}
 
-	private suspend fun reloadProjectRoots() {
-		@Suppress("UnstableApiUsage")
-		writeAction {
-			ProjectRootManagerEx.getInstanceEx(project)
-				.makeRootsChange(EmptyRunnable.getInstance(), RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED)
-		}
+	private fun reloadProjectRoots() {
+		//FIXME: Workaround for buggy jetbrains code to prevent it from blaming our plugin. Remove when fixed in the IDE. See: https://github.com/FalsePattern/zigbrains-error-reports/issues/6
+		// Original code:
+		//		writeAction {
+		//			ProjectRootManagerEx.getInstanceEx(project)
+		//				.makeRootsChange(EmptyRunnable.getInstance(), RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED)
+		//		}
+		val app = ApplicationManager.getApplication()
+		val rootsChange = makeRootsChangeFactory.invoke(ProjectRootManagerEx.getInstanceEx(project), EmptyRunnable.getInstance(), RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED) as Runnable
+		val rootsChangeWrite = runWriteActionFactory.invoke(app, rootsChange) as Runnable
+		app.invokeLater(rootsChangeWrite)
 	}
 
 	suspend fun register(listener: ZigBuildScanListener): Disposable {
@@ -267,3 +278,34 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 }
 
 val Project.zigBuildScan get() = service<ZigBuildScannerService>()
+
+//TODO remove this whole block once reloadProjectRoots bug is fixed
+
+private val makeRootsChangeFactory: MethodHandle = run {
+	val lookup = MethodHandles.lookup()
+	createRunnableFactory(
+		lookup,
+		MethodType.methodType(Runnable::class.java, ProjectRootManagerEx::class.java, Runnable::class.java, RootsChangeRescanningInfo::class.java),
+		lookup.findVirtual(ProjectRootManagerEx::class.java, "makeRootsChange", MethodType.methodType(Void.TYPE, Runnable::class.java, RootsChangeRescanningInfo::class.java)),
+	)
+}
+
+private val runWriteActionFactory: MethodHandle = run {
+	val lookup = MethodHandles.lookup()
+	createRunnableFactory(
+		lookup,
+		MethodType.methodType(Runnable::class.java, Application::class.java, Runnable::class.java),
+		lookup.findVirtual(Application::class.java, "runWriteAction", MethodType.methodType(Void.TYPE, Runnable::class.java)),
+	)
+}
+
+private fun createRunnableFactory(lookup: MethodHandles.Lookup, factoryType: MethodType, implementation: MethodHandle): MethodHandle {
+	return LambdaMetafactory.metafactory(
+		lookup,
+		"run",
+		factoryType,
+		MethodType.methodType(Void.TYPE),
+		implementation,
+		MethodType.methodType(Void.TYPE),
+	).target
+}

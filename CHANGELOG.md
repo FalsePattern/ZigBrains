@@ -6,6 +6,7 @@
 
 - Project
   - Build scan breaks on zig 0.15+
+  - "Failed to visit file" error blaming ZigBrains when opening projects
 
 ## [27.3.0] - 2025-08-21
 
