@@ -12,6 +12,9 @@
 - Cidr
   - Workspace provider file scanner throwing exception when file name contains comma
 
+- Project
+  - Improved performance of `file:line:char` pattern matching in terminal outputs
+
 ## [27.2.1] - 2025-08-14
 
 ### Fixed
