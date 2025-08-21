@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - Build scan breaks on zig 0.15+
+
 ## [27.3.0] - 2025-08-21
 
 ### Added
