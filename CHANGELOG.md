@@ -7,6 +7,11 @@
 - Zig
   - `async`, `await`, and `usingnamespace` as identifiers for Zig 0.15+
 
+### Fixed
+
+- Cidr
+  - Workspace provider file scanner throwing exception when file name contains comma
+
 ## [27.2.1] - 2025-08-14
 
 ### Fixed
