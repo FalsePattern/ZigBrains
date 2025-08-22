@@ -111,8 +111,6 @@
       KEYWORD_ANYFRAME='anyframe'
       KEYWORD_ANYTYPE='anytype'
       KEYWORD_ASM='asm'
-      KEYWORD_ASYNC='async'
-      KEYWORD_AWAIT='await'
       KEYWORD_BREAK='break'
       KEYWORD_CALLCONV='callconv'
       KEYWORD_CATCH='catch'
@@ -149,7 +147,6 @@
       KEYWORD_TRY='try'
       KEYWORD_UNION='union'
       KEYWORD_UNREACHABLE='unreachable'
-      KEYWORD_USINGNAMESPACE='usingnamespace'
       KEYWORD_VAR='var'
       KEYWORD_VOLATILE='volatile'
       KEYWORD_WHILE='while'
@@ -177,10 +174,10 @@
   implements("StringLiteral")="com.falsepattern.zigbrains.zig.psi.mixins.ZigStringLiteralMixin"
 }
 
-Root ::= CONTAINER_DOC_COMMENT? ContainerMembers;
+Root ::= ContainerMembers;
 
 // *** Top level ***
-ContainerMembers ::= ContainerDeclaration* (ContainerField COMMA)* (ContainerField | ContainerDeclaration*);
+ContainerMembers ::= CONTAINER_DOC_COMMENT? ContainerDeclaration* (ContainerField COMMA)* (ContainerField | ContainerDeclaration*);
 
 ContainerDeclaration ::= TestDecl | ComptimeDecl | DOC_COMMENT? KEYWORD_PUB Decl;
 
@@ -537,7 +534,7 @@ PtrTypeStart
 ArrayTypeStart ::= LBRACKET Expr (COLON Expr)? RBRACKET;
 
 // ContainerDecl specific
-ContainerDeclAuto ::= ContainerDeclType LBRACE CONTAINER_DOC_COMMENT? ContainerMembers RBRACE;
+ContainerDeclAuto ::= ContainerDeclType LBRACE ContainerMembers RBRACE;
 
 ContainerDeclType
 ::= KEYWORD_STRUCT (LPAREN Expr RPAREN)?
