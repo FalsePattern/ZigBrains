@@ -29,6 +29,11 @@
                 language="Zig"
                 implementationClass="com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighterFactory"/>
 
+        <!-- Annotators -->
+        <annotator
+                language="Zig"
+                implementationClass="com.falsepattern.zigbrains.zig.annotator.color.ZigSimpleColorAnnotator"/>
+
         <!-- String manipulation -->
         <enterHandlerDelegate
                 id="ZigEnterInTextBlockHandler"

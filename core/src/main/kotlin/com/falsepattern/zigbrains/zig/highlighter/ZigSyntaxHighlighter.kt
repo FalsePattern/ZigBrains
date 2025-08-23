@@ -41,9 +41,11 @@ class ZigSyntaxHighlighter: SyntaxHighlighterBase() {
 
     @NonNls
     companion object {
-
         // @formatter:off
         val BAD_CHAR          = createKey("BAD_CHARACTER"      , HighlighterColors.BAD_CHARACTER                        )
+		val BRACES            = createKey("BRACES"             , DefaultLanguageHighlighterColors.BRACES                )
+		val BRACKETS          = createKey("BRACKETS"           , DefaultLanguageHighlighterColors.BRACKETS              )
+		val PARENTHESES       = createKey("PARENTHESES"        , DefaultLanguageHighlighterColors.PARENTHESES           )
         val BUILTIN           = createKey("BUILTIN"            , DefaultLanguageHighlighterColors.STATIC_METHOD         )
         val NUMBER            = createKey("NUMBER"             , DefaultLanguageHighlighterColors.NUMBER                )
         val CHAR              = createKey("CHAR"               , NUMBER                                                 )
@@ -101,9 +103,7 @@ class ZigSyntaxHighlighter: SyntaxHighlighterBase() {
                 KEYWORD,
                 *ZigTypes::class.java
                     .fields
-                    .filter {
-                        it.name.startsWith("KEYWORD_")
-                    }
+                    .filter { it.name.startsWith("KEYWORD_") }
                     .map { it.get(null) as IElementType }
                     .toTypedArray()
             )
@@ -115,6 +115,9 @@ class ZigSyntaxHighlighter: SyntaxHighlighterBase() {
             addMapping(BAD_CHAR, TokenType.BAD_CHARACTER)
             addMapping(NUMBER, ZigTypes.INTEGER, ZigTypes.FLOAT)
             addMapping(CHAR, ZigTypes.CHAR_LITERAL)
+            addMapping(BRACES, ZigTypes.LBRACE, ZigTypes.RBRACE)
+            addMapping(BRACKETS, ZigTypes.LBRACKET, ZigTypes.RBRACKET)
+            addMapping(PARENTHESES, ZigTypes.LPAREN, ZigTypes.RPAREN)
         }
 
         private fun addMapping(key: TextAttributesKey, vararg types: IElementType) {
