@@ -22,7 +22,9 @@
 package com.falsepattern.zigbrains.zig.annotator.color
 
 import com.falsepattern.zigbrains.zig.highlighter.ZigSyntaxHighlighter
+import com.falsepattern.zigbrains.zig.psi.ZigFieldInit
 import com.falsepattern.zigbrains.zig.psi.ZigFnProto
+import com.falsepattern.zigbrains.zig.psi.ZigParamDecl
 import com.falsepattern.zigbrains.zig.psi.ZigPrimaryTypeExpr
 import com.falsepattern.zigbrains.zig.psi.ZigVarDeclProto
 import com.intellij.lang.annotation.AnnotationHolder
@@ -72,6 +74,36 @@ class ZigSimpleColorAnnotator: Annotator, DumbAware {
 						.range( name )
 						.textAttributes( attr )
 						.create()
+				}
+			}
+			is ZigFieldInit -> {
+				holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+					.range( node.identifier )
+					.textAttributes(ZigSyntaxHighlighter.PROPERTY_REF )
+					.create()
+			}
+			is ZigParamDecl -> {
+				node.identifier?.let {
+					var attr = ZigSyntaxHighlighter.PARAMETER
+					if ( node.keywordComptime != null && node.paramType?.text == "type" ) {
+						attr = ZigSyntaxHighlighter.TYPE_PARAM_DECL
+					}
+
+					holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+						.range(it)
+						.textAttributes(attr)
+						.create()
+				}
+
+				val expr = node.paramType?.expr
+				if ( expr is ZigPrimaryTypeExpr ) {
+					val ident = expr.identifier
+					if ( ident != null ) {
+						holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+							.range(ident)
+							.textAttributes(ZigSyntaxHighlighter.TYPE_REF)
+							.create()
+					}
 				}
 			}
 		}
