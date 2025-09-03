@@ -38,15 +38,15 @@ import com.intellij.openapi.project.Project
 class ZigExecConfigBuild(project: Project, factory: ConfigurationFactory): ZigExecConfig<ZigExecConfigBuild>(project, factory, ZigBrainsBundle.message("exec.type.build.label")) {
     var buildSteps = ArgsConfigurable("buildSteps", ZigBrainsBundle.message("exec.option.label.build.steps"))
         private set
-    var extraArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.build.args"))
+    var extraArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.build.args"), true)
         private set
     var debugBuildSteps = ArgsConfigurable("debugBuildSteps", ZigBrainsBundle.message("exec.option.label.build.steps-debug"))
         private set
-    var debugExtraArgs = ArgsConfigurable("debugCompilerArgs", ZigBrainsBundle.message("exec.option.label.build.args-debug"))
+    var debugExtraArgs = ArgsConfigurable("debugCompilerArgs", ZigBrainsBundle.message("exec.option.label.build.args-debug"), true)
         private set
     var exePath = FilePathConfigurable("exePath", ZigBrainsBundle.message("exec.option.label.build.exe-path-debug"))
         private set
-    var exeArgs = ArgsConfigurable("exeArgs", ZigBrainsBundle.message("exec.option.label.build.exe-args-debug"))
+    var exeArgs = ArgsConfigurable("exeArgs", ZigBrainsBundle.message("exec.option.label.build.exe-args-debug"), true)
         private set
 
     @Throws(ExecutionException::class)

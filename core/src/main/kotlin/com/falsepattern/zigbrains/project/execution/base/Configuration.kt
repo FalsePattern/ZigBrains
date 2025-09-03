@@ -43,6 +43,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
+import com.intellij.ui.components.fields.ExpandableTextField
 import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
@@ -336,7 +337,8 @@ class OptimizationConfigurable(
 
 class ArgsConfigurable(
     @Transient private val serializedName: String,
-    @Transient @Nls private val guiName: String
+    @Transient @Nls private val guiName: String,
+	@Transient private val expandable: Boolean
 ) : ZigConfigurable<ArgsConfigurable>, Cloneable {
     var args: String = ""
 
@@ -353,7 +355,7 @@ class ArgsConfigurable(
     }
 
     override fun createEditor(): ZigConfigModule<ArgsConfigurable> {
-        return ArgsConfigModule(serializedName, guiName)
+        return ArgsConfigModule(serializedName, guiName, expandable)
     }
 
     override fun clone(): ArgsConfigurable {
@@ -362,9 +364,10 @@ class ArgsConfigurable(
 
     class ArgsConfigModule(
         private val serializedName: String,
-        @Nls private val guiName: String
+        @Nls private val guiName: String,
+        expandable: Boolean
     ) : ZigConfigModule<ArgsConfigurable> {
-        private val argsField = JBTextField()
+        private val argsField = if (expandable) ExpandableTextField() else JBTextField()
 
         override fun tryMatch(cfg: ZigConfigurable<*>): ArgsConfigurable? {
             return if (cfg is ArgsConfigurable && cfg.serializedName == serializedName) cfg else null
@@ -381,7 +384,7 @@ class ArgsConfigurable(
 
         override fun construct(p: Panel): Unit = with(p) {
             row(guiName) {
-                cell(argsField).resizableColumn().align(AlignX.FILL)
+                cell(argsField).align(AlignX.FILL)
             }
         }
 

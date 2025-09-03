@@ -36,7 +36,7 @@ import com.intellij.openapi.project.Project
 class ZigExecConfigBinary(project: Project, factory: ConfigurationFactory) : ZigExecConfig<ZigExecConfigBinary>(project, factory, ZigDebugBundle.message("exec.type.binary.label")) {
     var exePath = FilePathConfigurable("exePath", ZigDebugBundle.message("exec.option.label.binary.exe-path"))
         private set
-    var args = ArgsConfigurable("args", ZigDebugBundle.message("exec.option.label.binary.args"))
+    var args = ArgsConfigurable("args", ZigDebugBundle.message("exec.option.label.binary.args"), true)
         private set
 
     override val suggestedName: String
