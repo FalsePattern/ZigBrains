@@ -36,6 +36,9 @@ import com.falsepattern.zigbrains.shared.element.writeEnum
 import com.falsepattern.zigbrains.shared.element.writeString
 import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.falsepattern.zigbrains.shared.sanitizedToNioPath
+import com.intellij.execution.ExecutionBundle
+import com.intellij.execution.configuration.EnvironmentVariablesData
+import com.intellij.execution.configuration.EnvironmentVariablesTextFieldWithBrowseButton
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
@@ -43,10 +46,12 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
+import com.intellij.ui.components.fields.ExpandableTextField
 import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
+import com.jetbrains.rd.framework.base.deepClonePolymorphic
 import org.jdom.Element
 import org.jetbrains.annotations.Nls
 import java.io.Serializable
@@ -338,7 +343,8 @@ class OptimizationConfigurable(
 
 class ArgsConfigurable(
     @Transient private val serializedName: String,
-    @Transient @Nls private val guiName: String
+    @Transient @Nls private val guiName: String,
+	@Transient private val expandable: Boolean
 ) : ZigConfigurable<ArgsConfigurable>, Cloneable {
     var args: String = ""
 
@@ -355,7 +361,7 @@ class ArgsConfigurable(
     }
 
     override fun createEditor(): ZigConfigModule<ArgsConfigurable> {
-        return ArgsConfigModule(serializedName, guiName)
+        return ArgsConfigModule(serializedName, guiName, expandable)
     }
 
     override fun clone(): ArgsConfigurable {
@@ -364,9 +370,10 @@ class ArgsConfigurable(
 
     class ArgsConfigModule(
         private val serializedName: String,
-        @Nls private val guiName: String
+        @Nls private val guiName: String,
+        expandable: Boolean
     ) : ZigConfigModule<ArgsConfigurable> {
-        private val argsField = JBTextField()
+        private val argsField = if (expandable) ExpandableTextField() else JBTextField()
 
         override fun tryMatch(cfg: ZigConfigurable<*>): ArgsConfigurable? {
             return if (cfg is ArgsConfigurable && cfg.serializedName == serializedName) cfg else null
@@ -383,7 +390,56 @@ class ArgsConfigurable(
 
         override fun construct(p: Panel): Unit = with(p) {
             row(guiName) {
-                cell(argsField).resizableColumn().align(AlignX.FILL)
+                cell(argsField).align(AlignX.FILL)
+            }
+        }
+
+        override fun dispose() {
+
+        }
+    }
+}
+
+class EnvConfigurable : ZigConfigurable<EnvConfigurable>, Cloneable {
+    var variables: EnvironmentVariablesData = EnvironmentVariablesData.DEFAULT
+
+    override fun readExternal(element: Element) {
+        variables = EnvironmentVariablesData.readExternal(element)
+    }
+
+    override fun writeExternal(element: Element) {
+		variables.writeExternal(element)
+    }
+
+    override fun createEditor(): ZigConfigModule<EnvConfigurable> {
+        return EnvConfigModule()
+    }
+
+    override fun clone(): EnvConfigurable {
+		val clone = super<Cloneable>.clone() as EnvConfigurable
+		clone.variables = clone.variables.deepClonePolymorphic()
+        return clone
+    }
+
+    class EnvConfigModule : ZigConfigModule<EnvConfigurable> {
+        private val envComponent = EnvironmentVariablesTextFieldWithBrowseButton()
+
+        override fun tryMatch(cfg: ZigConfigurable<*>): EnvConfigurable? {
+            return cfg as? EnvConfigurable
+        }
+
+        override fun apply(configurable: EnvConfigurable): Boolean {
+            configurable.variables = envComponent.data
+            return true
+        }
+
+        override fun reset(configurable: EnvConfigurable) {
+            envComponent.data = configurable.variables
+        }
+
+        override fun construct(p: Panel): Unit = with(p) {
+            row(ExecutionBundle.message("environment.variables.component.title")) {
+                cell(envComponent).align(AlignX.FILL)
             }
         }
 
