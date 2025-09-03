@@ -41,9 +41,9 @@ class ZigExecConfigRun(project: Project, factory: ConfigurationFactory): ZigExec
         private set
     var optimization = OptimizationConfigurable("optimization")
         private set
-    var compilerArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.compiler-args"))
+    var compilerArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.compiler-args"), true)
         private set
-    var exeArgs = ArgsConfigurable("exeArgs", ZigBrainsBundle.message("exec.option.label.exe-args"))
+    var exeArgs = ArgsConfigurable("exeArgs", ZigBrainsBundle.message("exec.option.label.exe-args"), true)
         private set
 
     override suspend fun buildCommandLineArgs(debug: Boolean): List<String> {
