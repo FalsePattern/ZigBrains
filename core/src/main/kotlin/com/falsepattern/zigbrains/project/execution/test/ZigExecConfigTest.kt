@@ -41,7 +41,7 @@ class ZigExecConfigTest(project: Project, factory: ConfigurationFactory): ZigExe
         private set
     var optimization = OptimizationConfigurable("optimization")
         private set
-    var compilerArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.compiler-args"))
+    var compilerArgs = ArgsConfigurable("compilerArgs", ZigBrainsBundle.message("exec.option.label.compiler-args"), true)
         private set
 
     @Throws(ExecutionException::class)

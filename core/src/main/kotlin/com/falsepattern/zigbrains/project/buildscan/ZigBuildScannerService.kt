@@ -80,6 +80,8 @@ class ZigBuildScannerService(private val project: Project): SerializablePersiste
 		set(value) {
 			updateState { it.copy(enabled = value) }
 		}
+	val rootProject: Serialization.Project?
+		get() = this.projects.getOrNull(0)
 
 	private fun reloadProjectRoots() {
 		//FIXME: Workaround for buggy jetbrains code to prevent it from blaming our plugin. Remove when fixed in the IDE. See: https://github.com/FalsePattern/zigbrains-error-reports/issues/6

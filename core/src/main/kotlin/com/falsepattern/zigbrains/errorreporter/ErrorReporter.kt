@@ -91,6 +91,7 @@ class ErrorReporter: ErrorReportSubmitter() {
                 val jbStatus = when(response.status) {
                     ErrorResponse.Status.New -> SubmittedReportInfo.SubmissionStatus.NEW_ISSUE
                     ErrorResponse.Status.Duplicate -> SubmittedReportInfo.SubmissionStatus.DUPLICATE
+                    ErrorResponse.Status.OldVersion -> SubmittedReportInfo.SubmissionStatus.FAILED
                 }
                 consumer.consume(SubmittedReportInfo(response.url, response.linkText, jbStatus))
             }.onFailure {
