@@ -36,6 +36,9 @@ import com.falsepattern.zigbrains.shared.element.writeEnum
 import com.falsepattern.zigbrains.shared.element.writeString
 import com.falsepattern.zigbrains.shared.sanitizedPathString
 import com.falsepattern.zigbrains.shared.sanitizedToNioPath
+import com.intellij.execution.ExecutionBundle
+import com.intellij.execution.configuration.EnvironmentVariablesData
+import com.intellij.execution.configuration.EnvironmentVariablesTextFieldWithBrowseButton
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
@@ -48,6 +51,7 @@ import com.intellij.ui.components.textFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
+import com.jetbrains.rd.framework.base.deepClonePolymorphic
 import org.jdom.Element
 import org.jetbrains.annotations.Nls
 import java.io.Serializable
@@ -385,6 +389,55 @@ class ArgsConfigurable(
         override fun construct(p: Panel): Unit = with(p) {
             row(guiName) {
                 cell(argsField).align(AlignX.FILL)
+            }
+        }
+
+        override fun dispose() {
+
+        }
+    }
+}
+
+class EnvConfigurable : ZigConfigurable<EnvConfigurable>, Cloneable {
+    var variables: EnvironmentVariablesData = EnvironmentVariablesData.DEFAULT
+
+    override fun readExternal(element: Element) {
+        variables = EnvironmentVariablesData.readExternal(element)
+    }
+
+    override fun writeExternal(element: Element) {
+		variables.writeExternal(element)
+    }
+
+    override fun createEditor(): ZigConfigModule<EnvConfigurable> {
+        return EnvConfigModule()
+    }
+
+    override fun clone(): EnvConfigurable {
+		val clone = super<Cloneable>.clone() as EnvConfigurable
+		clone.variables = clone.variables.deepClonePolymorphic()
+        return clone
+    }
+
+    class EnvConfigModule : ZigConfigModule<EnvConfigurable> {
+        private val envComponent = EnvironmentVariablesTextFieldWithBrowseButton()
+
+        override fun tryMatch(cfg: ZigConfigurable<*>): EnvConfigurable? {
+            return cfg as? EnvConfigurable
+        }
+
+        override fun apply(configurable: EnvConfigurable): Boolean {
+            configurable.variables = envComponent.data
+            return true
+        }
+
+        override fun reset(configurable: EnvConfigurable) {
+            envComponent.data = configurable.variables
+        }
+
+        override fun construct(p: Panel): Unit = with(p) {
+            row(ExecutionBundle.message("environment.variables.component.title")) {
+                cell(envComponent).align(AlignX.FILL)
             }
         }
 

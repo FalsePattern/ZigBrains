@@ -41,8 +41,10 @@ import org.jetbrains.annotations.Nls
 abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: ConfigurationFactory, @Nls name: String): LocatableConfigurationBase<ZigProfileState<T>>(project, factory, name) {
     var workingDirectory = WorkDirectoryConfigurable("workingDirectory").apply { path = project.guessProjectDir()?.toNioPathOrNull() }
         private set
+	var environment = EnvConfigurable()
+		private set
 
-    abstract val suggestedName: @ActionText String
+	abstract val suggestedName: @ActionText String
     @Throws(ExecutionException::class)
     abstract suspend fun buildCommandLineArgs(debug: Boolean): List<String>
     abstract override fun getState(executor: Executor, environment: ExecutionEnvironment): ZigProfileState<T>
@@ -67,15 +69,17 @@ abstract class ZigExecConfig<T: ZigExecConfig<T>>(project: Project, factory: Con
         if (direnv.isEnabled.isEnabled(project)) {
             commandLine.withEnvironment(direnv.import().env)
         }
+		commandLine.withEnvironment(environment.variables.envs)
         return commandLine
     }
 
     override fun clone(): T {
         val myClone = super.clone() as ZigExecConfig<*>
         myClone.workingDirectory = workingDirectory.clone()
+        myClone.environment = environment.clone()
         @Suppress("UNCHECKED_CAST")
         return myClone as T
     }
 
-    open fun getConfigurables(): List<ZigConfigurable<*>> = listOf(workingDirectory)
+    open fun getConfigurables(): List<ZigConfigurable<*>> = listOf(workingDirectory, environment)
 }
