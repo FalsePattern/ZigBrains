@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+
+- Project
+  - Autocompletion for zig build tasks in run configurations (by ENDERZOMBI102)
+  - An option for configuring environment variables in all zig run tasks (by ENDERZOMBI102)
+
+### Fixed
+
+- Project
+  - Zig build task command line arguments can now be opened as multi-line text boxes instead of making the window wide (by ENDERZOMBI102)
+
 ## [27.3.1] - 2025-08-21
 
 ### Fixed
