@@ -15,7 +15,7 @@
                 implementationClass="com.falsepattern.zigbrains.zig.pairing.ZigBraceMatcher"/>
         <lang.commenter
                 language="Zig"
-                implementationClass="com.falsepattern.zigbrains.zig.comments.ZigCommenter"/>
+                implementationClass="com.falsepattern.zigbrains.zig.comments.ZigSelfManagingCommenter"/>
         <lang.formatter
                 language="Zig"
                 implementationClass="com.falsepattern.zigbrains.zig.formatter.ZigFormattingModelBuilder"/>

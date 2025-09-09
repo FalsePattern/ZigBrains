@@ -10,10 +10,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 plugins {
     kotlin("jvm") version "2.1.10" apply false
     kotlin("plugin.serialization") version "2.1.10" apply false
-    id("org.jetbrains.intellij.platform") version "2.7.1"
+    id("org.jetbrains.intellij.platform") version "2.10.2"
     id("org.jetbrains.changelog") version "2.4.0"
     id("org.jetbrains.grammarkit") version "2022.3.2.2" apply false
-    id("org.jetbrains.gradle.plugin.idea-ext") version "1.2"
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.3"
     idea
     `maven-publish`
 }

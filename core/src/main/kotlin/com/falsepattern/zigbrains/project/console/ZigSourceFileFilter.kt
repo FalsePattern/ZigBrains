@@ -24,9 +24,11 @@ package com.falsepattern.zigbrains.project.console
 
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.filters.Filter.ResultItem
+import com.intellij.execution.filters.LazyFileHyperlinkInfo
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.toNioPathOrNull
+import kotlinx.io.IOException
 import java.io.File
 import java.nio.file.InvalidPathException
 import java.nio.file.Path
@@ -48,7 +50,7 @@ class ZigSourceFileFilter(private val project: Project): Filter {
             val path = pair.first
             val lineNumber = max(match.line - 1, 0)
             val lineOffset = max(match.offset - 1, 0)
-            results.add(ResultItem(lineStart + pair.second, lineStart + match.end, LazyOpenFileHyperlinkInfo(project, path, lineNumber, lineOffset)))
+            results.add(ResultItem(lineStart + pair.second, lineStart + match.end, LazyFileHyperlinkInfo(project, path.toString(), lineNumber, lineOffset)))
         }
         if (results.isEmpty())
             return null
@@ -71,6 +73,7 @@ class ZigSourceFileFilter(private val project: Project): Filter {
                 }
                 return Pair(file.toPath(), i)
             } catch (_: InvalidPathException) {
+            } catch (_: IOException) {
             }
         }
         return null

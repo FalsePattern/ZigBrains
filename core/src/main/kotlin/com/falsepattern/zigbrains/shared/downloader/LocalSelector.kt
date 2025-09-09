@@ -43,6 +43,8 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import com.intellij.util.system.OS
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.awt.Component
 import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicBoolean
@@ -112,7 +114,9 @@ abstract class LocalSelector<T>(val component: Component) {
         dialog.addCancelAction()
         dialog.addOkAction().also { it.setText(ZigBrainsBundle.message("settings.shared.local-selector.ok-action")) }
         if (preSelected == null) {
-            val chosenFile = FileChooser.chooseFile(descriptor, null, null)
+			val chosenFile = withContext(Dispatchers.IO) {
+				FileChooser.chooseFile(descriptor, null, null)
+			}
             if (chosenFile != null) {
                 verifyAndUpdate(chosenFile.toNioPath())
                 path.text = chosenFile.path
