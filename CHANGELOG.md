@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+## [28.1.0] - 2025-10-25
+
+### Changed
+
+- LSP
+  - Hide the ZLS multiline<->regular string conversion intentions (the plugin ones are more reliable)
+
+- Project
+  - Replaced invalid dependency name error logging with warning (reduced "IDE Error" spam)
+
+- Zig
+  - Reimplemented commenter to handle all logic internally instead of deferring to intellij (by ENDERZOMBI102)
+
+### Fixed
+
+- Project
+  - Uncaught IOException in ZigSourceFileFilter causing error spam
+  - "Slow operations are prohibited on EDT" error spam in the stacktrace highlighter
+
+- Zig
+  - Support Zig 0.15 inline assembly
+
 ## [28.0.0] - 2025-08-04
 
 ### Added

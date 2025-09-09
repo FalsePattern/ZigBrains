@@ -62,7 +62,7 @@ class ZigDependencyLibraryRootProvider: AdditionalLibraryRootsProvider() {
 							parts.size > 2 -> parts[0]  // $name-$version-$hash
 							parts.size == 1 -> parts[0] // a `.path` dependency, folder name is usually dep name
 							else -> {
-								logger.error("Failed to derive dependency name for directory ${vf.name}")
+								logger.warn("Failed to derive dependency name for directory ${vf.name}")
 								vf.name
 							}
 						}
@@ -72,7 +72,7 @@ class ZigDependencyLibraryRootProvider: AdditionalLibraryRootsProvider() {
 							parts.size > 2 -> parts[1]  // $name-$version-$hash
 							parts.size == 1 -> ""  // a `.path` dependency, if the project doesn't know the version then its empty
 							else -> {
-								logger.error("Failed to derive dependency version for directory ${vf.name}")
+								logger.warn("Failed to derive dependency version for directory ${vf.name}")
 								""
 							}
 						}
