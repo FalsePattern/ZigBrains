@@ -36,6 +36,7 @@ import com.redhat.devtools.lsp4ij.LanguageServerFactory
 import com.redhat.devtools.lsp4ij.LanguageServerManager
 import com.redhat.devtools.lsp4ij.ServerStatus
 import com.redhat.devtools.lsp4ij.client.features.LSPClientFeatures
+import com.redhat.devtools.lsp4ij.client.features.LSPCodeActionFeature
 import com.redhat.devtools.lsp4ij.client.features.LSPFormattingFeature
 import com.redhat.devtools.lsp4ij.client.features.LSPInlayHintFeature
 import com.redhat.devtools.lsp4ij.client.features.LSPSelectionRangeFeature
@@ -45,6 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.eclipse.lsp4j.CodeAction
 
 class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementSupport {
     override fun createConnectionProvider(project: Project): StreamConnectionProvider {
@@ -83,6 +85,15 @@ class ZigLanguageServerFactory: LanguageServerFactory, LanguageServerEnablementS
             override fun isEnabled(file: PsiFile): Boolean {
                 val settings = project.zls?.settings ?: return false
                 return settings.selectionRanges
+            }
+        }
+        features.codeActionFeature = object: LSPCodeActionFeature() {
+            override fun getText(codeAction: CodeAction): String? {
+                return when(val text = super.getText(codeAction)) {
+                    "convert to a multiline string literal",
+                    "convert to a string literal" -> null
+                    else -> text
+                }
             }
         }
         return features
