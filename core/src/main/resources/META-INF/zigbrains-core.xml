@@ -47,6 +47,14 @@
             <category>Zig</category>
         </intentionAction>
 
+
+        <!-- QoL things -->
+        <intentionAction>
+            <language>Zig</language>
+            <className>com.falsepattern.zigbrains.zig.intentions.AssignToUnderscore</className>
+            <category>Zig</category>
+        </intentionAction>
+
         <!-- Language injection -->
         <lang.elementManipulator
                 forClass="com.falsepattern.zigbrains.zig.psi.ZigStringLiteral"
