@@ -4,6 +4,9 @@
 
 ### Changed
 
+- Project
+  - Replaced invalid dependency name error logging with warning (reduced "IDE Error" spam)
+
 - Zig
   - Reimplemented commenter to handle all logic internally instead of deferring to intellij (by ENDERZOMBI102)
 
