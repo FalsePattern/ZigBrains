@@ -27,6 +27,7 @@ import com.intellij.execution.filters.Filter.ResultItem
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.toNioPathOrNull
+import kotlinx.io.IOException
 import java.io.File
 import java.nio.file.InvalidPathException
 import java.nio.file.Path
@@ -71,6 +72,7 @@ class ZigSourceFileFilter(private val project: Project): Filter {
                 }
                 return Pair(file.toPath(), i)
             } catch (_: InvalidPathException) {
+            } catch (_: IOException) {
             }
         }
         return null

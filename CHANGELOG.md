@@ -7,6 +7,11 @@
 - Zig
   - Reimplemented commenter to handle all logic internally instead of deferring to intellij (by ENDERZOMBI102)
 
+### Fixed
+
+- Project
+  - Uncaught IOException in ZigSourceFileFilter causing error spam
+
 ## [28.0.0] - 2025-08-04
 
 ### Added
