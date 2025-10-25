@@ -19,6 +19,9 @@
   - Uncaught IOException in ZigSourceFileFilter causing error spam
   - "Slow operations are prohibited on EDT" error spam in the stacktrace highlighter
 
+- Zig
+  - Support Zig 0.15 inline assembly
+
 ## [28.0.0] - 2025-08-04
 
 ### Added

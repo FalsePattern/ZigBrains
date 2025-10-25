@@ -378,7 +378,9 @@ AsmInput ::= COLON AsmInputList AsmClobbers?
 
 AsmInputItem ::= LBRACKET IDENTIFIER RBRACKET StringLiteral LPAREN Expr RPAREN
 
-AsmClobbers ::= COLON StringList
+//Zig 0.14: StringList
+//Zig 0.15: Expr
+AsmClobbers ::= COLON (Expr | StringList)
 
 // *** Helper grammar ***
 BreakLabel ::= COLON IDENTIFIER
