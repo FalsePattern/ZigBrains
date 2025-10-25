@@ -33,6 +33,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.refreshAndFindVirtualDirectory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Service(Service.Level.PROJECT)
 class ZigStandardLibraryRootService(val project: Project) {
@@ -48,8 +49,11 @@ class ZigStandardLibraryRootService(val project: Project) {
     }
 
     suspend fun reset(toolchain: ZigToolchain?) {
-        root = getRoot(toolchain)
-        name = getName(toolchain)
+        val (newRoot, newName) = withContext(Dispatchers.IO) {
+            getRoot(toolchain) to getName(toolchain)
+        }
+        root = newRoot
+        name = newName
     }
 
     private suspend fun getName(
