@@ -4,6 +4,9 @@
 
 ### Changed
 
+- LSP
+  - Hide the ZLS multiline<->regular string conversion intentions (the plugin ones are more reliable)
+
 - Project
   - Replaced invalid dependency name error logging with warning (reduced "IDE Error" spam)
 
