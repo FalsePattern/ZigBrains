@@ -211,6 +211,9 @@
         <projectConfigProvider
                 implementation="com.falsepattern.zigbrains.direnv.ui.DirenvEditor$Provider"
         />
+        <projectConfigProvider
+                implementation="com.falsepattern.zigbrains.zig.comments.cfg.ZigCommenterEditor$Provider"
+        />
     </extensions>
 
     <actions resource-bundle="zigbrains.ActionsBundle">
