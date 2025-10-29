@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Zig
+  - Made the commenter match the behaviour of other languages in intellij
+
 ## [28.1.0] - 2025-10-25
 
 ### Changed
