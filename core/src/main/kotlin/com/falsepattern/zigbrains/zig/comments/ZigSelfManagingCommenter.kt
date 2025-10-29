@@ -21,6 +21,8 @@
 
 package com.falsepattern.zigbrains.zig.comments
 
+import com.falsepattern.zigbrains.zig.comments.cfg.ZigCommenterService
+import com.falsepattern.zigbrains.zig.comments.cfg.ZigCommenterState
 import com.falsepattern.zigbrains.zig.psi.ZigTypes
 import com.intellij.codeInsight.generation.CommenterDataHolder
 import com.intellij.codeInsight.generation.SelfManagingCommenter
@@ -78,7 +80,7 @@ class ZigSelfManagingCommenter: SelfManagingCommenter<ZigCommenterDataHolder>, C
 			minIndent = minIndent?.let { minOf(minIndent, indent) } ?: indent
 		}
 		val indent = minIndent ?: 0
-		return ZigCommenterDataHolder(indent)
+		return ZigCommenterDataHolder(indent, ZigCommenterService.getInstance(file.project).commenterState)
 	}
 
 	override fun createBlockCommentingState(
@@ -96,17 +98,30 @@ class ZigSelfManagingCommenter: SelfManagingCommenter<ZigCommenterDataHolder>, C
 		document: Document,
 		data: ZigCommenterDataHolder
 	) {
-		val lineEndOffset = document.getLineEndOffset(line)
-		var commentOffset = offset + data.indent
-		var b = StringBuilder()
-		if (commentOffset >= lineEndOffset && isLineEmpty(document, line, offset, lineEndOffset)) {
-			for (i in lineEndOffset..<commentOffset) {
-				b.append(' ')
+		when(data.state) {
+			ZigCommenterState.Standard -> {
+				val lineEndOffset = document.getLineEndOffset(line)
+				var commentOffset = offset + data.indent
+				val b = StringBuilder()
+				if (commentOffset >= lineEndOffset && isLineEmpty(document, line, offset, lineEndOffset)) {
+					for (i in lineEndOffset..<commentOffset) {
+						b.append(' ')
+					}
+					commentOffset = lineEndOffset
+				}
+				b.append(COMMENT).append(' ')
+				document.insertString(commentOffset, b.toString())
 			}
-			commentOffset = lineEndOffset
+			ZigCommenterState.Alternative -> {
+				val prefix = if ( line == 0 )
+					TOP_LEVEL_COMMENT
+				else
+					this.detectLineCommentType(document, line - 1) ?: COMMENT
+
+				val offset = this.getOffset(document, line, offset)
+				document.insertString(offset, "$prefix ")
+			}
 		}
-		b.append(COMMENT).append(' ')
-		document.insertString(commentOffset, b.toString())
 	}
 
 	override fun uncommentLine(
@@ -118,24 +133,35 @@ class ZigSelfManagingCommenter: SelfManagingCommenter<ZigCommenterDataHolder>, C
 		// how much text do we need to remove?
 		val prefix = this.detectLineCommentType(document, line) ?: return
 
-		val lineEndOffset = document.getLineEndOffset(line)
+		when(data.state) {
+			ZigCommenterState.Standard -> {
+				val lineEndOffset = document.getLineEndOffset(line)
 
-		val prefixStartOffset = this.getOffset(document, line, offset)
-		val prefixEndOffset = prefixStartOffset + prefix.length
+				val prefixStartOffset = this.getOffset(document, line, offset)
+				val prefixEndOffset = prefixStartOffset + prefix.length
 
-		val offsetAfterPrefix = this.getOffset(document, line, prefixEndOffset)
+				val offsetAfterPrefix = this.getOffset(document, line, prefixEndOffset)
 
-		if (offsetAfterPrefix == lineEndOffset) {
-			//empty line, intellij/zig fmt strips whitespace in empty lines, follow the same convention
-			document.deleteString(document.getLineStartOffset(line), lineEndOffset)
-			return
+				if (offsetAfterPrefix == lineEndOffset) {
+					//empty line, intellij/zig fmt strips whitespace in empty lines, follow the same convention
+					document.deleteString(document.getLineStartOffset(line), lineEndOffset)
+					return
+				}
+
+				//strip the first space after the comment (zig convention)
+				val cs = document.immutableCharSequence
+				val endOffset = if (cs.length > prefixEndOffset && cs[prefixEndOffset].isWhitespace()) prefixEndOffset + 1 else prefixEndOffset
+
+				document.deleteString(prefixStartOffset, endOffset)
+			}
+			ZigCommenterState.Alternative -> {
+				val offset = this.getOffset(document, line, offset)
+				val endOffset = this.getOffset(document, line, offset + prefix.length)
+
+				document.deleteString(offset, endOffset)
+				this.deleteSpacesIfLineIsBlank(document, document.charsSequence, line)
+			}
 		}
-
-		//strip the first space after the comment (zig convention)
-		val cs = document.immutableCharSequence
-		val endOffset = if (cs.length > prefixEndOffset && cs[prefixEndOffset].isWhitespace()) prefixEndOffset + 1 else prefixEndOffset
-
-		document.deleteString(prefixStartOffset, endOffset)
 	}
 
 	override fun isLineCommented(
@@ -197,7 +223,7 @@ class ZigSelfManagingCommenter: SelfManagingCommenter<ZigCommenterDataHolder>, C
 		var offset = offset
 
 		// skip whitespace
-		while ( offset < len - 1 && sequence[offset].isWhitespace() && !sequence[offset].isLineBreak() ) {
+		while ( offset < len && sequence[offset].isWhitespace() && !sequence[offset].isLineBreak() ) {
 			offset += 1
 		}
 

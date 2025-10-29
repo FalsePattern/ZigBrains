@@ -19,9 +19,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.falsepattern.zigbrains.zig.comments
+package com.falsepattern.zigbrains.zig.comments.cfg
 
-import com.falsepattern.zigbrains.zig.comments.cfg.ZigCommenterState
-import com.intellij.codeInsight.generation.CommenterDataHolder
-
-data class ZigCommenterDataHolder(val indent: Int, val state: ZigCommenterState): CommenterDataHolder()
+enum class ZigCommenterState {
+    Standard,
+    Alternative;
+}
