@@ -149,3 +149,4 @@ secrets
 !.idea/copyright/
 !**/src/**/build/
 .kotlin
+.zig-cache

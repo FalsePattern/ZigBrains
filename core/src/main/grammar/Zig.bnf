@@ -274,7 +274,7 @@ AdditionExpr ::= MultiplyExpr (AdditionOp MultiplyExpr)*
 
 MultiplyExpr ::= PrefixExpr (MultiplyOp PrefixExpr)*
 
-PrefixExpr ::= PrefixOp* PrimaryExpr
+PrefixExpr ::= (PrefixOp+ PrimaryExpr) | PrimaryExpr
 
 PrimaryExpr
 ::= AsmExpr
