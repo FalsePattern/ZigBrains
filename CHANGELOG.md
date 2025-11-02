@@ -7,6 +7,11 @@
 - Project
   - Regression in toolchain selector logic prevents "Add ... from disk" from working
 
+### Changed
+
+- Project
+  - Allow selecting potentially incompatible ZLS versions for zig toolchains (e.g. ZLS 0.16.0 git builds for Zig 0.15.2)
+
 ## [28.2.0] - 2025-10-29
 
 ### Changed
