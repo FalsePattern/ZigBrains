@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Project
+  - Support for IOGate (Zig 0.16 IO refactor) in the build scanner
+
 ## [28.2.1] - 2025-11-02
 
 ### Fixed
