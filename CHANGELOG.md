@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [28.2.2] - 2025-11-02
+
+### Added
+
+- Project
+  - Support for IOGate (Zig 0.16 IO refactor) in the build scanner
+
+### Fixed
+
+- Zig
+  - "await" could not be used as a variable name in some cases
+
 ## [28.2.1] - 2025-11-02
 
 ### Fixed
