@@ -74,9 +74,11 @@ const Storage = struct {
 };
 
 // 0.14 compat
-// Remove after IOGate becomes stable
 const postWritergate = @hasDecl( std, "Io" );
 const newArrayLists = @hasDecl(std, "array_list");
+
+// 0.15 compat (IOGate added in 0.16)
+const postIOGate = postWritergate and @hasDecl(std.Io, "Threaded");
 
 pub fn build( b: *std.Build ) !void {
 	// run the project's build.zig
@@ -100,9 +102,21 @@ pub fn build( b: *std.Build ) !void {
     const port = try std.fmt.parseInt( u16, port_str, 10 );
 	std.log.info( "[ZigBrains:BuildScan] IDE is listening on port {}", .{ port } );
 
+	var threaded_io = if (postIOGate) std.Io.Threaded.init(b.allocator) else {};
+	defer if (postIOGate) threaded_io.deinit();
 	// connect to the IDE
-	var stream = try std.net.tcpConnectToAddress(.{ .in = try std.net.Ip4Address.resolveIp( "127.0.0.1", port ) });
-	defer stream.close();
+    var stream = if (postIOGate) netblk: {
+		const ip = std.Io.net.IpAddress{
+			.ip4 = .loopback(port),
+		};
+		break :netblk try ip.connect(threaded_io.io(), .{
+			.mode = .stream,
+			.protocol = .tcp,
+		});
+	} else netblk: {
+		break :netblk try std.net.tcpConnectToAddress(.{ .in = try std.net.Ip4Address.resolveIp( "127.0.0.1", port ) });
+	};
+	defer if (postIOGate) stream.close(threaded_io.io()) else stream.close();
 
 	// gather data
 	var storage: Storage = .{ .projects = if (newArrayLists) .empty else .init( alloc ) };
@@ -172,7 +186,7 @@ pub fn build( b: *std.Build ) !void {
 	// serialize
 	if ( postWritergate ) {
 		var writerBuf: [1024]u8 = undefined;
-		var streamWriter = stream.writer( &writerBuf );
+		var streamWriter = if (postIOGate) stream.writer( threaded_io.io(), &writerBuf ) else stream.writer( &writerBuf );
 		try std.json.Stringify.value( projects, .{ .whitespace = .indent_4 }, &streamWriter.interface );
 		try streamWriter.interface.flush();
 	} else {
