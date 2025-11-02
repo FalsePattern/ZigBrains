@@ -51,9 +51,11 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.text.SemVer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.toList
 import java.awt.Component
 import java.nio.file.Files
 import java.nio.file.Path
@@ -112,7 +114,7 @@ sealed interface ZLSDriver: UUIDComboBoxDriver<ZLSVersion> {
             }
             val res = ArrayList<ListElemIn<ZLSVersion>>()
             res.add(ListElem.None())
-            res.addAll(compatibleInstallations(toolchainVersion))
+            res.addAll(sortedInstallations(toolchainVersion))
             res.add(Separator("", true))
             res.addAll(ListElem.fetchGroup())
             res.add(Separator(ZLSBundle.message("settings.model.detected.separator"), true))
@@ -145,56 +147,79 @@ private fun suggestZLSVersions(project: Project? = null, data: ZigProjectConfigu
         Env.empty
     }
     val existing = zlsInstallations.map { (_, zls) -> zls }
-    env.findAllExecutablesOnPATH("zls").collect { path ->
-        if (existing.any { it.path == path }) {
-            return@collect
+    env.findAllExecutablesOnPATH("zls")
+        .filter { path -> existing.none { it.path == path } }
+        .mapNotNull { path -> toVersionSorterPair(path, toolchainVersion) }
+        .toList()
+        .sortedByDescending { ver -> ver.second }
+        .forEach { ver ->
+            emit(ver.first)
         }
-        emitIfCompatible(path, toolchainVersion)
-    }
     val exe = if (SystemInfo.isWindows) "zls.exe" else "zls"
     wellKnownZLS.forEach { wellKnown ->
         runCatching {
             Files.newDirectoryStream(wellKnown).use { stream ->
-                stream.asSequence().filterNotNull().forEach streamForEach@{ dir ->
-                    val path = dir.resolve(exe)
-                    if (!path.isRegularFile() || !path.isExecutable()) {
-                        return@streamForEach
+                stream.asSequence()
+                    .mapNotNull { dir -> dir?.resolve(exe) }
+                    .filter { path -> path.isRegularFile() && path.isExecutable() }
+                    .filter { path -> existing.none { it.path == path } }
+                    .toList()
+                    .mapNotNull { path -> toVersionSorterPair(path, toolchainVersion) }
+                    .sortedByDescending { ver -> ver.second }
+                    .forEach { ver ->
+                        emit(ver.first)
                     }
-                    if (existing.any { it.path == path }) {
-                        return@streamForEach
-                    }
-                    emitIfCompatible(path, toolchainVersion)
-                }
             }
         }
     }
 }.flowOn(Dispatchers.IO)
 
-private suspend fun FlowCollector<ZLSVersion>.emitIfCompatible(path: Path, toolchainVersion: SemVer?) {
-    val ver = ZLSVersion.tryFromPath(path) ?: return
-    if (isCompatible(ver, toolchainVersion)) {
-        emit(ver)
-    }
+private suspend fun toVersionSorterPair(path: Path, toolchainVersion: SemVer?): Pair<ZLSVersion, VersionSorter>? {
+    val ver = ZLSVersion.tryFromPath(path) ?: return null
+    return ver to toSorter(ver, toolchainVersion)
 }
 
-private suspend fun compatibleInstallations(toolchainVersion: SemVer): List<Actual<ZLSVersion>> {
-    return zlsInstallations.mapNotNull { (uuid, version) ->
-        if (!isCompatible(version, toolchainVersion)) {
-            return@mapNotNull null
+private suspend fun toSorter(zlsVersion: ZLSVersion, toolchainVersion: SemVer?): VersionSorter {
+    val zlsSemver = zlsVersion.version()
+    return VersionSorter(zlsSemverCompatible(zlsSemver, toolchainVersion), zlsSemver)
+}
+
+@JvmRecord
+data class VersionSorter(val compatible: Boolean, val semver: SemVer?): Comparable<VersionSorter> {
+    override fun compareTo(other: VersionSorter): Int {
+        if (compatible && !other.compatible) {
+            return 1
         }
-        Actual(uuid, version)
+        if (!compatible && other.compatible) {
+            return -1
+        }
+        if (semver != null) {
+            if (other.semver == null) {
+                return 1
+            }
+            return semver.compareTo(other.semver)
+        } else {
+            if (other.semver == null) {
+                return 0
+            }
+            return -1
+        }
     }
 }
 
-private suspend fun isCompatible(version: ZLSVersion, toolchainVersion: SemVer?): Boolean {
+private suspend fun sortedInstallations(toolchainVersion: SemVer?): List<Actual<ZLSVersion>> {
+    return zlsInstallations
+        .map { ver -> ver to toSorter(ver.second, toolchainVersion) }
+        .sortedBy { ver -> ver.second}
+        .map { ver -> Actual(ver.first.first, ver.first.second) }
+}
+
+private fun zlsSemverCompatible(zlsVersion: SemVer?, toolchainVersion: SemVer?): Boolean {
+    if (zlsVersion == null)
+        return false
     if (toolchainVersion == null)
         return true
-    val zlsVersion = version.version() ?: return false
-    return numericVersionCompatible(zlsVersion, toolchainVersion)
-}
-
-private fun numericVersionCompatible(a: SemVer, b: SemVer): Boolean {
-    return a.major == b.major && a.minor == b.minor
+    return zlsVersion.major == toolchainVersion.major && zlsVersion.minor == toolchainVersion.minor
 }
 
 
