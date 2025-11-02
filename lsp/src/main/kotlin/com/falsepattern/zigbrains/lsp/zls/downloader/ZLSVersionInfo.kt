@@ -35,6 +35,7 @@ import com.intellij.util.asSafely
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.text.SemVer
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -51,35 +52,49 @@ data class ZLSVersionInfo(
     override val dist: Tarball
 ): VersionInfo {
     companion object {
-        @OptIn(ExperimentalSerializationApi::class)
         suspend fun downloadVersionInfoFor(toolchain: ZigToolchain?, project: Project?): List<ZLSVersionInfo> {
             return withContext(Dispatchers.IO) {
-                val single = toolchain != null
-                val url = if (single) {
-                    getToolchainURL(toolchain!!, project) ?: return@withContext emptyList()
-                } else {
-                    multiURL
+                val primaryAsync = async {
+                    toolchain
+                        ?.let { getToolchainURL(it, project) }
+                        ?.let { download(it) }
+                        ?.let { parseVersion(null, it) }
                 }
-                val service = DownloadableFileService.getInstance()
-                val tempFile = FileUtil.createTempFile(tempPluginDir, "zls_version_info", ".json", false, false)
-                val desc = service.createFileDescription(url, tempFile.name)
-                val downloader = service.createDownloader(listOf(desc), ZLSBundle.message("settings.downloader.service.index"))
-                val downloadResults = blockingContext {
-                    downloader.download(tempPluginDir)
+                val allAsync = async {
+                    download(multiURL)
+                        ?.mapNotNull { (key, value) -> parseVersion(key, value) }
                 }
-                if (downloadResults.isEmpty())
-                    return@withContext emptyList()
-                val index = downloadResults[0].first
-                val info = index.inputStream().use { Json.decodeFromStream<JsonObject>(it) }
-                index.delete()
-                return@withContext if (single) {
-                    listOfNotNull(parseVersion(null, info))
-                } else {
-                    info.mapNotNull { (key, value) -> parseVersion(key, value) }
+                val primary = primaryAsync.await()
+                val all = allAsync.await()
+                if (primary == null) {
+                    return@withContext all ?: emptyList()
                 }
+                val result = ArrayList<ZLSVersionInfo>()
+                result.add(primary)
+                if (all != null) {
+                    result.addAll(all.filter { version -> version.version != primary.version })
+                }
+                return@withContext result
             }
         }
     }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+private suspend fun download(url: String): JsonObject? {
+    val service = DownloadableFileService.getInstance()
+    val tempFile = FileUtil.createTempFile(tempPluginDir, "zls_version_info", ".json", false, false)
+    val desc = service.createFileDescription(url, tempFile.name)
+    val downloader = service.createDownloader(listOf(desc), ZLSBundle.message("settings.downloader.service.index"))
+    val downloadResults = blockingContext {
+        downloader.download(tempPluginDir)
+    }
+    if (downloadResults.isEmpty())
+        return null
+    val index = downloadResults[0].first
+    val info = index.inputStream().use { Json.decodeFromStream<JsonObject>(it) }
+    index.delete()
+    return info
 }
 
 private suspend fun getToolchainURL(toolchain: ZigToolchain, project: Project?): String? {
