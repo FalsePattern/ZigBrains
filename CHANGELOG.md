@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - Regression in toolchain selector logic prevents "Add ... from disk" from working
+
 ## [28.2.0] - 2025-10-29
 
 ### Changed
