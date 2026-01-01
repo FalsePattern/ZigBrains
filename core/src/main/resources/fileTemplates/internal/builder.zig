@@ -55,6 +55,8 @@ const Storage = struct {
 	projects: std.ArrayList(Project),
 
 	const Project = struct {
+		name: []const u8,
+  		version: ?[]const u8,
 		path: []const u8,
 		steps: []const Serialization.Step,
 		modules: []const Storage.Module,
@@ -127,7 +129,7 @@ pub fn build( b: *std.Build ) !void {
 
 	// gather data
 	var storage: Storage = .{ .projects = if (newArrayLists) .empty else .init( alloc ) };
-	try gatherProjects( b, if ( postIOGate ) threaded_io.io() else {}, &storage, alloc );
+	try gatherProjects( b, if ( postIOGate ) threaded_io.io() else {}, &storage, "<root>", alloc );
 
 	const Util = struct {
 		pub fn findProjectIndex( strg: *Storage, needle: []const u8 ) ?usize {
@@ -181,8 +183,8 @@ pub fn build( b: *std.Build ) !void {
 
 		// save the mappings
 		projects[i] = .{
-			.name = null,
-			.version = null,
+			.name = proj.name,
+			.version = proj.version,
 			.path = proj.path,
 			.steps = proj.steps,
 			.modules = modules,
@@ -204,22 +206,22 @@ pub fn build( b: *std.Build ) !void {
 	return res;
 }
 
-fn gatherProjects( b: *std.Build, io: IoType, storage: *Storage, alloc: std.mem.Allocator ) !void {
+fn gatherProjects( b: *std.Build, io: IoType, storage: *Storage, depName: []const u8, alloc: std.mem.Allocator ) !void {
 	const root_path = blk: {
 		// check if we need to resolve the path
 		if ( std.fs.path.isAbsolute( b.build_root.path.? ) ) {
 			break :blk b.build_root.path.?;
 		}
 		// well, we need to, resolve that bad boy!
-		var dir = try if ( postIOGate )
-			std.Io.Dir.cwd().openDir( io, b.build_root.path.?, .{ } )
-		else
-			std.fs.cwd().openDir( b.build_root.path.?, .{ } );
-		defer dir.close( io );
-		break :blk try if ( postIOGate )
-			dir.realPathFileAlloc( io, ".", alloc )
-		else
-			dir.realpathAlloc( alloc, "." );
+		if ( postIOGate ) {
+			var dir = try std.Io.Dir.cwd().openDir( io, b.build_root.path.?, .{ } );
+			defer dir.close( io );
+			break :blk try dir.realPathFileAlloc( io, ".", alloc );
+		} else {
+			var dir = try std.fs.cwd().openDir( b.build_root.path.?, .{ } );
+			defer dir.close();
+			break :blk try dir.realpathAlloc( alloc, "." );
+		}
 	};
 	// ensure we don't traverse a project twice
 	for ( storage.projects.items ) |proj| {
@@ -282,8 +284,15 @@ fn gatherProjects( b: *std.Build, io: IoType, storage: *Storage, alloc: std.mem.
 		}
 	}
 
+	// parse the .zon
+	var name: []const u8 = depName;
+	var version: ?[]const u8 = null;
+	parseZigZon( b, io, alloc, root_path, &name, &version ) catch { };
+
 	// save the gathered data
 	(if (newArrayLists) try storage.projects.addOne(alloc) else try storage.projects.addOne()).* = .{
+		.name = name,
+		.version = version,
 		.path = root_path,
 		.modules = modules.items,
 		.steps = steps,
@@ -292,7 +301,7 @@ fn gatherProjects( b: *std.Build, io: IoType, storage: *Storage, alloc: std.mem.
 
 	// visit the dependencies
 	for ( b.available_deps ) |dep| {
-		try gatherProjects( (b.lazyDependency( dep.@"0", .{ } ) orelse continue).builder, io, storage, alloc );
+		try gatherProjects( (b.lazyDependency( dep.@"0", .{ } ) orelse continue).builder, io, storage, dep.@"0", alloc );
 	}
 }
 
@@ -313,5 +322,49 @@ fn discoverStepModules( step: *std.Build.Step, modules: *std.ArrayList(Storage.M
 	}
 	for ( step.dependencies.items ) |s| {
 		try discoverStepModules( s, modules, alloc );
+	}
+}
+
+fn parseZigZon( b: *std.Build, io: IoType, alloc: std.mem.Allocator, root_path: []const u8, name: *[]const u8, version: *?[]const u8 ) !void {
+	var file = blk: {
+		// well, we need to, resolve that bad boy!
+		if ( postIOGate ) {
+			var dir = try std.Io.Dir.openDirAbsolute( io, root_path, .{ } );
+			defer dir.close( io );
+			break :blk try dir.openFile( io, "build.zig.zon", .{ } );
+		} else {
+			var dir = try std.fs.openDirAbsolute( root_path, .{ } );
+			defer dir.close();
+			break :blk try dir.openFile( "build.zig.zon", .{ } );
+		}
+	};
+	defer if ( postIOGate )
+		file.close( io )
+	else
+		file.close();
+
+	const stats = try if ( postIOGate )
+		file.stat( io )
+	else
+		file.stat();
+	const buffer = try alloc.allocSentinel( u8, stats.size, 0 );
+	_ = try if ( postIOGate )
+		file.readPositionalAll( io, buffer, 0 )
+	else
+		file.readAll( buffer );
+	const ast = try std.zig.Ast.parse( alloc, buffer, .zon );
+	const zoir = try std.zig.ZonGen.generate( alloc, ast, .{ } );
+
+	const ZonIdx = std.zig.Zoir.Node.Index;
+	const root = ZonIdx.get( ZonIdx.root, zoir ).struct_literal;
+
+	for ( root.names, 0.. ) |nodeNameNts, idx| {
+		const nodeName = nodeNameNts.get( zoir );
+		const node = root.vals.at( @intCast( idx ) ).get( zoir );
+		if ( std.mem.eql( u8, nodeName, "name" ) ) {
+			name.* = b.dupe( node.enum_literal.get( zoir ) );
+		} else if ( std.mem.eql( u8, nodeName, "version" ) ) {
+			version.* = b.dupe( node.string_literal );
+		}
 	}
 }
