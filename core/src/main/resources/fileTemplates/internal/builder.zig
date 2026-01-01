@@ -51,8 +51,18 @@ const Serialization = struct {
 	};
 };
 
+// 0.14 compat
+const postWritergate = @hasDecl( std, "Io" );
+const newArrayLists = @hasDecl(std, "array_list");
+const ArrayList = if ( newArrayLists ) std.ArrayList else std.ArrayListUnmanaged;
+
+// 0.15 compat (IOGate added in 0.16)
+const postIOGate = postWritergate and @hasDecl(std.Io, "Threaded");
+const IoType = if ( postIOGate ) std.Io else void;
+
+// In-memory representation
 const Storage = struct {
-	projects: std.ArrayList(Project),
+	projects: ArrayList(Project),
 
 	const Project = struct {
 		name: []const u8,
@@ -74,15 +84,6 @@ const Storage = struct {
 		lazy: bool,
 	};
 };
-
-// 0.14 compat
-const postWritergate = @hasDecl( std, "Io" );
-const newArrayLists = @hasDecl(std, "array_list");
-
-// 0.15 compat (IOGate added in 0.16)
-const postIOGate = postWritergate and @hasDecl(std.Io, "Threaded");
-
-const IoType = if ( postIOGate ) std.Io else void;
 
 pub fn build( b: *std.Build ) !void {
 	// run the project's build.zig
@@ -128,7 +129,7 @@ pub fn build( b: *std.Build ) !void {
 	defer if (postIOGate) stream.close(threaded_io.io()) else stream.close();
 
 	// gather data
-	var storage: Storage = .{ .projects = if (newArrayLists) .empty else .init( alloc ) };
+	var storage: Storage = .{ .projects = .empty };
 	try gatherProjects( b, if ( postIOGate ) threaded_io.io() else {}, &storage, "<root>", alloc );
 
 	const Util = struct {
@@ -265,7 +266,7 @@ fn gatherProjects( b: *std.Build, io: IoType, storage: *Storage, depName: []cons
 	}
 
 	// gather modules
-	var modules: std.ArrayList(Storage.Module) = try .initCapacity( alloc, b.modules.count() );
+	var modules: ArrayList(Storage.Module) = try .initCapacity( alloc, b.modules.count() );
 	{
 		// public modules, we know exactly how many there are, so we prealloc the space for them
 		var modIter = b.modules.iterator();
@@ -290,7 +291,7 @@ fn gatherProjects( b: *std.Build, io: IoType, storage: *Storage, depName: []cons
 	parseZigZon( b, io, alloc, root_path, &name, &version ) catch { };
 
 	// save the gathered data
-	(if (newArrayLists) try storage.projects.addOne(alloc) else try storage.projects.addOne()).* = .{
+	(try storage.projects.addOne(alloc)).* = .{
 		.name = name,
 		.version = version,
 		.path = root_path,
@@ -305,7 +306,7 @@ fn gatherProjects( b: *std.Build, io: IoType, storage: *Storage, depName: []cons
 	}
 }
 
-fn discoverStepModules( step: *std.Build.Step, modules: *std.ArrayList(Storage.Module), alloc: std.mem.Allocator ) !void {
+fn discoverStepModules( step: *std.Build.Step, modules: *ArrayList(Storage.Module), alloc: std.mem.Allocator ) !void {
 	if ( step.id == .compile ) blk: {
 		const compile: *std.Build.Step.Compile = @fieldParentPtr( "step", step );
 		// check if a module was already added
@@ -314,7 +315,7 @@ fn discoverStepModules( step: *std.Build.Step, modules: *std.ArrayList(Storage.M
 				break :blk;
 			}
 		}
-		(if (newArrayLists) try modules.addOne(alloc) else try modules.addOne()).* = .{
+		(try modules.addOne( alloc )).* = .{
 			.module = compile.root_module,
 			.public = false,
 			.imports = &compile.root_module.import_table,
