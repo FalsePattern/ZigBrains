@@ -46,7 +46,7 @@ const Serialization = struct {
 	const Dependency = struct {
 		/// The index of the project in the projects list
 		project: usize,
-		/// Whether the dependency was delcared lazy
+		/// Whether the dependency was declared lazy
 		lazy: bool,
 	};
 };
@@ -80,6 +80,8 @@ const newArrayLists = @hasDecl(std, "array_list");
 // 0.15 compat (IOGate added in 0.16)
 const postIOGate = postWritergate and @hasDecl(std.Io, "Threaded");
 
+const IoType = if ( postIOGate ) std.Io else void;
+
 pub fn build( b: *std.Build ) !void {
 	// run the project's build.zig
 	const res = switch ( @typeInfo(RetType) ) {
@@ -102,8 +104,13 @@ pub fn build( b: *std.Build ) !void {
     const port = try std.fmt.parseInt( u16, port_str, 10 );
 	std.log.info( "[ZigBrains:BuildScan] IDE is listening on port {}", .{ port } );
 
-	var threaded_io = if (postIOGate) std.Io.Threaded.init(b.allocator) else {};
+	// get an Io implementation
+	var threaded_io = if (postIOGate)
+		std.Io.Threaded.init( b.allocator, .{ } )
+	else
+		{};
 	defer if (postIOGate) threaded_io.deinit();
+
 	// connect to the IDE
     var stream = if (postIOGate) netblk: {
 		const ip = std.Io.net.IpAddress{
@@ -120,7 +127,7 @@ pub fn build( b: *std.Build ) !void {
 
 	// gather data
 	var storage: Storage = .{ .projects = if (newArrayLists) .empty else .init( alloc ) };
-	try gatherProjects( b, &storage, alloc );
+	try gatherProjects( b, if ( postIOGate ) threaded_io.io() else {}, &storage, alloc );
 
 	const Util = struct {
 		pub fn findProjectIndex( strg: *Storage, needle: []const u8 ) ?usize {
@@ -197,16 +204,22 @@ pub fn build( b: *std.Build ) !void {
 	return res;
 }
 
-fn gatherProjects( b: *std.Build, storage: *Storage, alloc: std.mem.Allocator ) !void {
+fn gatherProjects( b: *std.Build, io: IoType, storage: *Storage, alloc: std.mem.Allocator ) !void {
 	const root_path = blk: {
 		// check if we need to resolve the path
 		if ( std.fs.path.isAbsolute( b.build_root.path.? ) ) {
 			break :blk b.build_root.path.?;
 		}
 		// well, we need to, resolve that bad boy!
-		var dir = try std.fs.cwd().openDir( b.build_root.path.?, .{ } );
-		defer dir.close();
-		break :blk try dir.realpathAlloc( alloc, "." );
+		var dir = try if ( postIOGate )
+			std.Io.Dir.cwd().openDir( io, b.build_root.path.?, .{ } )
+		else
+			std.fs.cwd().openDir( b.build_root.path.?, .{ } );
+		defer dir.close( io );
+		break :blk try if ( postIOGate )
+			dir.realPathFileAlloc( io, ".", alloc )
+		else
+			dir.realpathAlloc( alloc, "." );
 	};
 	// ensure we don't traverse a project twice
 	for ( storage.projects.items ) |proj| {
@@ -279,7 +292,7 @@ fn gatherProjects( b: *std.Build, storage: *Storage, alloc: std.mem.Allocator ) 
 
 	// visit the dependencies
 	for ( b.available_deps ) |dep| {
-		try gatherProjects( (b.lazyDependency( dep.@"0", .{ } ) orelse continue).builder, storage, alloc );
+		try gatherProjects( (b.lazyDependency( dep.@"0", .{ } ) orelse continue).builder, io, storage, alloc );
 	}
 }
 
