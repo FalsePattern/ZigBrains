@@ -22,6 +22,7 @@
 
 package com.falsepattern.zigbrains.project.console
 
+import com.falsepattern.zigbrains.project.toolchain.ZigToolchainService
 import com.intellij.execution.filters.Filter
 import com.intellij.execution.filters.Filter.ResultItem
 import com.intellij.execution.filters.LazyFileHyperlinkInfo
@@ -38,6 +39,9 @@ import kotlin.math.max
 class ZigSourceFileFilter(private val project: Project): Filter {
     private val projectPath = runCatching { project.guessProjectDir()?.toNioPathOrNull()?.toFile() }.getOrNull()
     override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
+		// If we're not a zig project, avoid analyzing the console, might prevent unwanted effects
+		if (ZigToolchainService.getInstance(project).toolchain == null)
+			return null
         if (line.isEmpty())
             return null
         val lineStart = entireLength - line.length
