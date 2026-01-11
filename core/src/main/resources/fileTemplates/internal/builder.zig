@@ -62,6 +62,7 @@ const IoType = if ( postIOGate ) std.Io else void;
 
 // 0.16 compat (new build apis)
 const envInGraph = @hasField(std.Build.Graph, "environ_map");
+const ioInGraph = @hasField(std.Build.Graph, "io");
 
 // In-memory representation
 const Storage = struct {
@@ -114,29 +115,30 @@ pub fn build( b: *std.Build ) !void {
 	std.log.info( "[ZigBrains:BuildScan] IDE is listening on port {}", .{ port } );
 
 	// get an Io implementation
-	var threaded_io = if (postIOGate)
+	var threaded_io = if (postIOGate and !ioInGraph)
 		std.Io.Threaded.init( b.allocator, .{ } )
 	else
 		{};
-	defer if (postIOGate) threaded_io.deinit();
+	defer if (postIOGate and !ioInGraph) threaded_io.deinit();
+    const io = if (postIOGate) if (ioInGraph) b.graph.io else threaded_io.io() else {};
 
 	// connect to the IDE
     var stream = if (postIOGate) netblk: {
 		const ip = std.Io.net.IpAddress{
 			.ip4 = .loopback(port),
 		};
-		break :netblk try ip.connect(threaded_io.io(), .{
+		break :netblk try ip.connect(io, .{
 			.mode = .stream,
 			.protocol = .tcp,
 		});
 	} else netblk: {
 		break :netblk try std.net.tcpConnectToAddress(.{ .in = try std.net.Ip4Address.resolveIp( "127.0.0.1", port ) });
 	};
-	defer if (postIOGate) stream.close(threaded_io.io()) else stream.close();
+	defer if (postIOGate) stream.close(io) else stream.close();
 
 	// gather data
 	var storage: Storage = .{ .projects = .empty };
-	try gatherProjects( b, if ( postIOGate ) threaded_io.io() else {}, &storage, "<root>", alloc );
+	try gatherProjects( b, if ( postIOGate ) io else {}, &storage, "<root>", alloc );
 
 	const Util = struct {
 		pub fn findProjectIndex( strg: *Storage, needle: []const u8 ) ?usize {
@@ -202,7 +204,7 @@ pub fn build( b: *std.Build ) !void {
 	// serialize
 	if ( postWritergate ) {
 		var writerBuf: [1024]u8 = undefined;
-		var streamWriter = if (postIOGate) stream.writer( threaded_io.io(), &writerBuf ) else stream.writer( &writerBuf );
+		var streamWriter = if (postIOGate) stream.writer( io, &writerBuf ) else stream.writer( &writerBuf );
 		try std.json.Stringify.value( projects, .{ .whitespace = .indent_4 }, &streamWriter.interface );
 		try streamWriter.interface.flush();
 	} else {
