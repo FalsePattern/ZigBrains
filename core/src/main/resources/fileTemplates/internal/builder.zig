@@ -60,6 +60,9 @@ const ArrayList = if ( newArrayLists ) std.ArrayList else std.ArrayListUnmanaged
 const postIOGate = postWritergate and @hasDecl(std.Io, "Threaded");
 const IoType = if ( postIOGate ) std.Io else void;
 
+// 0.16 compat (new build apis)
+const envInGraph = @hasField(std.Build.Graph, "environ_map");
+
 // In-memory representation
 const Storage = struct {
 	projects: ArrayList(Project),
@@ -98,10 +101,13 @@ pub fn build( b: *std.Build ) !void {
 	defer arena.deinit();
 
 	// get the port environment variable
-    const port_str = std.process.getEnvVarOwned(alloc, "ZIGBRAINS_PORT") catch |e| switch (e) {
-        error.EnvironmentVariableNotFound => return error.NoPortGiven,
-        else => return e,
-    };
+    const port_str = if (envInGraph)
+        b.graph.environ_map.get("ZIGBRAINS_PORT") orelse return error.NoPortGiven
+    else
+        std.process.getEnvVarOwned(alloc, "ZIGBRAINS_PORT") catch |e| switch (e) {
+            error.EnvironmentVariableNotFound => return error.NoPortGiven,
+            else => return e,
+        };
 
     // translate it to an int
     const port = try std.fmt.parseInt( u16, port_str, 10 );
