@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Project
+  - Unnecessary console output analysis in non-zig projects
+  - Updated build scan helper for compatibility with latest zig 0.16 builds
+
 ## [28.2.2] - 2025-11-02
 
 ### Added
