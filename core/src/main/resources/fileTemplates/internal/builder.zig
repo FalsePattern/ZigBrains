@@ -46,15 +46,31 @@ const Serialization = struct {
 	const Dependency = struct {
 		/// The index of the project in the projects list
 		project: usize,
-		/// Whether the dependency was delcared lazy
+		/// Whether the dependency was declared lazy
 		lazy: bool,
 	};
 };
 
+// 0.14 compat
+const postWritergate = @hasDecl( std, "Io" );
+const newArrayLists = @hasDecl(std, "array_list");
+const ArrayList = if ( newArrayLists ) std.ArrayList else std.ArrayListUnmanaged;
+
+// 0.15 compat (IOGate added in 0.16)
+const postIOGate = postWritergate and @hasDecl(std.Io, "Threaded");
+const IoType = if ( postIOGate ) std.Io else void;
+
+// 0.16 compat (new build apis)
+const envInGraph = @hasField(std.Build.Graph, "environ_map");
+const ioInGraph = @hasField(std.Build.Graph, "io");
+
+// In-memory representation
 const Storage = struct {
-	projects: std.ArrayList(Project),
+	projects: ArrayList(Project),
 
 	const Project = struct {
+		name: []const u8,
+  		version: ?[]const u8,
 		path: []const u8,
 		steps: []const Serialization.Step,
 		modules: []const Storage.Module,
@@ -73,13 +89,6 @@ const Storage = struct {
 	};
 };
 
-// 0.14 compat
-const postWritergate = @hasDecl( std, "Io" );
-const newArrayLists = @hasDecl(std, "array_list");
-
-// 0.15 compat (IOGate added in 0.16)
-const postIOGate = postWritergate and @hasDecl(std.Io, "Threaded");
-
 pub fn build( b: *std.Build ) !void {
 	// run the project's build.zig
 	const res = switch ( @typeInfo(RetType) ) {
@@ -93,34 +102,43 @@ pub fn build( b: *std.Build ) !void {
 	defer arena.deinit();
 
 	// get the port environment variable
-    const port_str = std.process.getEnvVarOwned(alloc, "ZIGBRAINS_PORT") catch |e| switch (e) {
-        error.EnvironmentVariableNotFound => return error.NoPortGiven,
-        else => return e,
-    };
+    const port_str = if (envInGraph)
+        b.graph.environ_map.get("ZIGBRAINS_PORT") orelse return error.NoPortGiven
+    else
+        std.process.getEnvVarOwned(alloc, "ZIGBRAINS_PORT") catch |e| switch (e) {
+            error.EnvironmentVariableNotFound => return error.NoPortGiven,
+            else => return e,
+        };
 
     // translate it to an int
     const port = try std.fmt.parseInt( u16, port_str, 10 );
 	std.log.info( "[ZigBrains:BuildScan] IDE is listening on port {}", .{ port } );
 
-	var threaded_io = if (postIOGate) std.Io.Threaded.init(b.allocator) else {};
-	defer if (postIOGate) threaded_io.deinit();
+	// get an Io implementation
+	var threaded_io = if (postIOGate and !ioInGraph)
+		std.Io.Threaded.init( b.allocator, .{ } )
+	else
+		{};
+	defer if (postIOGate and !ioInGraph) threaded_io.deinit();
+    const io = if (postIOGate) if (ioInGraph) b.graph.io else threaded_io.io() else {};
+
 	// connect to the IDE
     var stream = if (postIOGate) netblk: {
 		const ip = std.Io.net.IpAddress{
 			.ip4 = .loopback(port),
 		};
-		break :netblk try ip.connect(threaded_io.io(), .{
+		break :netblk try ip.connect(io, .{
 			.mode = .stream,
 			.protocol = .tcp,
 		});
 	} else netblk: {
 		break :netblk try std.net.tcpConnectToAddress(.{ .in = try std.net.Ip4Address.resolveIp( "127.0.0.1", port ) });
 	};
-	defer if (postIOGate) stream.close(threaded_io.io()) else stream.close();
+	defer if (postIOGate) stream.close(io) else stream.close();
 
 	// gather data
-	var storage: Storage = .{ .projects = if (newArrayLists) .empty else .init( alloc ) };
-	try gatherProjects( b, &storage, alloc );
+	var storage: Storage = .{ .projects = .empty };
+	try gatherProjects( b, if ( postIOGate ) io else {}, &storage, "<root>", alloc );
 
 	const Util = struct {
 		pub fn findProjectIndex( strg: *Storage, needle: []const u8 ) ?usize {
@@ -174,8 +192,8 @@ pub fn build( b: *std.Build ) !void {
 
 		// save the mappings
 		projects[i] = .{
-			.name = null,
-			.version = null,
+			.name = proj.name,
+			.version = proj.version,
 			.path = proj.path,
 			.steps = proj.steps,
 			.modules = modules,
@@ -186,7 +204,7 @@ pub fn build( b: *std.Build ) !void {
 	// serialize
 	if ( postWritergate ) {
 		var writerBuf: [1024]u8 = undefined;
-		var streamWriter = if (postIOGate) stream.writer( threaded_io.io(), &writerBuf ) else stream.writer( &writerBuf );
+		var streamWriter = if (postIOGate) stream.writer( io, &writerBuf ) else stream.writer( &writerBuf );
 		try std.json.Stringify.value( projects, .{ .whitespace = .indent_4 }, &streamWriter.interface );
 		try streamWriter.interface.flush();
 	} else {
@@ -197,16 +215,22 @@ pub fn build( b: *std.Build ) !void {
 	return res;
 }
 
-fn gatherProjects( b: *std.Build, storage: *Storage, alloc: std.mem.Allocator ) !void {
+fn gatherProjects( b: *std.Build, io: IoType, storage: *Storage, depName: []const u8, alloc: std.mem.Allocator ) !void {
 	const root_path = blk: {
 		// check if we need to resolve the path
 		if ( std.fs.path.isAbsolute( b.build_root.path.? ) ) {
 			break :blk b.build_root.path.?;
 		}
 		// well, we need to, resolve that bad boy!
-		var dir = try std.fs.cwd().openDir( b.build_root.path.?, .{ } );
-		defer dir.close();
-		break :blk try dir.realpathAlloc( alloc, "." );
+		if ( postIOGate ) {
+			var dir = try std.Io.Dir.cwd().openDir( io, b.build_root.path.?, .{ } );
+			defer dir.close( io );
+			break :blk try dir.realPathFileAlloc( io, ".", alloc );
+		} else {
+			var dir = try std.fs.cwd().openDir( b.build_root.path.?, .{ } );
+			defer dir.close();
+			break :blk try dir.realpathAlloc( alloc, "." );
+		}
 	};
 	// ensure we don't traverse a project twice
 	for ( storage.projects.items ) |proj| {
@@ -250,7 +274,7 @@ fn gatherProjects( b: *std.Build, storage: *Storage, alloc: std.mem.Allocator ) 
 	}
 
 	// gather modules
-	var modules: std.ArrayList(Storage.Module) = try .initCapacity( alloc, b.modules.count() );
+	var modules: ArrayList(Storage.Module) = try .initCapacity( alloc, b.modules.count() );
 	{
 		// public modules, we know exactly how many there are, so we prealloc the space for them
 		var modIter = b.modules.iterator();
@@ -269,8 +293,15 @@ fn gatherProjects( b: *std.Build, storage: *Storage, alloc: std.mem.Allocator ) 
 		}
 	}
 
+	// parse the .zon
+	var name: []const u8 = depName;
+	var version: ?[]const u8 = null;
+	parseZigZon( b, io, alloc, root_path, &name, &version ) catch { };
+
 	// save the gathered data
-	(if (newArrayLists) try storage.projects.addOne(alloc) else try storage.projects.addOne()).* = .{
+	(try storage.projects.addOne(alloc)).* = .{
+		.name = name,
+		.version = version,
 		.path = root_path,
 		.modules = modules.items,
 		.steps = steps,
@@ -279,11 +310,11 @@ fn gatherProjects( b: *std.Build, storage: *Storage, alloc: std.mem.Allocator ) 
 
 	// visit the dependencies
 	for ( b.available_deps ) |dep| {
-		try gatherProjects( (b.lazyDependency( dep.@"0", .{ } ) orelse continue).builder, storage, alloc );
+		try gatherProjects( (b.lazyDependency( dep.@"0", .{ } ) orelse continue).builder, io, storage, dep.@"0", alloc );
 	}
 }
 
-fn discoverStepModules( step: *std.Build.Step, modules: *std.ArrayList(Storage.Module), alloc: std.mem.Allocator ) !void {
+fn discoverStepModules( step: *std.Build.Step, modules: *ArrayList(Storage.Module), alloc: std.mem.Allocator ) !void {
 	if ( step.id == .compile ) blk: {
 		const compile: *std.Build.Step.Compile = @fieldParentPtr( "step", step );
 		// check if a module was already added
@@ -292,7 +323,7 @@ fn discoverStepModules( step: *std.Build.Step, modules: *std.ArrayList(Storage.M
 				break :blk;
 			}
 		}
-		(if (newArrayLists) try modules.addOne(alloc) else try modules.addOne()).* = .{
+		(try modules.addOne( alloc )).* = .{
 			.module = compile.root_module,
 			.public = false,
 			.imports = &compile.root_module.import_table,
@@ -300,5 +331,49 @@ fn discoverStepModules( step: *std.Build.Step, modules: *std.ArrayList(Storage.M
 	}
 	for ( step.dependencies.items ) |s| {
 		try discoverStepModules( s, modules, alloc );
+	}
+}
+
+fn parseZigZon( b: *std.Build, io: IoType, alloc: std.mem.Allocator, root_path: []const u8, name: *[]const u8, version: *?[]const u8 ) !void {
+	var file = blk: {
+		// well, we need to, resolve that bad boy!
+		if ( postIOGate ) {
+			var dir = try std.Io.Dir.openDirAbsolute( io, root_path, .{ } );
+			defer dir.close( io );
+			break :blk try dir.openFile( io, "build.zig.zon", .{ } );
+		} else {
+			var dir = try std.fs.openDirAbsolute( root_path, .{ } );
+			defer dir.close();
+			break :blk try dir.openFile( "build.zig.zon", .{ } );
+		}
+	};
+	defer if ( postIOGate )
+		file.close( io )
+	else
+		file.close();
+
+	const stats = try if ( postIOGate )
+		file.stat( io )
+	else
+		file.stat();
+	const buffer = try alloc.allocSentinel( u8, stats.size, 0 );
+	_ = try if ( postIOGate )
+		file.readPositionalAll( io, buffer, 0 )
+	else
+		file.readAll( buffer );
+	const ast = try std.zig.Ast.parse( alloc, buffer, .zon );
+	const zoir = try std.zig.ZonGen.generate( alloc, ast, .{ } );
+
+	const ZonIdx = std.zig.Zoir.Node.Index;
+	const root = ZonIdx.get( ZonIdx.root, zoir ).struct_literal;
+
+	for ( root.names, 0.. ) |nodeNameNts, idx| {
+		const nodeName = nodeNameNts.get( zoir );
+		const node = root.vals.at( @intCast( idx ) ).get( zoir );
+		if ( std.mem.eql( u8, nodeName, "name" ) ) {
+			name.* = b.dupe( node.enum_literal.get( zoir ) );
+		} else if ( std.mem.eql( u8, nodeName, "version" ) ) {
+			version.* = b.dupe( node.string_literal );
+		}
 	}
 }
