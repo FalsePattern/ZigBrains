@@ -2,7 +2,7 @@
 #
 # This file is part of ZigBrains.
 #
-# Copyright (C) 2023-2025 FalsePattern
+# Copyright (C) 2023-2026 FalsePattern
 # All Rights Reserved
 #
 # The above copyright notice and this permission notice shall be included
